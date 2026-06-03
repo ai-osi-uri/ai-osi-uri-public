@@ -1,0 +1,283 @@
+{
+  "meta": {
+    "eyebrow": "FOODOPS PLATFORM",
+    "title": "業務 AS-IS / TO-BE",
+    "subtitle": "店舗が紙とFAXで発注する運用から、AIが需要予測して本部が承認1クリックの運用へ",
+    "client": "外食チェーン本部",
+    "audience": "本部購買部 / 店長 / 経営",
+    "date": "2026-04-29"
+  },
+  "summary": {
+    "asisHeadline": "店舗ごとに紙・電話・FAX で発注",
+    "asisDetail": "30店舗が独自フォーマットで紙発注書を作り、FAXで仕入先へ。本部は集計に毎週8時間かけて在庫差異を吸収",
+    "tobeHeadline": "AIが需要予測し本部は承認1クリック",
+    "tobeDetail": "POSデータ＋天気＋イベント情報からAIが店舗別発注量を提案。店長はタブレットで差分確認、本部は例外のみ承認"
+  },
+  "people": [
+    { "icon": "building", "title": "店舗", "num": "30店", "desc": "店長1名+ホール1-3名\n発注・棚卸し・売上報告" },
+    { "icon": "userTie", "title": "本部購買部", "num": "3名", "desc": "30店分の発注集計\n仕入先交渉・契約管理" },
+    { "icon": "users", "title": "仕入先", "num": "12社", "desc": "野菜・肉・魚・乾物など\n店舗別配送" },
+    { "icon": "userCog", "title": "経営", "num": "週次", "desc": "原価率・在庫回転率を\n週次でレビュー" }
+  ],
+  "peopleNote": "顧客（来店客）月7万人 ── このスコープでは直接接点なし",
+  "asisOverview": {
+    "tagline": "店舗ごとに紙・FAX・Excelで運用、本部が手で集計",
+    "topBox": "店舗 30店 ── 各店の独自Excel・紙メモ・口頭引き継ぎ",
+    "topToMid": "FAX送信・電話確認・店長LINE",
+    "midTitle": "本部購買部 3名（週次で30店分の発注集計）",
+    "midTools": [
+      { "name": "Excel\n発注集計表", "note": "20MB" },
+      { "name": "FAX",            "note": "受発注" },
+      { "name": "Outlook",         "note": "問合せ" },
+      { "name": "電話",            "note": "急ぎ" }
+    ],
+    "extSystems": [
+      { "name": "POS",      "note": "売上参照のみ", "icon": "warn" },
+      { "name": "仕入先12社", "note": "FAX",         "icon": "envelope" },
+      { "name": "在庫アプリ", "note": "紙連動",      "icon": "tools" },
+      { "name": "天気・市況", "note": "個別確認",    "icon": "warn" }
+    ]
+  },
+  "tobeOverview": {
+    "tagline": "AI が需要予測 → 店長が差分確認 → 本部は例外承認のみ",
+    "topBox": "店舗 30店 ── タブレットで差分確認（紙・FAX 廃止）",
+    "topToMid": "AI予測 + プレビュー確認",
+    "midTitle": "foodops プラットフォーム",
+    "stages": [
+      { "icon": "robot", "label": "AI 需要予測", "desc": "POS×天気×イベント\n店舗別に発注量を提案" },
+      { "icon": "click", "label": "店長 HITL",  "desc": "差分のみ確認\nタブレットで承認" },
+      { "icon": "db",    "label": "単一DB",     "desc": "発注・在庫・売上を\n一元管理" }
+    ],
+    "extSystems": [
+      { "name": "POS",      "note": "リアルタイム連携", "tone": "green" },
+      { "name": "仕入先12社", "note": "EDI / API",        "tone": "green" },
+      { "name": "天気・市況", "note": "API連携",          "tone": "green" }
+    ]
+  },
+  "steps": [
+    {
+      "num": "01",
+      "title": "①需要予測",
+      "asis": {
+        "lanes": [
+          { "name": "店舗", "sub": "店長" },
+          { "name": "本部購買部", "sub": "3名" },
+          { "name": "AI / システム", "sub": "(なし)" },
+          { "name": "情報源", "sub": "POS等" }
+        ],
+        "slots": 5,
+        "actions": [
+          { "lane": 0, "slot": 0, "label": "前日の売上を\n紙で集計", "fill": "RED", "tag": "閉店後30分" },
+          { "lane": 0, "slot": 1, "label": "経験で\n発注量を判断", "fill": "RED", "tag": "勘頼り" },
+          { "lane": 1, "slot": 2, "label": "30店の発注を\nExcelに転記", "fill": "NAVY" },
+          { "lane": 1, "slot": 3, "label": "在庫差異を\n目視で確認", "fill": "NAVY", "tag": "週8時間" },
+          { "lane": 3, "slot": 4, "label": "POSは\n参照のみ", "fill": "SLATE_LT" }
+        ],
+        "flows": [
+          { "path": [[0,0],[0,1]], "color": "RED" },
+          { "path": [[0,1],[1,2]], "color": "RED" },
+          { "path": [[1,2],[1,3]], "color": "RED" }
+        ]
+      },
+      "tobe": {
+        "lanes": [
+          { "name": "店舗", "sub": "店長" },
+          { "name": "本部購買部", "sub": "確認のみ" },
+          { "name": "AI Agent", "sub": "foodops" },
+          { "name": "DB / 外部", "sub": "POS+気象" }
+        ],
+        "slots": 5,
+        "actions": [
+          { "lane": 3, "slot": 0, "label": "POS / 天気 / イベント\nを取得", "fill": "GREEN" },
+          { "lane": 2, "slot": 1, "label": "需要を\n予測する", "fill": "GOLD", "color": "NAVY_DK" },
+          { "lane": 2, "slot": 2, "label": "店舗別の\n発注量を生成", "fill": "GOLD", "color": "NAVY_DK" },
+          { "lane": 0, "slot": 3, "label": "差分を\n確認する", "fill": "NAVY", "tag": "1分以内" },
+          { "lane": 1, "slot": 4, "label": "例外のみ\n承認する", "fill": "NAVY" }
+        ],
+        "flows": [
+          { "path": [[3,0],[2,1]], "color": "GREEN" },
+          { "path": [[2,1],[2,2]], "color": "GREEN" },
+          { "path": [[2,2],[0,3]], "color": "GREEN" },
+          { "path": [[0,3],[1,4]], "color": "GREEN" }
+        ]
+      },
+      "effect": "発注の勘頼りから卒業"
+    },
+    {
+      "num": "02",
+      "title": "②発注送信",
+      "asis": {
+        "lanes": [
+          { "name": "店舗", "sub": "店長" },
+          { "name": "本部購買部", "sub": "3名" },
+          { "name": "AI / システム", "sub": "(なし)" },
+          { "name": "仕入先", "sub": "12社" }
+        ],
+        "slots": 5,
+        "actions": [
+          { "lane": 0, "slot": 0, "label": "発注書を\n紙で書く", "fill": "RED" },
+          { "lane": 0, "slot": 1, "label": "FAXを\n送信する", "fill": "RED", "tag": "送信ミスあり" },
+          { "lane": 3, "slot": 2, "label": "FAXを\n受領する", "fill": "SLATE" },
+          { "lane": 1, "slot": 3, "label": "本部に電話で\n確認する", "fill": "NAVY", "tag": "店長から" },
+          { "lane": 0, "slot": 4, "label": "送り直し対応\nする", "fill": "RED", "tag": "5%発生" }
+        ],
+        "flows": [
+          { "path": [[0,0],[0,1]], "color": "RED" },
+          { "path": [[0,1],[3,2]], "color": "RED" },
+          { "path": [[3,2],[1,3]], "color": "RED" },
+          { "path": [[1,3],[0,4]], "color": "RED", "labels": ["要再送"] }
+        ]
+      },
+      "tobe": {
+        "lanes": [
+          { "name": "店舗", "sub": "確認のみ" },
+          { "name": "本部購買部", "sub": "確認のみ" },
+          { "name": "AI Agent", "sub": "foodops" },
+          { "name": "仕入先", "sub": "EDI/API" }
+        ],
+        "slots": 5,
+        "actions": [
+          { "lane": 2, "slot": 0, "label": "発注データを\nEDIで送信", "fill": "GOLD", "color": "NAVY_DK" },
+          { "lane": 3, "slot": 1, "label": "受領を\n返す", "fill": "GREEN", "tag": "即時ACK" },
+          { "lane": 2, "slot": 2, "label": "受領を\n記録する", "fill": "GOLD", "color": "NAVY_DK" },
+          { "lane": 0, "slot": 3, "label": "通知を\n確認する", "fill": "NAVY", "tag": "差分のみ" },
+          { "lane": 1, "slot": 4, "label": "例外のみ\nハンドル", "fill": "NAVY" }
+        ],
+        "flows": [
+          { "path": [[2,0],[3,1]], "color": "GREEN" },
+          { "path": [[3,1],[2,2]], "color": "GREEN" },
+          { "path": [[2,2],[0,3]], "color": "GREEN" },
+          { "path": [[0,3],[1,4]], "color": "GREEN" }
+        ]
+      },
+      "effect": "FAX 全廃、送信ミスゼロ"
+    },
+    {
+      "num": "03",
+      "title": "③検品・棚卸し",
+      "asis": {
+        "lanes": [
+          { "name": "店舗", "sub": "店長+ホール" },
+          { "name": "本部購買部", "sub": "3名" },
+          { "name": "AI / システム", "sub": "(なし)" },
+          { "name": "在庫アプリ", "sub": "紙連動" }
+        ],
+        "slots": 5,
+        "actions": [
+          { "lane": 0, "slot": 0, "label": "納品を\n目視確認", "fill": "RED" },
+          { "lane": 0, "slot": 1, "label": "数量差異を\n紙にメモ", "fill": "RED", "tag": "週1回紛失" },
+          { "lane": 0, "slot": 2, "label": "Excelに\n転記する", "fill": "RED", "tag": "閉店後30分" },
+          { "lane": 1, "slot": 3, "label": "30店の差異を\n集計する", "fill": "NAVY" },
+          { "lane": 3, "slot": 4, "label": "在庫を\n更新する", "fill": "SLATE_LT" }
+        ],
+        "flows": [
+          { "path": [[0,0],[0,1]], "color": "RED" },
+          { "path": [[0,1],[0,2]], "color": "RED" },
+          { "path": [[0,2],[1,3]], "color": "RED" },
+          { "path": [[1,3],[3,4]], "color": "RED" }
+        ]
+      },
+      "tobe": {
+        "lanes": [
+          { "name": "店舗", "sub": "スキャンのみ" },
+          { "name": "本部購買部", "sub": "確認のみ" },
+          { "name": "AI Agent", "sub": "foodops" },
+          { "name": "DB", "sub": "foodops" }
+        ],
+        "slots": 5,
+        "actions": [
+          { "lane": 0, "slot": 0, "label": "QRコードを\nスキャンする", "fill": "GREEN", "tag": "1秒" },
+          { "lane": 2, "slot": 1, "label": "差異を\n自動検出", "fill": "GOLD", "color": "NAVY_DK" },
+          { "lane": 2, "slot": 2, "label": "原因候補を\n推定する", "fill": "GOLD", "color": "NAVY_DK" },
+          { "lane": 1, "slot": 3, "label": "閾値超のみ\n確認する", "fill": "NAVY" },
+          { "lane": 3, "slot": 4, "label": "在庫を\nリアルタイム更新", "fill": "GREEN" }
+        ],
+        "flows": [
+          { "path": [[0,0],[2,1]], "color": "GREEN" },
+          { "path": [[2,1],[2,2]], "color": "GREEN" },
+          { "path": [[2,2],[1,3]], "color": "GREEN" },
+          { "path": [[1,3],[3,4]], "color": "GREEN" }
+        ]
+      },
+      "effect": "閉店後30分作業を5分に短縮"
+    },
+    {
+      "num": "04",
+      "title": "④原価分析",
+      "asis": {
+        "lanes": [
+          { "name": "店長", "sub": "30名" },
+          { "name": "本部購買部", "sub": "3名" },
+          { "name": "経営", "sub": "週次レビュー" },
+          { "name": "Excel", "sub": "" }
+        ],
+        "slots": 5,
+        "actions": [
+          { "lane": 0, "slot": 0, "label": "店舗別 PL を\n手集計", "fill": "RED", "tag": "月末3日" },
+          { "lane": 1, "slot": 1, "label": "30店をExcelに\n転記する", "fill": "NAVY" },
+          { "lane": 3, "slot": 2, "label": "ピボットで\n集計する", "fill": "SLATE", "tag": "重い・遅い" },
+          { "lane": 1, "slot": 3, "label": "原価率の\n異常を探す", "fill": "NAVY", "tag": "目視" },
+          { "lane": 2, "slot": 4, "label": "週次会議で\n報告する", "fill": "NAVY" }
+        ],
+        "flows": [
+          { "path": [[0,0],[1,1]], "color": "RED" },
+          { "path": [[1,1],[3,2]], "color": "RED" },
+          { "path": [[3,2],[1,3]], "color": "RED" },
+          { "path": [[1,3],[2,4]], "color": "RED" }
+        ]
+      },
+      "tobe": {
+        "lanes": [
+          { "name": "店長", "sub": "確認のみ" },
+          { "name": "本部購買部", "sub": "判断のみ" },
+          { "name": "経営", "sub": "ダッシュボード" },
+          { "name": "AI Agent", "sub": "foodops" }
+        ],
+        "slots": 5,
+        "actions": [
+          { "lane": 3, "slot": 0, "label": "売上・仕入を\n自動集計", "fill": "GOLD", "color": "NAVY_DK" },
+          { "lane": 3, "slot": 1, "label": "原価率異常を\n検出する", "fill": "GOLD", "color": "NAVY_DK", "tag": "前年同月比" },
+          { "lane": 3, "slot": 2, "label": "原因仮説を\n提示する", "fill": "GOLD", "color": "NAVY_DK" },
+          { "lane": 1, "slot": 3, "label": "対策を\n判断する", "fill": "NAVY" },
+          { "lane": 2, "slot": 4, "label": "ダッシュボード\nで把握する", "fill": "NAVY", "tag": "リアルタイム" }
+        ],
+        "flows": [
+          { "path": [[3,0],[3,1]], "color": "GREEN" },
+          { "path": [[3,1],[3,2]], "color": "GREEN" },
+          { "path": [[3,2],[1,3]], "color": "GREEN" },
+          { "path": [[1,3],[2,4]], "color": "GREEN" }
+        ]
+      },
+      "effect": "月末作業ゼロ、即時意思決定"
+    }
+  ],
+  "structure": {
+    "items": [
+      {
+        "label": "ツール数",
+        "asisStat": "8+",
+        "asis": "Excel / FAX / Outlook / 電話 / POS / 紙 / 在庫アプリ / 天気サイト",
+        "tobeStat": "1",
+        "tobe": "foodops 1つ + 既存POS（連携）"
+      },
+      {
+        "label": "発注精度",
+        "asisStat": "勘",
+        "asis": "店長の経験 + Excelの過去平均、欠品/廃棄が常態化",
+        "tobeStat": "AI",
+        "tobe": "POS×天気×イベントで需要予測、欠品/廃棄を最小化"
+      }
+    ]
+  },
+  "summaryEnd": {
+    "eyebrow": "SUMMARY",
+    "headline": "導入で何が起きるか",
+    "stats": [
+      { "num": "8+ → 1",  "label": "ツール数",       "desc": "FAX/紙/Excel往復が単一プラットフォームへ" },
+      { "num": "週8h → 0", "label": "本部の集計時間", "desc": "30店の手集計が消滅、リアルタイム化" },
+      { "num": "5%",       "label": "発注ミス率",     "desc": "EDI連携で送信エラー/漏れがゼロに" }
+    ],
+    "closingBanner": "店長は「発注作業」から解放され、「お客様体験」に集中できる",
+    "footer": "最終更新: 2026-04-29"
+  }
+}

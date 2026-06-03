@@ -1,0 +1,61 @@
+{
+  "name": "ai-osi-uri-public",
+  "owner": {
+    "name": "AI OSI URI",
+    "email": "yuhenagisa@ai-osi-uri.com",
+    "url": "https://ai-osi-uri.com"
+  },
+  "metadata": {
+    "description": "AI OSI URI 公開プラグイン（外部配布用サブセット）。",
+    "version": "0.3.3"
+  },
+  "plugins": [
+    {
+      "name": "osi-creative",
+      "source": "./plugins/osi-creative",
+      "description": "AI 動画制作と出資お礼メッセージ生成。汎用クリエイティブスキル集。",
+      "version": "0.1.2",
+      "category": "creative",
+      "tags": [
+        "ai-video",
+        "fal.ai",
+        "elevenlabs",
+        "thank-you",
+        "investor"
+      ],
+      "strict": false
+    },
+    {
+      "name": "osi-docs",
+      "source": "./plugins/osi-docs",
+      "description": "文書・契約・業務フロー作成：pptx-custom・NDA 自動生成・業務 AS-IS/TO-BE スイムレーン作成。",
+      "version": "0.1.1",
+      "category": "docs",
+      "tags": [
+        "docs",
+        "pptx",
+        "nda",
+        "business-flow",
+        "contract"
+      ],
+      "strict": false
+    },
+    {
+      "name": "osi-deploy",
+      "source": "./plugins/osi-deploy",
+      "description": "アプリ・LP・SaaS デプロイ自動化：Vercel（軽量）と AWS（業務系）両対応。Stripe Live 切替・Supabase Auth 更新・スモークテストまで一気通貫。",
+      "version": "0.4.0",
+      "category": "deploy",
+      "tags": [
+        "deploy",
+        "vercel",
+        "aws",
+        "github",
+        "stripe",
+        "supabase",
+        "saas"
+      ],
+      "strict": false
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "name": "osi-docs",
+  "version": "0.1.1",
+  "description": "AI OSI URI の文書・契約・業務フロー作成。pptx-custom・NDA 自動生成・業務 AS-IS/TO-BE スイムレーン作成。",
+  "author": {
+    "name": "AI OSI URI",
+    "email": "yuhenagisa@ai-osi-uri.com"
+  },
+  "homepage": "https://github.com/ai-osi-uri/ai-osi-uri-public",
+  "license": "UNLICENSED",
+  "keywords": [
+    "docs",
+    "pptx",
+    "nda",
+    "business-flow",
+    "contract"
+  ]
+}

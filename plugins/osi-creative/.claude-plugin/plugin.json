@@ -1,0 +1,19 @@
+{
+  "name": "osi-creative",
+  "version": "0.1.2",
+  "description": "AI 動画制作と出資お礼メッセージ生成のスキル束。fal.ai / ElevenLabs を介した AI 動画と、出資者向けお礼文生成を含む。",
+  "author": {
+    "name": "AI OSI URI",
+    "email": "yuhenagisa@ai-osi-uri.com"
+  },
+  "homepage": "https://github.com/ai-osi-uri/ai-osi-uri-public",
+  "license": "UNLICENSED",
+  "keywords": [
+    "ai-video",
+    "fal.ai",
+    "elevenlabs",
+    "thank-you",
+    "investor",
+    "creative"
+  ]
+}

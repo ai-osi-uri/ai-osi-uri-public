@@ -1,0 +1,18 @@
+{
+  "skill_name": "setup-deploy-environment",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Cowork でデプロイ系スキルを使うための初期セットアップを手伝って。GitHub と Vercel のトークンから登録したい。",
+      "expected_output": ".env の存在確認 → MCP 接続確認 → GitHub PAT 発行案内 → API 検証 → Vercel Token → Anthropic → Supabase の順で受け取って .env に書き込み。Phase 1 移行注記を踏まえ、Stripe/Anthropic/Supabase は任意である旨を伝える。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "デプロイ環境を整えたい。とりあえず GitHub と Vercel だけで。Stripe は使わないので飛ばして。",
+      "expected_output": "GitHub PAT と Vercel Token のみ受け取って .env に書く。Stripe / Anthropic / Supabase はスキップする旨を確認。",
+      "files": []
+    }
+  ],
+  "_note": "Phase 3 で配置した scaffold。assertions は空。skill-creator の eval 機能で実行する想定。"
+}

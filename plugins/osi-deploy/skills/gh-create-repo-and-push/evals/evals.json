@@ -1,0 +1,18 @@
+{
+  "skill_name": "gh-create-repo-and-push",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "/tmp/my-app/ にあるコードを GitHub の private リポ 'my-app' として作って、main ブランチに push して。",
+      "expected_output": "GitHub API でリポ作成成功（HTTP 201）→ git init → push 成功。最後に PAT を含む remote が削除されている。stdout に REPO_NAME / REPO_ID / REPO_URL / STATE_FILE が出力される。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "リポ名 'foo-bar' で push したいんだけど、たぶん既にあるから衝突したらサフィックス自動採番してほしい。",
+      "expected_output": "1 回目で 422 が返ったら 'foo-bar-002' で再試行、5 回まで自動採番。最終的に成功したら REPO_NAME に決定名（例: foo-bar-003）が入る。",
+      "files": []
+    }
+  ],
+  "_note": "Phase 3 で配置した scaffold。assertions は空。skill-creator の eval 機能で実行する想定。"
+}

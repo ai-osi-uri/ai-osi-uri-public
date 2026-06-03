@@ -1,0 +1,13 @@
+{
+  "name": "business-flow-deck-generator",
+  "version": "1.0.0",
+  "description": "Generate AS-IS / TO-BE business flow pptx with swimlanes",
+  "main": "generate_deck.js",
+  "dependencies": {
+    "pptxgenjs": "^3.12.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-icons": "^5.0.0",
+    "sharp": "^0.33.0"
+  }
+}
