@@ -9,6 +9,13 @@ version: 0.1.1
 「アプリ作って」と言われたら、業種・規模に関わらず要件を聞き出して、Vercel か
 AWS で公開するところまで 1 つの対話で完結させる。
 
+> **AWS パスで着手する前に必ず参照**：[references/aws-app-gotchas.md](references/aws-app-gotchas.md)
+> — 最小構成テンプレ（S3+CloudFront+Lambda+API Gateway+DynamoDB+Bedrock）と、
+> このアカウント固有の罠（公開 Function URL は SCP 禁止 → API Gateway、`$default` の
+> CORS は Lambda 側で処理、source_arn はアカウント ID 込み、terraform は arm64、
+> Bedrock は use case フォーム提出が前提、format はマジックバイト判定）。
+> コロワイド 2 アプリで確立。同じ罠で時間を溶かさない。
+
 ## 設計原則
 
 1. **Single entry point**: ユーザーは「アプリ作って」と言うだけ。Tier / Phase /
@@ -568,6 +575,13 @@ EC・予約・SaaSなど「お客さん向けUI」と「事務局向けUI」が�
 ---
 
 ## Phase 4-A: AWS パス: インフラ構築 (インフラ先行)
+
+> **着手前に必ず：Terraform state を共有S3 backend にする（orphan化防止）。**
+> 初回 apply の前に **`tf-state-backend` スキル**を呼び、state基盤（共有バケット
+> `aiosiuri-tfstate-<ACCOUNT_ID>` + ロック `aiosiuri-tf-lock`）を用意し、`infra/backend.tf` を
+> 差し込む。これで state は最初からS3に置かれ、Cowork の揮発フォルダに残らない。
+> 既存のローカルstateアプリを移行する場合も同スキル（migrate-existing）を使う。
+> 詳細は [references/aws-app-gotchas.md](references/aws-app-gotchas.md) の項7。
 
 ### Step 1: spec.md と infra-decision.md を生成
 
