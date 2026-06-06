@@ -53,6 +53,22 @@ AI OSI URI のAWSアカウント（ap-northeast-1 / 東京）で、Cowork から
    ```
    初回 apply 前に **`tf-state-backend` スキル**を呼ぶ（state基盤の作成＋backend.tf差し込み）。既存のローカルstateアプリは同スキルの migrate-existing（`aws_terraform_apply` の prebuild で `terraform init -migrate-state -force-copy`）でS3へ移行。**mcpb の `terraform init` は `-migrate-state` を付けない**ので移行は必ず prebuild 側で。state用バケット/ロック（`aiosiuri-tf-lock`）は**手で消さない・destroy対象にしない**。コードとHANDOFFは共有ドライブへ退避（揮発対策）。詳細は `tf-state-backend` スキル参照。
 
+8. **`aws_s3_object` に `server_side_encryption="AES256"` を明示しない**（S3+CloudFront静的配信時）。既存オブジェクトのstateに古いKMS属性が残っていると、in-place更新が `400 InvalidArgument: ...requires aws:kms` で延々落ちる。**バケット既定の SSE-S3(AES256) に委ねる**のが正解（CloudFront/OACで配信できる）。詰まったら対象オブジェクトを一度 `aws s3api delete-object` → 次の apply でクリーンに新規作成され解消（stateの古い属性が消える）。
+
+9. **`archive_file`(Lambda zip) の `excludes` に `.git` と画像/`assets` 等の重いディレクトリを必ず入れる**。入れないと zip が肥大し `UpdateFunctionCode` の **70MB制限超過（RequestEntityTooLargeException）**。特に**リポをgit化した後は `.git` がオブジェクトblobで膨らむ**ので要注意。例：`excludes = ["infra","data","web","assets","assets/*",".git",".git/*",".tfrun","__pycache__","*.md"]`。
+
+10. **定期実行は EventBridge **Scheduler**（`aws_scheduler_schedule`）を使い、確認は `aws scheduler list-schedules`**。`aws events list-rules`（classic Rules）には出ないので「スケジュールが無い」と誤診しやすい。Scheduler は Lambda の **resource policy ではなく IAMロール（`role_arn`）で invoke** するため、`aws lambda get-policy` が `ResourceNotFoundException` でも**正常**（権限はロール側）。
+
+11. **`aws_terraform_apply` の `prebuild` に文字列 `"null"` を渡さない**。`null` がそのままシェルで実行され `null: command not found` で失敗する。不要なら **`true`（no-op）** を渡すか省略する。
+
+12. **Cowork サンドボックスは Google Drive(FUSE) マウント上で `git` を扱えない**。`.git/index.lock` 等の `.lock`/tmpオブジェクトを **unlink できず（Operation not permitted）**、commit/push が詰む。→ **リポ同期は拡張の `github_create_repo_and_push` / `github_push` で行う**（素のローカル `git` 認証は使わない方が確実）。プライベートリポは未認証だと 404「Repository not found」になる点に注意。ローカル `.git` とリモートの履歴が不一致（unrelated histories）で push 拒否されたら、**`rm -rf .git`（ユーザーのMac側）→ リモートを削除 → `github_create_repo_and_push` で作り直し**が最短。
+
+13. **外部API連携のゲートパターン（再利用テンプレ）**。鍵未設定でも壊れずにデプロイでき、鍵投入だけで有効化できる安全な型：
+    - Lambda env に `<NAME>_SECRET_ID = "${project}-<name>-${env}"` を常設。コードは **env優先 → Secrets Manager の順**で鍵取得し、**取れなければ no-op**（収集本体を絶対に壊さない・try/exceptで保護）。
+    - IAM は `secretsmanager:GetSecretValue` を `arn:...:secret:${project}-<name>-${env}-*` に**限定**（シークレット未作成でも無害）。
+    - 高コストな per-item 処理（画像生成=fal、歓迎度推定=Claude Haiku 等）は **S3キャッシュ（内容ハッシュをキー）＋ `max_new` 上限**で「新規/変更分のみ課金」に。週次バッチでも実費は数十円/回に収まる。
+    - 有効化は `aws secretsmanager create-secret --name ${project}-<name>-${env} --secret-string '<KEY or JSON>'` だけ（コード/TF 再適用不要）。
+
 ## Bedrock
 
 - **アカウント初期設定**：Anthropicモデルは**アカウント単位で「use case 詳細フォーム」提出が前提**（Bedrock Playgroundで対象モデル初回起動→送信→約15分で有効化）。未提出だと invoke_model も converse も `ResourceNotFoundException`。
