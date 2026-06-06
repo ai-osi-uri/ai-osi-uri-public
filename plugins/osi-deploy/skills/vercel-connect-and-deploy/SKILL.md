@@ -1,7 +1,7 @@
 ---
 name: vercel-connect-and-deploy
-description: 既に GitHub に push 済みのリポジトリを Vercel に接続し、環境変数を設定して初回本番デプロイを実行する atomic スキル。認証は AI OSI URI Deploy 拡張が保持する Vercel Token / GitHub PAT を使い、`.env` は読まない。拡張の MCP ツール `vercel_create_project_and_deploy`（作成+env+デプロイ起動）、`vercel_get_deployment_status`（polling）、`vercel_get_build_logs`（失敗調査）、`github_push`（修正コミットの再push）を組み合わせ、ビルド失敗の自動修正ループ（最大5回）まで行う。「Vercel にデプロイして」「リポジトリを Vercel に接続」「Next.js を Vercel に上げて」などで発動。Vercel Token の入力は拡張設定の役割。
-version: 0.2.1
+description: 既に GitHub に push 済みのリポジトリを Vercel に接続し、環境変数を設定して初回本番デプロイを実行する atomic スキル。認証は AI OSI URI Deploy 拡張が保持する Vercel Token / GitHub PAT を使い、`.env` は読まない。拡張の MCP ツール `vercel_create_project_and_deploy`（作成+env+デプロイ起動。既定で Deployment Protection を解除し認証なしで公開）、`vercel_get_deployment_status`（polling）、`vercel_get_build_logs`（失敗調査）、`github_push`（修正コミットの再push）を組み合わせ、ビルド失敗の自動修正ループ（最大5回）まで行う。「Vercel にデプロイして」「リポジトリを Vercel に接続」「Next.js を Vercel に上げて」などで発動。Vercel Token の入力は拡張設定の役割。
+version: 0.3.0
 ---
 
 # Vercel 接続 + env + 初回デプロイ（atomic / 拡張ツール版）
@@ -28,19 +28,23 @@ push 済みリポを受け取り、Vercel プロジェクト作成・env 流し�
 | `framework` | 任意 | `nextjs` / `vite` / `other` / null |
 | `env_vars` | 任意 | `[{key,value,target?,type?}]`。アプリ固有の環境変数 |
 | `include_anthropic_key` | 任意 | 拡張に保存した `ANTHROPIC_API_KEY` を自動注入（デフォルト true）。不要なら false |
+| `disable_protection` | 任意 | 作成直後に Vercel Authentication(Deployment Protection) を解除し認証なしで公開にする（デフォルト true）。社内検証専用に保護を残すなら false |
 | `work_dir` | 任意 | ビルド修正の再 push 用（`github_create_repo_and_push` の戻り値） |
 
 ## ワークフロー
 
 ```
-1. vercel_create_project_and_deploy で作成+env+デプロイ起動
+1. vercel_create_project_and_deploy で作成+env+デプロイ起動（既定で保護を解除＝公開）
    - needs_github_app_grant が返ったら許可 URL を提示 → ユーザー許可後に再実行
+   - 戻り値 protection_disabled:false / protection_warning が返ったら、保護が残っている旨を
+     ユーザーに伝える（Vercel の Settings → Deployment Protection で確認）
 2. vercel_get_deployment_status を READY/ERROR になるまで polling
 3. ERROR/CANCELED なら vercel_get_build_logs でログ取得
    → work_dir のコードを修正 → github_push で再 push
    → Vercel が自動再デプロイするので新しい deployment_id を取得して再 polling
    → 最大 5 回。超えたら最後のログを提示して中断
-4. READY なら app_url を返す
+4. READY なら app_url を返す。外部から認証なしで開けることを web_fetch で1回検証
+   （本文が返れば公開成功。空で返れば保護が残っているので確認）
 ```
 
 ### Step 1: 作成 + デプロイ起動
@@ -50,11 +54,12 @@ vercel_create_project_and_deploy({
   repo_name, repo_id, repo_owner,
   framework: "nextjs",
   env_vars: [ /* アプリ固有 */ ],
-  include_anthropic_key: true
+  include_anthropic_key: true,
+  disable_protection: true   // 既定 true。認証なしで公開。社内検証専用に守るなら false
 })
 ```
 
-戻り：`project_id` / `deployment_id` / `app_url` / `anthropic_key_injected`。
+戻り：`project_id` / `deployment_id` / `app_url` / `anthropic_key_injected` / `protection_disabled`。
 `needs_github_app_grant: true` が返ったら、出力の URL（`https://github.com/apps/vercel/installations/select_target`）を
 ユーザーに提示し、対象リポへのアクセス許可後に同じツールを再実行する。
 
@@ -119,3 +124,7 @@ PDF フォント・OCR モデル・辞書ファイル等を関数バンドルに
 - `gitSource.repoId` は数値（ツールが処理）。
 - Hobby プランは商用制限あり。本番販売段階では Pro へ。
 - env を後から足す場合は再デプロイが必要（現状は作成時 env 同梱）。
+- `disable_protection`（既定 true）で本番・プレビュー両方が公開になる。社内検証だけ守りたい
+  場合は `disable_protection: false` にして、Protection Bypass for Automation トークン運用にする。
+- ユーザーに Vercel ダッシュボードを触らせない運用前提（当社課金・管理画面のみ提供）のため、
+  保護解除はこのツール内で自動化する（手動トグルは不要）。

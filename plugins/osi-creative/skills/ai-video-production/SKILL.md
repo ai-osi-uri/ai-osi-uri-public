@@ -1,6 +1,6 @@
 ---
 name: ai-video-production
-description: AI動画を作るスキル。台本構成→シーン別動画生成（fal.ai経由のVeo 3 Fast / Kling 2.5）→ナレーション生成（ElevenLabs）→字幕生成→ffmpeg合成→BGMミックスまで自動化。「動画を作って」「動画作成」「PR動画」「IR動画」「採用動画」「企業説明動画」「ピッチ動画」「ナレーション付き動画」「アニメ動画」「実写動画」「ドキュメンタリー動画」「TikTok動画」「Reels動画」など、AI動画制作のリクエスト全般で発動する。既存の動画台本テキストが渡された場合も発動する。fal-video-mcp（v0.3以降）がCoworkに登録されていることを前提とする。PPT・スライドのみ、静止画のみの依頼では使わない。
+description: AI動画を作るスキル。台本構成→シーン別動画生成（fal.ai経由のVeo 3 Fast / Kling 2.5）→ナレーション生成（ElevenLabs）→字幕生成→ffmpeg合成→BGMミックスまで自動化。「動画を作って」「動画作成」「PR動画」「IR動画」「採用動画」「企業説明動画」「ピッチ動画」「ナレーション付き動画」「アニメ動画」「実写動画」「ドキュメンタリー動画」「TikTok動画」「Reels動画」など、AI動画制作のリクエスト全般で発動する。既存の動画台本テキストが渡された場合も発動する。「AI OSI URI Creative」コネクタ（旧 fal-video）が Cowork に登録されていることを前提とする。PPT・スライドのみ、静止画のみの依頼では使わない。
 version: 0.1.0
 ---
 
@@ -10,7 +10,7 @@ OKWEB × JINEN動画制作で確立した全工程を再現可能な形にした
 
 ## 前提
 
-- fal-video-mcp v0.3 以降が Cowork に登録されている（13ツール: 動画5＋TTS4＋音楽4）
+- 「AI OSI URI Creative」コネクタ（fal + ElevenLabs を内包）が Cowork に登録されている（13ツール: 動画5＋TTS4＋音楽4）
 - fal.ai のAPIキーが設定済み、最低 $10 のクレジットがある
 - ffmpeg が利用可能なBash環境がある（Linux sandbox）
 - 出力先フォルダ（FAL_OUTPUT_DIR）が Drive 等に設定済み
