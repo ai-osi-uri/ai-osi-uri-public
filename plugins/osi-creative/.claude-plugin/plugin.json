@@ -2,7 +2,7 @@
   "name": "osi-creative",
   "version": "0.1.2",
   "requires_connectors": [
-    "fal-video"
+    "AI OSI URI Creative"
   ],
   "description": "AI 動画制作と出資お礼メッセージ生成のスキル束。fal.ai / ElevenLabs を介した AI 動画と、出資者向けお礼文生成を含む。",
   "author": {
