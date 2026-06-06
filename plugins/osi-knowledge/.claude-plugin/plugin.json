@@ -1,0 +1,22 @@
+{
+  "name": "osi-knowledge",
+  "version": "0.2.1",
+  "requires_connectors": [
+    "Obsidian",
+    "Google カレンダー"
+  ],
+  "description": "AI OSI URI の知識管理。Obsidian vault への自律キャプチャと過去ノートからの参照引き出し、Google Calendar の空き時間取得。",
+  "author": {
+    "name": "AI OSI URI",
+    "email": "yuhenagisa@ai-osi-uri.com"
+  },
+  "homepage": "https://github.com/ai-osi-uri/ai-osi-uri-public",
+  "license": "UNLICENSED",
+  "keywords": [
+    "obsidian",
+    "knowledge",
+    "calendar",
+    "vault",
+    "capture"
+  ]
+}

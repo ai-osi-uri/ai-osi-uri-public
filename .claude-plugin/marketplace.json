@@ -57,6 +57,21 @@
         "terraform-state"
       ],
       "strict": false
+    },
+    {
+      "name": "osi-knowledge",
+      "source": "./plugins/osi-knowledge",
+      "description": "知識管理：Obsidian への自律キャプチャと過去ノート参照、Google Calendar の空き時間取得。",
+      "version": "0.2.1",
+      "category": "knowledge",
+      "tags": [
+        "obsidian",
+        "knowledge",
+        "calendar",
+        "vault",
+        "capture"
+      ],
+      "strict": false
     }
   ]
 }
