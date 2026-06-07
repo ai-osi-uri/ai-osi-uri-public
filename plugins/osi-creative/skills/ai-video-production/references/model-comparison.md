@@ -2,8 +2,8 @@
 
 「AI OSI URI Creative」コネクタ（旧 fal-video）が公開する13ツールの中から、シーンに合わせて選ぶ。
 
-> **モデル指定の仕組み**：`model` 引数には ① コネクタに登録済みの **ショートカット slug**（`veo3-fast` 等）か、② `fal-ai/...` で始まる **fal の生エンドポイント**を直接渡せる（`resolveVideoEndpoint` が後者を許可）。
-> ⚠️ **Seedance 2.0 のエンドポイントは `bytedance/seedance-2.0/...` と `fal-ai/` で始まらない**ため、現状のコネクタでは生指定が通らない（`Unknown video model` で弾かれる）。Seedance を使うには MCP レジストリ（`mcp/fal-video/src/index.ts`）への slug 登録が必要。Veo 3.1 / Kling 3.0 は `fal-ai/` 始まりなので生エンドポイントで即利用できる。
+> **モデル指定の仕組み**：`model` 引数には ① コネクタに登録済みの **ショートカット slug**（`veo31-fast` 等）か、② `fal-ai/` ・ `bytedance/` で始まる **生エンドポイント**を直接渡せる。
+> ✅ **v0.5 以降**：Veo 3.1（`veo31` / `veo31-fast`）・Kling 3.0（`kling30`）・Seedance 2.0（`seedance20`）はすべて slug 登録済み。Seedance の `bytedance/` 始まりエンドポイントも解決できる（v0.4 までは `Unknown video model` で弾かれていた）。
 
 ---
 
@@ -34,13 +34,13 @@
 - **使用シーン**：握手、対話、複数人会議、家族、コミュニティ、連続アクション
 - **苦手**：単純な環境カット（→ Veo 3.1 Fast の方が安い）
 
-### Seedance 2.0（`bytedance/seedance-2.0/text-to-video`）コスパ＆モーション最強
+### Seedance 2.0（slug `seedance20`）コスパ＆モーション最強
 - 激しい動き・スポーツ・ダンス・衝突などの物理表現に強い。多参照入力（**画像9 / 動画3 / 音声3**）対応
-- 単価：**$0.3034/s**（標準）/ $0.2419/s（fast `bytedance/seedance-2.0/fast/text-to-video`） → 8s ≒ **$1.94 / $1.94**
+- 単価：**$0.3034/s**（標準）/ $0.2419/s（fast slug `seedance20-fast`） → 8s ≒ **$2.4 / $1.9**
 - 最大 720p（fal）、4〜15s（`duration: "auto"` で自動最適化）、ネイティブ音声込み
 - マルチショットは "Shot 1:" ラベルでプロンプト内指定
 - **使用シーン**：激しいモーション、モンタージュ、多素材参照の合成
-- ⚠️ **エンドポイントが `bytedance/` 始まりのため現状のコネクタでは未解決**（上記の注記参照）。使う場合は slug 登録が必要
+- ✅ **v0.5 で利用可**：`seedance20` / `seedance20-fast` / `seedance20-i2v` で呼べる（生 `bytedance/seedance-2.0/...` も可）
 
 ### レガシー／フォールバック枠（コネクタに slug 登録済み・引き続き使用可）
 | slug | 用途 |
@@ -81,6 +81,32 @@
 - 「Studio Ghibli style 2D hand-drawn anime」を強くアンカー
 - IP filter回避のため "watercolor" "hand-painted" を併記
 - 全12本で約 **$6.4**
+
+---
+
+## 静止画モデル（i2v 起点フレーム用）
+
+i2v（image-to-video）は「静止画を作る → `fal_image_to_video` の起点に渡す」流れ。**起点の静止画は fal ではなく専用の直コネクタで作る**（ElevenLabs を直で呼ぶのと同じ思想：直の方が一貫性・グラウンディング・テキスト精度で有利）。
+
+| コネクタ | モデル | ツール | 強み | 鍵 |
+|---|---|---|---|---|
+| **`nano-banana`** ★既定 | Gemini Nano Banana Pro | `generate_image` / `edit_image` | **キャラ/絵柄の一貫性**・雰囲気・量産・グラウンディング | `GEMINI_API_KEY` |
+| **`openai-image`** | OpenAI GPT Image 2 | `openai_generate_image` / `openai_edit_image` | 写実の極み・**画面内テキスト/ロゴ/コピー焼き込み**・指示追従 | `OPENAI_API_KEY` |
+
+### 使い分け（動画フレーム用途）
+- **多シーンで同じ人物・世界観を揃えたい**（動画の基本）→ **`nano-banana`**。1枚キーフレームを作り、`edit_image` で「同じ人物のまま別シーン」を派生させると一貫性が保てる
+- **ヒーロー静止画・写実の極み・テロップ/ロゴ/コピーを画像内に焼く** → **`openai-image`（GPT Image 2）**
+- 2枚を併用して使い分けるのが基本（どちらか一方ではない）
+
+### 標準フロー（i2v）
+```
+1. nano-banana の generate_image でシーン①のキーフレーム生成
+2. nano-banana の edit_image で②③…を「同じ人物・絵柄」で派生（一貫性キープ）
+   ※ テロップ/ロゴ入りカットは openai-image で焼き込む
+3. 各フレームを fal_image_to_video（kling30-i2v / veo31-i2v）に渡して動画化
+```
+
+> なぜ fal 経由で画像を作らないか：fal にも画像モデルはあるが、(1) 画像は専用直コネクタが既にあり、(2) Gemini 直は Google 検索グラウンディング、(3) GPT Image 2 直はテキスト描画精度、(4) ElevenLabs と同じく「直の方が機能欠損が無い」という整理。動画/音楽は fal アグリゲータ、音声/画像は直、が現行の役割分担。
 
 ---
 
