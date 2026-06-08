@@ -1,7 +1,7 @@
 ---
 name: deploy-app
 description: AI OSI URI が Cowork から **任意の業種のアプリを新規に作って公開する**ための唯一のオーケストレータスキル。「アプリ作って」「LP 立ち上げて」「○○屋向けの在庫管理アプリ作って」「予約サイトを作って」「会員制のサブスク SaaS 作って」「業務系のシステム作って」「LP 公開して」など、ユーザーが新しいアプリの作成と公開を依頼したときに発動する。
-version: 0.1.1
+version: 0.2.0
 ---
 
 # deploy-app v3.2 — 汎用アプリ作成エントリポイント
@@ -30,6 +30,68 @@ AWS で公開するところまで 1 つの対話で完結させる。
    atomic / `/setup-infra` / `/create-app` に委譲
 6. **既存資産活用**: 軽量パスは `gh-create-repo-and-push` / `vercel-connect-and-deploy`
    / `supabase-set-auth-url` / `aws-static-deploy` を使う
+
+---
+
+## ハーネス: 状態ログと「完了の定義」（必須）
+
+deploy-app は複数フェーズ・複数セッションにまたがる長時間タスク（特に AWS パスは
+Claude Code への引き渡し → ポーリング → 復帰）。途中でセッションが切れても再開でき、
+かつ「実際は動いていないのに完了宣言する（early victory declaration）」事故を防ぐため、
+以下を必ず守る。これはこのスキルの最重要ルールであり、体裁や速度より優先する。
+
+### 1. 状態ログ `deploy-progress.md`（フェーズ境界ごとに更新）
+
+最初の実作業（Phase 4 着手）に入る前に `{OUTPUTS}/deploy-progress.md` を作成し、
+各フェーズの完了時に更新する。AWS パスで Drive 案件フォルダがある場合は、同ファイルを
+`03.PJT資料/{ID}.{企業名}/03_制作・成果物/` にもミラーする。
+
+```markdown
+# Deploy Progress — {PROJECT_NAME}
+更新: {YYYY-MM-DD HH:MM}
+
+## 確定事項
+- ホスティング: {Vercel|AWS}
+- リポジトリ: {REPO_URL or 未作成}
+- 構成: {Supabase/Stripe/Anthropic 有無}
+
+## 完了（evidence 付き）
+- [x] Phase 0 認証確認 — evidence: health_check の valid 一覧
+- [x] Phase 1 アプリ定義
+
+## 進行中
+- [ ] Phase 4-V デプロイ（現在: vercel build 監視中）
+
+## ブロック中 / 要確認
+- （なし / 例: Stripe live 切替はユーザー承認待ち）
+
+## 次セッションでの再開手順
+- {具体的な次の1手}
+```
+
+**セッション開始時にこのファイルが既にあれば必ず先に読み**、途中から再開する。
+記憶ではなくこのファイルを唯一の進捗の正典（system of record）とする。
+
+### 2. 完了の定義（DoD）— 証拠なしに「完了」と言わない
+
+Phase 5-V / Phase 7-A の完了レポートを出してよいのは、**下の検証チェックリストの
+全項目に実際の出力（evidence）を貼れたときだけ**。未検証の項目が1つでも残るなら
+「完了」と書かず、`未検証: ◯◯` と正直に明記する。READY 状態や `git push` 成功だけを
+根拠に「直りました／動いています」と顧客に伝えない。
+
+### 3. 検証コマンド（このスキルの正典チェック）
+
+| 対象 | コマンド / 確認 | 合格条件 |
+|---|---|---|
+| Vercel: コミット一致 | Vercel API の `meta.githubCommitSha` と `git rev-parse HEAD` | 一致 |
+| Vercel: 公開URL実体 | `curl -sf {APP_URL}` の中身を grep | 期待文字列が出る（旧キャッシュでない） |
+| Supabase 結合 | `app-smoke-test` の PostgREST probe | `PGRST200` が出ない |
+| Stripe webhook | `app-smoke-test` で webhook に無署名 POST | 400 が返る |
+| AWS API | `curl -i https://{ALB_DNS}/health` | 200 |
+| マルチテナント | 2人目ユーザーで他テナント不可視 | 他テナントデータ 0 件 |
+
+検証の実行は `app-smoke-test` に委譲してよいが、**結果（evidence）は必ず
+`deploy-progress.md` の「完了」欄に貼る**。検証していない項目を完了扱いにしない。
 
 ---
 
@@ -552,6 +614,10 @@ EC・予約・SaaSなど「お客さん向けUI」と「事務局向けUI」が�
 
 ## Phase 5-V: Vercel 完了レポート
 
+> **DoD ゲート（必須）**：この完了レポートを出す前に「ハーネス §3 検証コマンド」を
+> 実行し、各 evidence を `deploy-progress.md` に貼ること。未検証項目が残るなら
+> `🎉` ではなく「未検証: ◯◯」を明記して正直に出す。
+
 ```
 🎉 デプロイ完了 (Vercel パス)
 
@@ -770,6 +836,10 @@ curl -i "https://$ALB_DNS/health"
 ---
 
 ## Phase 7-A: 完了レポート (AWS パス)
+
+> **DoD ゲート（必須）**：Phase 6-A の smoke test（`/health` 200 等）の evidence を
+> `deploy-progress.md` に貼ってからこのレポートを出す。ECS の `runningCount` 到達や
+> apply 成功だけを根拠に完了と書かない。未検証項目は「未検証: ◯◯」と明記する。
 
 ```
 🎉 アプリ作成完了 (AWS パス)
