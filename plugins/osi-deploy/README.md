@@ -12,3 +12,4 @@ AI OSI URI のアプリ・LP・販売サイト・SaaS デプロイ自動化。Ve
 - `supabase-set-auth-url`
 - `app-smoke-test`
 - `switch-to-live-mode`
+- `update-deploy` — 既存アプリを更新（ソース修正→push→Vercel自動デプロイ→smoke testまで一気通貫）
