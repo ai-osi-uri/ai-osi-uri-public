@@ -13,15 +13,13 @@
     {
       "name": "osi-creative",
       "source": "./plugins/osi-creative",
-      "description": "AI 動画制作と出資お礼メッセージ生成。汎用クリエイティブスキル集。",
-      "version": "0.1.3",
+      "description": "AI 動画制作。汎用クリエイティブスキル集。",
+      "version": "0.1.4",
       "category": "creative",
       "tags": [
         "ai-video",
         "fal.ai",
-        "elevenlabs",
-        "thank-you",
-        "investor"
+        "elevenlabs"
       ],
       "strict": false
     },

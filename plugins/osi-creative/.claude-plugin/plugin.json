@@ -1,10 +1,10 @@
 {
   "name": "osi-creative",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "requires_connectors": [
     "AI OSI URI Creative"
   ],
-  "description": "AI 動画制作と出資お礼メッセージ生成のスキル束。fal.ai / ElevenLabs を介した AI 動画と、出資者向けお礼文生成を含む。",
+  "description": "AI 動画制作のスキル束。fal.ai / ElevenLabs を介した AI 動画制作を含む。",
   "author": {
     "name": "AI OSI URI",
     "email": "yuhenagisa@ai-osi-uri.com"
@@ -15,8 +15,6 @@
     "ai-video",
     "fal.ai",
     "elevenlabs",
-    "thank-you",
-    "investor",
     "creative"
   ]
 }
