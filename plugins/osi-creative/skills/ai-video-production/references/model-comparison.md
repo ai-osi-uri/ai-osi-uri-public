@@ -1,15 +1,37 @@
 # モデル比較・使い分けガイド
 
-「AI OSI URI Creative」コネクタ（旧 fal-video）が公開する13ツールの中から、シーンに合わせて選ぶ。
+「AI OSI URI Creative」コネクタ（旧 fal-video）が公開する13ツールと nano-banana を、シーンに合わせて選ぶ。
 
 > **モデル指定の仕組み**：`model` 引数には ① コネクタに登録済みの **ショートカット slug**（`veo31-fast` 等）か、② `fal-ai/` ・ `bytedance/` で始まる **生エンドポイント**を直接渡せる。
 > ✅ **v0.5 以降**：Veo 3.1（`veo31` / `veo31-fast`）・Kling 3.0（`kling30`）・Seedance 2.0（`seedance20`）はすべて slug 登録済み。Seedance の `bytedance/` 始まりエンドポイントも解決できる（v0.4 までは `Unknown video model` で弾かれていた）。
 
 ---
 
-## 動画モデル（2026現行・フラッグシップ3枠）
+## 最新モデル（2026〜 高解像度シネマティック標準）★モードA
 
-> 2026年現在、fal 1本で下記すべてに通る。毎案件 AskUserQuestion で枠を選ばせてよい。
+> `fal_list_models` の既定候補は Kling 2.5 / Veo 3 止まり。最新モデルは **fal endpoint を直書き** すれば呼べる。
+> 画像起点の高解像度ワークフローの全文は `references/cinematic-hires-recipe.md` を参照。
+
+### 画像：nano-banana / Gemini 3 Pro Image（キービジュアル）★
+- ツール：`mcp__nano-banana__generate_image`（`model_tier: pro`, `resolution: 4k`, `aspect_ratio: 9:16`）
+- 写実・シネマティックな光の質感は現状トップ。出力 3072×5504。
+- **モードAの起点**。画質はこの1枚で9割決まる。文字入れが要るカットだけ GPT Image 2 を部分併用。
+
+### 動画：image-to-video（fal endpoint 直指定）
+| 用途 | model（fal endpoint） | 出力/備考 |
+|---|---|---|
+| 高解像度の本命 ★基準 | `fal-ai/kling-video/v3/4k/image-to-video` | 約2148×3856。Kling 3.0 4K。2〜4分かかる |
+| 標準（速い・安い） | `fal-ai/kling-video/v3/pro/image-to-video` | 約1076×1924 |
+| 激しい動き | Seedance 2.0（fal） | モーション最強・合議ベンチ首位 |
+| 最高画質ヒーロー | `fal-ai/veo3.1/image-to-video` | ※現行 fal コネクタは**ポーリング不可（Unprocessable Entity）**。当面は Kling を使う |
+
+投入は `fal_submit_video`、確認は `fal_check_status`（40〜60秒待ってから）。カメラは追従ショット（recipe §5）が歩留まり良。
+
+---
+
+## 動画モデル（2026現行・フラッグシップ3枠／モードB・量産用）
+
+> モードA（上記）が画像起点のヒーローカット高画質ルートなのに対し、本セクションは台本起点で 2〜3 分尺の動画を量産する **モードB** で使う標準枠。2026年現在、fal 1本で下記すべてに通る。毎案件 AskUserQuestion で枠を選ばせてよい。
 > 価格は fal の従量（秒単価）。**8秒クリップ**を基準にした目安を併記する。
 
 ### Veo 3.1 Fast（`fal-ai/veo3.1/fast`）★標準デフォルト
