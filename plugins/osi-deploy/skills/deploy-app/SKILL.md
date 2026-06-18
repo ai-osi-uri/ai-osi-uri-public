@@ -2,6 +2,14 @@
 name: deploy-app
 description: AI OSI URI が Cowork から **任意の業種のアプリを新規に作って公開する**ための唯一のオーケストレータスキル。「アプリ作って」「LP 立ち上げて」「○○屋向けの在庫管理アプリ作って」「予約サイトを作って」「会員制のサブスク SaaS 作って」「業務系のシステム作って」「LP 公開して」など、ユーザーが新しいアプリの作成と公開を依頼したときに発動する。
 version: 0.2.0
+requires_connectors:
+  - server: AI_OSI_URI_Deploy
+    provision: mcpb
+  - server: aws-api
+    provision: user-install
+  - server: slack
+    provision: user-install
+
 ---
 
 # deploy-app v3.2 — 汎用アプリ作成エントリポイント
@@ -466,16 +474,17 @@ Phase 1 で確定したエンティティ・機能から、次の表に該当す
 過去案件で実際にハマった具体的な落とし穴。Vercel パスでは**最初から**以下を仕込む。
 後から直すと顧客の前で「なぜか動かない」状態を見せることになる。
 
-### Stripe MCP は Live Mode がデフォルト
+### Stripe は AI OSI URI Deploy 拡張経由（test がデフォルト）
 
-- `mcp__stripe__*` 系ツールは **Live Mode の鍵**で動く（Live キーが既定）。デモ用の商品作成に
-  そのまま使うと**本番アカウントに本物の商品**が登録される（顧客が誤って買えてしまう）。
+- Stripe 操作は拡張ツール `mcp__AI_OSI_URI_Deploy__stripe_create_product_and_price` /
+  `stripe_create_payment_link` / `stripe_create_webhook` を使う。**`mode:"test"` が既定**で、
+  Live で作成するには `confirm_live:true` を明示的に渡す必要がある（誤爆防止）。
 - **対策**:
-  - デモ・検証は必ず `STRIPE_SECRET_KEY=sk_test_...` で REST API を直接叩く（curl / fetch）。
-  - MCP で商品作成する場合は事前に「これは本番アカウントに残ります」と顧客に確認。
-  - `get_stripe_account_info` で `account_id` を取得し、`acct_xxx` が live (本番)
-    か test 用か判定する。本番アカウントを掴んでいたら警告し、即時 Test モードへ
-    切り替えを促す。
+  - デモ・検証は既定の `mode:"test"` のまま使う。`confirm_live` は付けない。
+  - Live で商品を作る前に必ず「これは本番アカウントに残ります」と顧客に確認し、
+    その上で `confirm_live:true` を渡す。
+  - 旧 standalone Stripe MCP（単独 `stripe_*` サーバ / `get_stripe_account_info`）は**使わない**。
+    AI OSI URI では Stripe は Deploy 拡張に一本化済み。
 - 本番化 (test→live) は `switch-to-live-mode` を使う。dev/demo段階では使わない。
 
 ### Next.js Server Component キャッシュは最初から無効化

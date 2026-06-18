@@ -8,6 +8,10 @@ description: >
   「今週の空き」「明日の空き」「来週の空き時間を出して」「空いてる時間ある？」など、
   期間を指定した空き時間の問い合わせにも対応する。
   空き時間の確認に関わるリクエストであればこのスキルを使うこと。
+requires_connectors:
+  - server: google-calendar
+    provision: user-install
+
 ---
 
 # カレンダー空き時間表示スキル

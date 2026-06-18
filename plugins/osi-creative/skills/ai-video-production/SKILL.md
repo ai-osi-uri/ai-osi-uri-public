@@ -1,73 +1,29 @@
 ---
 name: ai-video-production
-description: AI動画を作るスキル。デフォルトは「画像起点・高解像度シネマティック」：nano-banana（Gemini 3 Pro Image）で4Kキービジュアル→Kling 3.0 4K / Seedance 2.0 / Veo3.1 で image-to-video→ffmpeg bloom仕上げ→BGM。ナレーション付き2〜3分の長尺版（ElevenLabsナレ＋字幕＋12シーン構成）も選べる。「動画を作って」「動画作成」「PR動画」「IR動画」「採用動画」「企業説明動画」「ピッチ動画」「ナレーション付き動画」「アニメ動画」「実写動画」「ドキュメンタリー動画」「TikTok動画」「Reels動画」「シネマティック動画」など、AI動画制作のリクエスト全般で発動する。既存の動画台本テキストが渡された場合も発動する。「AI OSI URI Creative」コネクタ（旧 fal-video）と nano-banana コネクタが Cowork に登録されていることを前提とする。PPT・スライドのみ、静止画のみの依頼では使わない。
-version: 0.1.0
+description: AI動画を作るスキル。台本構成→シーン別動画生成（fal.ai経由のVeo 3.1 / Seedance 2.0 / Kling 3.0）→ナレーション生成（ElevenLabs）→字幕生成→ffmpeg合成→BGMミックスまで自動化。「動画を作って」「動画作成」「PR動画」「IR動画」「採用動画」「企業説明動画」「ピッチ動画」「ナレーション付き動画」「アニメ動画」「実写動画」「ドキュメンタリー動画」「TikTok動画」「Reels動画」など、AI動画制作のリクエスト全般で発動する。既存の動画台本テキストが渡された場合も発動する。「AI OSI URI Creative」コネクタ（旧 fal-video）と nano-banana コネクタが Cowork に登録されていることを前提とする（デフォルトは画像起点：nano-banana で4Kキービジュアル→image-to-video）。PPT・スライドのみ、静止画のみの依頼では使わない。
+version: 0.3.0
+requires_connectors:
+  - server: fal-video
+    provision: user-install
+    tools: [fal_submit_video, fal_image_to_video, fal_text_to_speech, fal_generate_music]
+  - server: nano-banana
+    provision: user-install
+    tools: [generate_image]
 ---
 
 # AI動画制作パイプライン
 
-AI動画制作の全工程を再現可能な形にしたスキル。2つのモードを持つ：**画像起点で1カットの画質を最大化する高解像度シネマティック（モードA・デフォルト）** と、**ナレーション付き2〜3分尺を量産する長尺版（モードB・従来）**。
+OKWEB × JINEN動画制作で確立した全工程を再現可能な形にしたスキル。**60〜75分／約 $5〜$10** で2〜3分尺の動画を完成させる。
 
 ## 前提
 
 - 「AI OSI URI Creative」コネクタ（fal + ElevenLabs を内包）が Cowork に登録されている（13ツール: 動画5＋TTS4＋音楽4）
-- **nano-banana コネクタ**（Gemini 3 Pro Image）が登録されている ＝ モードAのキービジュアル生成に必須
+- **nano-banana コネクタ（Gemini Image）が登録されている**（画像起点デフォルトのキービジュアル生成に必須。`generate_image`）
 - fal.ai のAPIキーが設定済み、最低 $10 のクレジットがある
 - ffmpeg が利用可能なBash環境がある（Linux sandbox）
 - 出力先フォルダ（FAL_OUTPUT_DIR）が Drive 等に設定済み
 
----
-
-## 生成モードの選択（最初に決める）
-
-`AskUserQuestion` で「どちらのモードか」を最初に確認する。判断つかなければ**モードAをデフォルト**にする。
-
-| | モードA：高解像度シネマティック（デフォルト） | モードB：ナレーション付き長尺（従来） |
-|---|---|---|
-| 起点 | **静止画1枚**（nano-banana 4K）→ image-to-video | テキスト台本 → text-to-video |
-| 動画モデル | Kling 3.0 4K / Seedance 2.0 / Veo3.1（fal endpoint直指定） | Veo 3 Fast / Kling 2.5 |
-| 尺・用途 | 5〜15秒のヒーローカット、9:16のSNS/ブランド/IR映像、最高画質 | 2〜3分のIR/採用/PR、起承転結の12シーン |
-| ナレ・字幕 | 原則なし（BGM主体）。必要ならモードBの Phase 6〜7 を流用 | ElevenLabsナレ＋SRT字幕あり |
-| 仕上げ | **ffmpeg bloom＋グレード＋xfade** が肝 | 尺合わせ concat＋字幕焼き込み |
-| 所要・コスト | 1カット 5〜10分／$0.5〜$2、複数カットで積み上げ | 60〜75分／$5〜$10 |
-
-> 「映画みたいに」「シネマティックに」「縦動画」「1カットだけ高画質で」「ブランドムービー」→ モードA。
-> 「ナレーション付きで」「会社説明2〜3分」「採用動画一式」→ モードB。両モードの併用も可（モードAのカットをモードBの1シーンに差し込む等）。
-
----
-
-## モードA：高解像度シネマティック・パイプライン（デフォルト）
-
-**詳細・プロンプト全文・ffmpegコマンドは `references/cinematic-hires-recipe.md` を必ず Read すること。** ここは要点のみ。
-
-```
-1. キービジュアル静止画を nano-banana pro 4K で生成
-   （構図§2＋ライティング§3＋キラキラ§4 をプロンプトに必ず盛り込む）
-   → ★ユーザー確認（構図が刺さるか。画像で品質の9割が決まる）
-2. 確定画像を Kling 3.0 4K（fal endpoint直指定）で追従カメラ（§5）化 ＝ image-to-video
-   → 投入は fal_submit_video、40〜60秒待ってから fal_check_status（4Kは2〜4分）
-3. ffmpeg で bloom＋グレード（§6）→ BGM（fal_submit_music）をミックス
-4. 複数カットなら xfade で連結（§6）
-5. 4Kマスター＋配信用1080 の2本を納品
-```
-
-モードAの鉄則（`references/cinematic-hires-recipe.md` の結論）：
-
-- **画質は入力画像1枚で9割決まる。** プロンプトより画像作りに時間をかけ、必ずユーザー確認を挟む。
-- 派手な回転より **被写体と等速の追従＋緩やかなアングル変化** の方が品が出て歩留まりが良い。
-- キラキラ・影は **画像→動画→仕上げbloom の3層**。特に仕上げの発光（bloom）が最も効く。
-- **bloom は4K素材に直接かけない**（タイムアウト）。1080化してからかけ、4Kはマスターとして別保管。
-- fal は5本ずつ＋待機で投入（Forbidden回避）。Veo3.1 は現状ポーリング不可なので当面 Kling を使う。
-
-モードAで完結する場合はここまで。ナレーションを足したい時だけ下記モードBの Phase 6〜8 を流用する。
-
----
-
-## モードB：ナレーション付き長尺パイプライン（従来・全10 Phase）
-
-OKWEB × JINEN動画制作で確立した量産フロー。**60〜75分／約 $5〜$10** で2〜3分尺を完成させる。
-
-### 全工程（10 Phase）
+## 全工程（10 Phase）
 
 ```
 [Phase 0]  ヒアリング（5分・無料）
@@ -167,6 +123,28 @@ no text overlays
 
 ---
 
+## Phase 3.5: キービジュアル生成（画像起点・デフォルト）
+
+**デフォルトは画像起点フロー**。text-to-video で直接生成するより、まず nano-banana で
+4K キービジュアルを作り、それを fal の image-to-video で動かす方が、構図・ブランド・
+被写体の一貫性を制御しやすい。
+
+```
+nano-banana generate_image（各シーンのキービジュアル, 4K, no text）
+   ↓ 画像を確認・採否
+fal_image_to_video（採用画像 → 動画化, カメラワーク指定）
+```
+
+- nano-banana 側プロンプトは Phase 3 のシーン別プロンプトの [SUBJECT][LIGHTING][SETTING][MOOD]
+  をそのまま流用し、末尾に `4K, photorealistic, no text overlays` を付ける。
+- 被写体の一貫性が要る場合（同一人物・同一商品が複数シーンに出る）は、nano-banana の
+  subject consistency を活かし、1枚目を参照画像にして残りを生成する。
+- text-to-video を使うのは、抽象的・background 的なシーンで構図制御が要らない場合に限る。
+
+コスト目安：画像 $0.02〜/枚 + 動画 image-to-video 分。試作（Phase 4）は必ずこの後で挟む。
+
+---
+
 ## Phase 4: ★試作（必ず挟む）
 
 **最重要ステップ。全12本を一気に生成しない。**
@@ -184,7 +162,7 @@ fal_check_status x 2
 判断分岐：
 - ✅ OK → Phase 5へ
 - ⚠️ もっと○○な感じに → プロンプト調整して再試作
-- ❌ 別モデルで試したい → Veo 3 Fast ⇄ Kling 2.5 切替
+- ❌ 別モデルで試したい → Veo 3.1 / Seedance 2.0 / Kling 3.0 を AskUserQuestion で切替
 - 🔄 スタイル自体を変えたい → Phase 2に戻る
 
 コスト：$0.80〜$1.50
@@ -201,10 +179,13 @@ fal_check_status x 2
 - Forbidden発生時は30秒待機 → 1本ずつ再投入
 - ジョブIDを記録、 完了まで45〜60秒間隔でポーリング
 
-モデル使い分け：
-- 環境・抽象・単独人物 → **Veo 3 Fast**
-- 複数人物・対話・握手 → **Kling 2.5**（人物動作に強い）
-- ヒーローカット（最高品質欲しい場合）→ Veo 3（パラメータ要注意）
+モデル使い分け（2026現行・詳細は references/model-comparison.md が正本）：
+- 環境・抽象・単独人物 → **Veo 3.1 Fast**（安く写実）
+- 複数人物・対話・握手 → **Kling 3.0**（人物動作・最大6カット連結に強い）
+- 激しい動き・多参照・モンタージュ → **Seedance 2.0**（コスパ＆モーション最強）
+- ヒーローカット（最高品質・ナレ音声同期）→ **Veo 3.1**（4K・ネイティブ音声）
+
+鍵は fal 1本で全モデルに通る。毎案件 AskUserQuestion で枠を選ばせてよい。
 
 詳細は `references/model-comparison.md` を参照。
 
@@ -351,19 +332,13 @@ BGM: $0.20
 
 ## 必読参照ファイル
 
-このスキルが発動したら、まずモードを判定し、以下を `Read` する：
+このスキルが発動したら、まず以下を `Read` する：
 
-**モードA（高解像度シネマティック・デフォルト）で必読：**
-
-1. `references/cinematic-hires-recipe.md` — ★画像起点の高解像度レシピ全文（構図・ライト・キラキラ3層・追従カメラ・モデルendpoint・ffmpeg bloom/grade/xfade・運用注意）
-2. `references/model-comparison.md` — 最新モデル（Kling3.0 4K/Seedance2.0/Veo3.1/nano-banana）の使い分け
-3. `references/pitfalls.md` — 落とし穴と回避策（実戦から）
-
-**モードB（ナレーション付き長尺）で追加で必読：**
-
-4. `templates/voice-strategy.md` — ★ナレーターvoice選択戦略（Eleven v3、GENEL、感情タグ）
-5. `templates/narration-rules.md` — TTS誤読対策（最重要）
-6. 該当する `templates/prompts-{style}.md`
+1. `references/pitfalls.md` — 落とし穴と回避策（実戦から）
+2. `references/model-comparison.md` — 動画・音声・音楽モデル使い分け
+3. `templates/voice-strategy.md` — ★ナレーターvoice選択戦略（Eleven v3、GENEL、感情タグ）
+4. `templates/narration-rules.md` — TTS誤読対策（最重要）
+5. 該当する `templates/prompts-{style}.md`
 
 ## 必須スクリプト
 

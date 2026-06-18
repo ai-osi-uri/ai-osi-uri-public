@@ -14,6 +14,6 @@
 | plugins/osi-deploy/skills/aws-static-deploy/SKILL.md | 30 | 共有ドライブ | 共有ドライブの `.deploy-credentials/.env` は **任意フォールバック**としてのみ参照する。 |
 | plugins/osi-docs/skills/business-flow-asis-tobe/references/data-schema.md | 135 | 共有ドライブ | { "name": "Excel管理簿", "where": "営業共有ドライブ" } |
 | plugins/osi-docs/skills/business-flow-asis-tobe/references/data-schema.md | 167 | Notion | \| `name`    \| yes  \| ドキュメント名（例：「契約書ドラフト Word」「Notion 商談 DB」） \| |
-| plugins/osi-docs/skills/pptx-custom/SKILL.md | 190 | CAIO | - ✅ "Now let's look at the core CAIO business — how it works, pricing, current state" — transitions and previews |
-| plugins/osi-docs/skills/pptx-custom/SKILL.md | 199 | CAIO | If a term will appear on multiple slides, define it the first time it appears — not five slides later. The most common b |
-| plugins/osi-docs/skills/pptx-custom/SKILL.md | 203 | CAIO | 1. **Inline definition in the subtitle** when the term first appears: `"CAIO (= a monthly retainer that teaches companie |
+| plugins/osi-docs/skills/pptx-custom/SKILL.md | 194 | CAIO | - ✅ "Now let's look at the core CAIO business — how it works, pricing, current state" — transitions and previews |
+| plugins/osi-docs/skills/pptx-custom/SKILL.md | 203 | CAIO | If a term will appear on multiple slides, define it the first time it appears — not five slides later. The most common b |
+| plugins/osi-docs/skills/pptx-custom/SKILL.md | 207 | CAIO | 1. **Inline definition in the subtitle** when the term first appears: `"CAIO (= a monthly retainer that teaches companie |

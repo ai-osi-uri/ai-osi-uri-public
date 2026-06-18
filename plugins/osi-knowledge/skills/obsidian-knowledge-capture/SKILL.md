@@ -1,7 +1,11 @@
 ---
 name: obsidian-knowledge-capture
 description: Obsidian vault（~/ObsidianVault）に会話・思考・気づき・調査結果を自律的に保存・整理するスキル。ユーザーが「知識化して」「Obsidianに保存」「vaultにまとめて」「Conceptに切り出して」「議事録にして」「Resourceとして保存」「Inboxに入れて」「ノートにして」「永続化して」「これ残しておいて」など、会話内容や思考を永続的な知識として保管したいと発話したときに必ず発動する。obsidian MCPサーバ（mcp__obsidian-mcp-tools__*）が利用可能な環境で使う。フォルダ・タイトル・frontmatter・リンクはすべてClaudeが自律判断し、ユーザーに細かく聞き返さない（判断つかない場合のみ最大1問）。判断ルールは vault 内の 90_Meta/ を毎回参照する単一情報源原則。完了後は必ず透明性レポート（新規N件・更新M件・リンクK本）を返す。AI OSI URI のメンバーが日々の会話・打ち合わせ・気づきを Obsidian に蓄積する運用で必須となる。
-version: 0.2.0
+version: 0.2.1
+requires_connectors:
+  - server: obsidian-mcp-tools
+    provision: user-install
+    tools: [get_vault_file, create_vault_file, append_to_vault_file, patch_vault_file, search_vault_simple, search_vault, search_vault_smart, list_vault_files]
 ---
 
 # Obsidian Knowledge Capture
@@ -10,7 +14,7 @@ Obsidian vault に会話・思考・知見を**自律的に**保存・組織化�
 
 ## v0.2.0 で変わったこと
 
-- **MCPツール名を `mcp__obsidian-mcp-tools__*` に統一**（旧 `mcp__obsidian__*` から変更。実環境で使えるツール名に合わせた）
+- **MCPツール名を `mcp__obsidian-mcp-tools__*` に統一**（旧 obsidian の REST API実装 `obsidian_*` から変更。実環境で使えるツール名に合わせた）
 - **Vault フォルダ構造を現状に合わせて修正**（`20_Concepts/` → `50_Resources/Concepts/` 等）
 - **`90_Meta/` の必読ファイル一覧を最新化**（5本構成：運用ルール／フォルダ規約／frontmatterスキーマ／表記揺れ正規化表／Concept昇華基準）
 
