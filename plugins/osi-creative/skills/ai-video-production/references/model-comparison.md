@@ -1,37 +1,15 @@
 # モデル比較・使い分けガイド
 
-「AI OSI URI Creative」コネクタ（旧 fal-video）が公開する13ツールと nano-banana を、シーンに合わせて選ぶ。
+「AI OSI URI Creative」コネクタ（旧 fal-video）が公開する13ツールの中から、シーンに合わせて選ぶ。
 
 > **モデル指定の仕組み**：`model` 引数には ① コネクタに登録済みの **ショートカット slug**（`veo31-fast` 等）か、② `fal-ai/` ・ `bytedance/` で始まる **生エンドポイント**を直接渡せる。
 > ✅ **v0.5 以降**：Veo 3.1（`veo31` / `veo31-fast`）・Kling 3.0（`kling30`）・Seedance 2.0（`seedance20`）はすべて slug 登録済み。Seedance の `bytedance/` 始まりエンドポイントも解決できる（v0.4 までは `Unknown video model` で弾かれていた）。
 
 ---
 
-## 最新モデル（2026〜 高解像度シネマティック標準）★モードA
+## 動画モデル（2026現行・フラッグシップ3枠）
 
-> `fal_list_models` の既定候補は Kling 2.5 / Veo 3 止まり。最新モデルは **fal endpoint を直書き** すれば呼べる。
-> 画像起点の高解像度ワークフローの全文は `references/cinematic-hires-recipe.md` を参照。
-
-### 画像：nano-banana / Gemini 3 Pro Image（キービジュアル）★
-- ツール：`mcp__nano-banana__generate_image`（`model_tier: pro`, `resolution: 4k`, `aspect_ratio: 9:16`）
-- 写実・シネマティックな光の質感は現状トップ。出力 3072×5504。
-- **モードAの起点**。画質はこの1枚で9割決まる。文字入れが要るカットだけ GPT Image 2 を部分併用。
-
-### 動画：image-to-video（fal endpoint 直指定）
-| 用途 | model（fal endpoint） | 出力/備考 |
-|---|---|---|
-| 高解像度の本命 ★基準 | `fal-ai/kling-video/v3/4k/image-to-video` | 約2148×3856。Kling 3.0 4K。2〜4分かかる |
-| 標準（速い・安い） | `fal-ai/kling-video/v3/pro/image-to-video` | 約1076×1924 |
-| 激しい動き | Seedance 2.0（fal） | モーション最強・合議ベンチ首位 |
-| 最高画質ヒーロー | `fal-ai/veo3.1/image-to-video` | ※現行 fal コネクタは**ポーリング不可（Unprocessable Entity）**。当面は Kling を使う |
-
-投入は `fal_submit_video`、確認は `fal_check_status`（40〜60秒待ってから）。カメラは追従ショット（recipe §5）が歩留まり良。
-
----
-
-## 動画モデル（2026現行・フラッグシップ3枠／モードB・量産用）
-
-> モードA（上記）が画像起点のヒーローカット高画質ルートなのに対し、本セクションは台本起点で 2〜3 分尺の動画を量産する **モードB** で使う標準枠。2026年現在、fal 1本で下記すべてに通る。毎案件 AskUserQuestion で枠を選ばせてよい。
+> 2026年現在、fal 1本で下記すべてに通る。毎案件 AskUserQuestion で枠を選ばせてよい。
 > 価格は fal の従量（秒単価）。**8秒クリップ**を基準にした目安を併記する。
 
 ### Veo 3.1 Fast（`fal-ai/veo3.1/fast`）★標準デフォルト
@@ -108,27 +86,27 @@
 
 ## 静止画モデル（i2v 起点フレーム用）
 
-i2v（image-to-video）は「静止画を作る → `fal_image_to_video` の起点に渡す」流れ。**起点の静止画は fal ではなく専用の直コネクタで作る**（ElevenLabs を直で呼ぶのと同じ思想：直の方が一貫性・グラウンディング・テキスト精度で有利）。
+i2v（image-to-video）は「静止画を作る → `fal_image_to_video` の起点に渡す」流れ。**起点の静止画は Creative コネクタの `fal_generate_image` で作る**（v0.6.0〜 画像も Creative に統合。fal 経由で nano-banana を呼ぶので **fal キー1本で完結＝別 Gemini キー・別コネクタ不要**）。
 
-| コネクタ | モデル | ツール | 強み | 鍵 |
+| 画像手段 | モデル | ツール | 強み | 鍵 |
 |---|---|---|---|---|
-| **`nano-banana`** ★既定 | Gemini Nano Banana Pro | `generate_image` / `edit_image` | **キャラ/絵柄の一貫性**・雰囲気・量産・グラウンディング | `GEMINI_API_KEY` |
-| **`openai-image`** | OpenAI GPT Image 2 | `openai_generate_image` / `openai_edit_image` | 写実の極み・**画面内テキスト/ロゴ/コピー焼き込み**・指示追従 | `OPENAI_API_KEY` |
+| **Creative の画像** ★既定 | nano-banana / nano-banana-pro(4K) | `fal_generate_image` / `fal_edit_image` | **キャラ/絵柄の一貫性**・雰囲気・量産。Creative 内で完結 | `FAL_KEY`（既存） |
+| `openai-image`（任意・別コネクタ） | OpenAI GPT Image 2 | `openai_generate_image` / `openai_edit_image` | **画面内テキスト/ロゴ/コピー焼き込み**・指示追従 | `OPENAI_API_KEY` |
 
 ### 使い分け（動画フレーム用途）
-- **多シーンで同じ人物・世界観を揃えたい**（動画の基本）→ **`nano-banana`**。1枚キーフレームを作り、`edit_image` で「同じ人物のまま別シーン」を派生させると一貫性が保てる
-- **ヒーロー静止画・写実の極み・テロップ/ロゴ/コピーを画像内に焼く** → **`openai-image`（GPT Image 2）**
-- 2枚を併用して使い分けるのが基本（どちらか一方ではない）
+- **多シーンで同じ人物・世界観を揃えたい**（動画の基本）→ Creative の `fal_generate_image` で1枚キーフレームを作り、`fal_edit_image` で「同じ人物のまま別シーン」を派生させると一貫性が保てる
+- **テロップ/ロゴ/コピーを画像内に焼く必要がある** → 任意で `openai-image`（GPT Image 2）を別途導入
+- 既定は **Creative 1本でOK**。openai-image は焼き込みが要るときだけ追加する
 
 ### 標準フロー（i2v）
 ```
-1. nano-banana の generate_image でシーン①のキーフレーム生成
-2. nano-banana の edit_image で②③…を「同じ人物・絵柄」で派生（一貫性キープ）
-   ※ テロップ/ロゴ入りカットは openai-image で焼き込む
+1. fal_generate_image（model: nano-banana / 4Kは nano-banana-pro）でシーン①のキーフレーム生成
+2. fal_edit_image で②③…を「同じ人物・絵柄」で派生（一貫性キープ）
+   ※ テロップ/ロゴ入りカットは任意で openai-image で焼き込む
 3. 各フレームを fal_image_to_video（kling30-i2v / veo31-i2v）に渡して動画化
 ```
 
-> なぜ fal 経由で画像を作らないか：fal にも画像モデルはあるが、(1) 画像は専用直コネクタが既にあり、(2) Gemini 直は Google 検索グラウンディング、(3) GPT Image 2 直はテキスト描画精度、(4) ElevenLabs と同じく「直の方が機能欠損が無い」という整理。動画/音楽は fal アグリゲータ、音声/画像は直、が現行の役割分担。
+> v0.6.0 での方針変更：以前は「画像は専用直コネクタ(nano-banana=Gemini直)で作る」設計だったが、**fal が nano-banana 本体をホストしている**ため、Creative 1コネクタ＋fal キーに統合した（別 Gemini キー・LOCAL DEV の nano-banana コネクタは不要）。テキスト焼き込みが要る案件のみ openai-image を任意で併用。動画/音楽/画像/ナレーションが Creative 1本に集約。
 
 ---
 

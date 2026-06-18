@@ -1,14 +1,11 @@
 ---
 name: ai-video-production
-description: AI動画を作るスキル。台本構成→シーン別動画生成（fal.ai経由のVeo 3.1 / Seedance 2.0 / Kling 3.0）→ナレーション生成（ElevenLabs）→字幕生成→ffmpeg合成→BGMミックスまで自動化。「動画を作って」「動画作成」「PR動画」「IR動画」「採用動画」「企業説明動画」「ピッチ動画」「ナレーション付き動画」「アニメ動画」「実写動画」「ドキュメンタリー動画」「TikTok動画」「Reels動画」など、AI動画制作のリクエスト全般で発動する。既存の動画台本テキストが渡された場合も発動する。「AI OSI URI Creative」コネクタ（旧 fal-video）と nano-banana コネクタが Cowork に登録されていることを前提とする（デフォルトは画像起点：nano-banana で4Kキービジュアル→image-to-video）。PPT・スライドのみ、静止画のみの依頼では使わない。
-version: 0.3.0
+description: AI動画を作るスキル。台本構成→シーン別動画生成（fal.ai経由のVeo 3.1 / Seedance 2.0 / Kling 3.0）→ナレーション生成（ElevenLabs）→字幕生成→ffmpeg合成→BGMミックスまで自動化。「動画を作って」「動画作成」「PR動画」「IR動画」「採用動画」「企業説明動画」「ピッチ動画」「ナレーション付き動画」「アニメ動画」「実写動画」「ドキュメンタリー動画」「TikTok動画」「Reels動画」など、AI動画制作のリクエスト全般で発動する。既存の動画台本テキストが渡された場合も発動する。「AI OSI URI Creative」コネクタ（旧 fal-video。動画・音楽・ナレーション・静止画[nano-banana]を内包）が Cowork に登録されていることを前提とする（デフォルトは画像起点：Creative の fal_generate_image で nano-banana キービジュアル→image-to-video）。PPT・スライドのみ、静止画のみの依頼では使わない。
+version: 0.4.0
 requires_connectors:
   - server: fal-video
     provision: user-install
-    tools: [fal_submit_video, fal_image_to_video, fal_text_to_speech, fal_generate_music]
-  - server: nano-banana
-    provision: user-install
-    tools: [generate_image]
+    tools: [fal_generate_image, fal_edit_image, fal_submit_video, fal_image_to_video, fal_text_to_speech, fal_generate_music]
 ---
 
 # AI動画制作パイプライン
@@ -17,8 +14,7 @@ OKWEB × JINEN動画制作で確立した全工程を再現可能な形にした
 
 ## 前提
 
-- 「AI OSI URI Creative」コネクタ（fal + ElevenLabs を内包）が Cowork に登録されている（13ツール: 動画5＋TTS4＋音楽4）
-- **nano-banana コネクタ（Gemini Image）が登録されている**（画像起点デフォルトのキービジュアル生成に必須。`generate_image`）
+- 「AI OSI URI Creative」コネクタ（fal + ElevenLabs を内包）が Cowork に登録されている（動画・音楽・ナレーション＋静止画[nano-banana]。`fal_generate_image` を含む）。**画像も Creative に統合済みなので、別途 nano-banana コネクタは不要**（既存の fal キーで動く）
 - fal.ai のAPIキーが設定済み、最低 $10 のクレジットがある
 - ffmpeg が利用可能なBash環境がある（Linux sandbox）
 - 出力先フォルダ（FAL_OUTPUT_DIR）が Drive 等に設定済み
@@ -125,23 +121,24 @@ no text overlays
 
 ## Phase 3.5: キービジュアル生成（画像起点・デフォルト）
 
-**デフォルトは画像起点フロー**。text-to-video で直接生成するより、まず nano-banana で
-4K キービジュアルを作り、それを fal の image-to-video で動かす方が、構図・ブランド・
-被写体の一貫性を制御しやすい。
+**デフォルトは画像起点フロー**。text-to-video で直接生成するより、まず Creative の
+`fal_generate_image`（model: nano-banana / 4Kは nano-banana-pro）で キービジュアルを作り、
+それを `fal_image_to_video` で動かす方が、構図・ブランド・被写体の一貫性を制御しやすい。
+**画像も動画も同じ Creative コネクタ＝falキー1本で完結する。**
 
 ```
-nano-banana generate_image（各シーンのキービジュアル, 4K, no text）
+fal_generate_image（model: nano-banana-pro, 各シーンのキービジュアル, 4K, no text）
    ↓ 画像を確認・採否
 fal_image_to_video（採用画像 → 動画化, カメラワーク指定）
 ```
 
-- nano-banana 側プロンプトは Phase 3 のシーン別プロンプトの [SUBJECT][LIGHTING][SETTING][MOOD]
+- 画像プロンプトは Phase 3 のシーン別プロンプトの [SUBJECT][LIGHTING][SETTING][MOOD]
   をそのまま流用し、末尾に `4K, photorealistic, no text overlays` を付ける。
 - 被写体の一貫性が要る場合（同一人物・同一商品が複数シーンに出る）は、nano-banana の
-  subject consistency を活かし、1枚目を参照画像にして残りを生成する。
+  subject consistency を活かし、1枚目を参照画像にして残りを生成する（`extra` で参照画像を渡す）。
 - text-to-video を使うのは、抽象的・background 的なシーンで構図制御が要らない場合に限る。
 
-コスト目安：画像 $0.02〜/枚 + 動画 image-to-video 分。試作（Phase 4）は必ずこの後で挟む。
+コスト目安：画像 $0.02〜/枚（4K は nano-banana-pro で $0.30）+ 動画 image-to-video 分。試作（Phase 4）は必ずこの後で挟む。
 
 ---
 

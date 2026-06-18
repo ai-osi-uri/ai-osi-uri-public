@@ -7,19 +7,21 @@
   },
   "metadata": {
     "description": "AI OSI URI 公開プラグイン（外部配布用サブセット）。",
-    "version": "0.3.5"
+    "version": "0.4.0"
   },
   "plugins": [
     {
       "name": "osi-creative",
       "source": "./plugins/osi-creative",
-      "description": "AI 動画制作。汎用クリエイティブスキル集。",
-      "version": "0.1.4",
+      "description": "AI 動画制作と出資お礼メッセージ生成。汎用クリエイティブスキル集。",
+      "version": "0.1.3",
       "category": "creative",
       "tags": [
         "ai-video",
         "fal.ai",
-        "elevenlabs"
+        "elevenlabs",
+        "thank-you",
+        "investor"
       ],
       "strict": false
     },
@@ -27,7 +29,7 @@
       "name": "osi-docs",
       "source": "./plugins/osi-docs",
       "description": "文書・契約・業務フロー作成：pptx-custom・NDA 自動生成・業務 AS-IS/TO-BE スイムレーン作成。",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "category": "docs",
       "tags": [
         "docs",
@@ -41,8 +43,8 @@
     {
       "name": "osi-deploy",
       "source": "./plugins/osi-deploy",
-      "description": "アプリ・LP・SaaS デプロイ自動化：Vercel（軽量）と AWS（業務系）両対応。Terraform state を共有S3 backendで一元管理（tf-state-backend）。既存アプリの更新は update-deploy。Stripe Live 切替・Supabase Auth 更新・スモークテストまで一気通貫。",
-      "version": "0.8.1",
+      "description": "アプリ・LP・SaaS デプロイ自動化：Vercel（軽量）と AWS（業務系）両対応。Terraform state を共有S3 backendで一元管理（tf-state-backend）。Stripe Live 切替・Supabase Auth 更新・スモークテストまで一気通貫。",
+      "version": "0.5.1",
       "category": "deploy",
       "tags": [
         "deploy",
