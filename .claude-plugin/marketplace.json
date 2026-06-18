@@ -44,7 +44,7 @@
       "name": "osi-deploy",
       "source": "./plugins/osi-deploy",
       "description": "アプリ・LP・SaaS デプロイ自動化：Vercel（軽量）と AWS（業務系）両対応。Terraform state を共有S3 backendで一元管理（tf-state-backend）。Stripe Live 切替・Supabase Auth 更新・スモークテストまで一気通貫。",
-      "version": "0.5.1",
+      "version": "0.5.2",
       "category": "deploy",
       "tags": [
         "deploy",
@@ -62,7 +62,7 @@
       "name": "osi-knowledge",
       "source": "./plugins/osi-knowledge",
       "description": "知識管理：Obsidian への自律キャプチャと過去ノート参照、Google Calendar の空き時間取得。",
-      "version": "0.2.1",
+      "version": "0.2.2",
       "category": "knowledge",
       "tags": [
         "obsidian",
