@@ -1,20 +1,20 @@
 ---
 name: obsidian-knowledge-capture
-description: Obsidian vault（~/ObsidianVault）に会話・思考・気づき・調査結果を自律的に保存・整理するスキル。ユーザーが「知識化して」「Obsidianに保存」「vaultにまとめて」「Conceptに切り出して」「議事録にして」「Resourceとして保存」「Inboxに入れて」「ノートにして」「永続化して」「これ残しておいて」など、会話内容や思考を永続的な知識として保管したいと発話したときに必ず発動する。obsidian MCPサーバ（mcp__obsidian-mcp-tools__*）が利用可能な環境で使う。フォルダ・タイトル・frontmatter・リンクはすべてClaudeが自律判断し、ユーザーに細かく聞き返さない（判断つかない場合のみ最大1問）。判断ルールは vault 内の 90_Meta/ を毎回参照する単一情報源原則。完了後は必ず透明性レポート（新規N件・更新M件・リンクK本）を返す。AI OSI URI のメンバーが日々の会話・打ち合わせ・気づきを Obsidian に蓄積する運用で必須となる。
+description: Obsidian vault（~/ObsidianVault）に会話・思考・気づき・調査結果を自律的に保存・整理するスキル。ユーザーが「知識化して」「Obsidianに保存」「vaultにまとめて」「Conceptに切り出して」「議事録にして」「Resourceとして保存」「Inboxに入れて」「ノートにして」「永続化して」「これ残しておいて」など、会話内容や思考を永続的な知識として保管したいと発話したときに必ず発動する。obsidian MCPサーバ（mcp__obsidian__*）が利用可能な環境で使う。フォルダ・タイトル・frontmatter・リンクはすべてClaudeが自律判断し、ユーザーに細かく聞き返さない（判断つかない場合のみ最大1問）。判断ルールは vault 内の 90_Meta/ を毎回参照する単一情報源原則。完了後は必ず透明性レポート（新規N件・更新M件・リンクK本）を返す。AI OSI URI のメンバーが日々の会話・打ち合わせ・気づきを Obsidian に蓄積する運用で必須となる。
 version: 0.2.1
 requires_connectors:
-  - server: obsidian-mcp-tools
+  - server: obsidian
     provision: user-install
-    tools: [get_vault_file, create_vault_file, append_to_vault_file, patch_vault_file, search_vault_simple, search_vault, search_vault_smart, list_vault_files]
+    tools: [obsidian_get_file_contents, obsidian_append_content, obsidian_patch_content, obsidian_simple_search, obsidian_complex_search, obsidian_list_files_in_vault]
 ---
 
 # Obsidian Knowledge Capture
 
 Obsidian vault に会話・思考・知見を**自律的に**保存・組織化するスキル。
 
-## v0.2.0 で変わったこと
+## 変更履歴
 
-- **MCPツール名を `mcp__obsidian-mcp-tools__*` に統一**（旧 obsidian の REST API実装 `obsidian_*` から変更。実環境で使えるツール名に合わせた）
+- **MCPツール名を `mcp__obsidian__obsidian_*`（mcp-obsidian / Local REST API）に統一**（チーム正本。旧称 obsidian-mcp-tools はアーカイブのため不採用）。ノート新規作成は `obsidian_append_content`（新規／既存どちらにも書ける）で行う。
 - **Vault フォルダ構造を現状に合わせて修正**（`20_Concepts/` → `50_Resources/Concepts/` 等）
 - **`90_Meta/` の必読ファイル一覧を最新化**（5本構成：運用ルール／フォルダ規約／frontmatterスキーマ／表記揺れ正規化表／Concept昇華基準）
 
@@ -44,7 +44,7 @@ vault は「自己記述型」設計になっており、ルール（命名・�
 
 vault は自己記述型なので、保存ルールが vault 内に書かれている。これを単一情報源として尊重する。
 
-以下を `mcp__obsidian-mcp-tools__get_vault_file` で読む：
+以下を `mcp__obsidian__obsidian_get_file_contents` で読む：
 
 1. `90_Meta/運用ルール.md` — 知識化コマンドの仕様、書き込み原則、姉妹スキルとの責務分担
 2. `90_Meta/フォルダ規約.md` — このVaultにおけるパスの正
@@ -56,7 +56,7 @@ vault は自己記述型なので、保存ルールが vault 内に書かれて�
 
 ### Step 2: 既存ノートを横断検索
 
-`mcp__obsidian-mcp-tools__search_vault_simple` で会話の主要キーワード（概念・固有名詞）を検索。
+`mcp__obsidian__obsidian_simple_search` で会話の主要キーワード（概念・固有名詞）を検索。
 
 目的は2つ：
 - **重複確認** ── 既に同主題のノートがあれば新規作成しない
@@ -81,8 +81,8 @@ vault は自己記述型なので、保存ルールが vault 内に書かれて�
 
 ### Step 4: ノート作成・更新
 
-- **新規作成**: `mcp__obsidian-mcp-tools__create_vault_file`
-- **既存追記**: `mcp__obsidian-mcp-tools__append_to_vault_file`（末尾追加）または `mcp__obsidian-mcp-tools__patch_vault_file`（特定セクション・frontmatter フィールド指定）
+- **新規作成**: `mcp__obsidian__obsidian_append_content`
+- **既存追記**: `mcp__obsidian__obsidian_append_content`（末尾追加）または `mcp__obsidian__obsidian_patch_content`（特定セクション・frontmatter フィールド指定）
 
 frontmatter は必ず `90_Meta/frontmatterスキーマ.md` の該当 type 仕様に従う。共通必須：`type`, `created`, `tags`。
 
@@ -134,16 +134,13 @@ vault 構造が異なる場合は、Step 1 で読んだ `90_Meta/フォルダ規
 
 ## 利用可能な MCP ツール
 
-- `mcp__obsidian-mcp-tools__list_vault_files`
-- `mcp__obsidian-mcp-tools__get_vault_file`
-- `mcp__obsidian-mcp-tools__search_vault_simple`
-- `mcp__obsidian-mcp-tools__search_vault`
-- `mcp__obsidian-mcp-tools__search_vault_smart`
-- `mcp__obsidian-mcp-tools__create_vault_file`
-- `mcp__obsidian-mcp-tools__append_to_vault_file`
-- `mcp__obsidian-mcp-tools__patch_vault_file`
-- `mcp__obsidian-mcp-tools__delete_vault_file`（削除指示時のみ）
-- `mcp__obsidian-mcp-tools__show_file_in_obsidian`
+- `mcp__obsidian__obsidian_list_files_in_vault`
+- `mcp__obsidian__obsidian_get_file_contents`
+- `mcp__obsidian__obsidian_simple_search`
+- `mcp__obsidian__obsidian_complex_search`
+- `mcp__obsidian__obsidian_append_content`（新規作成・末尾追記）
+- `mcp__obsidian__obsidian_patch_content`
+- `mcp__obsidian__obsidian_delete_file`（削除指示時のみ）
 
 ## 姉妹スキルとの責務分担
 

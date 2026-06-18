@@ -1,11 +1,11 @@
 ---
 name: obsidian-knowledge-consult
-description: Obsidian vault（~/ObsidianVault）に蓄積されたユーザー独自の知識を引き出し、回答の文脈に組み込むスキル。ユーザーが「vaultから○○について教えて」「過去のノートから探して」「前に何書いたっけ」「知識ベースから引っ張ってきて」「私の見解は？」「自分が前に考えたことを思い出させて」「サンプル案件のときどうした？」「○○について自分は何を知ってる？」「営業・提案について自分のノートに何がある？」「Conceptsから関連を探して」など、ユーザーが過去に蓄積した思考・議事録・人物情報・外部資料を活用したい時に必ず発動する。obsidian-mcp-tools MCPサーバ（mcp__obsidian-mcp-tools__*）が利用可能な環境で使う。検索→読込→引用付き要約→ユーザータスクへの活用、までを担う。出典は必ず `[[ノート名]]` 形式で示し、見つからなかった場合は明示する。AI OSI URI のメンバーが、過去の自分の思考や意思決定パターンを最大限再利用するために使う。
+description: Obsidian vault（~/ObsidianVault）に蓄積されたユーザー独自の知識を引き出し、回答の文脈に組み込むスキル。ユーザーが「vaultから○○について教えて」「過去のノートから探して」「前に何書いたっけ」「知識ベースから引っ張ってきて」「私の見解は？」「自分が前に考えたことを思い出させて」「サンプル案件のときどうした？」「○○について自分は何を知ってる？」「営業・提案について自分のノートに何がある？」「Conceptsから関連を探して」など、ユーザーが過去に蓄積した思考・議事録・人物情報・外部資料を活用したい時に必ず発動する。obsidian MCPサーバ（mcp__obsidian__*）が利用可能な環境で使う。検索→読込→引用付き要約→ユーザータスクへの活用、までを担う。出典は必ず `[[ノート名]]` 形式で示し、見つからなかった場合は明示する。AI OSI URI のメンバーが、過去の自分の思考や意思決定パターンを最大限再利用するために使う。
 version: 0.3.0
 requires_connectors:
-  - server: obsidian-mcp-tools
+  - server: obsidian
     provision: user-install
-    tools: [search_vault_simple, search_vault, search_vault_smart, get_vault_file, list_vault_files]
+    tools: [obsidian_simple_search, obsidian_complex_search, obsidian_get_file_contents, obsidian_list_files_in_vault]
 ---
 
 # Obsidian Knowledge Consult
@@ -35,14 +35,14 @@ vault に書き溜めても、引き出されなければ意味がない。普�
 
 ### Step 1: vault 構造を理解する（必須・初回）
 
-`mcp__obsidian-mcp-tools__get_vault_file` で `90_Meta/運用ルール.md` を読む。  
+`mcp__obsidian__obsidian_get_file_contents` で `90_Meta/運用ルール.md` を読む。  
 vault がどう組織化されているかを最初に把握する。これによって検索結果の解釈精度が上がる。
 
 すでに同セッション内で読み込み済みなら省略可。
 
 ### Step 2: 多角検索
 
-`mcp__obsidian-mcp-tools__search_vault_simple` で複数キーワードを並列検索。
+`mcp__obsidian__obsidian_simple_search` で複数キーワードを並列検索。
 
 検索戦略の詳細は `references/search-strategy.md` を参照。基本：
 
@@ -55,7 +55,7 @@ vault がどう組織化されているかを最初に把握する。これに�
 
 ### Step 3: 関連ノートを読む
 
-検索でヒットしたノートのうち、関連度が高そうなもの（タイトル・サマリで判断）を `mcp__obsidian-mcp-tools__get_vault_file` で読み込む。
+検索でヒットしたノートのうち、関連度が高そうなもの（タイトル・サマリで判断）を `mcp__obsidian__obsidian_get_file_contents` で読み込む。
 
 優先順位：
 1. `20_Concepts/` のノート（永続的な思考の核）── 最重要
@@ -117,7 +117,7 @@ vault には ○○ に関する直接のノートは見当たりませんでし
 | | consult | capture |
 |---|---|---|
 | 動詞 | 読む・引き出す | 書く・残す |
-| MCPツール | `get_vault_file`, `search_vault_simple` | `append_to_vault_file`, `patch_vault_file` |
+| MCPツール | `obsidian_get_file_contents`, `obsidian_simple_search` | `obsidian_append_content`, `obsidian_patch_content` |
 | ユーザー発話 | 「vaultから」「前に何書いた」 | 「知識化して」「Conceptに切り出して」 |
 | 出力 | 引用付き要約 + タスク回答 | 透明性レポート（新規/更新/リンク） |
 
@@ -125,13 +125,13 @@ vault には ○○ に関する直接のノートは見当たりませんでし
 
 ## 利用可能な MCP ツール
 
-- `mcp__obsidian-mcp-tools__search_vault_simple`（最重要）
-- `mcp__obsidian-mcp-tools__get_vault_file`
-- `mcp__obsidian-mcp-tools__list_vault_files`
-- `mcp__obsidian-mcp-tools__search_vault`（複雑な条件検索が必要な場合）
-- `mcp__obsidian-mcp-tools__search_vault_smart`（意味検索。capture と同じく高機能検索を使える）
+- `mcp__obsidian__obsidian_simple_search`（最重要）
+- `mcp__obsidian__obsidian_get_file_contents`
+- `mcp__obsidian__obsidian_list_files_in_vault`
+- `mcp__obsidian__obsidian_complex_search`（複雑な条件検索が必要な場合）
+- `mcp__obsidian__obsidian_get_recent_changes`（最近の更新を見たい場合）
 
-> 注: 旧 obsidian の REST API実装（`obsidian_*` ツール）から `mcp__obsidian-mcp-tools__*` に統一済み（チーム正本）。`obsidian_get_recent_changes` 相当は obsidian-mcp-tools に無いため、`search_vault` / `search_vault_smart` で代替する。
+> 注: チーム正本は `mcp-obsidian`（Local REST API 実装＝`mcp__obsidian__obsidian_*`）。配布用 .mcpb・各自の接続もこれに統一。旧称 obsidian-mcp-tools はアーカイブのため不採用。
 
 ## 参照
 
