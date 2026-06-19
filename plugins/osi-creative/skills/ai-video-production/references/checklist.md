@@ -6,7 +6,7 @@
 
 ## 着手前
 
-- [ ] fal-video-mcp が Cowork に登録されている（`fal_list_models` で13ツール確認）
+- [ ] fal-video-mcp が Cowork に登録されている（`list_models` で13ツール確認）
 - [ ] fal.ai に最低 $10 のクレジットがある
 - [ ] Drive 出力先（FAL_OUTPUT_DIR）が設定済み
 - [ ] `references/pitfalls.md` を読み返した

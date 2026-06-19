@@ -1,11 +1,11 @@
 ---
 name: ai-video-production
-description: AI動画を作るスキル。台本構成→シーン別動画生成（fal.ai経由のVeo 3.1 / Seedance 2.0 / Kling 3.0）→ナレーション生成（ElevenLabs）→字幕生成→ffmpeg合成→BGMミックスまで自動化。「動画を作って」「動画作成」「PR動画」「IR動画」「採用動画」「企業説明動画」「ピッチ動画」「ナレーション付き動画」「アニメ動画」「実写動画」「ドキュメンタリー動画」「TikTok動画」「Reels動画」など、AI動画制作のリクエスト全般で発動する。既存の動画台本テキストが渡された場合も発動する。「AI OSI URI Creative」コネクタ（旧 fal-video。動画・音楽・ナレーション・静止画[nano-banana]を内包）が Cowork に登録されていることを前提とする（デフォルトは画像起点：Creative の fal_generate_image で nano-banana キービジュアル→image-to-video）。PPT・スライドのみ、静止画のみの依頼では使わない。
+description: AI動画を作るスキル。台本構成→シーン別動画生成（fal.ai経由のVeo 3.1 / Seedance 2.0 / Kling 3.0）→ナレーション生成（ElevenLabs）→字幕生成→ffmpeg合成→BGMミックスまで自動化。「動画を作って」「動画作成」「PR動画」「IR動画」「採用動画」「企業説明動画」「ピッチ動画」「ナレーション付き動画」「アニメ動画」「実写動画」「ドキュメンタリー動画」「TikTok動画」「Reels動画」など、AI動画制作のリクエスト全般で発動する。既存の動画台本テキストが渡された場合も発動する。「AI OSI URI Creative」コネクタ（旧 fal-video。動画・音楽・ナレーション・静止画[nano-banana]を内包）が Cowork に登録されていることを前提とする（デフォルトは画像起点：Creative の generate_image で nano-banana キービジュアル→image-to-video）。PPT・スライドのみ、静止画のみの依頼では使わない。
 version: 0.4.0
 requires_connectors:
-  - server: fal-video
+  - server: ai-osi-uri-creative
     provision: user-install
-    tools: [fal_generate_image, fal_edit_image, fal_submit_video, fal_image_to_video, fal_text_to_speech, fal_generate_music]
+    tools: [generate_image, edit_image, generate_video, image_to_video, submit_video, check_status, generate_speech, generate_music]
 ---
 
 # AI動画制作パイプライン
@@ -14,7 +14,7 @@ OKWEB × JINEN動画制作で確立した全工程を再現可能な形にした
 
 ## 前提
 
-- 「AI OSI URI Creative」コネクタ（fal + ElevenLabs を内包）が Cowork に登録されている（動画・音楽・ナレーション＋静止画[nano-banana]。`fal_generate_image` を含む）。**画像も Creative に統合済みなので、別途 nano-banana コネクタは不要**（既存の fal キーで動く）
+- 「AI OSI URI Creative」コネクタ（fal + ElevenLabs を内包）が Cowork に登録されている（動画・音楽・ナレーション＋静止画[nano-banana]。`generate_image` を含む）。**画像も Creative に統合済みなので、別途 nano-banana コネクタは不要**（既存の fal キーで動く）
 - fal.ai のAPIキーが設定済み、最低 $10 のクレジットがある
 - ffmpeg が利用可能なBash環境がある（Linux sandbox）
 - 出力先フォルダ（FAL_OUTPUT_DIR）が Drive 等に設定済み
@@ -122,14 +122,14 @@ no text overlays
 ## Phase 3.5: キービジュアル生成（画像起点・デフォルト）
 
 **デフォルトは画像起点フロー**。text-to-video で直接生成するより、まず Creative の
-`fal_generate_image`（model: nano-banana / 4Kは nano-banana-pro）で キービジュアルを作り、
-それを `fal_image_to_video` で動かす方が、構図・ブランド・被写体の一貫性を制御しやすい。
+`generate_image`（model: nano-banana / 4Kは nano-banana-pro）で キービジュアルを作り、
+それを `image_to_video` で動かす方が、構図・ブランド・被写体の一貫性を制御しやすい。
 **画像も動画も同じ Creative コネクタ＝falキー1本で完結する。**
 
 ```
-fal_generate_image（model: nano-banana-pro, 各シーンのキービジュアル, 4K, no text）
+generate_image（model: nano-banana-pro, 各シーンのキービジュアル, 4K, no text）
    ↓ 画像を確認・採否
-fal_image_to_video（採用画像 → 動画化, カメラワーク指定）
+image_to_video（採用画像 → 動画化, カメラワーク指定）
 ```
 
 - 画像プロンプトは Phase 3 のシーン別プロンプトの [SUBJECT][LIGHTING][SETTING][MOOD]
@@ -149,9 +149,9 @@ fal_image_to_video（採用画像 → 動画化, カメラワーク指定）
 ヒーローシーン①と中盤の代表的なシーン（⑧推奨）の **2本だけ** を生成。
 
 ```
-fal_submit_video x 2
+submit_video x 2
 ↓ 60秒待機
-fal_check_status x 2
+check_status x 2
 ↓ ダウンロード
 ユーザーに見せて判断
 ```
@@ -259,10 +259,10 @@ voice タイプ別に**逆方向の最適化**が必要。詳細は `templates/n
 2. **本番**：12本を6本ずつ並列投入（fal.ai並列上限考慮）
 3. 全DL確認
 
-ツール：`fal_text_to_speech`（ブロッキング、各5〜15秒）
+ツール：`generate_speech`（ブロッキング、各5〜15秒）
 
 ```typescript
-fal_text_to_speech({
+generate_speech({
   text: "[calm] ...",
   voice: "GxhGYQesaQaYKePCZDEC",  // GENEL voice_id
   model: "elevenlabs-v3",

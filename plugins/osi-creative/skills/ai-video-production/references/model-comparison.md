@@ -86,24 +86,24 @@
 
 ## 静止画モデル（i2v 起点フレーム用）
 
-i2v（image-to-video）は「静止画を作る → `fal_image_to_video` の起点に渡す」流れ。**起点の静止画は Creative コネクタの `fal_generate_image` で作る**（v0.6.0〜 画像も Creative に統合。fal 経由で nano-banana を呼ぶので **fal キー1本で完結＝別 Gemini キー・別コネクタ不要**）。
+i2v（image-to-video）は「静止画を作る → `image_to_video` の起点に渡す」流れ。**起点の静止画は Creative コネクタの `generate_image` で作る**（v0.6.0〜 画像も Creative に統合。fal 経由で nano-banana を呼ぶので **fal キー1本で完結＝別 Gemini キー・別コネクタ不要**）。
 
 | 画像手段 | モデル | ツール | 強み | 鍵 |
 |---|---|---|---|---|
-| **Creative の画像** ★既定 | nano-banana / nano-banana-pro(4K) | `fal_generate_image` / `fal_edit_image` | **キャラ/絵柄の一貫性**・雰囲気・量産。Creative 内で完結 | `FAL_KEY`（既存） |
+| **Creative の画像** ★既定 | nano-banana / nano-banana-pro(4K) | `generate_image` / `edit_image` | **キャラ/絵柄の一貫性**・雰囲気・量産。Creative 内で完結 | `FAL_KEY`（既存） |
 | `openai-image`（任意・別コネクタ） | OpenAI GPT Image 2 | `openai_generate_image` / `openai_edit_image` | **画面内テキスト/ロゴ/コピー焼き込み**・指示追従 | `OPENAI_API_KEY` |
 
 ### 使い分け（動画フレーム用途）
-- **多シーンで同じ人物・世界観を揃えたい**（動画の基本）→ Creative の `fal_generate_image` で1枚キーフレームを作り、`fal_edit_image` で「同じ人物のまま別シーン」を派生させると一貫性が保てる
+- **多シーンで同じ人物・世界観を揃えたい**（動画の基本）→ Creative の `generate_image` で1枚キーフレームを作り、`edit_image` で「同じ人物のまま別シーン」を派生させると一貫性が保てる
 - **テロップ/ロゴ/コピーを画像内に焼く必要がある** → 任意で `openai-image`（GPT Image 2）を別途導入
 - 既定は **Creative 1本でOK**。openai-image は焼き込みが要るときだけ追加する
 
 ### 標準フロー（i2v）
 ```
-1. fal_generate_image（model: nano-banana / 4Kは nano-banana-pro）でシーン①のキーフレーム生成
-2. fal_edit_image で②③…を「同じ人物・絵柄」で派生（一貫性キープ）
+1. generate_image（model: nano-banana / 4Kは nano-banana-pro）でシーン①のキーフレーム生成
+2. edit_image で②③…を「同じ人物・絵柄」で派生（一貫性キープ）
    ※ テロップ/ロゴ入りカットは任意で openai-image で焼き込む
-3. 各フレームを fal_image_to_video（kling30-i2v / veo31-i2v）に渡して動画化
+3. 各フレームを image_to_video（kling30-i2v / veo31-i2v）に渡して動画化
 ```
 
 > v0.6.0 での方針変更：以前は「画像は専用直コネクタ(nano-banana=Gemini直)で作る」設計だったが、**fal が nano-banana 本体をホストしている**ため、Creative 1コネクタ＋fal キーに統合した（別 Gemini キー・LOCAL DEV の nano-banana コネクタは不要）。テキスト焼き込みが要る案件のみ openai-image を任意で併用。動画/音楽/画像/ナレーションが Creative 1本に集約。
@@ -181,7 +181,7 @@ curl -X POST https://api.elevenlabs.io/v1/text-to-speech/$VOICE_ID \
 
 ### A. 多言語汎用voice（fal.ai 経由でも DIRECT でも使える）
 
-`fal_list_voices` で確認：
+`list_voices` で確認：
 
 | プリセット | ElevenLabs voice | 用途 |
 |---|---|---|

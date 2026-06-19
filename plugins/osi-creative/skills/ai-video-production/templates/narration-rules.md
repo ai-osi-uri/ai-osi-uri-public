@@ -173,7 +173,7 @@ OKWEB事例での試行錯誤（v1〜v24）で確立。最初からこれを守�
 ## ④ 推奨設定
 
 ```typescript
-fal_text_to_speech({
+generate_speech({
   text: "...",
   voice: "calm-female",  // Rachel（推奨）or calm-male（Adam）
   model: "elevenlabs-v2",
@@ -280,7 +280,7 @@ GENEL voice（`GxhGYQesaQaYKePCZDEC`）等のネイティブクローンを使�
 ### ⑧-1. 推奨セッティング
 
 ```typescript
-fal_text_to_speech({
+generate_speech({
   text: "[calm] ...",                   // 感情タグを先頭に
   voice: "GxhGYQesaQaYKePCZDEC",        // GENEL voice_id
   model: "elevenlabs-v3",               // 最新モデル

@@ -1,24 +1,12 @@
 # 落とし穴集（実戦で得た知見）
 
-実際の動画制作で遭遇した問題と回避策。**毎回ここを参照してから着手する。**
-
----
-
-## 0. 高解像度シネマティック（モードA）特有の注意
-
-詳細・コマンドは `references/cinematic-hires-recipe.md` §7。要点：
-
-- **Veo3.1 はポーリング不可**：現行 fal コネクタで `fal-ai/veo3.1/image-to-video` は `Unprocessable Entity` になり結果を引き出せない。当面は Kling 3.0 4K を使う。
-- **bloom を4K素材に直接かけない**：重くてタイムアウトする。**1080へ scale してから** bloom/グレードをかけ、4K はマスターとして別保管。
-- **edit モードは解像度が落ちることがある**（768px等）。高解像度を保ちたい時は edit より **同条件で再 generate**。
-- **最新モデルは endpoint 直書き**：`fal_list_models` 既定は古いので、Kling 3.0 4K / Seedance 2.0 / Veo3.1 は fal endpoint を直指定する。
-- 並列・ポーリングの注意は下記 §1 と共通（Kling 3.0 4K は完了まで2〜4分）。
+OKWEB × JINEN動画制作で実際に遭遇した問題と回避策。**毎回ここを参照してから着手する。**
 
 ---
 
 ## 1. fal.ai 並列ジョブ制限（Forbidden）
 
-**症状**：5〜6本以上を同時に `fal_submit_video` すると、4〜5本目以降が `Error: Forbidden` で受理されない。
+**症状**：5〜6本以上を同時に `submit_video` すると、4〜5本目以降が `Error: Forbidden` で受理されない。
 
 **原因**：fal.ai のアカウント並列実行枠の上限。Pay-as-you-go アカウントではモデル毎に約5〜6本同時が上限と推測。
 
@@ -47,7 +35,7 @@ for i in 01 02 03 04 05 06 07 08 09 10; do submit; done
 
 **対処**：
 - 古いジョブは無視（自動的にタイムアウト消滅）
-- クレジット追加後、新規 `fal_submit_video` で再投入
+- クレジット追加後、新規 `submit_video` で再投入
 - ユーザーには fal.ai dashboard でキャンセルしてもらう案内も可
 
 ---
@@ -67,14 +55,14 @@ for i in 01 02 03 04 05 06 07 08 09 10; do submit; done
 
 ## 4. MCP ブロッキング呼び出しのタイムアウト
 
-**症状**：`fal_text_to_video`（ブロッキング）で `MCP error -32001: Request timed out`。
+**症状**：`generate_video`（ブロッキング）で `MCP error -32001: Request timed out`。
 
 **原因**：Cowork のMCPツール呼び出しは 60〜120秒でタイムアウト。Veo 3 の生成は 1〜5分かかる。
 
 **対処**：
-- 動画生成は必ず **`fal_submit_video` + `fal_check_status`** の非同期パターンを使う
-- ブロッキング `fal_text_to_video` は 30秒以内で完了する用途のみ
-- ナレーションTTS（5〜15秒）は `fal_text_to_speech` ブロッキングでOK
+- 動画生成は必ず **`submit_video` + `check_status`** の非同期パターンを使う
+- ブロッキング `generate_video` は 30秒以内で完了する用途のみ
+- ナレーションTTS（5〜15秒）は `generate_speech` ブロッキングでOK
 
 ---
 
@@ -302,7 +290,7 @@ ffmpeg では `-vf "subtitles=...:fontsdir=/tmp/fonts:force_style='FontName=Noto
 
 ## 14. fal.ai音楽生成のレスポンス形式の罠
 
-**症状**：`fal_check_music` で「Job COMPLETED but no audio URL」エラー。
+**症状**：`check_music` で「Job COMPLETED but no audio URL」エラー。
 
 **原因**：Stable Audio は `audio_file.url` フィールドで返してくる（他のTTSは `audio.url`）。MCP の `extractMediaUrl` はこの形式を見落としている。
 
