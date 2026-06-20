@@ -29,7 +29,7 @@
       "name": "osi-docs",
       "source": "./plugins/osi-docs",
       "description": "文書・契約・業務フロー・事業計画作成：事業計画ビルダー（財務3表連動モデル＋ピッチ＋報告）・pptx-custom・NDA 自動生成・業務 AS-IS/TO-BE スイムレーン作成。",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "category": "docs",
       "tags": [
         "docs",
@@ -62,7 +62,7 @@
       "name": "osi-knowledge",
       "source": "./plugins/osi-knowledge",
       "description": "知識管理：Obsidian への自律キャプチャと過去ノート参照、Google Calendar の空き時間取得。",
-      "version": "0.2.2",
+      "version": "0.2.3",
       "category": "knowledge",
       "tags": [
         "obsidian",

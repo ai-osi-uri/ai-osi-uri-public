@@ -1,6 +1,6 @@
 {
   "name": "osi-knowledge",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "requires_connectors": [
     "Obsidian",
     "Google カレンダー"

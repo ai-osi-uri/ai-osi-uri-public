@@ -1,6 +1,6 @@
 ---
 name: pptx-custom
-description: "Use this skill any time a .pptx file is involved in any way — as input, output, or both. This includes: creating slide decks, pitch decks, or presentations; reading, parsing, or extracting text from any .pptx file (even if the extracted content will be used elsewhere, like in an email or summary); editing, modifying, or updating existing presentations; combining or splitting slide files; working with templates, layouts, speaker notes, or comments. Trigger whenever the user mentions \"deck,\" \"slides,\" \"presentation,\" or references a .pptx filename, regardless of what they plan to do with the content afterward. If a .pptx file needs to be opened, created, or touched, use this skill."
+description: "AI OSI URI の社内体裁（ブランド配色・レイアウト規約）で .pptx を作成/整形する専用スキル。社内テンプレでピッチや提案資料の新規デッキを作る、既存 pptx を社内体裁に整える、business-plan-builder / architecture-proposal / proposal 系などのオーケストレータから「pptx に整形する部品」として呼ばれる、といった場合に発動する。AI OSI URI のスライド体裁が要るときはこちら。体裁不問の汎用的な .pptx の読み取り・抽出・変換や、社外/他テンプレのスライド作成は基盤 `pptx` スキルの担当（そちらを使う）。"
 license: Proprietary. LICENSE.txt has complete terms
 requires_connectors:
   - server: ai-osi-uri-creative
