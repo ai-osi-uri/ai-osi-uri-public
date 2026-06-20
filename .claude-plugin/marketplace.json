@@ -7,7 +7,7 @@
   },
   "metadata": {
     "description": "AI OSI URI 公開プラグイン（外部配布用サブセット）。",
-    "version": "0.4.0"
+    "version": "0.5.0"
   },
   "plugins": [
     {
@@ -28,8 +28,8 @@
     {
       "name": "osi-docs",
       "source": "./plugins/osi-docs",
-      "description": "文書・契約・業務フロー作成：pptx-custom・NDA 自動生成・業務 AS-IS/TO-BE スイムレーン作成。",
-      "version": "0.1.3",
+      "description": "文書・契約・業務フロー・事業計画作成：事業計画ビルダー（財務3表連動モデル＋ピッチ＋報告）・pptx-custom・NDA 自動生成・業務 AS-IS/TO-BE スイムレーン作成。",
+      "version": "0.2.0",
       "category": "docs",
       "tags": [
         "docs",

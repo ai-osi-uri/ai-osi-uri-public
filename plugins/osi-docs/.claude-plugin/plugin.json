@@ -1,8 +1,8 @@
 {
   "name": "osi-docs",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "requires_connectors": [],
-  "description": "AI OSI URI の文書・契約・業務フロー作成。pptx-custom・NDA 自動生成・業務 AS-IS/TO-BE スイムレーン作成。",
+  "description": "AI OSI URI の文書・契約・業務フロー・事業計画作成。事業計画ビルダー（財務3表連動モデル＋ピッチ＋報告）・pptx-custom・NDA 自動生成・業務 AS-IS/TO-BE スイムレーン作成。",
   "author": {
     "name": "AI OSI URI",
     "email": "yuhenagisa@ai-osi-uri.com"
@@ -14,6 +14,10 @@
     "pptx",
     "nda",
     "business-flow",
-    "contract"
+    "contract",
+    "business-plan",
+    "financial-model",
+    "3statement",
+    "cashflow"
   ]
 }
