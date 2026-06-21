@@ -1,7 +1,7 @@
 ---
 name: ai-video-production
 description: AI動画を作るスキル。台本構成→シーン別動画生成（fal.ai経由のVeo 3.1 / Seedance 2.0 / Kling 3.0）→ナレーション生成（ElevenLabs）→字幕生成→ffmpeg合成→BGMミックスまで自動化。「動画を作って」「動画作成」「PR動画」「IR動画」「採用動画」「企業説明動画」「ピッチ動画」「ナレーション付き動画」「アニメ動画」「実写動画」「ドキュメンタリー動画」「TikTok動画」「Reels動画」など、AI動画制作のリクエスト全般で発動する。既存の動画台本テキストが渡された場合も発動する。「AI OSI URI Creative」コネクタ（旧 fal-video。動画・音楽・ナレーション・静止画[nano-banana]を内包）が Cowork に登録されていることを前提とする（デフォルトは画像起点：Creative の generate_image で nano-banana キービジュアル→image-to-video）。PPT・スライドのみ、静止画のみの依頼では使わない。
-version: 0.4.0
+version: 0.5.0
 requires_connectors:
   - server: ai-osi-uri-creative
     provision: user-install
@@ -49,8 +49,10 @@ OKWEB × JINEN動画制作で確立した全工程を再現可能な形にした
 | ビジュアルスタイル？ | アニメ（ジブリ風）/ ドキュメンタリー実写 / コーポレートCG / ライフスタイル |
 | ナレーター声 | 落ち着いた女性（推奨）/ 落ち着いた男性 / 力強い男性 / 明るい女性 / なし |
 | 字幕焼き込み？ | 焼き込み（推奨）/ SRT別出力 / なし |
-| BGM？ | Stable Audioで生成（推奨）/ なし |
+| BGM？ | Stable Audioで生成 / フリー定番曲（DOVA等のYouTuber定番・ショート推奨） / なし |
 | アスペクト比 | 16:9（推奨）/ 9:16 / 1:1 |
+
+※ **ショート（9:16・〜60秒）・SNS拡散狙い・「流行りのBGM」希望のときは、AI生成より "YouTuber定番のフリー曲" を選ぶと刺さる。`references/bgm-selection.md` 参照（調査→選定→取得→ミックスの定型と著作権ルール）。**
 
 既存台本がある → そのまま読み込み Phase 1 構成検討へ。
 台本なし → Phase 1 で構成を一緒に作る。
@@ -296,7 +298,9 @@ python3 scripts/make_subs.py \
    - PTS factor = target_duration / source_video_duration
    - target = max(narration_duration, source_video_duration) + 0.3秒
 2. **連結**：12シーンを concat
-3. **BGMミックス**：stream_loop で長さ合わせ、volume=0.18 (-15dB)、fade in/out
+3. **BGMミックス**：volume=0.16〜0.18 (-15dB前後)、fade in 1.2s / fade out 2s。
+   - **途切れ防止**：曲尺 ≥ 動画尺の曲を選び **ループしない**（`stream_loop` の継ぎ目は"途切れ"に聞こえる）。足りない時のみ acrossfade でループ。末尾は必ず 2秒フェードアウトし、`volumedetect` で末尾が十分小さいか確認。
+   - フリー定番曲を使う場合の取得・選定・著作権は `references/bgm-selection.md` を参照（Web音源は Claude in Chrome で取得 → `~/Downloads` を mount → cp）。
 4. **字幕焼き込み**：黒文字＋白縁取り、Noto Sans JP
 
 **重要：必ず /tmp で作業し、最後に Drive に cp する。Drive直接書き込みは sync 干渉でファイルが壊れる。**
@@ -336,6 +340,7 @@ BGM: $0.20
 3. `templates/voice-strategy.md` — ★ナレーターvoice選択戦略（Eleven v3、GENEL、感情タグ）
 4. `templates/narration-rules.md` — TTS誤読対策（最重要）
 5. 該当する `templates/prompts-{style}.md`
+6. `references/bgm-selection.md` — ★ショート向けBGM選定（YouTuber定番フリー曲・取得・著作権・途切れ防止）
 
 ## 必須スクリプト
 
