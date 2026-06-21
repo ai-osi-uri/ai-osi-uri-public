@@ -1,7 +1,7 @@
 ---
 name: deploy-app
 description: AI OSI URI が Cowork から **任意の業種のアプリを新規に作って公開する**ための唯一のオーケストレータスキル。「アプリ作って」「LP 立ち上げて」「○○屋向けの在庫管理アプリ作って」「予約サイトを作って」「会員制のサブスク SaaS 作って」「業務系のシステム作って」「LP 公開して」など、ユーザーが新しいアプリの作成と公開を依頼したときに発動する。
-version: 0.2.0
+version: 0.3.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb
@@ -38,6 +38,37 @@ AWS で公開するところまで 1 つの対話で完結させる。
    atomic / `/setup-infra` / `/create-app` に委譲
 6. **既存資産活用**: 軽量パスは `gh-create-repo-and-push` / `vercel-connect-and-deploy`
    / `supabase-set-auth-url` / `aws-static-deploy` を使う
+
+---
+
+## 冪等デプロイとローカルクローン正本（最重要・必須）
+
+> 経緯: 実デプロイで Vercel プロジェクトが重複作成された（env 無しで初回 create → 後から
+> env を足そうと再 create → 名前衝突で `-002` が自動採番）。**同じ事故を二度と起こさない**ため、
+> 以下を体裁・速度より優先する。設計の詳細は
+> [docs/deploy-app-local-clone-and-idempotency.md](../../../../docs/deploy-app-local-clone-and-idempotency.md)。
+
+### 原則
+1. **正本は GitHub リモート。ローカルクローンは“そのマシンの作業コピー”**。誰でも clone し直せる。
+2. **Vercel プロジェクトは 1 リポにつき 1 つ。create は一度きり**。以降の更新は git push＝CI 自動デプロイ。
+3. **provision → env 収集 → 単一 create**。Supabase/Stripe を先に作り env を全部そろえてから Vercel を 1 回だけ作る。
+4. **本番URLは production alias（`<project>-<team>.vercel.app`）**。per-deploy 固定URLを正本にしない。
+
+### 冪等ガード（Vercel パスで create する前に必ず）
+- 「この repo に紐づく既存 Vercel プロジェクトが在るか」を確認する。**在れば `vercel_create_project_and_deploy` を絶対に再実行しない**（名前衝突で別プロジェクトが増殖する）。
+- 既存があるのに env を変えたい場合は、create ではなく「git push（CI 自動デプロイ）＋ env はダッシュボード/CLI/将来の `vercel_set_env`」で対応する。
+- ⚠️ 現状、拡張に「既存プロジェクトへ env 後付け」「プロジェクト削除」ツールは無い。よって **初回 create に env を全部入れる**ことが唯一の安全策。env が未確定なうちは create しない。
+
+### ローカルクローン確立（repo 作成直後）
+- 既定の配置は `~/projects/<repo-name>`。以下のガードを必ず通す:
+  - (a) 正本は GitHub リモートと明記。クローンは作業コピー（壊れても再 clone で復旧）。
+  - (b) Cowork では `~/projects` が**接続（マウント）済み＆書込可能**かを確認。未接続なら接続を促すか接続済みフォルダを選ばせる。
+  - (c) 配置は上書き可能（`OSI_PROJECTS_DIR` 等）。既定は `~/projects`。
+  - (d) 同名ディレクトリ衝突をチェックして確認。
+- scaffold に `CLAUDE.md` / `DEPLOY.md` を必ず同梱し、「更新は clone→push→CI／再 create 禁止／本番は alias／旧プロジェクトは削除」をリポ自身に自己記述させる。
+
+### 初回デプロイ後の更新
+- **全更新は `update-deploy`（clone→編集→github_push→CI 監視→smoke）を既定入口にする**。本スキル（deploy-app）を同じ案件で再実行しない。
 
 ---
 

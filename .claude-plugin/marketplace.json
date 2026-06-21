@@ -44,7 +44,7 @@
       "name": "osi-deploy",
       "source": "./plugins/osi-deploy",
       "description": "アプリ・LP・SaaS デプロイ自動化：Vercel（軽量）と AWS（業務系）両対応。Terraform state を共有S3 backendで一元管理（tf-state-backend）。Stripe Live 切替・Supabase Auth 更新・スモークテストまで一気通貫。",
-      "version": "0.6.2",
+      "version": "0.6.3",
       "category": "deploy",
       "tags": [
         "deploy",
