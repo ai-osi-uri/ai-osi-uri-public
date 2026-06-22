@@ -77,7 +77,7 @@
       "name": "osi-finance",
       "source": "./plugins/osi-finance",
       "description": "OSI Finance — 日本の中小企業向け 経理（請求AR・支払AP）自動化プロダクト。初回セットアップ（osi-finance-setup）・契約取込→請求スケジュール化・月次請求書発行・受領請求書の支払予定起票/取りこぼし検出・会計SaaS（v1=マネーフォワード）との突合・月次クローズを収録。台帳テンプレ同梱、組織固有値は keiri-settings に外出しで非開発者でも導入可。送金しない／自動確定しない（人レビュー必須）。",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "category": "finance",
       "tags": [
         "finance",
