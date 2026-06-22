@@ -1,6 +1,6 @@
 {
   "name": "osi-finance",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "requires_connectors": [
     "Google Drive",
     "Gmail",
@@ -8,7 +8,7 @@
     "MoneyForward",
     "DocuSign"
   ],
-  "description": "OSI Finance — 日本の中小企業向け 経理（請求AR・支払AP）自動化プロダクト。初回セットアップのオーケストレーション（osi-finance-setup）、契約取込→請求スケジュール化（keiri-contract-intake）、月次請求書発行（keiri-invoice）、受領請求書→支払予定起票（keiri-payment-intake）、受領請求書の取りこぼし検出（keiri-payment-detect）、支払管理台帳と会計SaaS（v1=マネーフォワード）の突合・計上漏れ検出（keiri-mf-sync）、月次クローズのオーケストレーション（keiri-monthly）を収録。台帳テンプレ同梱・組織固有値は keiri-settings に外出しし、非開発者でも導入できる。送金はしない／台帳の自動確定はしない（人レビュー必須）。1 Cowork=1組織。",
+  "description": "OSI Finance — 日本の中小企業向け 経理（請求AR・支払AP）自動化プロダクト。初回セットアップのオーケストレーション（osi-finance-setup）、契約取込→請求スケジュール化（keiri-contract-intake）、月次請求書発行（keiri-invoice）、受領請求書→支払予定起票（keiri-payment-intake）、受領請求書の取りこぼし検出（keiri-payment-detect）、支払管理台帳と会計SaaS（v1=マネーフォワード）の突合・計上漏れ検出（keiri-mf-sync）、月次クローズのオーケストレーション（keiri-monthly）、会計ダッシュボードのライブ生成（keiri-dashboard）を収録。台帳テンプレ同梱・組織固有値は keiri-settings に外出しし、非開発者でも導入できる。発火evalデータセット＋runner・導入完了レポート・エラー処理ガイドを同梱。送金はしない／台帳の自動確定はしない（人レビュー必須）。1 Cowork=1組織。",
   "author": {
     "name": "AI OSI URI",
     "email": "yuhenagisa@ai-osi-uri.com"

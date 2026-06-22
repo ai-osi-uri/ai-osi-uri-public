@@ -10,6 +10,8 @@
 - [ ] **コネクタ監査** `python3 scripts/audit_connectors.py --strict` → **ERROR 0**（WARN は既存分のみ許容）。
 - [ ] **スキル検証** `python3 scripts/validate_skills.py` → osi-finance 配下のスキルにエラーなし
       （※ クラウド同期由来の空 `_shared`/`.fuse_hidden` は git 非追跡で公開物に出ない）。
+- [ ] **発火eval整合性** `python3 scripts/eval_skill_firing.py --strict` → **ERROR 0 / WARN 0**
+      （C表データセット `docs/eval/firing-tests.yaml` の全スキルカバレッジ・no_fire target 整合）。
 - [ ] **バージョン** plugin.json と marketplace.json の osi-finance を一致させて bump（semver）。
 - [ ] **機微値スキャン** 登録番号(T+13桁)・口座番号・実在支払先名が repo に無い
       （`grep -rE 'T[0-9]{13}|[0-9]{7,}' plugins/osi-finance/skills` で0件）。
@@ -53,9 +55,30 @@
 
 ---
 
-## Phase 2 の残タスク（このチェックリスト導入後の発展）
+## Phase 2 の実装状況（v0.5.0）
 
-- 自動 eval：skill-creator で C 表のフレーズを回し、発火精度を数値化（誤発火/取りこぼしを定点観測）。
-- オンボーディングUX：osi-finance-setup の完了時に B 表のスモークを自動実行し「導入完了レポート」を出す。
-- エラー処理：大容量PDFのDrive格納（ローカル同期推奨）・添付取得（Superhuman必須）の失敗時ガイドを各スキルに明記。
-- Phase 3：他会計SaaS（freee 等）・多通貨・多言語（需要が出たら）。
+- [x] 自動 eval：C表を機械可読化した `docs/eval/firing-tests.yaml`（8スキル / fire 40 / no_fire 16）と
+      runner `scripts/eval_skill_firing.py` を同梱。整合性検証（カバレッジ・no_fire target・重複）を
+      `--strict` でゲート化。`--emit-skill-creator OUTDIR` で skill-creator `run_eval.py` 用の eval-set を
+      skill 単位出力（本物の発火率測定は Mac の skill-creator で実行）。
+- [x] オンボーディングUX：`osi-finance-setup` ステップ7「導入完了レポート」で B 表9項目を
+      自動実行し OK/要対応/スキップ＋サマリ＋要対応リストを出す。雛形＝
+      `skills/osi-finance-setup/references/setup-completion-report.md`。
+- [x] エラー処理：正本 `docs/エラー処理ガイド.md`（大容量PDF＝ローカル同期／添付＝Superhuman／
+      MF事業者・期間ズレ／settings未整備）を作成し、全8スキルの末尾「## エラー処理」節から参照。
+
+### C表データセットの回し方（Mac, skill-creator で本物の発火eval）
+
+```bash
+# 1) eval-set を生成（skill 単位 JSON）
+python3 scripts/eval_skill_firing.py --emit-skill-creator /tmp/osi-finance-evalset
+# 2) skill-creator の run_eval.py で発火率を測定（例: keiri-invoice）
+python3 <skill-creator>/scripts/run_eval.py \
+    --eval-set /tmp/osi-finance-evalset/keiri-invoice.eval.json \
+    --skill-path plugins/osi-finance/skills/keiri-invoice --verbose
+```
+
+## Phase 3（今後）
+
+- 他会計SaaS（freee 等）・多通貨・多言語（需要が出たら）。
+- 発火eval を CI に組み込み、誤発火/取りこぼしを定点観測（数値の経時比較）。

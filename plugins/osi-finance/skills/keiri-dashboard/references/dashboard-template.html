@@ -96,8 +96,9 @@ async function call(name,args){
 }
 const AP_ACCOUNTS=["業務委託料","地代家賃","支払報酬","支払手数料","外注費"];
 
-// 請求管理台帳由来のARスナップショット（当セッション確定値・配布版は台帳ライブ読取）
-const AR={ total:31512250, paid:8811000, month:6039000 };
+// 請求管理台帳由来のARスナップショット（初期プレースホルダ＝0。実値は起動時に台帳ライブ読取で差し替える）
+// 配布テンプレには実数値を埋め込まない（機微・誤認防止）。スキル側で当月数値を算出して上書きする。
+const AR={ total:0, paid:0, month:0 };
 
 function renderAR(){
   document.getElementById("ar-total").textContent=yen(AR.total);

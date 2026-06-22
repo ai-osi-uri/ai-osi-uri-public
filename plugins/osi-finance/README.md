@@ -33,6 +33,7 @@
 | `keiri-payment-detect` | 日次で受領請求書の取りこぼしを検出 → 起票案を報告 | AP 検出 |
 | `keiri-mf-sync` | 支払管理台帳の支払済 ⇔ 会計SaaS仕訳を突合 → 計上漏れ検出 | 突合 |
 | `keiri-monthly` | 月次クローズのオーケストレーション（取込→仕訳→突合→検算→報告） | 月次 |
+| `keiri-dashboard` | 請求(AR)・支払(AP)・経費を1枚で見るライブ・アーティファクト生成（表示専用） | 可視化 |
 
 ## 台帳テンプレ（同梱）
 
@@ -81,6 +82,13 @@
 
 ## バージョン
 
+- v0.5.0：Phase 2（品質・運用）。発火eval データセット（`docs/eval/firing-tests.yaml`）＋
+  runner（`scripts/eval_skill_firing.py`、整合性検証＋skill-creator eval-set 生成）、
+  `osi-finance-setup` の**導入完了レポート**（B表スモークの自動実行・`references/setup-completion-report.md`）、
+  共通の**エラー処理ガイド**（`docs/エラー処理ガイド.md`、大容量PDF＝ローカル同期／添付＝Superhuman）を
+  各スキル末尾から参照。QAチェックリストの Phase 2 残タスクを反映。
+- v0.4.0：会計ダッシュボード（`keiri-dashboard`、ライブ・アーティファクト）を追加。
+  `docs/QA-リリースチェックリスト.md`（配布前ゲート・導入スモーク・発火テスト・運用安全）を新設。
 - v0.3.0：プロダクト化マイルストーン。`osi-backoffice` → **`osi-finance`** に独立化。
   `osi-finance-setup`（導入オーケストレータ）・`docs/導入ガイド.md`（顧客向け）を新設。
   スキル本文の組織固有プロバイダ名を役割名＋例示に統一。
