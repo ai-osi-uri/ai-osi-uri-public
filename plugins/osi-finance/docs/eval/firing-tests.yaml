@@ -72,6 +72,17 @@ skills:
       - { phrase: "受領請求書を台帳に起票", target: keiri-payment-intake }
       - { phrase: "今月の経理を締めて", target: keiri-monthly }
 
+  keiri-ar-sync:
+    fire:
+      - "請求をMFに計上"
+      - "売上を会計連携"
+      - "売掛金を計上"
+      - "入金消込をMFに"
+      - "請求台帳とMFを売上で突合"
+    no_fire:
+      - { phrase: "支払済がMFに入っているか確認", target: keiri-mf-sync }
+      - { phrase: "今月の請求書を作って", target: keiri-invoice }
+
   keiri-monthly:
     fire:
       - "今月の経理を締めて"

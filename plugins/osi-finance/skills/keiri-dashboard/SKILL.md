@@ -22,40 +22,62 @@ requires_connectors:
 請求(AR)・支払(AP)・経費の「今の状況」を1画面で見えるようにする、表示専用のダッシュボード。
 `mcp__cowork__create_artifact` で**ライブ・アーティファクト**として作る（開くたびにコネクタから最新取得・再オープン可）。
 
+> **正本の前提（重要）**：AR が `keiri-ar-sync` で MF に計上される設計になったため、本ダッシュボードは
+> **MF の構造化データ（試算表 PL/BS・仕訳）を正本**にする。台帳テキストの自然言語解釈はやめ、台帳は
+> 「今月のオペレーション（請求予定・採番待ち・宛先未補完）」の補助にのみ使う。
+
+## 画面を2用途に分ける設計（重要）
+
+ダッシュボードは目的の違う2つを混ぜない。本スキルは主に①を1枚にし、②は推移系で補う。
+
+- **① 今月オペレーション（ライブ・"やること"）**：当月の請求／支払／経費の進捗。請求予定・採番待ち・
+  宛先未補完など、台帳が正本の運用タスク。締めていない当月の動きを見る。
+- **② 履歴・分析（確定値）**：月次PLの推移・前月比など、MF の確定データで見る分析。
+
 ## 役割と非役割
-- やる：MF＋台帳から読み取り、当期の費用構成／純損益／直近の支払／当月の請求・入金状況を可視化。
+- やる：MF（試算表PL/BS・仕訳）を正本に、当期の売上／費用構成／純損益・売掛金(未回収)／未払金・直近仕訳を可視化。
+  台帳は当月オペレーション（請求予定・採番待ち等）の補助としてのみ読む。
 - やらない：仕訳の確定・台帳の更新・送金（= 各 keiri-* スキルや人の役割）。本スキルは**読み取り表示のみ**。
 
-## データ源（確実な順）
-1. **MoneyForward（構造化・確実）**
+## データ源（MF 正本・確実な順）
+1. **MoneyForward 試算表 PL（売上・費用・純損益＝正本）**
    - `mfc_ca_getReportsTrialBalanceProfitLoss`（`start_date`=会計年度開始日, `end_date`=本日）
-     → `rows` の「販売費及び一般管理費合計」の子 `rows`（`type:account`）が科目別費用。各 `values[3]`＝期末残高。
-       「当期純損失/税引前当期純損失」`values[3]`＝純損益。
-   - `mfc_ca_getJournals`（同期間）→ 直近の支払仕訳（`branches[].debitor` の `account_name` と `value+tax_value`、`remark` の摘要から支払先）。
+     → `rows` の「**売上高合計**」`values[3]`＝当期売上、「販売費及び一般管理費合計」の子 `rows`（`type:account`）が
+       科目別費用、「当期純損益/税引前当期純損益」`values[3]`＝**正しい純損益**（売上−費用）。
    - 科目を **支払(AP)** と **経費** に分類：keiri-settings の分類表（既定：AP＝業務委託料・地代家賃・支払報酬／経費＝通信費・旅費交通費・接待交際費・会議費・備品消耗品費・広告宣伝費）。
-2. **請求管理台帳（AR・台帳が正本／MFは売上未計上）**
-   - Google Drive の `read_file_content`（keiri-settings の AR台帳パス）で「月次請求スケジュール」を取得。
-   - 返るのは自然言語テキストなので、アーティファクト内で `window.cowork.askClaude(prompt, [台帳テキスト])` を使い
-     「当月（対象月）の未請求合計・請求総額・入金済・未回収」をJSONで抽出させる（堅牢化）。
-   - 簡易運用では、起動時にスキル側で当月数値を算出し初期値として埋め込んでもよい。
+2. **MoneyForward 試算表 BS（売掛金=未回収・未払金=未払＝正本）**
+   - `mfc_ca_getReportsTrialBalanceBalanceSheet`（同期間）→ BS の「**売掛金**」`closing_balance`＝AR 未回収、
+     「未払金」`closing_balance`＝AP 未払。AR が `keiri-ar-sync` で MF に載るため、未回収はここを正本にできる。
+3. **MoneyForward 仕訳（直近の動き）**
+   - `mfc_ca_getJournals`（同期間）→ 直近仕訳（売上計上・入金消込・支払。`branches[].debitor/creditor` の
+     `account_name` と `value+tax_value`、`remark` の摘要から相手先・請求書ID）。
+4. **請求管理台帳（当月オペレーションの補助のみ）**
+   - Google Drive の `read_file_content`（keiri-settings の AR台帳パス）で「月次請求スケジュール」を取得し、
+     **当月の請求予定・採番待ち・宛先未補完**など"やること"を出す補助に使う（会計の数字＝AR残高は MF の BS を正本）。
+   - 自然言語テキストのため、必要時のみアーティファクト内で `window.cowork.askClaude(prompt, [台帳テキスト])` で
+     当月オペ項目を JSON 抽出する。**売上・未回収の金額は台帳ではなく MF を出典にする。**
 
 ## アーティファクトの作り方
-1. `references/dashboard-template.html`（同梱）を土台にする。3パネル構成：
-   - カード（当期費用合計／当期純損益／当月未請求(AR)／AR未回収残）
-   - 費用科目ドーナツ（🔵AP/🟠経費で色分け・Chart.js）＋ AP/経費の内訳バー
-   - 請求状況(AR) テーブル ＋ 直近の支払仕訳テーブル
+1. `references/dashboard-template.html`（同梱）を土台にする。MF 正本の3パネル構成：
+   - カード（当期売上／当期純損益／売掛金(未回収)＝BS／未払金＝BS）
+   - 費用科目ドーナツ（🔵AP/🟠経費で色分け・Chart.js）＋ AP/経費の内訳バー（PL）
+   - 当月オペレーション(AR・台帳補助：請求予定・採番待ち等) テーブル ＋ 直近仕訳テーブル（MF）
 2. テンプレ内の会計年度開始月（既定4月）・台帳パス・科目分類を keiri-settings の値に差し替える。
 3. 完成HTMLをワークスペースに書き出し、`create_artifact`：
    - `id`：例 `keiri-dashboard`
    - `html_path`：書き出したファイル
-   - `mcp_tools`：`["mcp__…__mfc_ca_getReportsTrialBalanceProfitLoss","mcp__…__mfc_ca_getJournals"]`（＋AR台帳を読むなら Drive `read_file_content` も）。**当該セッションで実際に呼んで形を確認したツールだけ**列挙する。
+   - `mcp_tools`：実在する MF 3ツール
+     `["mcp__…__mfc_ca_getReportsTrialBalanceProfitLoss","mcp__…__mfc_ca_getReportsTrialBalanceBalanceSheet","mcp__…__mfc_ca_getJournals"]`
+     （＋当月オペの台帳補助を読むなら Drive `read_file_content` も）。**当該セッションで実際に呼んで形を確認したツールだけ**列挙する。
 4. ライブ表示のためページ読み込み時にツールを呼ぶ。ヘッダのリロードで最新化される（自前の更新ボタンは作らない）。
+   売上=0 の現状（AR 未計上の事業者）でも各パネルがエラーで落ちないようガードする（0表示・空テーブルで継続）。
 
 ## 実装メモ
 - ライト用：`:root{color-scheme:light}`、薄背景＋濃文字。Chart.js は指定の integrity 付きCDNのみ。
 - `callMcpTool` の戻りは `r.structuredContent ?? JSON.parse(r.content[0].text)` で読む。
 - 取得失敗は各パネルでエラー表示（全体を落とさない）。localStorage で表示設定の記憶可。
-- 売上(AR)はMF未計上が前提。AR の数字は必ず「請求管理台帳より」と出典明記する。
+- **売上・売掛金(未回収)は MF（試算表 PL/BS）を正本**に表示し「MoneyForwardより」と出典明記する。
+  売上=0 の事業者（AR 未計上）でも 0 表示で落とさない。台帳由来は「当月オペレーション（請求予定等）」に限り、その出典は「請求管理台帳より」と明記する。
 
 ## 留意
 - 表示専用。数値の確定・修正は台帳/MF側で人が行う。

@@ -11,7 +11,10 @@
 body{margin:0;background:#f6f8fb;color:#1f2733;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;font-size:14px}
 .wrap{max-width:1080px;margin:0 auto;padding:18px}
 h1{font-size:19px;margin:0 0 2px}
-.sub{color:#6b7785;font-size:12px;margin-bottom:16px}
+.sub{color:#6b7785;font-size:12px;margin-bottom:14px}
+.tabs{display:flex;gap:8px;margin-bottom:14px}
+.tab{font-size:12px;padding:6px 12px;border:1px solid #e5eaf0;border-radius:999px;background:#fff;color:#33415c;cursor:default}
+.tab.on{background:#eaf1ff;color:#2a55c8;border-color:#cfe0ff;font-weight:600}
 .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
 .card{background:#fff;border:1px solid #e5eaf0;border-radius:12px;padding:14px}
 .card .l{color:#6b7785;font-size:12px}
@@ -33,19 +36,24 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 .loading{color:#8b95a1;font-size:12px;padding:8px}
 .legend{font-size:11px;color:#6b7785;margin-top:8px}
 .pill{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px}
-.pill.ap{background:#eaf1ff;color:#2a55c8}.pill.exp{background:#fff2e0;color:#b5711a}
+.pill.ap{background:#eaf1ff;color:#2a55c8}.pill.exp{background:#fff2e0;color:#b5711a}.pill.ar{background:#e6f6ee;color:#1e8e5a}
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>会計ダッシュボード <span class="muted" style="font-size:13px;font-weight:400">— OSI Finance</span></h1>
   <div class="sub" id="period">期間を取得中…</div>
+  <div class="tabs">
+    <span class="tab on">① 今月オペレーション</span>
+    <span class="tab">② 履歴・分析（確定値＝MF）</span>
+  </div>
 
+  <!-- カードは MF 試算表 PL/BS を正本にする -->
   <div class="cards" id="cards">
-    <div class="card"><div class="l">当期 費用合計</div><div class="v" id="c-exp">—</div><div class="sm">販管費（MF）</div></div>
-    <div class="card"><div class="l">当期 純損益</div><div class="v" id="c-pl">—</div><div class="sm">税引前（MF）</div></div>
-    <div class="card"><div class="l">当月 未請求(AR)</div><div class="v" id="c-ar">—</div><div class="sm">請求管理台帳</div></div>
-    <div class="card"><div class="l">AR 未回収残</div><div class="v" id="c-unc">—</div><div class="sm">請求−入金</div></div>
+    <div class="card"><div class="l">当期 売上高</div><div class="v" id="c-sales">—</div><div class="sm">MoneyForward（PL）</div></div>
+    <div class="card"><div class="l">当期 純損益</div><div class="v" id="c-pl">—</div><div class="sm">税引前（MF・PL）</div></div>
+    <div class="card"><div class="l">売掛金（未回収）</div><div class="v" id="c-ar">—</div><div class="sm">MF・BS 期末残</div></div>
+    <div class="card"><div class="l">未払金</div><div class="v" id="c-ap">—</div><div class="sm">MF・BS 期末残</div></div>
   </div>
 
   <div class="row">
@@ -55,31 +63,31 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
       <div class="legend"><span class="pill ap">支払(AP)</span> 業務委託料・地代家賃・支払報酬　／　<span class="pill exp">経費</span> カード・通信・旅費等</div>
     </div>
     <div class="panel">
-      <h2>支払(AP) と 経費 の内訳 <span class="tag">MF</span></h2>
+      <h2>支払(AP) と 経費 の内訳 <span class="tag">MF・PL</span></h2>
       <div id="apexp" class="loading">読み込み中…</div>
     </div>
   </div>
 
   <div class="row">
     <div class="panel">
-      <h2>請求状況 (AR) <span class="tag">請求管理台帳</span></h2>
-      <table id="arTable"><tbody>
-        <tr><td>請求総額（税込・年間）</td><td class="num" id="ar-total">—</td></tr>
-        <tr><td>入金済</td><td class="num" id="ar-paid">—</td></tr>
-        <tr><td>未回収残</td><td class="num" id="ar-unc">—</td></tr>
-        <tr><td>当月（対象月）未請求</td><td class="num" id="ar-month">—</td></tr>
+      <h2>今月のオペレーション (AR) <span class="tag">請求管理台帳・補助</span></h2>
+      <table id="opsTable"><tbody>
+        <tr><td>当月（対象月）請求予定</td><td class="num" id="ops-plan">—</td></tr>
+        <tr><td>採番待ち（未請求）</td><td class="num" id="ops-num">—</td></tr>
+        <tr><td>宛先未補完</td><td class="num" id="ops-dst">—</td></tr>
       </tbody></table>
-      <div class="legend">※ AR（売上・請求）は会計SaaS未計上のため、請求管理台帳を正本に表示。配布版スキルは各組織の台帳を読んでライブ更新します。</div>
+      <div class="legend">※ ここは台帳由来の「やること」。<b>売上・未回収の金額は MF（試算表PL/BS）を正本</b>に上のカードへ表示。
+        配布版スキルは各組織の台帳を読んで当月オペをライブ更新します。</div>
     </div>
     <div class="panel">
-      <h2>直近の支払仕訳 <span class="tag">MF・摘要</span></h2>
+      <h2>直近の仕訳 <span class="tag">MF・売上/入金/支払</span></h2>
       <div id="recent" class="loading">読み込み中…</div>
     </div>
   </div>
 </div>
 
 <script>
-const yen = n => "¥" + Math.round(n).toLocaleString("ja-JP");
+const yen = n => "¥" + Math.round(n||0).toLocaleString("ja-JP");
 // 会計年度（4月開始）の開始日と今日
 function fyRange(){
   const t=new Date(); const y=t.getFullYear(); const m=t.getMonth()+1;
@@ -96,41 +104,56 @@ async function call(name,args){
 }
 const AP_ACCOUNTS=["業務委託料","地代家賃","支払報酬","支払手数料","外注費"];
 
-// 請求管理台帳由来のARスナップショット（初期プレースホルダ＝0。実値は起動時に台帳ライブ読取で差し替える）
-// 配布テンプレには実数値を埋め込まない（機微・誤認防止）。スキル側で当月数値を算出して上書きする。
-const AR={ total:0, paid:0, month:0 };
+// 当月オペレーション（AR・台帳補助）のスナップショット（初期=0。スキル側で台帳から当月数値を上書き）
+// 売上・未回収の金額は台帳ではなく MF を正本にするため、ここには金額の正値は埋めない。
+const OPS={ plan:0, numbering:0, dest:0 };
+function renderOps(){
+  document.getElementById("ops-plan").textContent=yen(OPS.plan);
+  document.getElementById("ops-num").textContent=OPS.numbering+" 件";
+  document.getElementById("ops-dst").textContent=OPS.dest+" 件";
+}
 
-function renderAR(){
-  document.getElementById("ar-total").textContent=yen(AR.total);
-  document.getElementById("ar-paid").textContent=yen(AR.paid);
-  const unc=AR.total-AR.paid;
-  document.getElementById("ar-unc").textContent=yen(unc);
-  document.getElementById("ar-month").textContent=yen(AR.month);
-  document.getElementById("c-ar").textContent=yen(AR.month);
-  document.getElementById("c-unc").textContent=yen(unc);
+// 試算表の行から name で closing/期末残高 を引く（売上0でも落ちないよう全ガード）
+function rowVal(rows,name){
+  if(!Array.isArray(rows)) return 0;
+  const flat=[];
+  const walk=r=>{ (r||[]).forEach(x=>{ flat.push(x); if(x&&x.rows) walk(x.rows); }); };
+  walk(rows);
+  const hit=flat.find(r=>r&&r.name===name);
+  if(!hit) return 0;
+  if(typeof hit.closing_balance==="number") return hit.closing_balance;
+  if(Array.isArray(hit.values)) return hit.values[3]||0;
+  return 0;
 }
 
 async function loadPL(){
   const {start,end}=fyRange();
-  document.getElementById("period").textContent=`当期 ${start} 〜 ${end}（会計年度・MoneyForward）`;
+  document.getElementById("period").textContent=`当期 ${start} 〜 ${end}（会計年度・MoneyForward 正本）`;
   const pl=await call("mcp__8b201ee2-a71c-40af-adde-2c45763b0962__mfc_ca_getReportsTrialBalanceProfitLoss",{start_date:start,end_date:end});
   const rows=pl.rows||[];
+  // 売上高（売上=0 でも 0 表示で落とさない）
+  const sales=rowVal(rows,"売上高合計")||rowVal(rows,"売上高");
+  document.getElementById("c-sales").textContent=yen(sales);
+  // 費用科目
   const find=n=>rows.find(r=>r.name===n);
   const sga=find("販売費及び一般管理費合計");
-  const accts=(sga&&sga.rows)?sga.rows.map(a=>({name:a.name,amt:a.values[3]||0})).filter(a=>a.amt!==0):[];
+  const accts=(sga&&sga.rows)?sga.rows.map(a=>({name:a.name,amt:(a.values&&a.values[3])||0})).filter(a=>a.amt!==0):[];
   accts.sort((a,b)=>b.amt-a.amt);
-  const expTotal=(sga&&sga.values[3])||accts.reduce((s,a)=>s+a.amt,0);
-  const netRow=find("当期純損失")||find("税引前当期純損失");
-  const net=netRow?netRow.values[3]:-(expTotal);
-  // カード
-  document.getElementById("c-exp").textContent=yen(expTotal);
+  const expTotal=(sga&&sga.values&&sga.values[3])||accts.reduce((s,a)=>s+a.amt,0);
+  // 純損益（売上−費用＝正しい純損益）。明示行があれば優先。
+  const netRow=find("当期純利益")||find("当期純損失")||find("税引前当期純利益")||find("税引前当期純損失");
+  const net=netRow&&netRow.values?netRow.values[3]:(sales-expTotal);
   const pe=document.getElementById("c-pl"); pe.textContent=yen(net); pe.classList.add(net<0?"neg":"pos");
-  // doughnut
+  // doughnut（費用ゼロでも空表示）
   const colors=accts.map(a=>AP_ACCOUNTS.includes(a.name)?"#3b6ef0":"#f0a23b");
-  new Chart(document.getElementById("expChart"),{type:"doughnut",
-    data:{labels:accts.map(a=>a.name),datasets:[{data:accts.map(a=>a.amt),backgroundColor:colors,borderWidth:1,borderColor:"#fff"}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"right",labels:{boxWidth:10,font:{size:11}}},
-      tooltip:{callbacks:{label:c=>c.label+": "+yen(c.raw)}}}}});
+  if(accts.length){
+    new Chart(document.getElementById("expChart"),{type:"doughnut",
+      data:{labels:accts.map(a=>a.name),datasets:[{data:accts.map(a=>a.amt),backgroundColor:colors,borderWidth:1,borderColor:"#fff"}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"right",labels:{boxWidth:10,font:{size:11}}},
+        tooltip:{callbacks:{label:c=>c.label+": "+yen(c.raw)}}}}});
+  }else{
+    document.getElementById("expChart").parentElement.innerHTML='<div class="loading">費用科目なし</div>';
+  }
   // AP/経費 内訳
   let ap=0,ex=0; accts.forEach(a=>AP_ACCOUNTS.includes(a.name)?ap+=a.amt:ex+=a.amt);
   const tot=ap+ex||1;
@@ -139,7 +162,19 @@ async function loadPL(){
     <div class="bar"><span style="width:${(ap/tot*100).toFixed(1)}%;background:#3b6ef0"></span></div></div>
     <div><div style="display:flex;justify-content:space-between"><span><span class="pill exp">経費</span></span><b>${yen(ex)}</b></div>
     <div class="bar"><span style="width:${(ex/tot*100).toFixed(1)}%;background:#f0a23b"></span></div></div>
-    <table style="margin-top:12px">${accts.map(a=>`<tr><td>${AP_ACCOUNTS.includes(a.name)?'🔵':'🟠'} ${a.name}</td><td class="num">${yen(a.amt)}</td></tr>`).join("")}</table>`;
+    <table style="margin-top:12px">${accts.map(a=>`<tr><td>${AP_ACCOUNTS.includes(a.name)?'🔵':'🟠'} ${a.name}</td><td class="num">${yen(a.amt)}</td></tr>`).join("")||'<tr><td class="muted">費用科目なし</td></tr>'}</table>`;
+}
+
+async function loadBS(){
+  const {start,end}=fyRange();
+  try{
+    const bs=await call("mcp__8b201ee2-a71c-40af-adde-2c45763b0962__mfc_ca_getReportsTrialBalanceBalanceSheet",{start_date:start,end_date:end});
+    const rows=bs.rows||[];
+    document.getElementById("c-ar").textContent=yen(rowVal(rows,"売掛金"));   // 未回収＝BS 売掛金 期末残
+    document.getElementById("c-ap").textContent=yen(rowVal(rows,"未払金"));   // 未払＝BS 未払金 期末残
+  }catch(e){
+    document.getElementById("c-ar").textContent="—"; document.getElementById("c-ap").textContent="—";
+  }
 }
 
 async function loadRecent(){
@@ -147,6 +182,7 @@ async function loadRecent(){
   try{
     const j=await call("mcp__8b201ee2-a71c-40af-adde-2c45763b0962__mfc_ca_getJournals",{start_date:start,end_date:end,per_page:100});
     let js=(j.journals||[]).slice().sort((a,b)=>(b.transaction_date||"").localeCompare(a.transaction_date||"")).slice(0,8);
+    if(!js.length){ document.getElementById("recent").innerHTML='<div class="muted">仕訳なし（売上・支払が未計上です）</div>'; return; }
     document.getElementById("recent").innerHTML=`<table><thead><tr><th>日付</th><th>摘要</th><th class="num">金額</th></tr></thead><tbody>${
       js.map(x=>{const br=(x.branches||[]).find(b=>b.debitor)||{}; const d=br.debitor||{}; const amt=(d.value||0)+(d.tax_value||0);
         const rk=(x.branches&&x.branches[0]&&x.branches[0].remark)||""; const nm=rk.split(" / ")[1]||rk.slice(0,24);
@@ -156,8 +192,9 @@ async function loadRecent(){
 }
 
 (async()=>{
-  renderAR();
+  renderOps();
   try{ await loadPL(); }catch(e){ document.getElementById("apexp").innerHTML=`<div class="err">損益の取得に失敗：${e.message}</div>`; }
+  loadBS();
   loadRecent();
 })();
 </script>
