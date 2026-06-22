@@ -1,7 +1,7 @@
 ---
 name: ai-video-production
 description: AI動画を作るスキル。台本構成→シーン別動画生成（fal.ai経由のVeo 3.1 / Seedance 2.0 / Kling 3.0）→ナレーション生成（ElevenLabs）→字幕生成→ffmpeg合成→BGMミックスまで自動化。「動画を作って」「動画作成」「PR動画」「IR動画」「採用動画」「企業説明動画」「ピッチ動画」「ナレーション付き動画」「アニメ動画」「実写動画」「ドキュメンタリー動画」「TikTok動画」「Reels動画」など、AI動画制作のリクエスト全般で発動する。既存の動画台本テキストが渡された場合も発動する。「AI OSI URI Creative」コネクタ（旧 fal-video。動画・音楽・ナレーション・静止画[nano-banana]を内包）が Cowork に登録されていることを前提とする（デフォルトは画像起点：Creative の generate_image で nano-banana キービジュアル→image-to-video）。PPT・スライドのみ、静止画のみの依頼では使わない。
-version: 0.5.0
+version: 0.6.0
 requires_connectors:
   - server: ai-osi-uri-creative
     provision: user-install
@@ -35,6 +35,23 @@ OKWEB × JINEN動画制作で確立した全工程を再現可能な形にした
 ```
 
 各フェーズで**ユーザー確認を必ず取る**。一気に全部生成しない。
+
+---
+
+## ★ ドローン空撮モード（インタラクティブ・ワンショット）
+
+依頼が**風景・都市・自然・観光・空撮っぽい**とき（「ドローン動画」「上空から○○」「FPV」「夕暮れの東京を上から」等）は、
+12 Phase のフル工程に入る前に、この対話型ショートカットを提案する。**日本語1行のイメージ → 画像 → 動画**を最短で出す。
+
+進め方：
+1. イメージを一言もらう（曖昧でOK）。空撮向きと判断したら **「迫力のあるドローン空撮にしますか？」** と一度きく。
+2. `AskUserQuestion` で確認：①場所・被写体 ②時間帯/雰囲気 ③迫力レベル（迫力重視/優雅/標準）④尺(10/15秒)・縦横(16:9/9:16) ⑤音(FXのみ/なし/BGM)。
+3. `generate_image`（nano-banana-pro）で**クリーンなヒーロー写真**を作る（絵コンテは起点に渡さない＝#17）。
+4. `submit_video`（`seedance20-i2v`）で**6ビートのルート**を文章指示して動画化 → `check_status`。迫力レベルで動きワードを強める。
+5. ffmpeg で1フレーム目を検証（線・文字・分割が無いか）。
+
+詳細な質問テンプレ・迫力プリセット・プロンプト雛形は **`references/drone-aerial-fpv.md`** を参照。
+ナレーション・BGM・字幕・連結が必要なら、その後に通常の Phase 6〜8 へ接続する。
 
 ---
 
@@ -139,6 +156,12 @@ image_to_video（採用画像 → 動画化, カメラワーク指定）
 - 被写体の一貫性が要る場合（同一人物・同一商品が複数シーンに出る）は、nano-banana の
   subject consistency を活かし、1枚目を参照画像にして残りを生成する（`extra` で参照画像を渡す）。
 - text-to-video を使うのは、抽象的・background 的なシーンで構図制御が要らない場合に限る。
+
+> **同一キャラ／商品を“ブレさせず”動画化したい案件**（アニメキャラ・企業マスコット・VTuber・商品PR 等）は、
+> **`references/character-consistency-pipeline.md`** の3工程レシピ（①キービジュアル → ②設定シート → ③i2v）を参照。
+> ★最重要の落とし穴：`image_to_video` は **渡した画像が動画の1フレーム目**になる。設定シートを起点画像にすると
+> シートそのものが動き出す。起点は必ず「実シーンのキービジュアル」、設定シートは `generate_image` の参照
+> （`image_urls`）に渡して基準固定に使う——役割を分ける。
 
 コスト目安：画像 $0.02〜/枚（4K は nano-banana-pro で $0.30）+ 動画 image-to-video 分。試作（Phase 4）は必ずこの後で挟む。
 
@@ -341,6 +364,8 @@ BGM: $0.20
 4. `templates/narration-rules.md` — TTS誤読対策（最重要）
 5. 該当する `templates/prompts-{style}.md`
 6. `references/bgm-selection.md` — ★ショート向けBGM選定（YouTuber定番フリー曲・取得・著作権・途切れ防止）
+7. `references/drone-aerial-fpv.md` — ★ドローン空撮モード（対話型ワンショット：ヒアリング→クリーン起点→6ビート→Seedance 2.0）
+8. `references/character-consistency-pipeline.md` — ★キャラ／商品の一貫性モード（キービジュアル→設定シート→i2v。i2vは起点画像=1フレーム目の罠も）
 
 ## 必須スクリプト
 
