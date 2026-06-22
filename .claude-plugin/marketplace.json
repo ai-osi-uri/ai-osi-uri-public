@@ -14,7 +14,7 @@
       "name": "osi-creative",
       "source": "./plugins/osi-creative",
       "description": "AI 動画制作と出資お礼メッセージ生成。汎用クリエイティブスキル集。",
-      "version": "0.1.6",
+      "version": "0.1.7",
       "category": "creative",
       "tags": [
         "ai-video",

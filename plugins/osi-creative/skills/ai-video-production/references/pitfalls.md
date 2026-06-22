@@ -341,7 +341,21 @@ curl -sSL -o "$DIR/bgm.wav" "$URL_FROM_ERROR"
 - プロンプトに `no title cards, no split screen, no diagrams, no text, no red lines/arrows/markers at any point` を明示。
 - これで「クリーンな出だし」と「ルート制御」が両立する。検証は ffmpeg で1フレーム目を抜いて目視（`ffmpeg -i out.mp4 -vf "select=eq(n\,0)" -vframes 1 first.png`）。
 
-> 「絵コンテを reference として使いたい」場合は、Seedance 2.0 の reference/multi-reference 系を使う手もあるが、起点フレームは必ずクリーン画像にすること。
+**根本解決（2026-06 追記・推奨）**：i2v ではなく **Seedance 2.0 `reference-to-video`（`bytedance/seedance-2.0/reference-to-video`）** を使う。これは渡した画像を**参照(reference)**として使い1フレーム目にしないので、**赤線・番号入りの絵コンテをそのまま渡しても線が出力に出ない**（元ネタ「only use it for instructions」が成立）。頭トリックも不要。線駆動のカメラムーブはこのモードが正解。詳細は `references/cinematic-camera-move.md`。
+
+---
+
+## 18. カメラムーブが回りきらない／途中でカット（2026-06 発見）
+
+**症状**：(a) 360°オービットが半周で別カットに切り替わる。(b) 短尺に動きを詰め込むと途中でハードカットが入る（例：近景push-in→広域orbitの“距離戻し”で4秒地点に飛びが出る）。
+
+**原因**：短尺×多ビートで各動きの尺が足りない／1枚絵からの360°は背面創作が必要で破綻しやすい／近景と広域を混ぜるとカメラの再配置でカットが生じる。
+
+**対処**：
+- 主役の動き（例：360°オービット）は**そのビートに尺の大半を割く**。寄り/引きは最小化。
+- きれいな360°は**一定距離の純オービット**（push-in/pull-back を混ぜない）。回りきらせるためなら**速度を上げる**（多少のオーバー許容）。
+- 1枚絵で無理なら 180–270° に留める、または**ビート数を減らす**。
+- 検証は ffmpeg で 3〜5 秒付近を 0.3 秒刻みで抜いて“飛び”が無いか確認。
 
 ---
 
