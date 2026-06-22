@@ -341,7 +341,7 @@ curl -sSL -o "$DIR/bgm.wav" "$URL_FROM_ERROR"
 - プロンプトに `no title cards, no split screen, no diagrams, no text, no red lines/arrows/markers at any point` を明示。
 - これで「クリーンな出だし」と「ルート制御」が両立する。検証は ffmpeg で1フレーム目を抜いて目視（`ffmpeg -i out.mp4 -vf "select=eq(n\,0)" -vframes 1 first.png`）。
 
-**根本解決（2026-06 追記・推奨）**：i2v ではなく **Seedance 2.0 `reference-to-video`（`bytedance/seedance-2.0/reference-to-video`）** を使う。これは渡した画像を**参照(reference)**として使い1フレーム目にしないので、**赤線・番号入りの絵コンテをそのまま渡しても線が出力に出ない**（元ネタ「only use it for instructions」が成立）。頭トリックも不要。線駆動のカメラムーブはこのモードが正解。詳細は `references/cinematic-camera-move.md`。
+**根本解決（2026-06 追記・推奨）**：i2v ではなく **Seedance 2.0 `reference-to-video`（`bytedance/seedance-2.0/reference-to-video`）** を使う。これは渡した画像を**参照(reference)**として使い1フレーム目にしないので、**赤線・番号入りの絵コンテをそのまま渡しても線が出力に出ない**（元ネタ「only use it for instructions」が成立）。頭トリックも不要。線駆動のカメラムーブはこのモードが正解。詳細は `references/moveboard.md`。
 
 ---
 
