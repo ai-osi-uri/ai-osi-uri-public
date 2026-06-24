@@ -29,7 +29,7 @@
       "name": "osi-docs",
       "source": "./plugins/osi-docs",
       "description": "文書・契約・業務フロー・事業計画作成：事業計画ビルダー（財務3表連動モデル＋ピッチ＋報告）・pptx-custom・NDA 自動生成・業務 AS-IS/TO-BE スイムレーン作成。",
-      "version": "0.2.3",
+      "version": "0.2.4",
       "category": "docs",
       "tags": [
         "docs",
@@ -90,6 +90,22 @@
         "ledger",
         "monthly-close",
         "setup"
+      ],
+      "strict": false
+    },
+    {
+      "name": "osi-backoffice",
+      "source": "./plugins/osi-backoffice",
+      "description": "バックオフィス業務自動化。契約書の内容チェック→DocuSign 署名依頼（contract-docusign-send）。任意のアップロード契約書を S3 署名付きURL経由で DocuSign に取り込み、送付方向（自社送付／先方送付）を選択。送付は人が DocuSign 上で行う安全設計（自動送付しない）。",
+      "version": "0.1.0",
+      "category": "backoffice",
+      "tags": [
+        "backoffice",
+        "contract",
+        "docusign",
+        "esignature",
+        "nda",
+        "review"
       ],
       "strict": false
     }
