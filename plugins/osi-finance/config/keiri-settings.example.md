@@ -89,6 +89,12 @@ references 側には「汎用ロジック・判断基準」だけを残します
 |---|---|
 | 請求管理台帳（AR） | {{LEDGER_BILLING_FILE 例: 請求管理台帳.xlsx}} |
 | 支払管理台帳（AP・支払先マスタの正本） | {{LEDGER_PAYMENT_FILE 例: 支払管理台帳.xlsx}} |
+| 請求管理台帳 スプレッドシートID（ネイティブGoogle Sheets化した場合・自動追記用） | {{LEDGER_BILLING_SHEET_ID 例: 16Xm3-…（URL /d/<ここ>/edit）}} |
+| 支払管理台帳 スプレッドシートID（同上） | {{LEDGER_PAYMENT_SHEET_ID 例: 1dRNut-…}} |
+
+> **台帳を自動追記したい場合**：台帳をネイティブ Google スプレッドシートにし、上記の各 `..._SHEET_ID` を入れる。
+> `AI OSI URI Deploy` 拡張の `sheets_append_row`（要：対象シートをサービスアカウントのメールに「編集者」で共有）で、
+> keiri スキルが行を自動追記できる（重複は `sheets_get_values` で事前確認、確定は人）。未設定なら xlsx へ貼り付け運用。
 
 > **支払先マスタの正本＝支払管理台帳**。各支払先に「既定の支払方法（振込／カード）」列を持たせ、
 > 振込（Trunk 等）／カード（自動課金）の振り分けに使う（payment-intake / payment-detect が参照）。
