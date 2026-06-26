@@ -12,8 +12,8 @@ body{margin:0;background:#f6f8fb;color:#1f2733;font-family:-apple-system,BlinkMa
 .wrap{max-width:1080px;margin:0 auto;padding:18px}
 h1{font-size:19px;margin:0 0 2px}
 .sub{color:#6b7785;font-size:12px;margin-bottom:14px}
-.tabs{display:flex;gap:8px;margin-bottom:14px}
-.tab{font-size:12px;padding:6px 12px;border:1px solid #e5eaf0;border-radius:999px;background:#fff;color:#33415c;cursor:default}
+.tabs{display:flex;gap:8px;margin-bottom:16px}
+.tab{font-size:12px;padding:7px 14px;border:1px solid #e5eaf0;border-radius:999px;background:#fff;color:#33415c;cursor:pointer;user-select:none}
 .tab.on{background:#eaf1ff;color:#2a55c8;border-color:#cfe0ff;font-weight:600}
 .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
 .card{background:#fff;border:1px solid #e5eaf0;border-radius:12px;padding:14px}
@@ -23,9 +23,11 @@ h1{font-size:19px;margin:0 0 2px}
 .card .sm{color:#8b95a1;font-size:11px;margin-top:3px}
 .row{display:grid;grid-template-columns:1.3fr 1fr;gap:12px;margin-bottom:16px}
 .panel{background:#fff;border:1px solid #e5eaf0;border-radius:12px;padding:14px}
+.panel.full{grid-column:1/-1}
 .panel h2{font-size:13px;margin:0 0 10px;color:#33415c;display:flex;justify-content:space-between;align-items:center}
 .tag{font-size:10px;color:#8b95a1;font-weight:500}
 .chartbox{position:relative;height:240px}
+.chartbox.tall{height:300px}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th,td{text-align:left;padding:6px 8px;border-bottom:1px solid #eef2f6}
 td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
@@ -36,125 +38,207 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 .loading{color:#8b95a1;font-size:12px;padding:8px}
 .legend{font-size:11px;color:#6b7785;margin-top:8px}
 .pill{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px}
-.pill.ap{background:#eaf1ff;color:#2a55c8}.pill.exp{background:#fff2e0;color:#b5711a}.pill.ar{background:#e6f6ee;color:#1e8e5a}
+.pill.ap{background:#eaf1ff;color:#2a55c8}.pill.exp{background:#fff2e0;color:#b5711a}
+.up{color:#1e8e5a}.down{color:#c0392b}
+.hide{display:none}
+.msel{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.msel label{font-size:12px;color:#33415c;font-weight:600}
+.msel select{font-size:13px;padding:5px 10px;border:1px solid #cfe0ff;border-radius:8px;background:#fff;color:#2a55c8;font-weight:600}
+.msel .muted{font-size:11px}
+.lnk{font-size:12px;color:#2a55c8;background:#eaf1ff;border:1px solid #cfe0ff;border-radius:6px;padding:2px 8px;cursor:pointer;font-weight:600}
+.lnk:hover{background:#dbe7ff}
+#pane3 table th,#pane3 table td,#pane4 table th,#pane4 table td{white-space:nowrap}
+#pane3 table td:first-child,#pane3 table th:first-child,#pane4 table td:first-child,#pane4 table th:first-child{white-space:normal;min-width:120px}
+.scrollx{overflow-x:auto}
+.exprow{cursor:pointer}
+.exprow:hover{background:#f6f8fb}
+table.sub{margin:2px 0 6px 8px;background:#fafbfd;border:1px solid #eef2f6;border-radius:6px}
+table.sub th,table.sub td{padding:4px 8px;font-size:12px;border-bottom:1px solid #f0f3f7}
+table.sub th{color:#8b95a1;font-weight:500}
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>会計ダッシュボード <span class="muted" style="font-size:13px;font-weight:400">— OSI Finance</span></h1>
   <div class="sub" id="period">期間を取得中…</div>
+
   <div class="tabs">
-    <span class="tab on">① 今月オペレーション</span>
-    <span class="tab">② 履歴・分析（確定値＝MF）</span>
+    <span class="tab on" id="tab1" onclick="showTab(1)">① 当期サマリ</span>
+    <span class="tab" id="tab2" onclick="showTab(2)">② 履歴・分析（確定値＝MF）</span>
+    <span class="tab" id="tab3" onclick="showTab(3)">③ 案件別 売上・費用</span>
+    <span class="tab" id="tab4" onclick="showTab(4)">④ 回収・支払（資金）</span>
   </div>
 
-  <!-- カードは MF 試算表 PL/BS を正本にする -->
-  <div class="cards" id="cards">
-    <div class="card"><div class="l">当期 売上高</div><div class="v" id="c-sales">—</div><div class="sm">MoneyForward（PL）</div></div>
-    <div class="card"><div class="l">当期 純損益</div><div class="v" id="c-pl">—</div><div class="sm">税引前（MF・PL）</div></div>
-    <div class="card"><div class="l">売掛金（未回収）</div><div class="v" id="c-ar">—</div><div class="sm">MF・BS 期末残</div></div>
-    <div class="card"><div class="l">未払金</div><div class="v" id="c-ap">—</div><div class="sm">MF・BS 期末残</div></div>
+  <!-- ============ ① 当期サマリ ============ -->
+  <div id="pane1">
+    <div class="cards" id="cards">
+      <div class="card"><div class="l">当期 売上</div><div class="v" id="c-rev">—</div><div class="sm">MoneyForward・PL</div></div>
+      <div class="card"><div class="l">当期 純損益</div><div class="v" id="c-pl">—</div><div class="sm">税引後（MF・PL）</div></div>
+      <div class="card"><div class="l">売掛金（未回収）</div><div class="v" id="c-ar">—</div><div class="sm">MF・BS</div></div>
+      <div class="card"><div class="l">未払金</div><div class="v" id="c-ap">—</div><div class="sm">MF・BS</div></div>
+    </div>
+
+    <div class="row">
+      <div class="panel">
+        <h2>費用科目の構成 <span class="tag">MoneyForward・当期累計</span></h2>
+        <div class="chartbox"><canvas id="expChart"></canvas></div>
+        <div class="legend"><span class="pill ap">支払(AP)</span> 業務委託料・地代家賃・支払報酬等　／　<span class="pill exp">経費</span> 通信・旅費・接待・会議・備品等</div>
+      </div>
+      <div class="panel">
+        <h2>支払(AP) と 経費 の内訳 <span class="tag">MF・PL</span></h2>
+        <div id="apexp" class="loading">読み込み中…</div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="panel full">
+        <h2>直近の仕訳 <span class="tag">MF・売上/入金/支払</span></h2>
+        <div id="recent" class="loading">読み込み中…</div>
+      </div>
+    </div>
   </div>
 
-  <div class="row">
-    <div class="panel">
-      <h2>費用科目の構成 <span class="tag">MoneyForward・当期累計</span></h2>
-      <div class="chartbox"><canvas id="expChart"></canvas></div>
-      <div class="legend"><span class="pill ap">支払(AP)</span> 業務委託料・地代家賃・支払報酬　／　<span class="pill exp">経費</span> カード・通信・旅費等</div>
+  <!-- ============ ② 履歴・分析 ============ -->
+  <div id="pane2" class="hide">
+    <div class="row">
+      <div class="panel full">
+        <h2>月次推移：売上・費用・純損益 <span class="tag">MoneyForward・推移PL（月次）</span></h2>
+        <div class="chartbox tall"><canvas id="trendChart"></canvas></div>
+        <div class="legend">青＝売上／橙＝販管費（費用）／緑線＝純損益。会計年度の各月を確定値（MF）で表示。</div>
+      </div>
     </div>
-    <div class="panel">
-      <h2>支払(AP) と 経費 の内訳 <span class="tag">MF・PL</span></h2>
-      <div id="apexp" class="loading">読み込み中…</div>
+    <div class="row">
+      <div class="panel full">
+        <h2>月次明細・前月比 <span class="tag">MF・確定値</span></h2>
+        <div id="moTable" class="loading">読み込み中…</div>
+      </div>
     </div>
   </div>
 
-  <div class="row">
-    <div class="panel">
-      <h2>今月のオペレーション (AR) <span class="tag">請求管理台帳・補助</span></h2>
-      <table id="opsTable"><tbody>
-        <tr><td>当月（対象月）請求予定</td><td class="num" id="ops-plan">—</td></tr>
-        <tr><td>採番待ち（未請求）</td><td class="num" id="ops-num">—</td></tr>
-        <tr><td>宛先未補完</td><td class="num" id="ops-dst">—</td></tr>
-      </tbody></table>
-      <div class="legend">※ ここは台帳由来の「やること」。<b>売上・未回収の金額は MF（試算表PL/BS）を正本</b>に上のカードへ表示。
-        配布版スキルは各組織の台帳を読んで当月オペをライブ更新します。</div>
+  <!-- ============ ③ 案件・取引先別 明細 ============ -->
+  <div id="pane3" class="hide">
+    <div class="msel"><label>対象期間</label>
+      <select id="moSel" onchange="onMonthChange()"></select>
+      <span class="muted" id="moHint">月を選ぶと、その月に立った売上（計上）と費用を表示します</span>
     </div>
-    <div class="panel">
-      <h2>直近の仕訳 <span class="tag">MF・売上/入金/支払</span></h2>
-      <div id="recent" class="loading">読み込み中…</div>
+    <div class="row">
+      <div class="panel full">
+        <h2 id="custH2">案件先（取引先）別 売上（計上） <span class="tag">MF・売掛金 補助科目</span></h2>
+        <div class="chartbox"><canvas id="custChart"></canvas></div>
+        <div class="legend">その月に立った売上（請求＝計上・税込）の大きい順。入金・未回収は「④ 回収・支払」で。</div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="panel full">
+        <h2>案件先別 売上明細 <span class="tag">MF・売掛金（計上）</span></h2>
+        <div id="custTable" class="loading scrollx">読み込み中…</div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="panel full">
+        <h2>費用 科目別明細 <span class="tag">MF・PL（当月発生）</span></h2>
+        <div id="expTable" class="loading scrollx">読み込み中…</div>
+      </div>
     </div>
   </div>
+
+  <!-- ============ ④ 回収・支払（資金）============ -->
+  <div id="pane4" class="hide">
+    <div class="msel"><label>対象期間</label>
+      <select id="moSel4" onchange="onFundsMonthChange()"></select>
+      <span class="muted" id="moHint4">月を選ぶと、その月の請求・入金・支払と月末残を表示します</span>
+    </div>
+    <div class="row">
+      <div class="panel full">
+        <h2>未回収（売掛金）残高 — 取引先別 <span class="tag">MF・売掛金</span></h2>
+        <div class="chartbox"><canvas id="arChart"></canvas></div>
+        <div class="legend">現在の未回収残の大きい順。入金は前月以前の請求の回収を含みます。</div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="panel full">
+        <h2>回収トラッカー（期限・入金・遅延） <span class="tag">請求管理台帳</span></h2>
+        <div id="arTable" class="loading scrollx">読み込み中…</div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="panel full">
+        <h2>支払予定（AP・未払金） — 支払先別 <span class="tag">MF・未払金・当期累計</span></h2>
+        <div id="apTable" class="loading scrollx">読み込み中…</div>
+        <div class="legend">※ 未払金の支払先別（計上・支払・未払残）。業務委託等の支払先ビュー。貸付・資本取引は含めていません。</div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script>
-const yen = n => "¥" + Math.round(n||0).toLocaleString("ja-JP");
-// 会計年度（4月開始）の開始日と今日
-function fyRange(){
-  const t=new Date(); const y=t.getFullYear(); const m=t.getMonth()+1;
-  const startY = m>=4 ? y : y-1;
-  const pad=x=>String(x).padStart(2,"0");
-  const start=`${startY}-04-01`;
-  const end=`${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())}`;
-  return {start,end};
-}
+const yen = n => "¥" + Math.round(n).toLocaleString("ja-JP");
+const signYen = n => (n<0?"−":"") + "¥" + Math.abs(Math.round(n)).toLocaleString("ja-JP");
+const AP_ACCOUNTS=["業務委託料","地代家賃","支払報酬","支払手数料","外注費"];
+const T="mcp__8b201ee2-a71c-40af-adde-2c45763b0962__";
+
 async function call(name,args){
   const r=await window.cowork.callMcpTool(name,args);
   if(r.isError) throw new Error("tool error: "+name);
   return r.structuredContent ?? JSON.parse(r.content[0].text);
 }
-const AP_ACCOUNTS=["業務委託料","地代家賃","支払報酬","支払手数料","外注費"];
-
-// 当月オペレーション（AR・台帳補助）のスナップショット（初期=0。スキル側で台帳から当月数値を上書き）
-// 売上・未回収の金額は台帳ではなく MF を正本にするため、ここには金額の正値は埋めない。
-const OPS={ plan:0, numbering:0, dest:0 };
-function renderOps(){
-  document.getElementById("ops-plan").textContent=yen(OPS.plan);
-  document.getElementById("ops-num").textContent=OPS.numbering+" 件";
-  document.getElementById("ops-dst").textContent=OPS.dest+" 件";
-}
-
-// 試算表の行から name で closing/期末残高 を引く（売上0でも落ちないよう全ガード）
-function rowVal(rows,name){
-  if(!Array.isArray(rows)) return 0;
-  const flat=[];
-  const walk=r=>{ (r||[]).forEach(x=>{ flat.push(x); if(x&&x.rows) walk(x.rows); }); };
-  walk(rows);
-  const hit=flat.find(r=>r&&r.name===name);
-  if(!hit) return 0;
-  if(typeof hit.closing_balance==="number") return hit.closing_balance;
-  if(Array.isArray(hit.values)) return hit.values[3]||0;
-  return 0;
-}
-
-async function loadPL(){
-  const {start,end}=fyRange();
-  document.getElementById("period").textContent=`当期 ${start} 〜 ${end}（会計年度・MoneyForward 正本）`;
-  const pl=await call("mcp__8b201ee2-a71c-40af-adde-2c45763b0962__mfc_ca_getReportsTrialBalanceProfitLoss",{start_date:start,end_date:end});
-  const rows=pl.rows||[];
-  // 売上高（売上=0 でも 0 表示で落とさない）
-  const sales=rowVal(rows,"売上高合計")||rowVal(rows,"売上高");
-  document.getElementById("c-sales").textContent=yen(sales);
-  // 費用科目
-  const find=n=>rows.find(r=>r.name===n);
-  const sga=find("販売費及び一般管理費合計");
-  const accts=(sga&&sga.rows)?sga.rows.map(a=>({name:a.name,amt:(a.values&&a.values[3])||0})).filter(a=>a.amt!==0):[];
-  accts.sort((a,b)=>b.amt-a.amt);
-  const expTotal=(sga&&sga.values&&sga.values[3])||accts.reduce((s,a)=>s+a.amt,0);
-  // 純損益（売上−費用＝正しい純損益）。明示行があれば優先。
-  const netRow=find("当期純利益")||find("当期純損失")||find("税引前当期純利益")||find("税引前当期純損失");
-  const net=netRow&&netRow.values?netRow.values[3]:(sales-expTotal);
-  const pe=document.getElementById("c-pl"); pe.textContent=yen(net); pe.classList.add(net<0?"neg":"pos");
-  // doughnut（費用ゼロでも空表示）
-  const colors=accts.map(a=>AP_ACCOUNTS.includes(a.name)?"#3b6ef0":"#f0a23b");
-  if(accts.length){
-    new Chart(document.getElementById("expChart"),{type:"doughnut",
-      data:{labels:accts.map(a=>a.name),datasets:[{data:accts.map(a=>a.amt),backgroundColor:colors,borderWidth:1,borderColor:"#fff"}]},
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"right",labels:{boxWidth:10,font:{size:11}}},
-        tooltip:{callbacks:{label:c=>c.label+": "+yen(c.raw)}}}}});
-  }else{
-    document.getElementById("expChart").parentElement.innerHTML='<div class="loading">費用科目なし</div>';
+// PL/BS の rows を名前で再帰検索
+function findRow(rows,name){
+  for(const r of (rows||[])){
+    if(r.name===name) return r;
+    if(r.rows){ const f=findRow(r.rows,name); if(f) return f; }
   }
-  // AP/経費 内訳
+  return null;
+}
+// 純損益（利益/損失どちらの行名でも拾う・損失名はマイナス化）
+function netFromRows(rows,idx){
+  const names=[["当期純利益",1],["当期純損失",-1],["税引前当期純利益",1],["税引前当期純損失",-1]];
+  for(const [nm,sg] of names){ const r=findRow(rows,nm); if(r) return sg*(r.values[idx]||0); }
+  return null;
+}
+
+let FY={start:null,end:null,year:null};
+
+async function loadOffice(){
+  try{
+    const o=await call(T+"mfc_ca_currentOffice",{});
+    const p=(o.accounting_periods||[])[0];
+    if(p){ FY={start:p.start_date,end:p.end_date,year:p.fiscal_year}; }
+    const today=new Date(); const pad=x=>String(x).padStart(2,"0");
+    const todayStr=`${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
+    const endForCum = (FY.end && todayStr>FY.end)?FY.end:todayStr; // 期末を超えない
+    FY.cumEnd=endForCum;
+    document.getElementById("period").textContent=
+      `${o.name||""}　当期 ${FY.start||"?"} 〜 ${FY.cumEnd}（会計年度 ${FY.year||""}・MoneyForward）`;
+  }catch(e){
+    // フォールバック：今日基準
+    const t=new Date(); const pad=x=>String(x).padStart(2,"0");
+    FY={start:`${t.getFullYear()}-01-01`,end:null,year:t.getFullYear(),cumEnd:`${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())}`};
+    document.getElementById("period").textContent=`当期 ${FY.start} 〜 ${FY.cumEnd}（MoneyForward）`;
+  }
+}
+
+// ===== ① 当期サマリ：PL =====
+async function loadPL(){
+  const pl=await call(T+"mfc_ca_getReportsTrialBalanceProfitLoss",{start_date:FY.start,end_date:FY.cumEnd});
+  const rows=pl.rows||[];
+  const rev=findRow(rows,"売上高合計"); const revV=rev?(rev.values[3]||0):0;
+  const sga=findRow(rows,"販売費及び一般管理費合計");
+  const accts=(sga&&sga.rows)?sga.rows.map(a=>({name:a.name,amt:a.values[3]||0})).filter(a=>a.amt!==0):[];
+  accts.sort((a,b)=>b.amt-a.amt);
+  const expTotal=(sga&&sga.values[3])||accts.reduce((s,a)=>s+a.amt,0);
+  const net=netFromRows(rows,3); const netV=(net===null)?(revV-expTotal):net;
+  // カード
+  document.getElementById("c-rev").textContent=yen(revV);
+  const pe=document.getElementById("c-pl"); pe.textContent=signYen(netV); pe.classList.add(netV<0?"neg":"pos");
+  // ドーナツ
+  const colors=accts.map(a=>AP_ACCOUNTS.includes(a.name)?"#3b6ef0":"#f0a23b");
+  new Chart(document.getElementById("expChart"),{type:"doughnut",
+    data:{labels:accts.map(a=>a.name),datasets:[{data:accts.map(a=>a.amt),backgroundColor:colors,borderWidth:1,borderColor:"#fff"}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"right",labels:{boxWidth:10,font:{size:11}}},
+      tooltip:{callbacks:{label:c=>c.label+": "+yen(c.raw)}}}}});
+  // AP/経費
   let ap=0,ex=0; accts.forEach(a=>AP_ACCOUNTS.includes(a.name)?ap+=a.amt:ex+=a.amt);
   const tot=ap+ex||1;
   document.getElementById("apexp").innerHTML=`
@@ -165,37 +249,264 @@ async function loadPL(){
     <table style="margin-top:12px">${accts.map(a=>`<tr><td>${AP_ACCOUNTS.includes(a.name)?'🔵':'🟠'} ${a.name}</td><td class="num">${yen(a.amt)}</td></tr>`).join("")||'<tr><td class="muted">費用科目なし</td></tr>'}</table>`;
 }
 
+// ===== ① 当期サマリ：BS（売掛金・未払金）=====
 async function loadBS(){
-  const {start,end}=fyRange();
+  const bs=await call(T+"mfc_ca_getReportsTrialBalanceBalanceSheet",{fiscal_year:FY.year});
+  const rows=bs.rows||[];
+  const ar=findRow(rows,"売掛金"); const apv=findRow(rows,"未払金");
+  document.getElementById("c-ar").textContent=ar?yen(ar.values[3]||0):"¥0";
+  document.getElementById("c-ap").textContent=apv?yen(apv.values[3]||0):"¥0";
+}
+
+// ===== ① 直近仕訳 =====
+async function loadRecent(){
+  const j=await call(T+"mfc_ca_getJournals",{start_date:FY.start,end_date:FY.cumEnd,per_page:100});
+  let js=(j.journals||[]).slice().sort((a,b)=>(b.transaction_date||"").localeCompare(a.transaction_date||"")).slice(0,8);
+  document.getElementById("recent").innerHTML=`<table><thead><tr><th>日付</th><th>摘要</th><th>勘定</th><th class="num">金額</th></tr></thead><tbody>${
+    js.map(x=>{const br=(x.branches||[]).find(b=>b.debitor)||{}; const d=br.debitor||{}; const amt=(d.value||0)+(d.tax_value||0);
+      const rk=(x.branches&&x.branches[0]&&x.branches[0].remark)||""; const nm=rk.split(" / ")[1]||rk.slice(0,24);
+      return `<tr><td>${(x.transaction_date||"").slice(5)}</td><td>${nm||'<span class=muted>—</span>'}</td><td class="muted">${(d.account_name||"")}</td><td class="num">${yen(amt)}</td></tr>`}).join("")
+  }</tbody></table>`;
+}
+
+// ===== ② 履歴・分析：月次推移 =====
+let tab2built=false;
+async function loadTrend(){
+  if(tab2built) return; tab2built=true;
   try{
-    const bs=await call("mcp__8b201ee2-a71c-40af-adde-2c45763b0962__mfc_ca_getReportsTrialBalanceBalanceSheet",{start_date:start,end_date:end});
-    const rows=bs.rows||[];
-    document.getElementById("c-ar").textContent=yen(rowVal(rows,"売掛金"));   // 未回収＝BS 売掛金 期末残
-    document.getElementById("c-ap").textContent=yen(rowVal(rows,"未払金"));   // 未払＝BS 未払金 期末残
+    const tr=await call(T+"mfc_ca_getReportsTransitionProfitLoss",{type:"monthly",fiscal_year:FY.year});
+    const cols=tr.columns||[];
+    // settlement_balance / total を除外し、当月までに絞る
+    const today=new Date(); const curM=String(today.getMonth()+1);
+    let monthIdx=[]; for(let i=0;i<cols.length;i++){ if(cols[i]==="settlement_balance"||cols[i]==="total") continue; monthIdx.push(i); }
+    // 期首から当月まで（当月がFY内にあれば、そこで打ち切り）
+    const curPos=monthIdx.findIndex(i=>cols[i]===curM);
+    if(curPos>=0) monthIdx=monthIdx.slice(0,curPos+1);
+    const rows=tr.rows||[];
+    const rev=findRow(rows,"売上高合計"), sga=findRow(rows,"販売費及び一般管理費合計");
+    const labels=monthIdx.map(i=>cols[i]+"月");
+    const revArr=monthIdx.map(i=>rev?(rev.values[i]||0):0);
+    const expArr=monthIdx.map(i=>sga?(sga.values[i]||0):0);
+    const netArr=monthIdx.map(i=>{const n=netFromRows(rows,i);return n===null?0:n;});
+    // チャート（pane表示後に生成）
+    {const _x=Chart.getChart("trendChart"); if(_x)_x.destroy();}
+    new Chart(document.getElementById("trendChart"),{
+      data:{labels,datasets:[
+        {type:"bar",label:"売上",data:revArr,backgroundColor:"#3b6ef0",order:2},
+        {type:"bar",label:"費用(販管費)",data:expArr,backgroundColor:"#f0a23b",order:2},
+        {type:"line",label:"純損益",data:netArr,borderColor:"#1e8e5a",backgroundColor:"#1e8e5a",tension:.25,borderWidth:2,pointRadius:3,order:1}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:"top",labels:{boxWidth:12,font:{size:11}}},
+          tooltip:{callbacks:{label:c=>c.dataset.label+": "+signYen(c.raw)}}},
+        scales:{y:{ticks:{callback:v=>"¥"+(v/10000).toLocaleString()+"万"}}}}});
+    // 前月比テーブル
+    let prevNet=null;
+    const trows=monthIdx.map((i,k)=>{
+      const net=netArr[k]; let mom="";
+      if(prevNet!==null){ const d=net-prevNet; mom=`<span class="${d>=0?'up':'down'}">${d>=0?'▲':'▼'} ${signYen(d)}</span>`; }
+      prevNet=net;
+      return `<tr><td>${cols[i]}月</td><td class="num">${yen(revArr[k])}</td><td class="num">${yen(expArr[k])}</td><td class="num ${net<0?'down':'up'}">${signYen(net)}</td><td class="num">${mom}</td><td class="num" style="white-space:nowrap"><button class="lnk" onclick="gotoDetail('${cols[i]}')">売上・費用 →</button> <button class="lnk" onclick="gotoFunds('${cols[i]}')">回収・支払 →</button></td></tr>`;
+    }).join("");
+    document.getElementById("moTable").innerHTML=`<table><thead><tr><th>月</th><th class="num">売上</th><th class="num">費用</th><th class="num">純損益</th><th class="num">前月比(純損益)</th><th class="num">ジャンプ</th></tr></thead><tbody>${trows}</tbody></table>`;
   }catch(e){
-    document.getElementById("c-ar").textContent="—"; document.getElementById("c-ap").textContent="—";
+    document.getElementById("moTable").innerHTML=`<div class="err">推移の取得に失敗：${e.message}</div>`;
+    tab2built=false;
   }
 }
 
-async function loadRecent(){
-  const {start,end}=fyRange();
+// ③ 案件・取引先別 明細（対象月セレクタつき・タブ表示後に遅延生成）
+let detailInit=false, custChartObj=null, RANGES=[], EXPLINES={};
+function toggleExp(i){
+  const el=document.getElementById("exp-"+i), ar=document.getElementById("exparr-"+i);
+  if(!el) return; const hidden=el.classList.toggle("hide"); if(ar) ar.textContent=hidden?"▸":"▾";
+}
+function fyMonthRanges(){
+  const [sy,sm]=FY.start.split("-").map(Number);
+  const out=[{label:"当期累計",start:FY.start,end:FY.cumEnd}];
+  for(let k=0;k<12;k++){
+    let m=sm+k,y=sy; if(m>12){m-=12;y++;}
+    const ms=`${y}-${String(m).padStart(2,"0")}-01`;
+    if(ms>FY.cumEnd) break;
+    const last=new Date(y,m,0).getDate();
+    let me=`${y}-${String(m).padStart(2,"0")}-${String(last).padStart(2,"0")}`;
+    if(me>FY.cumEnd) me=FY.cumEnd;
+    out.push({label:`${y}年${m}月`,start:ms,end:me});
+  }
+  return out;
+}
+function initDetail(){
+  if(detailInit) return false; detailInit=true;
+  ensureRanges();
+  document.getElementById("moSel").innerHTML=RANGES.map((r,i)=>`<option value="${i}">${r.label}</option>`).join("");
+  return true;
+}
+function loadDetail(){ if(initDetail()) renderDetail(RANGES[0]); }
+function onMonthChange(){ renderDetail(RANGES[+document.getElementById("moSel").value]); }
+// ②の月次明細「詳細→」から、その月で③へジャンプ
+function gotoDetail(monthNum){
+  initDetail();
+  const idx=RANGES.findIndex(r=>r.label.endsWith(monthNum+"月"));
+  for(const i of [1,2,3,4]){ document.getElementById("tab"+i).classList.toggle("on",i===3); document.getElementById("pane"+i).classList.toggle("hide",i!==3); }
+  if(idx>=0){ document.getElementById("moSel").value=idx; renderDetail(RANGES[idx]); }
+}
+async function renderDetail(range){
+  const monthly = range.label!=="当期累計";
+  document.getElementById("custH2").innerHTML=`案件先（取引先）別 売上（計上） <span class="tag">MF・売掛金 補助科目・${monthly?range.label:"当期累計"}</span>`;
+  document.getElementById("moHint").textContent = monthly?`${range.label}に立った売上（計上）と費用を表示中。入金・未回収は「④ 回収・支払」へ`:"会計年度の累計を表示中（月を選ぶと月単位に切替）";
+  ["custTable","expTable"].forEach(id=>document.getElementById(id).innerHTML='<div class="loading">読み込み中…</div>');
+  if(custChartObj){custChartObj.destroy();custChartObj=null;}
+  // 案件先別 売上（計上＝売掛金の当月 debit）
   try{
-    const j=await call("mcp__8b201ee2-a71c-40af-adde-2c45763b0962__mfc_ca_getJournals",{start_date:start,end_date:end,per_page:100});
-    let js=(j.journals||[]).slice().sort((a,b)=>(b.transaction_date||"").localeCompare(a.transaction_date||"")).slice(0,8);
-    if(!js.length){ document.getElementById("recent").innerHTML='<div class="muted">仕訳なし（売上・支払が未計上です）</div>'; return; }
-    document.getElementById("recent").innerHTML=`<table><thead><tr><th>日付</th><th>摘要</th><th class="num">金額</th></tr></thead><tbody>${
-      js.map(x=>{const br=(x.branches||[]).find(b=>b.debitor)||{}; const d=br.debitor||{}; const amt=(d.value||0)+(d.tax_value||0);
-        const rk=(x.branches&&x.branches[0]&&x.branches[0].remark)||""; const nm=rk.split(" / ")[1]||rk.slice(0,24);
-        return `<tr><td>${(x.transaction_date||"").slice(5)}</td><td>${nm}<div class="muted" style="font-size:10px">${(d.account_name||"")}</div></td><td class="num">${yen(amt)}</td></tr>`}).join("")
-    }</tbody></table>`;
-  }catch(e){document.getElementById("recent").innerHTML=`<div class="err">仕訳の取得に失敗：${e.message}</div>`;}
+    const bs=await call(T+"mfc_ca_getReportsTrialBalanceBalanceSheet",{start_date:range.start,end_date:range.end,with_sub_accounts:true});
+    const ar=findRow(bs.rows||[],"売掛金");
+    const cust=((ar&&ar.rows)||[]).map(s=>({name:s.name,bill:s.values[1]||0})).filter(c=>c.bill).sort((a,b)=>b.bill-a.bill);
+    {const _x=Chart.getChart("custChart"); if(_x)_x.destroy();}
+    custChartObj=new Chart(document.getElementById("custChart"),{type:"bar",
+      data:{labels:cust.map(c=>c.name),datasets:[{label:"売上(税込)",data:cust.map(c=>c.bill),backgroundColor:"#3b6ef0"}]},
+      options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:c=>yen(c.raw)}}},scales:{x:{ticks:{callback:v=>"¥"+(v/10000).toLocaleString()+"万"}}}}});
+    const tot=cust.reduce((s,c)=>s+c.bill,0)||1;
+    document.getElementById("custTable").innerHTML=`<table><thead><tr><th>案件先</th><th class="num">売上(税込)</th><th class="num">構成比</th></tr></thead><tbody>${
+      cust.map(c=>`<tr><td>${c.name}</td><td class="num">${yen(c.bill)}</td><td class="num muted">${(c.bill/tot*100).toFixed(1)}%</td></tr>`).join("")||'<tr><td class="muted" colspan="3">この期間の売上なし</td></tr>'
+    }<tr style="font-weight:700"><td>合計</td><td class="num">${yen(tot)}</td><td class="num">100%</td></tr></tbody></table>
+    <div class="legend">売上＝売掛金の当月計上（請求・税込）。回収（入金・未回収）は「④ 回収・支払」で確認。</div>`;
+  }catch(e){ document.getElementById("custTable").innerHTML=`<div class="err">売上の取得に失敗：${e.message}</div>`; }
+  // 費用 科目別（当月発生＝借方−貸方）＋ 仕訳明細ドリルダウン
+  try{
+    const pl=await call(T+"mfc_ca_getReportsTrialBalanceProfitLoss",{start_date:range.start,end_date:range.end});
+    const sga=findRow(pl.rows||[],"販売費及び一般管理費合計");
+    const accts=((sga&&sga.rows)||[]).map(a=>({name:a.name,amt:(a.values?((a.values[1]||0)-(a.values[2]||0)):0)})).filter(a=>a.amt!==0).sort((a,b)=>b.amt-a.amt);
+    const tot=accts.reduce((s,a)=>s+a.amt,0)||1;
+    const expNames=new Set(accts.map(a=>a.name));
+    // 仕訳から費用明細を科目別に収集（相手先＝貸方の取引先補助／摘要）
+    EXPLINES={};
+    try{
+      let page=1,all=[];
+      for(let p=0;p<5;p++){
+        const j=await call(T+"mfc_ca_getJournals",{start_date:range.start,end_date:range.end,per_page:100,page});
+        all=all.concat(j.journals||[]);
+        const tp=(j.metadata&&j.metadata.total_pages)||1; if(page>=tp) break; page++;
+      }
+      all.forEach(jn=>(jn.branches||[]).forEach(br=>{
+        const d=br.debitor; if(!d||!expNames.has(d.account_name)) return;
+        const cr=br.creditor||{};
+        (EXPLINES[d.account_name]=EXPLINES[d.account_name]||[]).push({date:(jn.transaction_date||"").slice(5),vendor:cr.trade_partner_name||cr.sub_account_name||"",amt:(d.value||0),rk:br.remark||""});
+      }));
+      Object.values(EXPLINES).forEach(a=>a.sort((x,y)=>y.amt-x.amt));
+    }catch(_){}
+    document.getElementById("expTable").innerHTML=`<table><thead><tr><th>科目</th><th>区分</th><th class="num">金額</th><th class="num">構成比</th></tr></thead><tbody>${
+      accts.map((a,i)=>{
+        const lines=EXPLINES[a.name]||[]; const has=lines.length>0;
+        const head=`<tr class="${has?'exprow':''}" ${has?`onclick="toggleExp(${i})"`:''}><td>${has?`<span id="exparr-${i}">▸</span> `:''}${a.name}</td><td>${AP_ACCOUNTS.includes(a.name)?'<span class="pill ap">AP</span>':'<span class="pill exp">経費</span>'}</td><td class="num">${yen(a.amt)}</td><td class="num muted">${(a.amt/tot*100).toFixed(1)}%</td></tr>`;
+        const det=has?`<tr id="exp-${i}" class="hide"><td colspan="4"><table class="sub"><thead><tr><th>日付</th><th>相手先</th><th>摘要</th><th class="num">金額</th></tr></thead><tbody>${
+          lines.map(l=>`<tr><td>${l.date}</td><td>${l.vendor||'—'}</td><td class="muted">${(l.rk||'').slice(0,40)}</td><td class="num">${yen(l.amt)}</td></tr>`).join("")
+        }</tbody></table></td></tr>`:'';
+        return head+det;
+      }).join("")||'<tr><td class="muted" colspan="4">この期間の費用なし</td></tr>'
+    }<tr style="font-weight:700"><td>合計</td><td></td><td class="num">${yen(tot)}</td><td class="num">100%</td></tr></tbody></table>
+    <div class="legend">科目をクリックすると仕訳明細（日付・相手先・摘要・金額）を展開します。金額は税抜。</div>`;
+  }catch(e){ document.getElementById("expTable").innerHTML=`<div class="err">費用の取得に失敗：${e.message}</div>`; }
+}
+
+// 共通：会計年度の月レンジ（当期累計＋各月）を一度だけ構築
+function ensureRanges(){ if(!RANGES.length) RANGES=fyMonthRanges(); }
+
+// ④ 回収・支払（資金）：対象月セレクタつき（当期累計／各月）
+let fundsInit=false, arChartObj=null;
+function ensureFundsInit(){
+  if(fundsInit) return false; fundsInit=true; ensureRanges();
+  document.getElementById("moSel4").innerHTML=RANGES.map((r,i)=>`<option value="${i}">${r.label}</option>`).join("");
+  return true;
+}
+function loadFunds(){ if(ensureFundsInit()) renderFunds(RANGES[0]); }
+function onFundsMonthChange(){ renderFunds(RANGES[+document.getElementById("moSel4").value]); }
+// ②の月次明細「回収・支払 →」から、その月で④へジャンプ（描画は1回だけ）
+function gotoFunds(monthNum){
+  ensureFundsInit();
+  const idx=RANGES.findIndex(r=>r.label.endsWith(monthNum+"月"));
+  for(const i of [1,2,3,4]){ document.getElementById("tab"+i).classList.toggle("on",i===4); document.getElementById("pane"+i).classList.toggle("hide",i!==4); }
+  renderFunds(idx>=0?RANGES[idx]:RANGES[0]);
+  if(idx>=0) document.getElementById("moSel4").value=idx;
+}
+async function renderFunds(range){
+  const monthly=range.label!=="当期累計";
+  const today=(FY&&FY.cumEnd)||new Date().toISOString().slice(0,10);
+  document.getElementById("moHint4").textContent = monthly?`${range.label}の請求・入金・支払と月末残を表示中`:"会計年度の累計（現在の残高）を表示中";
+  ["arTable","apTable"].forEach(id=>document.getElementById(id).innerHTML='<div class="loading">読み込み中…</div>');
+  if(arChartObj){arChartObj.destroy();arChartObj=null;}
+  const balH=monthly?"月末未回収":"未回収残", apBalH=monthly?"月末未払残":"未払残";
+  try{
+    const bs=await call(T+"mfc_ca_getReportsTrialBalanceBalanceSheet",{start_date:range.start,end_date:range.end,with_sub_accounts:true});
+    const rows=bs.rows||[];
+    const ar=findRow(rows,"売掛金");
+    const arr=((ar&&ar.rows)||[]).map(s=>({name:s.name,open:s.values[0]||0,bill:s.values[1]||0,paid:s.values[2]||0,bal:s.values[3]||0})).filter(c=>c.open||c.bill||c.paid||c.bal).sort((a,b)=>b.bal-a.bal);
+    {const _x=Chart.getChart("arChart"); if(_x)_x.destroy();}
+    arChartObj=new Chart(document.getElementById("arChart"),{type:"bar",
+      data:{labels:arr.map(c=>c.name),datasets:[{label:balH,data:arr.map(c=>c.bal),backgroundColor:"#c0392b"}]},
+      options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>yen(c.raw)}}},scales:{x:{ticks:{callback:v=>"¥"+(v/10000).toLocaleString()+"万"}}}}});
+    // 回収トラッカー（台帳ベース：請求1件ごとに 支払期限・入金日・遅延を判定）
+    try{
+      await ensureLedger();
+      const monthKey = monthly ? range.start.slice(0,7) : null;
+      let trk=LEDGER_ROWS.filter(r=>(r.billDate&&r.billDate<=today)||r.paidDate);
+      if(monthKey) trk=trk.filter(r=>r.month===monthKey);
+      const st=r=>{ if(r.paidDate) return {k:3,t:"入金済",c:"up",i:"🟢"}; if(r.status==="未請求") return {k:0,t:"未請求(発行漏れ)",c:"down",i:"🔴"}; if(r.due&&r.due<today) return {k:0,t:"遅延(未入金)",c:"down",i:"🔴"}; return {k:1,t:"未入金(期限前)",c:"",i:"🟡"}; };
+      trk=trk.map(r=>({...r,s:st(r)})).sort((a,b)=>a.s.k-b.s.k||(a.due||"").localeCompare(b.due||""));
+      const sumK=k=>trk.filter(r=>r.s.k===k).reduce((s,r)=>s+r.amt,0), cntK=k=>trk.filter(r=>r.s.k===k).length;
+      document.getElementById("arTable").innerHTML=
+        `<div style="margin-bottom:8px"><b class="down">🔴 問題（遅延・発行漏れ）：${cntK(0)}件 ／ ${yen(sumK(0))}</b>　<span class="muted">🟡 期限前(回収待ち) ${cntK(1)}件 ${yen(sumK(1))}　🟢 入金済 ${cntK(3)}件 ${yen(sumK(3))}</span></div>`+
+        `<table><thead><tr><th>取引先</th><th>対象月</th><th>件名</th><th class="num">請求額</th><th>支払期限</th><th>入金日</th><th>状態</th></tr></thead><tbody>${
+          trk.map(r=>`<tr><td>${r.partner}</td><td>${r.month}</td><td class="muted">${r.title}</td><td class="num">${yen(r.amt)}</td><td>${r.due||"—"}</td><td>${r.paidDate||"—"}</td><td class="${r.s.c}">${r.s.i} ${r.s.t}</td></tr>`).join("")||'<tr><td class="muted" colspan="7">対象なし</td></tr>'
+        }</tbody></table><div class="legend">「支払期限」までに入金されるべき額。入金があれば「入金日」を表示。期限超過で未入金＝🔴遅延、請求書が未発行＝🔴発行漏れ。出典：請求管理台帳。</div>`;
+    }catch(e){ document.getElementById("arTable").innerHTML=`<div class="err">回収トラッカー（台帳）の取得に失敗：${e.message}</div>`; }
+    const ap=findRow(rows,"未払金");
+    const apr=((ap&&ap.rows)||[]).map(s=>({name:s.name,open:s.values[0]||0,booked:s.values[2]||0,paid:s.values[1]||0,bal:s.values[3]||0})).filter(p=>p.open||p.booked||p.paid||p.bal).sort((a,b)=>b.bal-a.bal);
+    const aoT=apr.reduce((s,p)=>s+p.open,0),abT=apr.reduce((s,p)=>s+p.booked,0),apT=apr.reduce((s,p)=>s+p.paid,0),alT=apr.reduce((s,p)=>s+p.bal,0);
+    document.getElementById("apTable").innerHTML=`<table><thead><tr><th>支払先</th><th class="num">期首未払</th><th class="num">計上</th><th class="num">支払</th><th class="num">${apBalH}</th></tr></thead><tbody>${
+      apr.map(p=>`<tr><td>${p.name}</td><td class="num muted">${yen(p.open)}</td><td class="num">${yen(p.booked)}</td><td class="num">${yen(p.paid)}</td><td class="num ${p.bal>0?'down':''}">${yen(p.bal)}</td></tr>`).join("")||'<tr><td class="muted" colspan="5">なし</td></tr>'
+    }<tr style="font-weight:700"><td>合計</td><td class="num">${yen(aoT)}</td><td class="num">${yen(abT)}</td><td class="num">${yen(apT)}</td><td class="num ${alT>0?'down':''}">${yen(alT)}</td></tr></tbody></table>`;
+  }catch(e){ document.getElementById("arTable").innerHTML=`<div class="err">資金状況の取得に失敗：${e.message}</div>`; fundsInit=false; }
+}
+
+function showTab(n){
+  for(const i of [1,2,3,4]){
+    document.getElementById("tab"+i).classList.toggle("on",n===i);
+    document.getElementById("pane"+i).classList.toggle("hide",n!==i);
+  }
+  if(n===2) loadTrend(); // 表示後に生成（display:none回避）
+  if(n===3) loadDetail();
+  if(n===4) loadFunds();
+}
+
+// 請求管理台帳ローダー（④回収トラッカーが使用）— 台帳を一度だけ読み LEDGER_ROWS に格納
+let ledgerLoaded=false, ledgerLoading=null, LEDGER_ROWS=[];
+const AR_LEDGER_FILE_ID="{{AR_LEDGER_FILE_ID}}"; // 請求管理台帳（org固有）
+const DRIVE="mcp__{{DRIVE_SERVER_ID}}__";
+function ensureLedger(){
+  if(ledgerLoaded) return Promise.resolve();
+  if(ledgerLoading) return ledgerLoading;
+  ledgerLoading=(async()=>{
+    const num=s=>{const n=parseInt(String(s||"").replace(/[^0-9-]/g,""),10);return isNaN(n)?0:n;};
+    const f=await call(DRIVE+"read_file_content",{fileId:AR_LEDGER_FILE_ID});
+    const md=f.fileContent||f.content||"";
+    LEDGER_ROWS=[];
+    md.split("\n").forEach(line=>{
+      if(line.trim()[0]!=="|") return;
+      const cells=line.split("|").map(x=>x.trim()).slice(1,-1);
+      if(!/^\d{4}-\d{2}$/.test(cells[2]||"")) return; // 月次請求スケジュール行のみ
+      LEDGER_ROWS.push({cid:cells[0],partner:cells[1],month:cells[2],title:cells[3],amt:num(cells[4]),inv:cells[5],billDate:cells[6],due:cells[7],status:cells[8],paidDate:cells[10],paidAmt:num(cells[11])});
+    });
+    ledgerLoaded=true;
+  })();
+  return ledgerLoading;
 }
 
 (async()=>{
-  renderOps();
-  try{ await loadPL(); }catch(e){ document.getElementById("apexp").innerHTML=`<div class="err">損益の取得に失敗：${e.message}</div>`; }
-  loadBS();
-  loadRecent();
+  await loadOffice();
+  loadPL().catch(e=>{document.getElementById("apexp").innerHTML=`<div class="err">損益の取得に失敗：${e.message}</div>`;});
+  loadBS().catch(e=>{document.getElementById("c-ar").textContent="—";document.getElementById("c-ap").textContent="—";});
+  loadRecent().catch(e=>{document.getElementById("recent").innerHTML=`<div class="err">仕訳の取得に失敗：${e.message}</div>`;});
 })();
 </script>
 </body>

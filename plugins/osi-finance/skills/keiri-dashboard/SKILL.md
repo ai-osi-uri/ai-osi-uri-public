@@ -26,13 +26,14 @@ requires_connectors:
 > **MF の構造化データ（試算表 PL/BS・仕訳）を正本**にする。台帳テキストの自然言語解釈はやめ、台帳は
 > 「今月のオペレーション（請求予定・採番待ち・宛先未補完）」の補助にのみ使う。
 
-## 画面を2用途に分ける設計（重要）
+## 画面構成（5タブ／業績と資金を分離）
 
-ダッシュボードは目的の違う2つを混ぜない。本スキルは主に①を1枚にし、②は推移系で補う。
+`references/dashboard-template.html` は**5タブの1ファイル**。各タブはクリックで切替（チャートは表示後に遅延生成＝`display:none` 回避）。会計年度は `mfc_ca_currentOffice` から自動判定（開始月を決め打ちしない）。**業績は発生主義（請求＝計上）、資金は回収（入金）で分けて見る**のが核。
 
-- **① 今月オペレーション（ライブ・"やること"）**：当月の請求／支払／経費の進捗。請求予定・採番待ち・
-  宛先未補完など、台帳が正本の運用タスク。締めていない当月の動きを見る。
-- **② 履歴・分析（確定値）**：月次PLの推移・前月比など、MF の確定データで見る分析。
+- **① 当期サマリ**：当期 売上・純損益（PL）／売掛金(未回収)・未払金（BS）のカード＋費用科目ドーナツ＋AP・経費内訳＋直近仕訳。
+- **② 履歴・分析（確定値＝MF）**：`mfc_ca_getReportsTransitionProfitLoss`（月次）で売上／費用／純損益の推移グラフ＋前月比。各月行に「売上・費用→③」「回収・支払→④」のその月ジャンプ。
+- **③ 案件別 売上・費用（業績）**：対象月セレクタつき。売掛金 取引先別 補助科目の当月 `debit`＝**案件先別の売上(計上)＋構成比**、費用は PL 科目別（当月発生＝借方−貸方）。費用は**科目クリックで仕訳明細を展開**。入金・未回収は混ぜない。
+- **④ 回収・支払（資金）**：対象月セレクタつき。**回収トラッカー**（請求管理台帳ベース：請求1件ごとに 取引先・対象月・請求額・**支払期限・入金日・状態**＝🔴遅延/発行漏れ・🟡期限前・🟢入金済、先頭に問題件数・金額）。あわせて MF 未回収残の取引先別チャートと、未払金 支払先別（計上・支払・未払残）。「未請求(発行漏れ)」は台帳ステータスをそのまま映すもので、実際に未発行か台帳の更新漏れかは人が確認する。
 
 ## 役割と非役割
 - やる：MF（試算表PL/BS・仕訳）を正本に、当期の売上／費用構成／純損益・売掛金(未回収)／未払金・直近仕訳を可視化。
@@ -40,6 +41,10 @@ requires_connectors:
 - やらない：仕訳の確定・台帳の更新・送金（= 各 keiri-* スキルや人の役割）。本スキルは**読み取り表示のみ**。
 
 ## データ源（MF 正本・確実な順）
+0. **MoneyForward 事業者・会計期間** `mfc_ca_currentOffice` → `accounting_periods[0]` の `start_date`/`end_date`/`fiscal_year` で当期（期首〜本日、期末を超えない）を決める。会計年度開始月を決め打ちしない（2月期首等にも自動対応）。
+0.5 **推移PL（②月次推移）** `mfc_ca_getReportsTransitionProfitLoss`（`type:"monthly"`）→ `columns` が月、`rows` の売上高合計／販管費合計／当期純利益(損失) の各月 `values[i]`。`settlement_balance`/`total` は除外、期首〜当月で打ち切り。
+0.6 **補助科目（取引先別）** PL/BS を `with_sub_accounts:true` で取得。売掛金 補助科目＝**案件先別売上**（debit=請求/credit=入金/closing=未回収）、未払金 補助科目＝**支払先別**。費用科目には補助が無いため、費用の取引先内訳は**仕訳**(`getJournals` を費用 account_id で)から取る。
+0.7 **回収トラッカー＝請求管理台帳（④）** Drive `read_file_content` で台帳の「月次請求スケジュール」を読み（markdown 行を `|` 分割し3列目が `YYYY-MM` の行のみ採用）、各請求行の **支払期限・入金日・請求ステータス** から「いつまでに・いくら・入金あったか・いつ・遅延か」を判定（🔴遅延/発行漏れ・🟡期限前・🟢入金済）。台帳ローダー(`ensureLedger`)が `LEDGER_ROWS` に一度だけ読み込む。
 1. **MoneyForward 試算表 PL（売上・費用・純損益＝正本）**
    - `mfc_ca_getReportsTrialBalanceProfitLoss`（`start_date`=会計年度開始日, `end_date`=本日）
      → `rows` の「**売上高合計**」`values[3]`＝当期売上、「販売費及び一般管理費合計」の子 `rows`（`type:account`）が
@@ -58,17 +63,13 @@ requires_connectors:
      当月オペ項目を JSON 抽出する。**売上・未回収の金額は台帳ではなく MF を出典にする。**
 
 ## アーティファクトの作り方
-1. `references/dashboard-template.html`（同梱）を土台にする。MF 正本の3パネル構成：
-   - カード（当期売上／当期純損益／売掛金(未回収)＝BS／未払金＝BS）
-   - 費用科目ドーナツ（🔵AP/🟠経費で色分け・Chart.js）＋ AP/経費の内訳バー（PL）
-   - 当月オペレーション(AR・台帳補助：請求予定・採番待ち等) テーブル ＋ 直近仕訳テーブル（MF）
-2. テンプレ内の会計年度開始月（既定4月）・台帳パス・科目分類を keiri-settings の値に差し替える。
+1. `references/dashboard-template.html`（同梱・5タブ実装済み）を土台にする。
+2. テンプレ先頭の `T`（MFコネクタ接頭辞）を実コネクタIDに、`AP_ACCOUNTS`（科目分類）を keiri-settings に差し替える。**④の回収トラッカー（台帳）を使う場合**は `AR_LEDGER_FILE_ID`（請求管理台帳の Drive fileId）・`DRIVE`（`mcp__…__`）を差し替える（未設定なら④回収トラッカーは台帳取得エラー表示）。会計年度は currentOffice 自動取得。
 3. 完成HTMLをワークスペースに書き出し、`create_artifact`：
    - `id`：例 `keiri-dashboard`
-   - `html_path`：書き出したファイル
-   - `mcp_tools`：実在する MF 3ツール
-     `["mcp__…__mfc_ca_getReportsTrialBalanceProfitLoss","mcp__…__mfc_ca_getReportsTrialBalanceBalanceSheet","mcp__…__mfc_ca_getJournals"]`
-     （＋当月オペの台帳補助を読むなら Drive `read_file_content` も）。**当該セッションで実際に呼んで形を確認したツールだけ**列挙する。
+   - `mcp_tools`：MF 5ツール
+     `["mcp__…__mfc_ca_currentOffice","mcp__…__mfc_ca_getReportsTrialBalanceProfitLoss","mcp__…__mfc_ca_getReportsTrialBalanceBalanceSheet","mcp__…__mfc_ca_getJournals","mcp__…__mfc_ca_getReportsTransitionProfitLoss"]`
+     **＋④の回収トラッカー（台帳）を使うなら Drive `read_file_content`**（`mcp__…__read_file_content`）。**当該セッションで実際に呼んで形を確認したツールだけ**列挙する。
 4. ライブ表示のためページ読み込み時にツールを呼ぶ。ヘッダのリロードで最新化される（自前の更新ボタンは作らない）。
    売上=0 の現状（AR 未計上の事業者）でも各パネルがエラーで落ちないようガードする（0表示・空テーブルで継続）。
 
