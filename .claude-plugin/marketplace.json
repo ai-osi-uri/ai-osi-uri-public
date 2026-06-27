@@ -29,7 +29,7 @@
       "name": "osi-docs",
       "source": "./plugins/osi-docs",
       "description": "文書・契約・業務フロー・事業計画作成：事業計画ビルダー（財務3表連動モデル＋ピッチ＋報告）・pptx-custom・NDA 自動生成・業務 AS-IS/TO-BE スイムレーン作成。",
-      "version": "0.2.4",
+      "version": "0.2.5",
       "category": "docs",
       "tags": [
         "docs",

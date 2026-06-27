@@ -2,7 +2,7 @@
 
 対象プラグイン: osi-creative, osi-docs, osi-deploy, osi-knowledge, osi-finance, osi-backoffice
 
-以下の 16 箇所に要注意語が残っています。publish 前に人手で確認してください（自動削除は文書を壊すため行いません）。
+以下の 13 箇所に要注意語が残っています。publish 前に人手で確認してください（自動削除は文書を壊すため行いません）。
 
 | ファイル | 行 | 語 | 抜粋 |
 |---|---|---|---|
@@ -19,6 +19,3 @@
 | plugins/osi-deploy/skills/aws-static-deploy/SKILL.md | 30 | 共有ドライブ | 共有ドライブの `.deploy-credentials/.env` は **任意フォールバック**としてのみ参照する。 |
 | plugins/osi-docs/skills/business-flow-asis-tobe/references/data-schema.md | 135 | 共有ドライブ | { "name": "Excel管理簿", "where": "営業共有ドライブ" } |
 | plugins/osi-docs/skills/business-flow-asis-tobe/references/data-schema.md | 167 | Notion | \| `name`    \| yes  \| ドキュメント名（例：「契約書ドラフト Word」「Notion 商談 DB」） \| |
-| plugins/osi-docs/skills/pptx-custom/SKILL.md | 195 | CAIO | - ✅ "Now let's look at the core CAIO business — how it works, pricing, current state" — transitions and previews |
-| plugins/osi-docs/skills/pptx-custom/SKILL.md | 204 | CAIO | If a term will appear on multiple slides, define it the first time it appears — not five slides later. The most common b |
-| plugins/osi-docs/skills/pptx-custom/SKILL.md | 208 | CAIO | 1. **Inline definition in the subtitle** when the term first appears: `"CAIO (= a monthly retainer that teaches companie |
