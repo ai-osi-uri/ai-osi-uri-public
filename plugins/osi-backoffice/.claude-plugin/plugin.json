@@ -1,6 +1,6 @@
 {
   "name": "osi-backoffice",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "requires_connectors": [],
   "description": "AI OSI URI のバックオフィス業務自動化。契約書の内容チェック→DocuSign 署名依頼（contract-docusign-send）。送付は人が DocuSign 上で行う安全設計（自動送付しない）。今後の契約締結・各種申請・労務まわりのバックオフィス系スキルの集約先。",
   "author": {

@@ -98,7 +98,7 @@
       "name": "osi-backoffice",
       "source": "./plugins/osi-backoffice",
       "description": "バックオフィス業務自動化。契約書の内容チェック→DocuSign 署名依頼（contract-docusign-send）。任意のアップロード契約書を S3 署名付きURL経由で DocuSign に取り込み、送付方向（自社送付／先方送付）を選択。送付は人が DocuSign 上で行う安全設計（自動送付しない）。",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "category": "backoffice",
       "tags": [
         "backoffice",
