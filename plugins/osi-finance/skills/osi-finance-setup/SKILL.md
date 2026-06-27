@@ -2,16 +2,16 @@
 name: osi-finance-setup
 description: >
   OSI Finance（請求AR・支払APの経理自動化）を新しい組織・Cowork に初回セットアップする
-  オーケストレータ・スキル。対話で組織の値を集めて `config/keiri-settings.md`（実値版・
+  オーケストレータ・スキル。対話で組織の値を集めて `config/osi-finance-settings.md`（実値版・
   gitignore対象）を生成し、Drive にフォルダ構造を作成、台帳テンプレ（請求管理台帳・支払管理台帳）を
   配置、必要コネクタ（会計SaaS=MoneyForward／Google Drive＋ローカル同期／メール=Gmailまたは
   Superhuman／任意:DocuSign）の疎通を確認、日次・月次のスケジュールタスク登録を案内し、最後に
   スモークテストまで行う。「OSI Finance を導入」「OSI Finance をセットアップ」「経理を初期セットアップ」
   「請求支払台帳を立ち上げ」「finance を新しい組織に入れる」「経理の初期設定をして」「請求と支払の
-  自動化を導入したい」「keiri-settings を作りたい」「台帳をDriveに置いて経理を始めたい」などで発動する。
+  自動化を導入したい」「osi-finance-settings を作りたい」「台帳をDriveに置いて経理を始めたい」などで発動する。
   機微値（社名・登録番号・口座番号・支払先名）はチャットに貼らせず設定ファイルへ書く。
-  **送金しない／台帳の自動確定はしない**（既存 keiri スキルと同じ安全原則）。日常運用の各処理
-  （請求書発行・支払起票・突合・月次クローズ）は keiri-* 各スキルの役割で、本スキルは初回導入専用。
+  **送金しない／台帳の自動確定はしない**（既存 osi-finance スキルと同じ安全原則）。日常運用の各処理
+  （請求書発行・支払起票・突合・月次クローズ）は osi-finance-* 各スキルの役割で、本スキルは初回導入専用。
 requires_connectors:
   - server: money-forward
     provision: user-install
@@ -27,15 +27,15 @@ requires_connectors:
 # osi-finance-setup（OSI Finance 初回セットアップ・オーケストレータ）
 
 > **役割**：新しい組織（1 Cowork = 1 組織）に OSI Finance を導入するための初回セットアップを、
-> 対話で一気通貫に進める。**この後の日常運用は keiri-* 各スキルが担当**するので、本スキルは
+> 対話で一気通貫に進める。**この後の日常運用は osi-finance-* 各スキルが担当**するので、本スキルは
 > 「設定ファイル生成 → フォルダ構成 → 台帳配置 → コネクタ確認 → スケジュール案内 → スモークテスト」
 > までで完了する。
 
-> **安全原則（既存 keiri スキルと共通・厳守）**
+> **安全原則（既存 osi-finance スキルと共通・厳守）**
 > - **送金しない。** 振込は人が振込口座（例: Trunk）で実行する。
 > - **台帳を自動確定しない。** 起票・更新は案として提示し、人が確認してから反映する。
 > - **機微値はチャットに貼らせない。** 社名・インボイス登録番号・口座番号・実在の支払先名などは
->   ユーザーに直接 `keiri-settings.md`（gitignore対象）へ書いてもらうか、こちらが受け取った値を
+>   ユーザーに直接 `osi-finance-settings.md`（gitignore対象）へ書いてもらうか、こちらが受け取った値を
 >   設定ファイルにだけ書く。チャット本文・コミット対象には残さない。
 
 導入は対話形式で進める。各ステップの結果を逐一報告し、ユーザーの確認を取りながら次へ進む。
@@ -52,11 +52,11 @@ requires_connectors:
 
 ---
 
-## ステップ 1: 組織値の収集 → `keiri-settings.md` 生成
+## ステップ 1: 組織値の収集 → `osi-finance-settings.md` 生成
 
-`config/keiri-settings.example.md`（プレースホルダ版）を雛形に、**実値版 `keiri-settings.md`** を
+`config/osi-finance-settings.example.md`（プレースホルダ版）を雛形に、**実値版 `osi-finance-settings.md`** を
 同じ `_shared/` ディレクトリに作成する。**実値版はコミットされない**（`.gitignore` の
-`**/keiri-settings.md` で除外済み）。
+`**/osi-finance-settings.md` で除外済み）。
 
 ### 1-1. 収集する値（example の章立てに対応）
 
@@ -75,7 +75,7 @@ requires_connectors:
 
 ### 1-2. 生成
 
-- example の `{{ }}` を収集値で置換した `keiri-settings.md` を `_shared/` に作成する。
+- example の `{{ }}` を収集値で置換した `osi-finance-settings.md` を `_shared/` に作成する。
 - 7（マッピング）が未確定なら**空行のまま**作り、「運用しながら追記」と案内する。
 - 生成後、機微値以外（フォルダ名・台帳名・税率・採番形式など非機微の構成）を要約提示して確認を取る。
   **口座番号・登録番号などの機微値はチャットにエコーしない**（「設定ファイルに記録済み」とだけ伝える）。
@@ -85,7 +85,7 @@ requires_connectors:
 ## ステップ 2: Drive のフォルダ構造を作成
 
 設定値（ステップ1の Drive ルート・フォルダ名）に従い、Google Drive に次の構造を作る。
-**フォルダ名は設定で変更可**なので、必ず `keiri-settings.md` の値を使う（以下は既定例）。
+**フォルダ名は設定で変更可**なので、必ず `osi-finance-settings.md` の値を使う（以下は既定例）。
 
 ```
 {請求管理ルート}            （例: 31.請求管理）
@@ -132,8 +132,15 @@ requires_connectors:
   - **メール添付の取得（受領請求書PDFの添付ダウンロード）には Superhuman が必要**。
     **標準の Gmail コネクタでは添付の取得ができない**ため、添付起点の AP 運用をするなら Superhuman を入れる。
 - **任意 = DocuSign**：自社送付契約のメタ補完にのみ使う補助。無くても運用は成立する。
+- **台帳同期 = AI OSI URI Finance 拡張（.mcpb）**：請求管理台帳（Googleスプレッドシート）の
+  読み書きと MoneyForward クラウド請求書のポーリングを担う専用拡張。**この拡張の OAuth 接続
+  （Google／MoneyForward 請求書）を通す作業は、`osi-finance-connect` スキルに委譲する**
+  （Claude in Chrome で半自動。規約同意・OAuth許可はユーザー確認、秘匿情報はファイル受け渡し）。
+  接続後は `health_check`（`google_auth_mode` と `moneyforward_invoice` が ok）→ `sheets_list_tabs`
+  で台帳が読めるかを確認する。
 
 確認結果（接続済み／未接続／要追加）を一覧で報告する。
+**台帳同期拡張の接続が未了なら、`osi-finance-connect` を呼んで通す。**
 
 ---
 
@@ -145,11 +152,11 @@ requires_connectors:
 
 | 周期 | タスク | 呼ぶスキル | 目安 |
 |---|---|---|---|
-| 日次 | 契約取込（契約→請求スケジュール化） | keiri-contract-intake | 毎朝 |
-| 日次 | 受領請求書の取りこぼし検出 | keiri-payment-detect | 毎朝 |
-| 月次 | 当月請求書ドラフト発行 | keiri-invoice | 毎月 1 日 |
-| 月次 | 月次クローズ | keiri-monthly | 毎月 3 日 |
-| 月次 | 支払予定リスト確認 | keiri-payment-intake / keiri-payment-detect | 毎月 25 日 |
+| 日次 | 契約取込（契約→請求スケジュール化） | osi-finance-contract-intake | 毎朝 |
+| 日次 | 受領請求書の取りこぼし検出 | osi-finance-payment-detect | 毎朝 |
+| 月次 | 当月請求書ドラフト発行 | osi-finance-invoice | 毎月 1 日 |
+| 月次 | 月次クローズ | osi-finance-monthly | 毎月 3 日 |
+| 月次 | 支払予定リスト確認 | osi-finance-payment-intake / osi-finance-payment-detect | 毎月 25 日 |
 
 - 各タスク登録後に「Run now」を1回実行して、接続許可・初回挙動を確認するよう案内する。
 - いずれのタスクも**送金・自動確定はしない**（検出・ドラフト・報告まで）。
@@ -160,10 +167,10 @@ requires_connectors:
 
 最後に、最小限の動作確認を行って結果を報告する。**書き込み・送金はしない。**
 
-1. **設定の読込**：`keiri-settings.md` が読め、Drive ルート・台帳名・税率・採番が取れること。
+1. **設定の読込**：`osi-finance-settings.md` が読め、Drive ルート・台帳名・税率・採番が取れること。
 2. **台帳の読込**：配置した請求管理台帳・支払管理台帳が開け、シート構成が揃っていること。
 3. **当月の請求予定**：請求管理台帳「月次請求スケジュール」から当月の予定行が拾えるか（0件でも可）。
-4. **受領請求書の検出**：受領請求書フォルダ／メール添付に当月分があれば軽く検出できるか（keiri-payment-detect の検出のみ）。
+4. **受領請求書の検出**：受領請求書フォルダ／メール添付に当月分があれば軽く検出できるか（osi-finance-payment-detect の検出のみ）。
 5. **会計SaaS 疎通**：MF の対象事業者・当月明細の取得状況を軽く確認。
 
 結果を「OK／要対応」で一覧化し、要対応があれば次アクション（コネクタ追加・テンプレ再配置・
@@ -180,10 +187,10 @@ requires_connectors:
 
 1. **B表9項目を順に実行/確認**する（**読み取り・ドライランのみ。書き込み・送金・自動確定はしない**）。
    - 設定生成（1）・Drive フォルダ（2）・台帳配置（3）：ステップ1〜3 の結果をそのまま転記。
-   - 請求(AR)（4）：keiri-invoice を当月で**ドライラン**し、未請求の件数・合計を取る（0件可）。
-   - 受領検出(AP)（5）：keiri-payment-detect で新着の有無を取る（新着なし可）。
-   - 突合(AP)（6）：keiri-mf-sync を**読み取りのみ**で回し、計上漏れ件数を取る。
-   - ダッシュボード（7）：keiri-dashboard で費用構成・純損益・AR数値が描画されるか。
+   - 請求(AR)（4）：osi-finance-invoice を当月で**ドライラン**し、未請求の件数・合計を取る（0件可）。
+   - 受領検出(AP)（5）：osi-finance-payment-detect で新着の有無を取る（新着なし可）。
+   - 突合(AP)（6）：osi-finance-mf-sync を**読み取りのみ**で回し、計上漏れ件数を取る。
+   - ダッシュボード（7）：osi-finance-dashboard で費用構成・純損益・AR数値が描画されるか。
    - コネクタ（8）・スケジュール（9）：ステップ4・5 の結果を転記。
 2. 各項目を **OK／要対応／スキップ** で判定し、件数・要対応内容をメモに書く。
    **機微値（口座番号・登録番号・実在支払先名）はレポートにも書かない。**
@@ -198,7 +205,7 @@ requires_connectors:
 
 ## 完了報告
 
-- 生成した `keiri-settings.md` の場所（機微値はエコーしない）
+- 生成した `osi-finance-settings.md` の場所（機微値はエコーしない）
 - 作成した Drive フォルダ・配置した台帳のパス
 - コネクタ接続状況（会計SaaS／Drive／メール／任意DocuSign）
 - 登録した（または案内した）スケジュールタスク
@@ -206,7 +213,7 @@ requires_connectors:
 - **導入完了レポート**（ステップ7・B表9項目の OK/要対応/スキップ ＋ サマリ ＋ 要対応リスト）
 
 を簡潔にまとめ、「日常運用は『この請求書払って』『契約を取り込んで』『今月の請求書を作って』などで
-keiri-* 各スキルが動く」ことを案内して終了する。
+osi-finance-* 各スキルが動く」ことを案内して終了する。
 
 ---
 

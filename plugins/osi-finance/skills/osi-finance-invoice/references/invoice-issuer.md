@@ -1,13 +1,13 @@
-# 発行者情報（AR 請求書 発行元）— 汎用ロジック ＋ keiri-settings 参照
+# 発行者情報（AR 請求書 発行元）— 汎用ロジック ＋ osi-finance-settings 参照
 
 > **具体値（社名・登録番号・住所・振込先・税率・採番ルール・支払サイト）は組織固有値であり、
-> `config/keiri-settings.md`（テンプレ：`config/keiri-settings.example.md`）を正本とする。**
-> 台帳に「発行者設定」シートがある場合はそれを最優先し、無ければ keiri-settings を参照する。
+> `config/osi-finance-settings.md`（テンプレ：`config/osi-finance-settings.example.md`）を正本とする。**
+> 台帳に「発行者設定」シートがある場合はそれを最優先し、無ければ osi-finance-settings を参照する。
 > このファイルには**汎用のレイアウト・運用ルールのみ**を置き、自社の実値は持たない。
 
-## 参照すべき値（すべて keiri-settings から）
+## 参照すべき値（すべて osi-finance-settings から）
 
-| 項目 | keiri-settings のキー |
+| 項目 | osi-finance-settings のキー |
 |---|---|
 | 発行者名義 | `ISSUER_NAME` |
 | インボイス登録番号（T＋13桁） | `ISSUER_INVOICE_REG_NO` |
@@ -18,7 +18,7 @@
 | 採番ルール（AR） | `AR_NUMBERING` |
 | 支払サイト | `AR_PAYMENT_TERMS` |
 
-## 請求書レイアウト（汎用テンプレ・値は keiri-settings で差し込む）
+## 請求書レイアウト（汎用テンプレ・値は osi-finance-settings で差し込む）
 
 ```
 請 求 書
@@ -40,4 +40,4 @@
 
 - 発行者は**常に自社のインボイス登録番号**（`ISSUER_INVOICE_REG_NO`）で固定する（相手側の番号ではない）。
 - 自社の登録番号が不明な場合は、国税庁 適格請求書発行事業者公表サイト
-  （https://www.invoice-kohyo.nta.go.jp/）で確認し、keiri-settings に記録する。
+  （https://www.invoice-kohyo.nta.go.jp/）で確認し、osi-finance-settings に記録する。

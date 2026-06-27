@@ -1,5 +1,5 @@
 ---
-name: keiri-dashboard
+name: osi-finance-dashboard
 description: >
   OSI Finance の「会計ダッシュボード」を Cowork のライブ・アーティファクトとして生成するスキル。
   開くたびに MoneyForward（当期の費用構成・純損益・直近の支払仕訳）と請求管理台帳（当月の請求・
@@ -7,22 +7,22 @@ description: >
   「会計ダッシュボードを作って」「今月の請求状況・支払状況・経費状況を一覧で見たい」「経理の
   ダッシュボードを出して」「請求と支払と経費をまとめて管理したい」「財務の現状を一目で」「損益と
   費用の内訳を見せて」などで発動する。組織固有値（台帳の場所・ファイル名・会計年度開始月）は
-  `config/keiri-settings.md` を参照する。データの確定・送金・台帳更新はしない（表示専用）。
+  `config/osi-finance-settings.md` を参照する。データの確定・送金・台帳更新はしない（表示専用）。
 requires_connectors:
   - server: money-forward
     provision: user-install
 
 ---
 
-# keiri-dashboard（会計ダッシュボード — ライブ・アーティファクト生成）
+# osi-finance-dashboard（会計ダッシュボード — ライブ・アーティファクト生成）
 
 > **組織固有値（台帳ルート／ファイル名・会計年度開始月・科目の支払/経費分類）は
-> `config/keiri-settings.md`（テンプレ：`config/keiri-settings.example.md`）を参照する。**
+> `config/osi-finance-settings.md`（テンプレ：`config/osi-finance-settings.example.md`）を参照する。**
 
 請求(AR)・支払(AP)・経費の「今の状況」を1画面で見えるようにする、表示専用のダッシュボード。
 `mcp__cowork__create_artifact` で**ライブ・アーティファクト**として作る（開くたびにコネクタから最新取得・再オープン可）。
 
-> **正本の前提（重要）**：AR が `keiri-ar-sync` で MF に計上される設計になったため、本ダッシュボードは
+> **正本の前提（重要）**：AR が `osi-finance-ar-sync` で MF に計上される設計になったため、本ダッシュボードは
 > **MF の構造化データ（試算表 PL/BS・仕訳）を正本**にする。台帳テキストの自然言語解釈はやめ、台帳は
 > 「今月のオペレーション（請求予定・採番待ち・宛先未補完）」の補助にのみ使う。
 
@@ -38,7 +38,7 @@ requires_connectors:
 ## 役割と非役割
 - やる：MF（試算表PL/BS・仕訳）を正本に、当期の売上／費用構成／純損益・売掛金(未回収)／未払金・直近仕訳を可視化。
   台帳は当月オペレーション（請求予定・採番待ち等）の補助としてのみ読む。
-- やらない：仕訳の確定・台帳の更新・送金（= 各 keiri-* スキルや人の役割）。本スキルは**読み取り表示のみ**。
+- やらない：仕訳の確定・台帳の更新・送金（= 各 osi-finance-* スキルや人の役割）。本スキルは**読み取り表示のみ**。
 
 ## データ源（MF 正本・確実な順）
 0. **MoneyForward 事業者・会計期間** `mfc_ca_currentOffice` → `accounting_periods[0]` の `start_date`/`end_date`/`fiscal_year` で当期（期首〜本日、期末を超えない）を決める。会計年度開始月を決め打ちしない（2月期首等にも自動対応）。
@@ -49,24 +49,24 @@ requires_connectors:
    - `mfc_ca_getReportsTrialBalanceProfitLoss`（`start_date`=会計年度開始日, `end_date`=本日）
      → `rows` の「**売上高合計**」`values[3]`＝当期売上、「販売費及び一般管理費合計」の子 `rows`（`type:account`）が
        科目別費用、「当期純損益/税引前当期純損益」`values[3]`＝**正しい純損益**（売上−費用）。
-   - 科目を **支払(AP)** と **経費** に分類：keiri-settings の分類表（既定：AP＝業務委託料・地代家賃・支払報酬／経費＝通信費・旅費交通費・接待交際費・会議費・備品消耗品費・広告宣伝費）。
+   - 科目を **支払(AP)** と **経費** に分類：osi-finance-settings の分類表（既定：AP＝業務委託料・地代家賃・支払報酬／経費＝通信費・旅費交通費・接待交際費・会議費・備品消耗品費・広告宣伝費）。
 2. **MoneyForward 試算表 BS（売掛金=未回収・未払金=未払＝正本）**
    - `mfc_ca_getReportsTrialBalanceBalanceSheet`（同期間）→ BS の「**売掛金**」`closing_balance`＝AR 未回収、
-     「未払金」`closing_balance`＝AP 未払。AR が `keiri-ar-sync` で MF に載るため、未回収はここを正本にできる。
+     「未払金」`closing_balance`＝AP 未払。AR が `osi-finance-ar-sync` で MF に載るため、未回収はここを正本にできる。
 3. **MoneyForward 仕訳（直近の動き）**
    - `mfc_ca_getJournals`（同期間）→ 直近仕訳（売上計上・入金消込・支払。`branches[].debitor/creditor` の
      `account_name` と `value+tax_value`、`remark` の摘要から相手先・請求書ID）。
 4. **請求管理台帳（当月オペレーションの補助のみ）**
-   - Google Drive の `read_file_content`（keiri-settings の AR台帳パス）で「月次請求スケジュール」を取得し、
+   - Google Drive の `read_file_content`（osi-finance-settings の AR台帳パス）で「月次請求スケジュール」を取得し、
      **当月の請求予定・採番待ち・宛先未補完**など"やること"を出す補助に使う（会計の数字＝AR残高は MF の BS を正本）。
    - 自然言語テキストのため、必要時のみアーティファクト内で `window.cowork.askClaude(prompt, [台帳テキスト])` で
      当月オペ項目を JSON 抽出する。**売上・未回収の金額は台帳ではなく MF を出典にする。**
 
 ## アーティファクトの作り方
 1. `references/dashboard-template.html`（同梱・5タブ実装済み）を土台にする。
-2. テンプレ先頭の `T`（MFコネクタ接頭辞）を実コネクタIDに、`AP_ACCOUNTS`（科目分類）を keiri-settings に差し替える。**④の回収トラッカー（台帳）を使う場合**は `AR_LEDGER_FILE_ID`（請求管理台帳の Drive fileId）・`DRIVE`（`mcp__…__`）を差し替える（未設定なら④回収トラッカーは台帳取得エラー表示）。会計年度は currentOffice 自動取得。
+2. テンプレ先頭の `T`（MFコネクタ接頭辞）を実コネクタIDに、`AP_ACCOUNTS`（科目分類）を osi-finance-settings に差し替える。**④の回収トラッカー（台帳）を使う場合**は `AR_LEDGER_FILE_ID`（請求管理台帳の Drive fileId）・`DRIVE`（`mcp__…__`）を差し替える（未設定なら④回収トラッカーは台帳取得エラー表示）。会計年度は currentOffice 自動取得。
 3. 完成HTMLをワークスペースに書き出し、`create_artifact`：
-   - `id`：例 `keiri-dashboard`
+   - `id`：例 `osi-finance-dashboard`
    - `mcp_tools`：MF 5ツール
      `["mcp__…__mfc_ca_currentOffice","mcp__…__mfc_ca_getReportsTrialBalanceProfitLoss","mcp__…__mfc_ca_getReportsTrialBalanceBalanceSheet","mcp__…__mfc_ca_getJournals","mcp__…__mfc_ca_getReportsTransitionProfitLoss"]`
      **＋④の回収トラッカー（台帳）を使うなら Drive `read_file_content`**（`mcp__…__read_file_content`）。**当該セッションで実際に呼んで形を確認したツールだけ**列挙する。
@@ -88,6 +88,6 @@ requires_connectors:
 
 詳細は **[`docs/エラー処理ガイド.md`](../../docs/エラー処理ガイド.md)** を正本とする。本スキルで詰まりやすい点：
 
-- **MF の対象事業者・会計年度期間ズレ**：処理前に対象事業者を社名で確認し、期間は会計年度開始日〜本日で取る（`keiri-settings` の会計年度開始月に合わせる）。
+- **MF の対象事業者・会計年度期間ズレ**：処理前に対象事業者を社名で確認し、期間は会計年度開始日〜本日で取る（`osi-finance-settings` の会計年度開始月に合わせる）。
 - **AR台帳の読取が大容量で失敗**するとき：台帳はローカル同期で開ける状態にし、アーティファクト内は `window.cowork.askClaude` で堅牢に抽出する。
 - 取得失敗は**各パネルでエラー表示し全体を落とさない**。表示専用で、数値の確定・台帳更新・送金はしない。

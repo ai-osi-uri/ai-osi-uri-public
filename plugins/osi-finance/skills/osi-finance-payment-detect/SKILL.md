@@ -1,24 +1,24 @@
 ---
-name: keiri-payment-detect
+name: osi-finance-payment-detect
 description: >
   毎朝、受領請求書（AP）の取りこぼしを検出する日次スキル。(a) 受領請求書フォルダの新規PDF と
   (b) メール添付の新着請求書 を検出し、支払管理台帳「月次支払管理」と照合して、**まだ起票されていない
   受領請求書**を「支払予定 起票案」として報告する。**自動で台帳に書かない（提案まで）／送金しない。**
-  判定ロジックは keiri-payment-intake と同じ（monthly-rules の判断辞書・**振込で払う請求書のみ対象**の
+  判定ロジックは osi-finance-payment-intake と同じ（monthly-rules の判断辞書・**振込で払う請求書のみ対象**の
   線引きを共有）。カード払い（自動課金SaaS）は対象外（会計のカード連携が自動仕訳）。
   「受領請求書の取りこぼしを検出」「新着請求書を支払予定に」「未起票の請求書がないか確認」「払い漏れ
   チェック」「今朝届いた請求書を確認」などで発動する。日次スケジュールタスクから呼ばれる前提。
-  実際の起票（台帳書き込み）と振込情報整形は keiri-payment-intake、突合・月次は keiri-mf-sync / keiri-monthly。
+  実際の起票（台帳書き込み）と振込情報整形は osi-finance-payment-intake、突合・月次は osi-finance-mf-sync / osi-finance-monthly。
 requires_connectors:
   - server: superhuman
     provision: user-install
 
 ---
 
-# keiri-payment-detect（受領請求書 取りこぼし検出 — 日次）
+# osi-finance-payment-detect（受領請求書 取りこぼし検出 — 日次）
 
 > **組織固有値（Drive ルート／フォルダ名・台帳ファイル名・支払先→科目マッピング・採番ルール等）は
-> `config/keiri-settings.md`（テンプレ：`config/keiri-settings.example.md`）を参照する。**
+> `config/osi-finance-settings.md`（テンプレ：`config/osi-finance-settings.example.md`）を参照する。**
 
 毎朝、入口（Drive 手置き・メール添付）に届いた受領請求書を検出し、支払管理台帳と照合して、
 **未起票のものだけ**を「支払予定 起票案」として報告する。**書き込みも送金もしない**（提案まで）。
@@ -26,7 +26,7 @@ requires_connectors:
 ## 役割と非役割
 
 - やる：新着受領請求書の**検出** → 台帳「月次支払管理」と照合 → **未起票分を起票案として報告**。
-- やらない：**台帳への書き込み（＝ keiri-payment-intake が人レビューのうえ実施）**、送金、会計仕訳投入、AR発行。
+- やらない：**台帳への書き込み（＝ osi-finance-payment-intake が人レビューのうえ実施）**、送金、会計仕訳投入、AR発行。
 - これは「漏れの可視化」が目的。確定操作（起票・支払・連携）は一切しない。
 
 ## 前提コネクタ
@@ -34,11 +34,11 @@ requires_connectors:
 - Google Drive / スプレッドシート（受領請求書フォルダ・支払管理台帳）。
 - Superhuman Mail（`get_attachment` / スレッド検索で新着の請求書PDF添付を検出）。
 
-## 共有する判定ロジック（keiri-payment-intake と同一）
+## 共有する判定ロジック（osi-finance-payment-intake と同一）
 
 - **対象は振込（振込口座から実行・例: Trunk）で払う受領請求書のみ。** カード払い（自動課金SaaS含む）は対象外
   （会計のカード連携が自動仕訳。台帳に入れると二重計上）。支払先マスタの「既定の支払方法」で振り分ける。
-- 科目・税区分・インボイス・源泉の判断は `keiri-monthly/references/monthly-rules.md` ＋ `keiri-settings` の
+- 科目・税区分・インボイス・源泉の判断は `osi-finance-monthly/references/monthly-rules.md` ＋ `osi-finance-settings` の
   支払先マッピングに従う（迷うものは「要確認」）。
 - 支払先マスタの正本＝支払管理台帳（MFは補助）。
 
@@ -60,7 +60,7 @@ requires_connectors:
 
 ### 4. 報告（書き込みしない）
 次の分類で一覧報告する。
-- **未起票（振込・要起票）** … 支払先・請求書番号・対象月・金額・支払期日。→ keiri-payment-intake での起票を促す。
+- **未起票（振込・要起票）** … 支払先・請求書番号・対象月・金額・支払期日。→ osi-finance-payment-intake での起票を促す。
 - カード払い（対象外） … 証憑保存のみで台帳起票不要。
 - 要確認 … 新規支払先・読取不能・支払方法不明。
 - 起票済み（参考） … 既に台帳にある分。
@@ -69,9 +69,9 @@ requires_connectors:
 
 ## 境界
 
-- 実際の起票（台帳書き込み）と振込情報の整形は **keiri-payment-intake**。
-- 台帳⇔MF の突合・計上漏れ検出は **keiri-mf-sync**、月次クローズは **keiri-monthly**。
-- 自社の請求書発行（AR）は **keiri-invoice**、契約取込は **keiri-contract-intake**。
+- 実際の起票（台帳書き込み）と振込情報の整形は **osi-finance-payment-intake**。
+- 台帳⇔MF の突合・計上漏れ検出は **osi-finance-mf-sync**、月次クローズは **osi-finance-monthly**。
+- 自社の請求書発行（AR）は **osi-finance-invoice**、契約取込は **osi-finance-contract-intake**。
 
 ## スケジュール運用
 
@@ -82,12 +82,12 @@ requires_connectors:
 
 - 検出・報告のみ。書き込み・送金・確定はしない。
 - 振込対象のみを起票候補にする（カードは会計のカード連携に委ねる＝二重計上防止）。
-- 機微値はスキルに直書きせず `keiri-settings` から読む。
+- 機微値はスキルに直書きせず `osi-finance-settings` から読む。
 
 ## エラー処理
 
 詳細は **[`docs/エラー処理ガイド.md`](../../docs/エラー処理ガイド.md)** を正本とする。本スキルで詰まりやすい点：
 
 - **メール添付の新着検出に Superhuman が必須**（標準 Gmail では添付取得不可）。Superhuman 未接続なら、その旨を報告し Drive 手置き分のみで検出する。
-- 大容量PDFの読取が不安定なときは件名・スレッドのメタだけで検出し、詳細起票は keiri-payment-intake（ローカル同期・人レビュー）に回す。
+- 大容量PDFの読取が不安定なときは件名・スレッドのメタだけで検出し、詳細起票は osi-finance-payment-intake（ローカル同期・人レビュー）に回す。
 - 検出・報告のみ。**台帳への書き込み・送金・確定はしない**（漏れの可視化が目的）。

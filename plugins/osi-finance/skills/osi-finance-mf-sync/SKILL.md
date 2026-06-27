@@ -1,5 +1,5 @@
 ---
-name: keiri-mf-sync
+name: osi-finance-mf-sync
 description: >
   OSI Finance の経理で、支払管理台帳（Googleスプレッドシート）の支払済取引と、
   会計SaaS（v1=マネーフォワード クラウド会計）の仕訳を突合し、計上漏れ・不一致を検出するスキル（突合役）。
@@ -16,10 +16,10 @@ requires_connectors:
 
 ---
 
-# 経理：台帳⇔MF 突合スキル（keiri-mf-sync）
+# 経理：台帳⇔MF 突合スキル（osi-finance-mf-sync）
 
 > **組織固有値（台帳ファイル名・支払先→科目マッピング・採番ルール等）は
-> `config/keiri-settings.md`（テンプレ：`config/keiri-settings.example.md`）を参照する。**
+> `config/osi-finance-settings.md`（テンプレ：`config/osi-finance-settings.example.md`）を参照する。**
 
 支払管理台帳の「支払済」取引が、マネーフォワード クラウド会計に**仕訳として計上されているか**を突合し、
 計上漏れ・不一致を洗い出す。会計仕訳の発生源は原則MFの口座連携明細（銀行・カード）。本スキルは
@@ -105,7 +105,7 @@ MF会計MCP（currentOffice 等）と Googleコネクタが使えるか確認。
 - これは「漏れ検出」が主目的。二重登録を避けるため、登録は未計上かつ重複なしの行に限る。
 - **手入力バックフィル × 連携未仕訳の重複に注意**：過去分を手入力した後に口座連携を繋ぐと、同じ支払が
   連携未仕訳としても入る。MF仕訳（手入力）に存在＝「計上済」でも、**連携未仕訳側が残っていると後で
-  登録され二重**になる。連携未仕訳の棚卸し・対象外は `keiri-feed-recon` で行う（連携明細の対象外/登録は
+  登録され二重**になる。連携未仕訳の棚卸し・対象外は `osi-finance-feed-recon` で行う（連携明細の対象外/登録は
   MF画面専用・MCP不可）。原則「正確な手入力を残し、重複未仕訳を対象外」。
 
 ## エラー処理

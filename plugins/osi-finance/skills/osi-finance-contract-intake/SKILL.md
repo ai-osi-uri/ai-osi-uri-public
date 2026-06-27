@@ -1,5 +1,5 @@
 ---
-name: keiri-contract-intake
+name: osi-finance-contract-intake
 description: >
   OSI Finance の請求業務の起点。Gmail（＋手動投入）から契約書PDFを収集して Drive の
   契約書フォルダ（設定の `請求管理ルート/契約書`、例: `31.請求管理/00.契約書/`）に格納し、請求管理台帳の「契約マスタ」に起票したうえで、契約期間
@@ -7,8 +7,8 @@ description: >
   送った契約」のメタ補完にのみ使う任意の補助。金額・期間は契約PDFの読み取りを中心に取得し、必ず
   人レビューを挟む。「契約を取り込んで」「新しい契約を請求スケジュールに反映」「○○社の契約を台帳に」
   「契約書フォルダを整理して請求予定を作って」「契約起点で請求準備」など、契約→請求スケジュール化に
-  関わるリクエストで発動する。請求書PDFの生成・メール下書きは keiri-invoice の役割（本スキルは行わない）。
-  支払（受領請求書）側は keiri-mf-sync / keiri-monthly。
+  関わるリクエストで発動する。請求書PDFの生成・メール下書きは osi-finance-invoice の役割（本スキルは行わない）。
+  支払（受領請求書）側は osi-finance-mf-sync / osi-finance-monthly。
 requires_connectors:
   - server: gmail
     provision: user-install
@@ -17,11 +17,11 @@ requires_connectors:
 
 ---
 
-# keiri-contract-intake（契約取込 → 請求スケジュール展開）
+# osi-finance-contract-intake（契約取込 → 請求スケジュール展開）
 
 > **組織固有値（Drive ルート／フォルダ名・台帳ファイル名・採番ルール・税率・支払サイト等）は
-> `config/keiri-settings.md`（テンプレ：`config/keiri-settings.example.md`）を参照する。**
-> 本文中の `31.請求管理/00.契約書/` 等のパスは `keiri-settings` の `請求管理ルート/契約書` を指す例示。
+> `config/osi-finance-settings.md`（テンプレ：`config/osi-finance-settings.example.md`）を参照する。**
+> 本文中の `31.請求管理/00.契約書/` 等のパスは `osi-finance-settings` の `請求管理ルート/契約書` を指す例示。
 
 契約書を正本に請求を回すための入口。**収集の正本は Gmail。** 自社送付・先方送付・他社サイン
 （クラウドサイン等）・紙スキャンは、いずれも最終的にメールで届くため、Gmail を一次収集点にする。
@@ -29,7 +29,7 @@ requires_connectors:
 ## 役割と非役割
 
 - やる：Gmail検索 → 契約PDFを契約書フォルダ（設定の `請求管理ルート/契約書`）へ格納（重複スキップ）→ 契約マスタ起票 → 契約期間の各月に請求予定を展開 → 人レビュー。
-- やらない：請求書PDFの生成・メール下書き（= keiri-invoice）／支払・会計連携（= keiri-mf-sync, keiri-monthly）。
+- やらない：請求書PDFの生成・メール下書き（= osi-finance-invoice）／支払・会計連携（= osi-finance-mf-sync, osi-finance-monthly）。
 - 送信・公開・権限変更は一切しない。台帳の更新は人の確認後。
 
 ## 前提コネクタ
@@ -68,7 +68,7 @@ requires_connectors:
 ### 5. 請求スケジュール展開
 - 月額固定：契約期間の各月に請求予定行（対象月・件名「{契約内容}（YYYY年MM月分）」・請求額税込）を作る。
 - 一括：該当月のみ1行。
-- 各行の請求ステータスは「未請求」。請求書番号・請求日・支払期限は keiri-invoice 発行時に確定（採番は §採番）。
+- 各行の請求ステータスは「未請求」。請求書番号・請求日・支払期限は osi-finance-invoice 発行時に確定（採番は §採番）。
 - **既存の同 契約ID×対象月 があれば作らない**（二重展開防止）。
 
 ### 6. 人レビュー（必須ゲート）
@@ -77,7 +77,7 @@ requires_connectors:
 ## 採番
 
 `INV-YYYY-MM-連番3桁`（YYYY-MM＝対象月、連番＝その月の発行順）。台帳の請求書番号列で一元管理。
-実際の採番・確定は keiri-invoice が発行時に行う。
+実際の採番・確定は osi-finance-invoice が発行時に行う。
 
 ## 留意
 
@@ -91,4 +91,4 @@ requires_connectors:
 
 - **大容量の契約PDF**は Drive 直アップロードが不安定。Google Drive の**ローカル同期フォルダにコピー**して格納する（配置後に開けるか確認）。
 - **メール添付が取得できない**場合：標準 Gmail では添付取得不可。**Superhuman** で取得するか、契約PDFを**Drive手置き**してもらう。
-- 金額・期間が読めない／`keiri-settings.md` 未整備のときは、**推測せず「要確認」**として止め、人に確認する（台帳の自動確定はしない）。
+- 金額・期間が読めない／`osi-finance-settings.md` 未整備のときは、**推測せず「要確認」**として止め、人に確認する（台帳の自動確定はしない）。

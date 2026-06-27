@@ -77,12 +77,11 @@
     {
       "name": "osi-finance",
       "source": "./plugins/osi-finance",
-      "description": "OSI Finance — 日本の中小企業向け 経理（請求AR・支払AP）自動化プロダクト。初回セットアップ（osi-finance-setup）・契約取込→請求スケジュール化・月次請求書発行・受領請求書の支払予定起票/取りこぼし検出・会計SaaS（v1=マネーフォワード）との突合（AP=keiri-mf-sync／AR=keiri-ar-sync で売上計上・入金消込）・月次クローズ・会計ダッシュボード（keiri-dashboard・MF正本）を収録。MFを請求(AR)・支払(AP)双方の単一会計正本に。台帳テンプレ同梱、組織固有値は keiri-settings に外出しで非開発者でも導入可。発火evalデータセット＋runner・導入完了レポート・エラー処理ガイド同梱。送金しない／自動確定しない（人レビュー必須）。",
-      "version": "0.7.1",
+      "description": "OSI Finance — 日本の中小企業向け 経理（請求AR・支払AP）自動化プロダクト。初回セットアップ（osi-finance-setup）・契約取込→請求スケジュール化・月次請求書発行・受領請求書の支払予定起票/取りこぼし検出・会計SaaS（v1=マネーフォワード）との突合（AP=osi-finance-mf-sync／AR=osi-finance-ar-sync で売上計上・入金消込）・月次クローズ・会計ダッシュボード（osi-finance-dashboard・MF正本）を収録。MFを請求(AR)・支払(AP)双方の単一会計正本に。台帳テンプレ同梱、組織固有値は osi-finance-settings に外出しで非開発者でも導入可。発火evalデータセット＋runner・導入完了レポート・エラー処理ガイド同梱。送金しない／自動確定しない（人レビュー必須）。",
+      "version": "0.8.0",
       "category": "finance",
       "tags": [
         "finance",
-        "keiri",
         "accounting",
         "invoice",
         "billing",
@@ -98,7 +97,7 @@
       "name": "osi-backoffice",
       "source": "./plugins/osi-backoffice",
       "description": "バックオフィス業務自動化。契約書の内容チェック→DocuSign 署名依頼（contract-docusign-send）。任意のアップロード契約書を S3 署名付きURL経由で DocuSign に取り込み、送付方向（自社送付／先方送付）を選択。送付は人が DocuSign 上で行う安全設計（自動送付しない）。",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "category": "backoffice",
       "tags": [
         "backoffice",

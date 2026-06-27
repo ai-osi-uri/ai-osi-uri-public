@@ -6,13 +6,13 @@
 非開発者でも導入できます（1 Cowork = 1 組織）。
 
 > **設計の前提**：会計仕訳の正本は**会計SaaS（v1=マネーフォワード）**。支払(AP)は口座連携明細（銀行・カード）、
-> 売上(AR)は `keiri-ar-sync` の売上計上・入金消込で MF に載せ、**MF を請求(AR)・支払(AP) 双方の単一会計正本**にする
+> 売上(AR)は `osi-finance-ar-sync` の売上計上・入金消込で MF に載せ、**MF を請求(AR)・支払(AP) 双方の単一会計正本**にする
 > （v0.6.0 で売上=0 の片肺記帳を是正）。支払管理台帳・請求管理台帳は**資金管理（誰にいくらいつ・請求予定・採番・入金予定）の正本**。
 > 二重計上を防ぐため、**カード払い（自動課金SaaS）は支払管理台帳に起票しない**（会計のカード連携が自動仕訳）。
 > 入金の銀行連携が自動仕訳する場合は連携側を「売掛金消込」に振り替え、AR の消込を二重計上しない。
 
 > **安全原則**：**送金しない／台帳を自動確定しない**（人レビュー必須）。AI は「準備」までを担当し、
-> 送金・確定は人が行う。機微値（社名・登録番号・口座番号・実在支払先名）は `keiri-settings.md` に外出し。
+> 送金・確定は人が行う。機微値（社名・登録番号・口座番号・実在支払先名）は `osi-finance-settings.md` に外出し。
 
 ## 導入（顧客・伴走先向け）
 
@@ -29,14 +29,14 @@
 | スキル | 役割 | 区分 |
 |---|---|---|
 | `osi-finance-setup` | 初回セットアップ（設定生成・フォルダ・台帳配置・コネクタ確認・スケジュール案内・スモークテスト） | **導入（新規）** |
-| `keiri-contract-intake` | 契約PDF収集 → 契約マスタ起票 → 月次請求スケジュール展開 | AR 起点 |
-| `keiri-invoice` | 月次の請求書PDF発行 → Gmail下書き作成 → 台帳更新 | AR 発行 |
-| `keiri-payment-intake` | 受領請求書（振込のみ）→ 支払予定起票（人レビュー）→ 振込情報整形 | AP 起票 |
-| `keiri-payment-detect` | 日次で受領請求書の取りこぼしを検出 → 起票案を報告 | AP 検出 |
-| `keiri-mf-sync` | 支払管理台帳の支払済 ⇔ 会計SaaS仕訳を突合 → 計上漏れ検出 | 突合（AP） |
-| `keiri-ar-sync` | 請求台帳の請求済→売上計上((借)売掛金/(貸)売上+仮受消費税)・入金済→消込((借)普通預金/(貸)売掛金)を MF と請求書IDで突合 → 計上漏れ検出・人レビューのうえ登録 | 突合（AR） |
-| `keiri-monthly` | 月次クローズのオーケストレーション（取込→仕訳→AP突合→AR突合→検算→報告） | 月次 |
-| `keiri-dashboard` | 請求(AR)・支払(AP)・経費を1枚で見るライブ・アーティファクト生成（MF試算表PL/BSを正本・表示専用） | 可視化 |
+| `osi-finance-contract-intake` | 契約PDF収集 → 契約マスタ起票 → 月次請求スケジュール展開 | AR 起点 |
+| `osi-finance-invoice` | 月次の請求書PDF発行 → Gmail下書き作成 → 台帳更新 | AR 発行 |
+| `osi-finance-payment-intake` | 受領請求書（振込のみ）→ 支払予定起票（人レビュー）→ 振込情報整形 | AP 起票 |
+| `osi-finance-payment-detect` | 日次で受領請求書の取りこぼしを検出 → 起票案を報告 | AP 検出 |
+| `osi-finance-mf-sync` | 支払管理台帳の支払済 ⇔ 会計SaaS仕訳を突合 → 計上漏れ検出 | 突合（AP） |
+| `osi-finance-ar-sync` | 請求台帳の請求済→売上計上((借)売掛金/(貸)売上+仮受消費税)・入金済→消込((借)普通預金/(貸)売掛金)を MF と請求書IDで突合 → 計上漏れ検出・人レビューのうえ登録 | 突合（AR） |
+| `osi-finance-monthly` | 月次クローズのオーケストレーション（取込→仕訳→AP突合→AR突合→検算→報告） | 月次 |
+| `osi-finance-dashboard` | 請求(AR)・支払(AP)・経費を1枚で見るライブ・アーティファクト生成（MF試算表PL/BSを正本・表示専用） | 可視化 |
 
 ## 台帳テンプレ（同梱）
 
@@ -51,13 +51,13 @@
 ## 組織固有値の外出し（配布向け抽象化）
 
 社名・登録番号・振込先・税率・採番ルール・Drive ルート／フォルダ名・台帳ファイル名・支払先→科目マッピング
-などの**組織固有値は、各スキルに直書きせず `keiri-settings` に集約**しています。
+などの**組織固有値は、各スキルに直書きせず `osi-finance-settings` に集約**しています。
 
-- 配布テンプレート：`skills/config/keiri-settings.example.md`（**プレースホルダのみ**。機微値は含まない）。
-- 各組織は同ディレクトリに `keiri-settings.md` をコピーし、`{{ }}` を実値で埋めて使う
+- 配布テンプレート：`skills/config/osi-finance-settings.example.md`（**プレースホルダのみ**。機微値は含まない）。
+- 各組織は同ディレクトリに `osi-finance-settings.md` をコピーし、`{{ }}` を実値で埋めて使う
   （`osi-finance-setup` が対話生成します）。
-- **実値版 `keiri-settings.md` はコミットしない**（`.gitignore` の `**/keiri-settings.md` で除外）。
-- 各 keiri スキルの SKILL.md 冒頭に「組織固有値は keiri-settings を参照」の共通注記。
+- **実値版 `osi-finance-settings.md` はコミットしない**（`.gitignore` の `**/osi-finance-settings.md` で除外）。
+- 各 osi-finance スキルの SKILL.md 冒頭に「組織固有値は osi-finance-settings を参照」の共通注記。
 - スキル本文のプロバイダ名は**役割名＋例示**に統一（振込口座〔例: Trunk〕／法人カード〔例: UPSIDER〕）。
   会計SaaS は v1=マネーフォワード固定。
 
@@ -76,21 +76,21 @@
 
 通常は `osi-finance-setup` に任せますが、手動で行う場合は次の通り。
 
-1. `skills/config/keiri-settings.example.md` を `skills/config/keiri-settings.md` にコピー。
+1. `skills/config/osi-finance-settings.example.md` を `skills/config/osi-finance-settings.md` にコピー。
 2. プレースホルダ `{{ }}` を自社の実値で埋める（発行者・振込先・税率・採番・Drive・台帳・支払先マッピング）。
 3. 必要コネクタを接続。
 4. Drive にフォルダ構成を作り、`assets/templates/` の台帳テンプレを配置（ローカル同期推奨）。
-5. 既存台帳の列が `keiri-mf-sync/references/ledger-schema.md` に準拠しているか確認。
+5. 既存台帳の列が `osi-finance-mf-sync/references/ledger-schema.md` に準拠しているか確認。
 6. 日次・月次のスケジュールタスクを登録（`docs/導入ガイド.md` 参照）。
 
 ## バージョン
 
 - v0.6.0：**AR の MF 計上**を追加し、MF を請求(AR)・支払(AP) 双方の単一会計正本化。
-  `keiri-ar-sync`（請求済→売上計上((借)売掛金/(貸)売上+仮受消費税)・入金済→消込((借)普通預金/(貸)売掛金)を
+  `osi-finance-ar-sync`（請求済→売上計上((借)売掛金/(貸)売上+仮受消費税)・入金済→消込((借)普通預金/(貸)売掛金)を
   請求書IDで MF と突合・人レビューのうえ登録。`scripts/build_ar_journal.py`・`references/ar-journal-rules.md` 同梱）を新設。
-  `keiri-monthly` に AR 突合ステップを追加、`keiri-invoice` に「発行と会計計上は分離」注記、
-  `config/keiri-settings.example.md` に「AR 会計設定」（売上高/仮受消費税/売掛金/課税売上税区分/入金普通預金科目・
-  入金bank連携の扱い）を追加。**`keiri-dashboard` を MF 試算表 PL/BS 正本に作り替え**（売上=正しい純損益、
+  `osi-finance-monthly` に AR 突合ステップを追加、`osi-finance-invoice` に「発行と会計計上は分離」注記、
+  `config/osi-finance-settings.example.md` に「AR 会計設定」（売上高/仮受消費税/売掛金/課税売上税区分/入金普通預金科目・
+  入金bank連携の扱い）を追加。**`osi-finance-dashboard` を MF 試算表 PL/BS 正本に作り替え**（売上=正しい純損益、
   売掛金(未回収)=BS、画面を「①今月オペレーション／②履歴・分析」の2用途に分離。売上=0 でも落ちないガード）。
   会計ルール（科目・税区分・計上タイミング）は各社の税理士確認を前提。源泉・値引・貸倒は初期対象外。
 - v0.5.0：Phase 2（品質・運用）。発火eval データセット（`docs/eval/firing-tests.yaml`）＋
@@ -98,7 +98,7 @@
   `osi-finance-setup` の**導入完了レポート**（B表スモークの自動実行・`references/setup-completion-report.md`）、
   共通の**エラー処理ガイド**（`docs/エラー処理ガイド.md`、大容量PDF＝ローカル同期／添付＝Superhuman）を
   各スキル末尾から参照。QAチェックリストの Phase 2 残タスクを反映。
-- v0.4.0：会計ダッシュボード（`keiri-dashboard`、ライブ・アーティファクト）を追加。
+- v0.4.0：会計ダッシュボード（`osi-finance-dashboard`、ライブ・アーティファクト）を追加。
   `docs/QA-リリースチェックリスト.md`（配布前ゲート・導入スモーク・発火テスト・運用安全）を新設。
 - v0.3.0：プロダクト化マイルストーン。`osi-backoffice` → **`osi-finance`** に独立化。
   `osi-finance-setup`（導入オーケストレータ）・`docs/導入ガイド.md`（顧客向け）を新設。

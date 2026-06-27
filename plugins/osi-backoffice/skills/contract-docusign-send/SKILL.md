@@ -11,7 +11,7 @@ description: >
   「契約書レビューして署名依頼」など、契約書の内容確認 → 電子署名送付に関わるリクエストで発動する。
   送付方向は選択式：自社から DocuSign で送る場合と、先方が送付する（自社は内容チェックのみ）場合の両方に対応する。
   ※ 契約書そのものを新規作成するのは nda-creation 等の役割。受領契約 → 請求スケジュール化は
-  osi-finance の keiri-contract-intake。本スキルは「手元の契約書をチェックして送る」ことに特化する。
+  osi-finance の osi-finance-contract-intake。本スキルは「手元の契約書をチェックして送る」ことに特化する。
 requires_connectors:
   - server: docusign
     provision: user-install
@@ -28,7 +28,7 @@ requires_connectors:
 ## 役割と非役割
 
 - やる：契約書の取り込み → 4観点チェックの提示 → 署名者抽出・確認 → DocuSign 封筒作成（ドラフト→送信）→ Drive 格納＋メタ記録。
-- やらない：契約書の新規作成（= `nda-creation` 等）／受領契約の請求スケジュール化（= `osi-finance/keiri-contract-intake`）／法的助言（弁護士ではない旨を添える）。
+- やらない：契約書の新規作成（= `nda-creation` 等）／受領契約の請求スケジュール化（= `osi-finance/osi-finance-contract-intake`）／法的助言（弁護士ではない旨を添える）。
 
 ## 最重要ルール：送信は人が DocuSign から行う（Claude は送信しない）
 
@@ -104,7 +104,7 @@ requires_connectors:
 - **先方が送付**：自社は電子署名の発信者にならない。**DocuSign 封筒・S3 アップロードは行わない。**
   - Step 2 のチェック結果と Step 3 の署名者情報を整理して人に渡す。
   - 必要なら「先方に送付を依頼する文面（メール下書き）」を作る（誰が・どのアドレスに送るか、署名者は誰か）。
-  - 受領後の契約は `30.契約管理/` への格納（または `osi-finance/keiri-contract-intake`）で扱う。Step 6（格納）は受領後に実施。
+  - 受領後の契約は `30.契約管理/` への格納（または `osi-finance/osi-finance-contract-intake`）で扱う。Step 6（格納）は受領後に実施。
   - この場合は Step 4・5 を**スキップ**して Step 6/7 へ。
 
 ### Step 4. S3 へアップロードして署名付きURLを発行（自社送付の場合のみ）

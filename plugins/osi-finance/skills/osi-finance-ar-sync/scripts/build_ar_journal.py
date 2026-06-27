@@ -9,12 +9,12 @@
 MF仕様に合わせ、消費税は税区分で自動計算される前提（仮受消費税の別行は作らない）。
 売上行の金額は税込。借方合計(税込)＝貸方合計。
 勘定科目ID・税区分ID・取引先コードは実行時に Claude がマスタ突合で解決する
-（ここでは keiri-settings の AR 会計設定の名称をそのまま account/tax_class に入れる）。
-売掛金科目・売上高科目・課税売上税区分・入金普通預金科目は keiri-settings から渡す。
+（ここでは osi-finance-settings の AR 会計設定の名称をそのまま account/tax_class に入れる）。
+売掛金科目・売上高科目・課税売上税区分・入金普通預金科目は osi-finance-settings から渡す。
 """
 import sys, json
 
-# keiri-settings の AR 会計設定（既定名称。実行時に実値で上書き可）
+# osi-finance-settings の AR 会計設定（既定名称。実行時に実値で上書き可）
 ACC_AR = "売掛金"        # AR_ACCOUNTS_RECEIVABLE
 ACC_SALES = "売上高"      # AR_SALES_ACCOUNT
 ACC_DEPOSIT = "普通預金"  # AR_DEPOSIT_ACCOUNT

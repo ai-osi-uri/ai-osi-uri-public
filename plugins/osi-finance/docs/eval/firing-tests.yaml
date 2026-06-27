@@ -17,7 +17,7 @@
 plugin: osi-finance
 
 skills:
-  keiri-contract-intake:
+  osi-finance-contract-intake:
     fire:
       - "契約を取り込んで"
       - "新しい契約を請求スケジュールに反映"
@@ -25,10 +25,10 @@ skills:
       - "契約書フォルダを整理して請求予定を作って"
       - "契約起点で請求準備をして"
     no_fire:
-      - { phrase: "今月の請求書を作って", target: keiri-invoice }
-      - { phrase: "この請求書払って", target: keiri-payment-intake }
+      - { phrase: "今月の請求書を作って", target: osi-finance-invoice }
+      - { phrase: "この請求書払って", target: osi-finance-payment-intake }
 
-  keiri-invoice:
+  osi-finance-invoice:
     fire:
       - "今月の請求書を作って"
       - "サンプル社の請求書を発行"
@@ -36,10 +36,10 @@ skills:
       - "月初の請求書ドラフトを出して"
       - "請求書PDFを生成してメール下書きにして"
     no_fire:
-      - { phrase: "契約を取り込んで", target: keiri-contract-intake }
-      - { phrase: "受け取った請求書を支払管理台帳に入れて", target: keiri-payment-intake }
+      - { phrase: "契約を取り込んで", target: osi-finance-contract-intake }
+      - { phrase: "受け取った請求書を支払管理台帳に入れて", target: osi-finance-payment-intake }
 
-  keiri-payment-intake:
+  osi-finance-payment-intake:
     fire:
       - "この請求書払って"
       - "サンプル社の請求書を支払予定に"
@@ -47,10 +47,10 @@ skills:
       - "振込で払う請求書を起票して"
       - "受け取った請求書を支払管理台帳に入れて"
     no_fire:
-      - { phrase: "今月の請求書を作って", target: keiri-invoice }
-      - { phrase: "受領請求書の取りこぼしを検出", target: keiri-payment-detect }
+      - { phrase: "今月の請求書を作って", target: osi-finance-invoice }
+      - { phrase: "受領請求書の取りこぼしを検出", target: osi-finance-payment-detect }
 
-  keiri-payment-detect:
+  osi-finance-payment-detect:
     fire:
       - "受領請求書の取りこぼしを検出"
       - "新着請求書を支払予定に"
@@ -58,10 +58,10 @@ skills:
       - "払い漏れチェックして"
       - "今朝届いた請求書を確認"
     no_fire:
-      - { phrase: "この請求書払って", target: keiri-payment-intake }
-      - { phrase: "今月の請求書を作って", target: keiri-invoice }
+      - { phrase: "この請求書払って", target: osi-finance-payment-intake }
+      - { phrase: "今月の請求書を作って", target: osi-finance-invoice }
 
-  keiri-mf-sync:
+  osi-finance-mf-sync:
     fire:
       - "台帳とMFを突合して"
       - "計上漏れを確認"
@@ -69,10 +69,10 @@ skills:
       - "未計上の支払いを探して"
       - "支払済がMFに入っているか確認"
     no_fire:
-      - { phrase: "受領請求書を台帳に起票", target: keiri-payment-intake }
-      - { phrase: "今月の経理を締めて", target: keiri-monthly }
+      - { phrase: "受領請求書を台帳に起票", target: osi-finance-payment-intake }
+      - { phrase: "今月の経理を締めて", target: osi-finance-monthly }
 
-  keiri-ar-sync:
+  osi-finance-ar-sync:
     fire:
       - "請求をMFに計上"
       - "売上を会計連携"
@@ -80,10 +80,10 @@ skills:
       - "入金消込をMFに"
       - "請求台帳とMFを売上で突合"
     no_fire:
-      - { phrase: "支払済がMFに入っているか確認", target: keiri-mf-sync }
-      - { phrase: "今月の請求書を作って", target: keiri-invoice }
+      - { phrase: "支払済がMFに入っているか確認", target: osi-finance-mf-sync }
+      - { phrase: "今月の請求書を作って", target: osi-finance-invoice }
 
-  keiri-monthly:
+  osi-finance-monthly:
     fire:
       - "今月の経理を締めて"
       - "月次クローズ"
@@ -91,10 +91,10 @@ skills:
       - "先月分の仕訳をレビュー"
       - "未払金を検算して"
     no_fire:
-      - { phrase: "今月の請求書を作って", target: keiri-invoice }
-      - { phrase: "この請求書払って", target: keiri-payment-intake }
+      - { phrase: "今月の請求書を作って", target: osi-finance-invoice }
+      - { phrase: "この請求書払って", target: osi-finance-payment-intake }
 
-  keiri-dashboard:
+  osi-finance-dashboard:
     fire:
       - "会計ダッシュボードを作って"
       - "今月の請求状況・支払状況・経費状況を一覧で見たい"
@@ -102,8 +102,8 @@ skills:
       - "請求と支払と経費をまとめて管理したい"
       - "損益と費用の内訳を見せて"
     no_fire:
-      - { phrase: "今月の請求書を作って", target: keiri-invoice }
-      - { phrase: "この請求書払って", target: keiri-payment-intake }
+      - { phrase: "今月の請求書を作って", target: osi-finance-invoice }
+      - { phrase: "この請求書払って", target: osi-finance-payment-intake }
 
   osi-finance-setup:
     fire:
@@ -111,7 +111,7 @@ skills:
       - "経理を初期セットアップして"
       - "OSI Finance をセットアップ"
       - "請求支払台帳を立ち上げて"
-      - "keiri-settings を作りたい"
+      - "osi-finance-settings を作りたい"
     no_fire:
-      - { phrase: "今月の請求書を作って", target: keiri-invoice }
-      - { phrase: "契約を取り込んで", target: keiri-contract-intake }
+      - { phrase: "今月の請求書を作って", target: osi-finance-invoice }
+      - { phrase: "契約を取り込んで", target: osi-finance-contract-intake }

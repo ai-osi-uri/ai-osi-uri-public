@@ -1,5 +1,5 @@
 ---
-name: keiri-payment-intake
+name: osi-finance-payment-intake
 description: >
   受領請求書（AP）を「①受領・格納 → ②読取・科目/税区分判定 → ③支払管理台帳に支払予定を起票
   （人レビュー必須）→ ④振込情報の整形提示」まで進めるオンデマンド・スキル。**振込（振込口座から実行・例: Trunk）で
@@ -9,8 +9,8 @@ description: >
   **送金しない／台帳の自動確定をしない**（人がレビュー・振込口座で振込実行）。
   「この請求書払って」「○○社の請求書を支払予定に」「受領請求書を台帳に起票」「振込で払う請求書を
   起票」「受け取った請求書を支払管理台帳に入れて」「請求書PDFを読み取って支払予定にして」などで発動。
-  月次クローズ・突合は keiri-monthly / keiri-mf-sync、自社の請求書発行（AR）は keiri-invoice、
-  契約取込は keiri-contract-intake の役割（本スキルは行わない）。日次の取りこぼし検出は keiri-payment-detect。
+  月次クローズ・突合は osi-finance-monthly / osi-finance-mf-sync、自社の請求書発行（AR）は osi-finance-invoice、
+  契約取込は osi-finance-contract-intake の役割（本スキルは行わない）。日次の取りこぼし検出は osi-finance-payment-detect。
 requires_connectors:
   - server: superhuman
     provision: user-install
@@ -19,10 +19,10 @@ requires_connectors:
 
 ---
 
-# keiri-payment-intake（受領請求書 → 支払予定 起票）
+# osi-finance-payment-intake（受領請求書 → 支払予定 起票）
 
 > **組織固有値（社名・登録番号・振込先・税率・採番ルール・Drive ルート／フォルダ名・台帳ファイル名・
-> 支払先→科目マッピング等）は `config/keiri-settings.md`（テンプレ：`config/keiri-settings.example.md`）
+> 支払先→科目マッピング等）は `config/osi-finance-settings.md`（テンプレ：`config/osi-finance-settings.example.md`）
 > を参照する。** 実値版が無ければユーザーに作成を案内する。
 
 サミダレで届く受領請求書（AP）を、人がレビューして振込口座（例: Trunk）で振り込む一歩手前まで整える。
@@ -32,21 +32,21 @@ requires_connectors:
 
 - **振込（振込口座から実行・例: Trunk）で払う受領請求書のみ対象。** カード払い（自動課金SaaS含む）は対象外＝台帳に起票しない。
   カードは会計側のカード連携（法人カード・例: UPSIDER）が自動仕訳するため、台帳に入れると **会計SaaSで二重計上**になる。
-  カード払いの証憑は `keiri-settings` の `カードSaaS証憑` フォルダに**保存のみ**。
+  カード払いの証憑は `osi-finance-settings` の `カードSaaS証憑` フォルダに**保存のみ**。
 - **支払先マスタの正本＝支払管理台帳。** 照合は台帳基準（MFの getTradePartners は補助）。
   台帳の支払先マスタに「既定の支払方法（振込／カード）」を持たせ、それで振込／カードを振り分ける。
   新規・不明な相手はその場で確認する。
 - 入口は3系統（どれでも同じ処理に合流する）：
   - (a) **Cowork 直接アップロード（推奨・サミダレ運用の主役）** … ユーザーが請求書PDFを Cowork にドロップして
     「この請求書を支払予定に起票して」と言う。アップロードされた PDF をその場で読み、Drive の受領請求書フォルダに格納してから処理する。
-  - (b) **Drive 手置き** … `keiri-settings` の `受領請求書` フォルダに置かれた PDF。
+  - (b) **Drive 手置き** … `osi-finance-settings` の `受領請求書` フォルダに置かれた PDF。
   - (c) **メール添付** … Superhuman `get_attachment` で取引先からの請求書PDF添付を取得（完了メール等に添付）。
 
 ## 役割と非役割
 
 - やる：受領・格納 → 読取 → 支払先マッチング → 科目・税区分判定 → 台帳に支払予定起票（人レビュー）→ 振込情報の整形提示。
-- やらない：**送金実行**（人が振込口座（例: Trunk）で実施）、会計仕訳の自動投入（= keiri-mf-sync / keiri-monthly が担う）、
-  AR 請求書の発行（= keiri-invoice）、契約取込・請求スケジュール展開（= keiri-contract-intake）。
+- やらない：**送金実行**（人が振込口座（例: Trunk）で実施）、会計仕訳の自動投入（= osi-finance-mf-sync / osi-finance-monthly が担う）、
+  AR 請求書の発行（= osi-finance-invoice）、契約取込・請求スケジュール展開（= osi-finance-contract-intake）。
 - **台帳の自動確定はしない。** 起票は「案」を提示し、人の確認後に反映する。
 
 ## 前提コネクタ
@@ -72,13 +72,13 @@ requires_connectors:
 - インボイス登録番号（T＋13桁）、源泉の有無
 
 ### 3. 支払先マッチング
-台帳の支払先マスタに照合し、支払先ID（例: `V-013`、形式は `keiri-settings` の採番ルール）を特定する。
+台帳の支払先マスタに照合し、支払先ID（例: `V-013`、形式は `osi-finance-settings` の採番ルール）を特定する。
 - 新規の支払先は採番候補を提案する（**人確認**のうえ確定）。
 - **既定の支払方法がカード**なら → 「**カード払い → 台帳起票せず、証憑を `カードSaaS証憑` に保存のみ**」で終了。
   （理由：会計側のカード連携が自動仕訳するため。台帳に入れると二重計上になる。）
 
 ### 4. 科目・税区分判定
-`keiri-monthly/references/monthly-rules.md`（判断辞書）と `keiri-settings` の支払先→科目マッピングに従い、
+`osi-finance-monthly/references/monthly-rules.md`（判断辞書）と `osi-finance-settings` の支払先→科目マッピングに従い、
 **勘定科目・税区分(MF)・インボイス区分・源泉**を判定する。迷うものは「要確認」とし確定しない。
 - **1枚に複数科目が混在する請求書**（例：社宅契約の初期費用＝賃料＋敷金＋礼金＋保証料）は、**明細ごとに行を分けて起票**する
   （地代家賃／差入保証金／長期前払費用 等）。不動産・社宅・非課税まわりは monthly-rules の「不動産/社宅系」を参照（敷金=差入保証金、
@@ -89,12 +89,12 @@ requires_connectors:
 - 請求書ID＝`支払先ID + 対象月(YYYYMM) + 請求書番号`、状態＝`未払い`、MF連携状態＝`未連携`、
   請求書ファイルのパスを記録。新規支払先は「支払先マスタ」にも1行（支払先ID採番＋振込先口座）を加える。
 - **金額・科目・税区分・期日を一覧で提示し、人が確認・修正してから台帳へ反映**する。
-- 列は `keiri-mf-sync/references/ledger-schema.md` の「月次支払管理」に準拠（下記§台帳列）。
+- 列は `osi-finance-mf-sync/references/ledger-schema.md` の「月次支払管理」に準拠（下記§台帳列）。
 
 **台帳への書き込み方法（台帳の種類で分岐）**
 - **(推奨) ネイティブ Google スプレッドシート台帳**：`AI OSI URI Deploy` 拡張の `sheets_append_row` で自動追記できる。
   手順：①`sheets_get_values` で対象列（請求書番号・支払先ID）を読み**重複が無いか確認** → ②人が起票案をOK → ③`sheets_append_row`
-  で「支払先マスタ（新規時）」「月次支払管理」に行を追記 → ④`sheets_get_values` で入った行を検算。台帳IDは `keiri-settings` の
+  で「支払先マスタ（新規時）」「月次支払管理」に行を追記 → ④`sheets_get_values` で入った行を検算。台帳IDは `osi-finance-settings` の
   `LEDGER_PAYMENT_SHEET_ID`。**前提**：対象シートをサービスアカウントのメールに「編集者」で共有済み（README参照）。
 - **xlsx 台帳（連携が無い場合）**：機械的な上書きは数式・書式を壊すため行わず、**起票する行（タブ区切り）を提示してユーザーが貼り付け**る。
 - いずれも**確定は人**（案→確認→反映）。
@@ -105,7 +105,7 @@ requires_connectors:
 
 ### 7. 支払後更新（任意・頼まれたら）
 支払が済んだら、状態＝`支払済`・支払日 を記入する。
-以後は `keiri-mf-sync` が MF と突合し、`keiri-monthly` が月次クローズで処理する。
+以後は `osi-finance-mf-sync` が MF と突合し、`osi-finance-monthly` が月次クローズで処理する。
 
 ## 台帳列（「月次支払管理」／ledger-schema 準拠）
 
@@ -115,16 +115,16 @@ requires_connectors:
 ## 境界（重複防止のための線引き）
 
 - **振込のみ起票**。カードは起票せず証憑保存のみ（会計のカード連携が自動仕訳）。
-- 月次クローズ・台帳⇔MFの突合は **keiri-monthly / keiri-mf-sync**（本スキルは起票まで）。
-- 自社の請求書発行（AR）・入金は **keiri-invoice**（本スキルは受領＝AP 専用）。
-- 契約取込・請求スケジュール展開は **keiri-contract-intake**。
-- 日次の受領請求書 取りこぼし検出は **keiri-payment-detect**（本スキルはオンデマンド起票）。
+- 月次クローズ・台帳⇔MFの突合は **osi-finance-monthly / osi-finance-mf-sync**（本スキルは起票まで）。
+- 自社の請求書発行（AR）・入金は **osi-finance-invoice**（本スキルは受領＝AP 専用）。
+- 契約取込・請求スケジュール展開は **osi-finance-contract-intake**。
+- 日次の受領請求書 取りこぼし検出は **osi-finance-payment-detect**（本スキルはオンデマンド起票）。
 
 ## 留意
 
 - 送金しない／台帳を自動確定しない。起票は案、確定は人。
 - 読めない値は推測せず「要確認」。新規・不明な支払先はその場で確認。
-- 機微値（実口座・登録番号・支払先名）はスキルに直書きせず `keiri-settings` から読む。
+- 機微値（実口座・登録番号・支払先名）はスキルに直書きせず `osi-finance-settings` から読む。
 
 ## エラー処理
 

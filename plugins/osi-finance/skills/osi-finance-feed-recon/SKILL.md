@@ -1,5 +1,5 @@
 ---
-name: keiri-feed-recon
+name: osi-finance-feed-recon
 description: >
   OSI Finance の経理で、マネーフォワード クラウド会計の「連携明細（未仕訳）」を棚卸しして整理するスキル
   （連携明細の入口整理役）。銀行・法人カードの口座連携が取り込んだ未仕訳を取得し、①既存仕訳（手入力の
@@ -9,7 +9,7 @@ description: >
   MCPの振替伝票で行い、二重計上を防ぐ。「未仕訳を整理して」「連携明細を棚卸しして」「未仕訳の重複を
   対象外に」「大型入金が売上になってる」「一括登録していい？」「銀行連携の未仕訳88件をどうする」
   「出資/借入が売上高に推定されてる」など、MF連携明細（未仕訳）の整理に関わるリクエストで発動する。
-  会計の正本はMFの口座連携明細、台帳は資金管理という前提。keiri-mf-sync(AP突合)・keiri-ar-sync(AR突合)と
+  会計の正本はMFの口座連携明細、台帳は資金管理という前提。osi-finance-mf-sync(AP突合)・osi-finance-ar-sync(AR突合)と
   並ぶ、連携明細を入口で仕分けるスキル。
 version: 0.1.0
 requires_connectors:
@@ -18,10 +18,10 @@ requires_connectors:
 
 ---
 
-# 経理：MF連携明細（未仕訳）の棚卸し・振り分けスキル（keiri-feed-recon）
+# 経理：MF連携明細（未仕訳）の棚卸し・振り分けスキル（osi-finance-feed-recon）
 
 > **組織固有値（会計年度・支払先/取引先・科目マッピング等）は
-> `config/keiri-settings.md`（テンプレ：`config/keiri-settings.example.md`）を参照する。
+> `config/osi-finance-settings.md`（テンプレ：`config/osi-finance-settings.example.md`）を参照する。
 > 分類辞書・作法は `references/recon-rules.md` を正本にする。**
 
 銀行・法人カードの口座連携がMFに取り込んだ「未仕訳（連携明細）」を棚卸しし、各明細を
@@ -32,7 +32,7 @@ requires_connectors:
 ## 全体の位置づけ（重要）
 
 - **会計の正本＝MFの口座連携明細**（銀行・法人カード）。本スキルはその未仕訳を仕分ける入口役。
-- keiri-mf-sync は「台帳の支払済 ⇔ MF仕訳」（AP突合）、keiri-ar-sync は「台帳の請求/入金 ⇔ MF仕訳」（AR突合）。
+- osi-finance-mf-sync は「台帳の支払済 ⇔ MF仕訳」（AP突合）、osi-finance-ar-sync は「台帳の請求/入金 ⇔ MF仕訳」（AR突合）。
   本スキルは**その手前**で、連携明細そのものを「これは重複/これは登録すべき/これは要確認」に分ける。
 - **MFのAI自動推定科目は信用しない。** 特に大型の入金を「売上高/売掛金」と誤推定する。**一括登録ボタンは押さない。**
 
@@ -82,7 +82,7 @@ requires_connectors:
 - **出資（増資）** → 登記前は (貸)新株式申込証拠金、登記後に資本金/資本準備金へ振替。**司法書士/税理士確認。**
 - **貸付金の回収** → (借)普通預金／(貸)短期貸付金（取崩し）。
 - **保証金の差入/返戻** → 差入：(借)差入保証金／(貸)普通預金。返戻はその逆。
-- **顧客入金（AR）** → (借)普通預金／(貸)売掛金（売掛金が無ければ先に keiri-ar-sync で売上計上）。
+- **顧客入金（AR）** → (借)普通預金／(貸)売掛金（売掛金が無ければ先に osi-finance-ar-sync で売上計上）。
 
 ## 二重計上を絶対に避ける（要）
 

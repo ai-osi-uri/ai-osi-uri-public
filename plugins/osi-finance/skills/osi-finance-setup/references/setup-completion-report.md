@@ -18,13 +18,13 @@ QA-リリースチェックリスト.md「B. 導入直後スモークテスト�
 
 | # | 項目 | 結果 | メモ（件数・要対応の内容。機微値は書かない） |
 |---|---|---|---|
-| 1 | `keiri-settings.md` 生成（社名・税率・採番・Driveルート） | {OK/要対応} | {例: 支払先マッピングは後追い} |
+| 1 | `osi-finance-settings.md` 生成（社名・税率・採番・Driveルート） | {OK/要対応} | {例: 支払先マッピングは後追い} |
 | 2 | Drive フォルダ作成（契約書／受領請求書／送付請求書／カードSaaS証憑） | {OK/要対応} | {作成 or 既存再利用} |
 | 3 | 台帳テンプレ配置（請求管理台帳／支払管理台帳） | {OK/要対応/スキップ} | {既存ありで上書き回避なら スキップ} |
-| 4 | 請求(AR)：keiri-invoice 当月ドライラン | {OK/要対応} | {当月の未請求 N 件／合計 ¥X（0件も可）} |
-| 5 | 受領検出(AP)：keiri-payment-detect | {OK/要対応} | {新着 N 件／新着なし} |
-| 6 | 突合(AP)：keiri-mf-sync 計上漏れ0確認 | {OK/要対応} | {計上漏れ N 件} |
-| 7 | ダッシュボード：keiri-dashboard 描画・AR数値 | {OK/要対応} | {費用構成・純損益・AR が出たか} |
+| 4 | 請求(AR)：osi-finance-invoice 当月ドライラン | {OK/要対応} | {当月の未請求 N 件／合計 ¥X（0件も可）} |
+| 5 | 受領検出(AP)：osi-finance-payment-detect | {OK/要対応} | {新着 N 件／新着なし} |
+| 6 | 突合(AP)：osi-finance-mf-sync 計上漏れ0確認 | {OK/要対応} | {計上漏れ N 件} |
+| 7 | ダッシュボード：osi-finance-dashboard 描画・AR数値 | {OK/要対応} | {費用構成・純損益・AR が出たか} |
 | 8 | コネクタ疎通（MF／Drive＋ローカル同期／メール） | {OK/要対応} | {未接続: …} |
 | 9 | 日次/月次タスク「Run now」で許可先取り | {OK/要対応/未実施} | {登録/案内した周期} |
 
@@ -40,6 +40,6 @@ QA-リリースチェックリスト.md「B. 導入直後スモークテスト�
 
 ### 次の一手（日常運用への引き継ぎ）
 
-- 「契約を取り込んで」→ keiri-contract-intake／「今月の請求書を作って」→ keiri-invoice
-- 「この請求書払って」→ keiri-payment-intake／「今月の経理を締めて」→ keiri-monthly
+- 「契約を取り込んで」→ osi-finance-contract-intake／「今月の請求書を作って」→ osi-finance-invoice
+- 「この請求書払って」→ osi-finance-payment-intake／「今月の経理を締めて」→ osi-finance-monthly
 - 詰まったら `docs/エラー処理ガイド.md` を参照（大容量PDF＝ローカル同期／添付＝Superhuman）。

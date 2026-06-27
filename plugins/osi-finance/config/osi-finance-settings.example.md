@@ -1,10 +1,10 @@
-# keiri-settings（組織固有値テンプレート）— EXAMPLE
+# osi-finance-settings（組織固有値テンプレート）— EXAMPLE
 
 このファイルは **配布用テンプレート（プレースホルダ）** です。各組織は本ファイルを
-同ディレクトリに `keiri-settings.md` としてコピーし、`{{ }}` を自社の実値で埋めて使います。
-**実値版 `keiri-settings.md` はコミットしないこと**（`.gitignore` で除外済み）。
+同ディレクトリに `osi-finance-settings.md` としてコピーし、`{{ }}` を自社の実値で埋めて使います。
+**実値版 `osi-finance-settings.md` はコミットしないこと**（`.gitignore` で除外済み）。
 
-OSI Finance（osi-finance）の各 keiri スキル（contract-intake / invoice / payment-intake /
+OSI Finance（osi-finance）の各 osi-finance スキル（contract-intake / invoice / payment-intake /
 payment-detect / mf-sync / monthly）は、社名・登録番号・振込先・税率・採番ルール・
 Drive ルート・台帳ファイル名などの**組織固有値をすべてこのファイルから読む**前提です。
 各 references（invoice-issuer / monthly-rules / ledger-schema）の具体値も、原則ここを正本とし、
@@ -49,7 +49,7 @@ references 側には「汎用ロジック・判断基準」だけを残します
 
 ## 4-2. AR 会計設定（売上・売掛金・入金消込のMF計上に使う）
 
-`keiri-ar-sync`（請求済→売上計上／入金済→消込のMF突合・登録）が参照する勘定科目・税区分。
+`osi-finance-ar-sync`（請求済→売上計上／入金済→消込のMF突合・登録）が参照する勘定科目・税区分。
 科目・税区分名は MF の getAccounts / getTaxes の**実在名**に合わせる（実行時にIDへ解決する）。
 
 | キー | 値 | 用途 |
@@ -63,8 +63,8 @@ references 側には「汎用ロジック・判断基準」だけを残します
 
 > **入金bank連携の扱い（AR_BANK_LINK_HANDLING）**
 > - `連携側を売掛金消込に振替`：MF銀行連携が入金を自動仕訳する場合、その仕訳を (借)普通預金/(貸)売掛金 に
->   振り替える。`keiri-ar-sync` は消込仕訳を**作らない**（入金消込は突合上「除外」。二重計上防止）。
-> - `台帳から消込`：銀行連携が入金を自動仕訳しない（または別科目で入る）場合、`keiri-ar-sync` が
+>   振り替える。`osi-finance-ar-sync` は消込仕訳を**作らない**（入金消込は突合上「除外」。二重計上防止）。
+> - `台帳から消込`：銀行連携が入金を自動仕訳しない（または別科目で入る）場合、`osi-finance-ar-sync` が
 >   台帳の入金済から (借)普通預金/(貸)売掛金 の消込仕訳をレビューのうえ登録する。
 >
 > **計上タイミング**：売上は請求発生時＝対象月末で計上（発生主義）。過去分は遡及計上（計上月は要確認）。
@@ -94,7 +94,7 @@ references 側には「汎用ロジック・判断基準」だけを残します
 
 > **台帳を自動追記したい場合**：台帳をネイティブ Google スプレッドシートにし、上記の各 `..._SHEET_ID` を入れる。
 > `AI OSI URI Deploy` 拡張の `sheets_append_row`（要：対象シートをサービスアカウントのメールに「編集者」で共有）で、
-> keiri スキルが行を自動追記できる（重複は `sheets_get_values` で事前確認、確定は人）。未設定なら xlsx へ貼り付け運用。
+> osi-finance スキルが行を自動追記できる（重複は `sheets_get_values` で事前確認、確定は人）。未設定なら xlsx へ貼り付け運用。
 
 > **支払先マスタの正本＝支払管理台帳**。各支払先に「既定の支払方法（振込／カード）」列を持たせ、
 > 振込（Trunk 等）／カード（自動課金）の振り分けに使う（payment-intake / payment-detect が参照）。
@@ -102,7 +102,7 @@ references 側には「汎用ロジック・判断基準」だけを残します
 ## 7. 判断辞書（科目マッピング）の所在
 
 科目・税区分・インボイス・源泉の判断辞書は
-`plugins/osi-finance/skills/keiri-monthly/references/monthly-rules.md` を参照する。
+`plugins/osi-finance/skills/osi-finance-monthly/references/monthly-rules.md` を参照する。
 **判断ロジック・税区分ルールは汎用**だが、**自社固有の「支払先→勘定科目」対応表**は
 組織ごとに異なるため、その実値は下表に定義する（monthly-rules の `例:` 表は雛形）。
 
@@ -129,8 +129,8 @@ references 側には「汎用ロジック・判断基準」だけを残します
 
 ## 運用メモ
 
-- 本テンプレ（`.example`）は配布対象。実値版 `keiri-settings.md` は各組織がローカルで作成し、
-  Git にはコミットしない（`**/keiri-settings.md` を `.gitignore` で除外）。
-- スキルから「組織固有値」を参照する場合は、まず実値版 `keiri-settings.md` を読み、
-  無ければユーザーに「keiri-settings.md を作成してください」と案内する。
+- 本テンプレ（`.example`）は配布対象。実値版 `osi-finance-settings.md` は各組織がローカルで作成し、
+  Git にはコミットしない（`**/osi-finance-settings.md` を `.gitignore` で除外）。
+- スキルから「組織固有値」を参照する場合は、まず実値版 `osi-finance-settings.md` を読み、
+  無ければユーザーに「osi-finance-settings.md を作成してください」と案内する。
 - 機微値（実口座番号・登録番号・実在支払先名など）は**この `.example` には書かない**。

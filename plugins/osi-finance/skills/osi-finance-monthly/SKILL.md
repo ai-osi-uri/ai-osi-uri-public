@@ -1,5 +1,5 @@
 ---
-name: keiri-monthly
+name: osi-finance-monthly
 description: >
   OSI Finance の月次経理クローズを進めるオーケストレータ・スキル。来月以降、毎月の経理を
   「①口座連携明細の取込確認 → ②カード/銀行明細の仕訳化 → ③台帳とMFの突合（漏れ検出）→
@@ -15,11 +15,11 @@ requires_connectors:
 
 ---
 
-# 月次経理クローズ（keiri-monthly）
+# 月次経理クローズ（osi-finance-monthly）
 
 > **組織固有値（台帳ファイル名・支払先→科目マッピング・採番ルール・Drive ルート等）は
-> `config/keiri-settings.md`（テンプレ：`config/keiri-settings.example.md`）を参照する。**
-> 判断辞書（`references/monthly-rules.md`）は汎用ロジック、自社の実値は keiri-settings 側に持つ。
+> `config/osi-finance-settings.md`（テンプレ：`config/osi-finance-settings.example.md`）を参照する。**
+> 判断辞書（`references/monthly-rules.md`）は汎用ロジック、自社の実値は osi-finance-settings 側に持つ。
 
 毎月の経理を一定の順序と判断ルールで回すオーケストレータ。会計仕訳の発生源はMFの口座連携明細
 （銀行・法人カード〔例: UPSIDER〕）、支払管理台帳は資金管理（支払予定）の正本、という役割分担を前提とする。
@@ -37,8 +37,8 @@ requires_connectors:
 2. 仕訳化：未仕訳の明細を「自動で仕訳」で登録（判断辞書に沿って科目・税区分・インボイス）
    - カード利用 → (借)経費/(貸)未払金   ／ 引き落とし → (借)未払金/(貸)普通預金(対象外)
    - 振込支払（業務委託・地代家賃・貸付等）→ 銀行明細から科目判定
-3. 突合：keiri-mf-sync を使い、台帳の支払済とMF仕訳を請求書IDで照合 → 計上漏れ/未計上/除外を報告（AP）
-3b. AR突合：keiri-ar-sync を使い、当月の請求済→売上計上・入金済→消込の漏れをMFと請求書IDで照合 → 計上漏れを報告（AR）
+3. 突合：osi-finance-mf-sync を使い、台帳の支払済とMF仕訳を請求書IDで照合 → 計上漏れ/未計上/除外を報告（AP）
+3b. AR突合：osi-finance-ar-sync を使い、当月の請求済→売上計上・入金済→消込の漏れをMFと請求書IDで照合 → 計上漏れを報告（AR）
 4. 検算：残高試算表(getReportsTrialBalanceBalanceSheet)で
    - 未払金 ＝ カードの未精算残（利用累計 − 引き落とし累計）と整合するか
    - 仮払消費税・各経費・貸付金などに異常がないか（前月比）
@@ -58,9 +58,9 @@ requires_connectors:
 - **振込支払** … 業務委託料・地代家賃・支払報酬・短期貸付金 等を支払先別ルールで判定。
 
 > **未仕訳が大量／初回連携／手入力バックフィルとの重複／大型入金が「売上高」に誤推定 等で
-> 棚卸しが要るときは `keiri-feed-recon` を呼ぶ**（連携明細を「対象外／登録／要確認」に振り分ける入口役）。
+> 棚卸しが要るときは `osi-finance-feed-recon` を呼ぶ**（連携明細を「対象外／登録／要確認」に振り分ける入口役）。
 > 連携明細の対象外/登録はMF画面専用（MCP不可）。**MFのAI推定は鵜呑みにせず「一括登録」は押さない**。
-> 詳細は `references/monthly-rules.md` の §9・§10 と `keiri-feed-recon/references/recon-rules.md`。
+> 詳細は `references/monthly-rules.md` の §9・§10 と `osi-finance-feed-recon/references/recon-rules.md`。
 
 **登録の作法（今回の教訓・重要）**
 - 摘要に必ずキー（請求書ID/加盟店+月）を入れる。重複・突合の生命線。
@@ -69,14 +69,14 @@ requires_connectors:
 - MCPには**仕訳の削除機能がない**。重複したらMF画面で該当番号を削除する。
 - **当会計年度外（例：前期＝2026/03以前）の取引日はpostできない**（期間外エラー）。前期分は別処理。
 
-## Step 3: 突合（keiri-mf-sync・AP）
+## Step 3: 突合（osi-finance-mf-sync・AP）
 
-`keiri-mf-sync` を呼び、台帳の支払済とMF仕訳を摘要キーで照合する。
+`osi-finance-mf-sync` を呼び、台帳の支払済とMF仕訳を摘要キーで照合する。
 「計上済／未計上（漏れ）／除外（カード・貸付）」を出し、未計上があればレビューのうえ登録する。
 
-## Step 3b: AR突合（keiri-ar-sync・AR）
+## Step 3b: AR突合（osi-finance-ar-sync・AR）
 
-`keiri-ar-sync` を呼び、当月の請求管理台帳「請求済→売上計上((借)売掛金/(貸)売上+仮受消費税)」・
+`osi-finance-ar-sync` を呼び、当月の請求管理台帳「請求済→売上計上((借)売掛金/(貸)売上+仮受消費税)」・
 「入金済→消込((借)普通預金/(貸)売掛金)」とMF仕訳を請求書ID(INV-…)で照合する。
 「計上済／未計上（漏れ）／除外（銀行連携が消込する振替運用時）」を出し、未計上があればレビューのうえ登録する。
 これでMFが請求(AR)・支払(AP) 双方の単一会計正本になる（売上=0 の片肺記帳を是正）。
@@ -111,5 +111,5 @@ requires_connectors:
 詳細は **[`docs/エラー処理ガイド.md`](../../docs/エラー処理ガイド.md)** を正本とする。本スキルで詰まりやすい点：
 
 - 本スキルは各処理（取込確認→仕訳化→突合→検算→報告）を順に回すオーケストレータ。**いずれかのステップで詰まったら、そのステップ名を明示して止める**（後続を見切り発車しない）。
-- **MF の対象事業者・期間ズレ**、**大容量台帳の Drive 読取失敗**は keiri-mf-sync と同じ対処（社名確認／ローカル同期）。
+- **MF の対象事業者・期間ズレ**、**大容量台帳の Drive 読取失敗**は osi-finance-mf-sync と同じ対処（社名確認／ローカル同期）。
 - **送金しない／台帳の自動確定はしない。**会計の最終判断は人（必要なら税理士）。
