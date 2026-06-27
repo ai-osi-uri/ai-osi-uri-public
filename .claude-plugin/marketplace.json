@@ -13,15 +13,16 @@
     {
       "name": "osi-creative",
       "source": "./plugins/osi-creative",
-      "description": "AI 動画制作と出資お礼メッセージ生成。汎用クリエイティブスキル集。",
-      "version": "0.2.1",
+      "description": "AI 動画制作・日本語音声ナレーション（narration）と出資お礼メッセージ生成。汎用クリエイティブスキル集。",
+      "version": "0.3.0",
       "category": "creative",
       "tags": [
         "ai-video",
         "fal.ai",
         "elevenlabs",
         "thank-you",
-        "investor"
+        "investor",
+        "narration"
       ],
       "strict": false
     },

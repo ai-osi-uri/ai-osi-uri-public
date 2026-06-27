@@ -1,7 +1,7 @@
 ---
 name: vp-corporate-narrated
 description: AI動画の「ナレ付き企業動画」メソッド。IR・採用・PR・会社説明・ピッチなど、起承転結の12シーン構成＋ナレーション＋字幕＋BGMで2〜3分尺に仕上げる。中核は「①12シーンの台本を設計し ②各シーンの画像起点プロンプトを書き ③ナレ原稿をTTS最適化（感情タグ＋誤読対策）で書く」こと。書いた台本・プロンプト・ナレ原稿は vp-core の承認ゲートに通し、承認後に生成→ナレ→字幕→ffmpeg合成→BGMミックスする。「採用動画」「会社説明動画」「IR動画」「PR動画」「ピッチ動画」「ナレーション付き動画」「2〜3分の企業動画」などのリクエストで、オーケストレータ ai-video-production から呼ばれる（単独指定も可）。1枚＋カメラムーブだけは vp-moveboard、キャラの躍動アクションは vp-character-action。
-version: 0.1.0
+version: 0.2.0
 requires_connectors:
   - server: ai-osi-uri-creative
     provision: user-install
@@ -16,7 +16,7 @@ OKWEB × JINEN 制作で確立。標準 60〜75分／約 $5〜$10。
 
 **正本テンプレ（必ず参照）**：
 - スタイル別プロンプト雛形：`../ai-video-production/templates/prompts-{corporate|documentary|lifestyle|anime-ghibli}.md`
-- ナレ：`../ai-video-production/templates/voice-strategy.md`（voice選択・感情タグ）／`narration-rules.md`（誤読対策・最重要）
+- ナレ：**`narration` スキルに委譲**（`../narration/SKILL.md`。声選択・感情タグ・発音辞書・誤読対策）
 - BGM：`../ai-video-production/references/bgm-selection.md`（ショートはYouTuber定番フリー曲）
 - モデル使い分け・単価：`../ai-video-production/references/model-comparison.md`
 - 落とし穴／チェック：`../ai-video-production/references/pitfalls.md`・`checklist.md`
@@ -35,10 +35,11 @@ OKWEB × JINEN 制作で確立。標準 60〜75分／約 $5〜$10。
 スタイルの `prompts-{style}.md` の構造（STYLE_PREFIX / SUBJECT / LIGHTING / CAMERA / SETTING / MOOD / STYLE_SUFFIX / no text / 4K）で12本起草。
 被写体の一貫性が要る人物・商品は `generate_image` の1枚目を参照に派生（character一貫が主目的なら vp-character-action を併用）。
 
-### 4. ナレ原稿（TTS最適化）★ここが企業動画の品質差
-- voice：ElevenLabs v3＋クローンvoice（GENEL `GxhGYQesaQaYKePCZDEC`、Starter以上）。
-- 感情タグ：①thoughtful →②③calm →④calm →⑤serious →⑥⑦confident →⑧hopeful →⑨calm →⑩confident →⑪hopeful →⑫warm。
-- 誤読対策（`narration-rules.md`）：長音二重母音化（サービス→サアビス）、数字読み（27年→にじゅうななねん）、固有名詞の「々（ふりがな）」技法 等を該当箇所のみ適用。
+### 4. ナレ原稿（→ narration スキルに委譲）
+ナレの読み制御・声・発音辞書は **`narration` スキル**が担当する。本メソッドは
+**台本（何を言うか）と感情タグ設計**だけ行い、原稿はクリーンな漢字かな混じりで書く（壊さない）。
+- 声：既定 Konoha（`T7yYq3WpB94yAuOXraRi`）。感情タグ：[thoughtful]/[calm]/[serious]/[confident]/[hopeful]/[warm]。
+- 生成手順・辞書・誤読対策は `../narration/SKILL.md` を参照。
 
 ### 5. 承認ゲート（vp-core）
 **台本＋12プロンプト＋ナレ原稿をまとめて提示**し、文章段階で承認/修正。承認まで生成しない。
@@ -48,16 +49,17 @@ OKWEB × JINEN 制作で確立。標準 60〜75分／約 $5〜$10。
 - 本番：5本ずつ2バッチ（6本以上同時で Forbidden #1）、45〜60秒間隔でポーリング。
 - モデル：環境/単独人物=Veo 3.1 Fast、複数人物/対話=Kling 3.0、激しい動き=Seedance 2.0、ヒーロー=Veo 3.1。
 
-### 7. ナレ生成 → 8. SRT字幕 → 9. ffmpeg合成＋BGM（vp-core/スクリプト）
-- ナレ：`generate_speech`（v3, stability 0.35）。シーン1本で試聴→本番。
-- 字幕：`make_subs.py`（ナレ実尺を測り文字数比例で配分。表示は自然な漢字交じり）。
-- 合成：`build_video.sh`（動画とナレの尺合わせ=PTS、12連結、BGM volume≈-15dB fade、字幕焼込み Noto Sans JP）。**ffmpegは /tmp で作業→cp #9**、長尺は nohup+ポーリング #10。
+### 7. ナレ生成（→ narration）
+クリーンな台本を `narration` に渡してナレ音声を生成する（jp_yomi_check→辞書→generate_speech）。
+詳細は `../narration/SKILL.md` フロー参照。SRT字幕（`make_subs.py`）・ffmpeg合成（`build_video.sh`：尺合わせPTS・12連結・BGM≈-15dB fade・字幕焼込み Noto Sans JP）は従来どおり vp-core/スクリプト。
 
 ### 10. 納品
 final.mp4（BGM＋字幕）／字幕なし／BGMなし／subtitles.srt と、累計コストを提示。
 
 ## 鉄則
-- ❌ 純粋ひらがなナレ（助詞「は」誤読 #5）。❌ 一気に全12本生成（必ず試作）。❌ Drive直書き。
+- ❌ 一気に全12本生成（必ず試作）。❌ Drive直書き。
+- ✅ ナレは narration スキルに委譲（クリーンテキスト＋発音辞書）。原稿の字面は壊さない。
+- ✅ 声は日本語ネイティブ（既定 Konoha）。
 - ✅ 文章（台本・プロンプト・ナレ）を先に承認 → それから生成（vp-core ゲート）。
 - ✅ ショート/SNS狙いのBGMは AI生成より YouTuber定番フリー曲（`bgm-selection.md`）。
 

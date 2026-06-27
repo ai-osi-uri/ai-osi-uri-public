@@ -362,7 +362,7 @@ curl -sSL -o "$DIR/bgm.wav" "$URL_FROM_ERROR"
 ## チェック手順（着手前に必ず）
 
 1. `references/pitfalls.md`（このファイル）を読み返す
-2. `templates/narration-rules.md` を読み返す
+2. `../narration/templates/narration-rules.md` を読み返す
 3. `references/model-comparison.md` でモデル使い分けを確認
 4. ユーザーへのヒアリングを Phase 0 で実施
 5. 試作（Phase 4）を必ず挟む

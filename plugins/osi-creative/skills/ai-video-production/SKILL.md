@@ -1,7 +1,7 @@
 ---
 name: ai-video-production
 description: AI動画を作るオーケストレータ（ディスパッチャ）スキル。依頼から動画タイプを判定し、最適なメソッド（vp-character-action＝キャラ一貫アクション / vp-cinematic-camera-move＝1枚＋カメラムーブ / vp-corporate-narrated＝ナレ付き企業動画 等）へ振り分け、共通インナー vp-core（プロンプト承認ゲート→生成→検証→連結）で作る。「動画を作って」「動画作成」「PR動画」「IR動画」「採用動画」「企業説明動画」「ピッチ動画」「ナレーション付き動画」「アニメ動画」「実写動画」「ドキュメンタリー動画」「TikTok動画」「Reels動画」「このキャラで動画」「商品を動かして」など、AI動画制作のリクエスト全般で発動する。既存の動画台本テキストが渡された場合も発動する。「AI OSI URI Creative」コネクタ（旧 fal-video。動画・音楽・ナレーション・静止画[nano-banana]を内包）が Cowork に登録されていることを前提とする。PPT・スライドのみ、静止画のみの依頼では使わない。
-version: 1.0.0
+version: 1.0.1
 requires_connectors:
   - server: ai-osi-uri-creative
     provision: user-install
@@ -27,10 +27,11 @@ requires_connectors:
 - どのメソッドも、起草したプロンプトを **`vp-core` の承認ゲート**（プロンプトを先に承認 → 生成）に通す。
 - カメラムーブ系（空撮/絵の潜り込み/商品オービット/内装ウォークスルー等）は **`vp-cinematic-camera-move` へ委譲**する（本ファイル下部の旧「カメラムーブモード」節は参照用の要約に縮小済み。正本はメソッド＋ `references/cinematic-camera-move.md`）。
 - ナレ付き企業動画は **`vp-corporate-narrated` へ委譲**する（本ファイル下部の 12 Phase はメソッドが参照する詳細リファレンス兼フォールバックとして残す。テンプレ `templates/*` ・スクリプト `scripts/*` が正本）。
+- ナレ音声は能力アトミック **`narration`** に委譲（v3＋日本語声＋発音辞書）。BGMは将来 `music`、字幕は将来 `subtitle`。
 - 新しい動画タイプは「メソッドを1つ追加する」だけで拡張できる（本表に1行足す）。
 
 > **移行状況**：`vp-core` / `vp-character-action` / `vp-cinematic-camera-move` / `vp-corporate-narrated` の4スキルをメソッド化済み（3メソッド＋インナー稼働）。共通参照
-> （model-comparison / pitfalls / narration-rules / templates / scripts / character-consistency-pipeline / cinematic-camera-move）は本スキル配下を正本として全メソッドで共有。
+> （model-comparison / pitfalls / templates[prompts] / scripts / character-consistency-pipeline / cinematic-camera-move）は本スキル配下を正本として全メソッドで共有。ナレ音声（voice-strategy / narration-rules / 発音辞書）は **`narration` スキル**が正本。
 
 ## 前提
 
@@ -246,7 +247,7 @@ Stability: 0.35〜0.5（低いほど抑揚強）
 
 ### Phase 6-2. voice 選択フロー
 
-詳細は `templates/voice-strategy.md`。
+詳細は `../narration/templates/voice-strategy.md`。
 
 ```
 Q: ElevenLabs Starter以上のプランがあるか？
@@ -260,7 +261,7 @@ GENEL voice ID: `GxhGYQesaQaYKePCZDEC`（公開クローン、商用OKを要確�
 
 ### Phase 6-3. テキスト最適化（voice別）
 
-voice タイプ別に**逆方向の最適化**が必要。詳細は `templates/narration-rules.md`。
+voice タイプ別に**逆方向の最適化**が必要。詳細は `../narration/templates/narration-rules.md`。
 
 **A. ネイティブクローンvoice（GENEL等）**：自然な日本語が基本だが、**読みが複数ある漢字はひらがな化**
 - 27年 → にじゅうななねん（しち化を防ぐ）
@@ -375,8 +376,8 @@ BGM: $0.20
 
 1. `references/pitfalls.md` — 落とし穴と回避策（実戦から）
 2. `references/model-comparison.md` — 動画・音声・音楽モデル使い分け
-3. `templates/voice-strategy.md` — ★ナレーターvoice選択戦略（Eleven v3、GENEL、感情タグ）
-4. `templates/narration-rules.md` — TTS誤読対策（最重要）
+3. `../narration/templates/voice-strategy.md` — ★ナレーターvoice選択戦略（Eleven v3、GENEL、感情タグ）
+4. `../narration/templates/narration-rules.md` — TTS誤読対策（最重要）
 5. 該当する `templates/prompts-{style}.md`
 6. `references/bgm-selection.md` — ★ショート向けBGM選定（YouTuber定番フリー曲・取得・著作権・途切れ防止）
 7. `references/cinematic-camera-move.md` — ★シネマティック・カメラムーブモード（どんな画像でも動かす汎用版：6プリセット・カメラ語彙・著作権注意）

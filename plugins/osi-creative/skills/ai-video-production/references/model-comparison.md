@@ -123,7 +123,7 @@ i2v（image-to-video）は「静止画を作る → `image_to_video` の起点�
 - 1動画 12シーンで約 $0.50
 - **stability**: 0.35〜0.5（低いほど抑揚強）
 - **推奨**：すべてのIR/PR/採用動画はこれを使う
-- **必ずTTSルール（templates/narration-rules.md §8）を遵守**
+- **必ずTTSルール（../narration/templates/narration-rules.md §8）を遵守**
 
 ### ElevenLabs Multilingual v2（`elevenlabs-v2`）
 - 安定的、日本語OK、感情タグ非対応
@@ -192,7 +192,7 @@ curl -X POST https://api.elevenlabs.io/v1/text-to-speech/$VOICE_ID \
 | energetic-male | Antoni | 力強い、ピッチ・ホテル起業家系 |
 
 **注意**：これらは英語ベースの多言語voice。日本語の癖（長音脱落、小書き分離）あり。
-narration-rules.md §1〜§7 のカタカナ強制ルールが必須。
+../narration/templates/narration-rules.md §1〜§7 のカタカナ強制ルールが必須。
 
 ### B. ネイティブクローンvoice ★現在の標準
 
@@ -204,7 +204,7 @@ narration-rules.md §1〜§7 のカタカナ強制ルールが必須。
 Free tier では `402 paid_plan_required` エラー。
 
 **癖**：自然な日本語だが、漢字の読み判定にやや誤り。
-narration-rules.md §8 のひらがな化ルールが必須。
+../narration/templates/narration-rules.md §8 のひらがな化ルールが必須。
 （27年→にじゅうななねん、AI→エーアイ、見える化→みえるか、等）
 
 ### Voice 選択の最終ルール
@@ -221,7 +221,7 @@ narration-rules.md §8 のひらがな化ルールが必須。
 → プロ品質ナレーションが 1動画あたり $0.50 で完成。
 ```
 
-詳細は **`templates/voice-strategy.md`** を必ず読むこと。
+詳細は **`../narration/templates/voice-strategy.md`** を必ず読むこと。
 
 ---
 
@@ -249,7 +249,7 @@ BGMコスト = $0.20
 - [ ] シーン別モデル選択（上記マッピング参照）
 - [ ] voice 選択（A 汎用 or B クローン）
 - [ ] ElevenLabs プラン確認（Starter以上ならGENEL OK）
-- [ ] テキスト最適化（voice 型に合わせて narration-rules.md 参照）
-- [ ] 感情タグマップ確認（voice-strategy.md §3）
+- [ ] テキスト最適化（voice 型に合わせて ../narration/templates/narration-rules.md 参照）
+- [ ] 感情タグマップ確認（../narration/templates/voice-strategy.md §3）
 - [ ] BGM 選定
 - [ ] コスト見積もり（$5〜$10レンジ内か）

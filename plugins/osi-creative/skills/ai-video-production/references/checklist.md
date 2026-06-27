@@ -10,7 +10,7 @@
 - [ ] fal.ai に最低 $10 のクレジットがある
 - [ ] Drive 出力先（FAL_OUTPUT_DIR）が設定済み
 - [ ] `references/pitfalls.md` を読み返した
-- [ ] `templates/narration-rules.md` を読み返した
+- [ ] `../narration/templates/narration-rules.md` を読み返した
 
 ## Phase 0（ヒアリング）
 
