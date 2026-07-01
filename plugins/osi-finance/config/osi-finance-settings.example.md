@@ -125,6 +125,41 @@ references 側には「汎用ロジック・判断基準」だけを残します
 | {{MERCHANT_1}} | {{ACCOUNT}} | {{TAX}} |
 | …（必要数だけ追加） | | |
 
+## 8. 経費（レシート）設定
+
+`osi-finance-receipt-intake`（紙レシートの証憑化 → UPSIDER明細突合）が参照する。
+※機微値（実氏名・実カード番号）は `.example` には書かず、実値版 `osi-finance-settings.md` のみに入れる。
+
+### 8-1. 保存先・台帳・入口
+
+| キー | 例 | 用途 |
+|---|---|---|
+| DRIVE_RECEIPT_INBOX      | {{DRIVE_RECEIPT_INBOX 例: 32.経費管理/レシート未処理/{氏名}}} | 入口（人単位フォルダ。氏名=申請者） |
+| DRIVE_RECEIPT_EVIDENCE   | {{DRIVE_RECEIPT_EVIDENCE 例: 32.経費管理/レシート証憑/{YYYY年度}/{氏名}}} | 証憑の正本（年度×人別・7年保存） |
+| LEDGER_RECEIPT_SHEET_ID  | {{LEDGER_RECEIPT_SHEET_ID 例: 1AbC…（経費レシート台帳の /d/<ここ>/edit）}} | 索引簿（自動追記用） |
+| EVIDENCE_PRIMARY_STORE   | Drive | 証憑の正本の置き場（本運用は Drive 固定） |
+
+### 8-2. メンバーと人↔カード対応（突合を人単位に限定）
+
+| キー | 例 | 用途 |
+|---|---|---|
+| MEMBERS         | {{MEMBERS 例: 田中太郎, 佐藤花子}} | 申請者フォルダを切る対象 |
+| PERSON_CARD_MAP | {{PERSON_CARD_MAP 例: 田中太郎=UPSIDER-1234, 佐藤花子=UPSIDER-5678}} | 人↔カード下4桁。突合をその人の明細に限定 |
+
+### 8-3. 会計・税務の運用値
+
+| キー | 例 | 用途 |
+|---|---|---|
+| CASH_ACCOUNT             | {{CASH_ACCOUNT 例: 現金 または 小口現金}} | ストリームB 現金払いの貸方科目 |
+| EMPLOYEE_PAYABLE_ACCOUNT | {{EMPLOYEE_PAYABLE_ACCOUNT 例: 未払金（従業員立替）}} | ストリームB 立替の貸方科目 |
+| SMALL_AMOUNT_SPECIAL     | {{SMALL_AMOUNT_SPECIAL 選択: あり / なし}} | 少額特例（税込1万円未満）の適用可否（要税理士確認） |
+| EBOOK_RECORDKEEPING_RULE | {{EBOOK_RECORDKEEPING_RULE 選択: 事務処理規程あり / なし(要整備)}} | 電帳法の真実性確保（Drive運用の前提） |
+| CARD_FEED_SOURCE         | {{CARD_FEED_SOURCE 例: UPSIDER（MF連携）}} | 突合対象のカード明細ソース |
+
+> - `EBOOK_RECORDKEEPING_RULE=なし` の間は、スキャナ保存の適合が確定するまで**紙原本も併存保管**する。
+> - `SMALL_AMOUNT_SPECIAL` は基準期間の課税売上高等で決まる。**税理士確認**のうえ設定する。
+> - `PERSON_CARD_MAP` の実カード番号・実氏名は**実値版のみ**に書く。
+
 ---
 
 ## 運用メモ
