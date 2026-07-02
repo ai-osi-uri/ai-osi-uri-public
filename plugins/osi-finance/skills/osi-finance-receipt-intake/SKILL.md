@@ -17,8 +17,8 @@ description: >
 requires_connectors:
   - server: money-forward
     provision: user-install
-  - server: google-drive
-    provision: user-install
+  - server: drive-fs
+    provision: fs
   - server: superhuman
     provision: user-install
 ---
