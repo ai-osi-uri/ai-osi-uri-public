@@ -1,0 +1,53 @@
+{
+  "name": "update-deploy",
+  "evals": [
+    {
+      "id": "ai-output-truncated",
+      "prompt": "ai-catalog-navigator.vercel.app のAIリサーチ提案、アウトプット途中で切れてるから直して",
+      "expected_skill": "update-deploy",
+      "expected_actions": [
+        "health_check",
+        "Vercel: list_teams / get_project / get_deployment で repo 特定",
+        "Phase 2: ~/Desktop/{repo_name} を request_cowork_directory",
+        "Phase 3: Grep max_tokens|maxTokens|max_output_tokens を実行",
+        "Edit で値を引き上げ + maxDuration 見直し",
+        "github_push でコミット & push",
+        "vercel_get_deployment_status で READY 待ち",
+        "app-smoke-test で実レスポンスを検証"
+      ]
+    },
+    {
+      "id": "copy-fix-existing-lp",
+      "prompt": "デプロイ済みのLPで価格表記が間違ってる、4800円に直して再デプロイ",
+      "expected_skill": "update-deploy",
+      "expected_actions": [
+        "Phase 1: 対象LPのVercelプロジェクトを特定",
+        "Phase 3: Grep で旧価格を全文検索 → 該当箇所をユーザー確認",
+        "Edit で局所修正",
+        "github_push + Vercel monitor",
+        "Phase 5: curl で本番URLに新価格が出るか grep"
+      ]
+    },
+    {
+      "id": "no-existing-clone-instructs-clone",
+      "prompt": "外部協力者から納品された social-cards-lp というVercelアプリ、CTAを「予約する」から「資料請求する」に変更したい。ローカルに無い",
+      "expected_skill": "update-deploy",
+      "expected_actions": [
+        "Phase 2-2: gh repo clone or git clone を案内（PAT を直接出さない）",
+        "ユーザー完了を待ってから Phase 3 へ"
+      ]
+    },
+    {
+      "id": "should-not-trigger-for-new-app",
+      "prompt": "花屋向けの在庫管理アプリを新しく作って公開して",
+      "expected_skill": "deploy-app",
+      "negative_expected_skill": "update-deploy"
+    },
+    {
+      "id": "should-not-trigger-for-stripe-live-switch",
+      "prompt": "Stripeを本番モードに切り替えて",
+      "expected_skill": "switch-to-live-mode",
+      "negative_expected_skill": "update-deploy"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "_comment": "ハーネスの機能トラッカー。エージェントが実装すべき全機能を機械可読で管理する。ルール: status=in_progress は常に1件まで。verification を実行し evidence を記録してから passing にする。example を消して自分の機能に置き換える。",
+  "_status_values": {
+    "not_started": "未着手",
+    "in_progress": "現在作業中（同時に1件のみ）",
+    "blocked": "文書化された理由で進められない",
+    "passing": "検証が通り、証拠が記録済み"
+  },
+  "features": [
+    {
+      "id": "example-001",
+      "priority": 1,
+      "area": "【TODO: 例 import / chat / search】",
+      "title": "【TODO: 機能の短い説明】",
+      "user_visible_behavior": "【TODO: 動いたときユーザーに何が見えるか】",
+      "status": "not_started",
+      "verification": [
+        "【TODO: 動作確認の手順1。例: ./init.sh で起動】",
+        "【TODO: 手順2】",
+        "【TODO: 手順3。例: 期待する画面/レスポンスが出る】"
+      ],
+      "evidence": "",
+      "notes": "【TODO: 補足コンテキストがあれば】"
+    },
+    {
+      "id": "example-002",
+      "priority": 2,
+      "area": "【TODO】",
+      "title": "【TODO】",
+      "user_visible_behavior": "【TODO】",
+      "status": "not_started",
+      "verification": [
+        "【TODO】"
+      ],
+      "evidence": "",
+      "notes": ""
+    }
+  ]
+}

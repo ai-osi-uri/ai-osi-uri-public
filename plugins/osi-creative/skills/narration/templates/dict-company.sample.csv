@@ -1,0 +1,7 @@
+# 会社別 正読み辞書（案件ごとにコピーして育てる）
+# 書式: surface,yomi(カタカナ/ひらがな),ipa(任意・aliasで直らない頑固な箇所のみ)
+# jp_yomi_check.py の --glossary に渡すと .pls を自動生成する。
+OKWEB,オーケーウェブ,
+ジネン,じねん,
+GRATICA,グラチカ,
+河野,かわの,
