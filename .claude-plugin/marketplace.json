@@ -7,7 +7,7 @@
   },
   "metadata": {
     "description": "AI OSI URI 公開プラグイン（外部配布用サブセット）。",
-    "version": "0.7.2"
+    "version": "0.7.3"
   },
   "plugins": [
     {
@@ -45,7 +45,7 @@
       "name": "osi-deploy",
       "source": "./plugins/osi-deploy",
       "description": "アプリ・LP・SaaS デプロイ自動化：Vercel（軽量）と AWS（業務系）両対応。Terraform state を共有S3 backendで一元管理（tf-state-backend）。Stripe Live 切替・Supabase Auth 更新・スモークテストまで一気通貫。非エンジニア向け入口 app-concierge（「公開されてる?/動かない/データ見せて」を平易に確認・triage）を追加。",
-      "version": "0.6.6",
+      "version": "0.7.0",
       "category": "deploy",
       "tags": [
         "deploy",

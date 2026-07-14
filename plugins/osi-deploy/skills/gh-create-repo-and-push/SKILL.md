@@ -1,7 +1,7 @@
 ---
 name: gh-create-repo-and-push
 description: ローカル作業ディレクトリの内容を新規 GitHub リポジトリに作成して push する atomic スキル。認証は AI OSI URI Deploy 拡張（mcp/ai-osi-uri-deploy）が保持する GitHub PAT を使い、`.env` は読まない。拡張の MCP ツール `github_create_repo_and_push` を呼ぶだけ。命名衝突時の自動採番・PAT 入り remote の削除はツール側が担当。オーケストレータ `deploy-app` の Step 1 相当として呼ばれる。「GitHub に push して」「リポジトリ作って push」「新しい repo に上げて」「コードを GitHub に上げて」などで発動。GitHub PAT の入力は拡張設定の役割。リポ作成のみ・push のみの片割れ作業には使わない。
-version: 0.2.0
+version: 0.3.0
 ---
 
 # GitHub リポジトリ作成 + 初回 push（atomic / 拡張ツール版）
@@ -26,10 +26,11 @@ version: 0.2.0
 | `repo_name` | ✅ | 希望リポジトリ名（衝突時は `-002` 等を自動採番） |
 | `is_private` | 任意 | `true`/`false`（デフォルト `true`） |
 | `commit_message` | 任意 | 初回コミットメッセージ（デフォルト `Initial scaffold`） |
-| `owner_override` | 任意 | `"personal"` で個人、Org slug（例 `"ai-osi-uri"`）でその Org に作成。未指定は個人アカウント |
+| `owner_override` | 任意 | 呼び出し側（deploy-app）の `USE_ORG` 判定に従う。真=`"ai-osi-uri"`、偽=`"personal"`。atomic 単体呼び出し時の既定は personal（安全側） |
 
-> 旧版では `.env` の `GITHUB_ORG` で作成先を切り替えていたが、拡張版では固定の Org 設定を
-> 持たないため、Org に作りたい場合は `owner_override` に slug を渡す。
+> 作成先ポリシー（2026-07）: org と個人を混在させない。deploy-app が GitHub/Vercel/Supabase の
+> org 3点をプリフライト判定し（USE_ORG）、全部揃えば `"ai-osi-uri"`、1つでも欠ければ `"personal"`
+> を `owner_override` に渡す。403（org 権限なし）は「欠け」として personal に倒す。
 
 ## 実行
 
@@ -41,7 +42,7 @@ github_create_repo_and_push({
   repo_name: "<REPO_NAME>",
   is_private: true,
   commit_message: "Initial scaffold",
-  owner_override: "<personal | org-slug>"   // 任意
+  owner_override: "ai-osi-uri"   // USE_ORG が偽なら "personal"（呼び出し側が決定）
 })
 ```
 
@@ -65,6 +66,6 @@ github_create_repo_and_push({
 
 ## 注意事項
 
-- 作成先は `owner_override` で制御。未指定なら個人アカウント。
+- 作成先は `owner_override` で制御。org と個人を混在させないため、呼び出し側（deploy-app）の USE_ORG 3点判定に従う（未指定時の安全既定は personal）。
 - ツールが push 後に PAT 入り remote を削除するので、認証情報は残らない。
 - `input_dir` に `.env` / `node_modules` を含めないのは呼び出し側の責任（ツールは `node_modules`・`.git`・`.DS_Store` をコピー除外する）。

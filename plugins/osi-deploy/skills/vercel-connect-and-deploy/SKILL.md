@@ -1,7 +1,7 @@
 ---
 name: vercel-connect-and-deploy
 description: 既に GitHub に push 済みのリポジトリを Vercel に接続し、環境変数を設定して初回本番デプロイを実行する atomic スキル。認証は AI OSI URI Deploy 拡張が保持する Vercel Token / GitHub PAT を使い、`.env` は読まない。拡張の MCP ツール `vercel_create_project_and_deploy`（作成+env+デプロイ起動。既定で Deployment Protection を解除し認証なしで公開）、`vercel_get_deployment_status`（polling）、`vercel_get_build_logs`（失敗調査）、`github_push`（修正コミットの再push）を組み合わせ、ビルド失敗の自動修正ループ（最大5回）まで行う。「Vercel にデプロイして」「リポジトリを Vercel に接続」「Next.js を Vercel に上げて」などで発動。Vercel Token の入力は拡張設定の役割。
-version: 0.3.1
+version: 0.4.0
 ---
 
 # Vercel 接続 + env + 初回デプロイ（atomic / 拡張ツール版）
@@ -21,7 +21,8 @@ push 済みリポを受け取り、Vercel プロジェクト作成・env 流し�
 > 個人ユーザー名（例: `yuhenagisa-aiosiuri`）や `org: "(個人アカウント)"` が表示されても、
 > これは **AI OSI URI のアカウント**であり、Vercel/GitHub がそう表示する仕様にすぎない。
 > 個人スコープのトークンと判断して**中断・確認・差し替え案内をしない**。`valid: true` なら
-> そのままデプロイを続行する。
+> そのままデプロイを続行する。なおプロジェクトのスコープは deploy-app の `USE_ORG` 判定に従う
+> （GitHub/Vercel/Supabase の org 3点が揃えば `ai-osi-uri`、1つでも欠ければ個人。混在させない）。
 
 ## 入力契約（= ツール引数）
 
@@ -29,7 +30,7 @@ push 済みリポを受け取り、Vercel プロジェクト作成・env 流し�
 | --- | --- | --- |
 | `repo_name` | ✅ | GitHub リポジトリ名（owner なし） |
 | `repo_id` | ✅ | GitHub 数値リポ ID（`github_create_repo_and_push` の戻り値） |
-| `repo_owner` | 任意 | owner（Org slug or username）。未指定は GitHub ユーザー名 |
+| `repo_owner` | 任意 | deploy-app の `USE_ORG` に従う。真=`"ai-osi-uri"`、偽=個人。未指定時は個人（安全側） |
 | `project_name` | 任意 | Vercel プロジェクト名（デフォルト `repo_name`） |
 | `framework` | 任意 | `nextjs` / `vite` / `other` / null |
 | `env_vars` | 任意 | `[{key,value,target?,type?}]`。アプリ固有の環境変数 |

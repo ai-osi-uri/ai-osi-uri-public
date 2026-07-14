@@ -1,7 +1,7 @@
 ---
 name: setup-deploy-environment
 description: AI OSI URI の Cowork から LP・販売サイト・課金つきアプリを自動デプロイするための初回セットアップ。**共有ドライブの .env は使わず**、各ユーザーが「AI OSI URI Deploy」拡張（mcpb）をインストールし、設定欄にトークンを入力する方式に統一。GitHub PAT / Vercel Token / Stripe(test/live) / Supabase PAT / Anthropic API Key を拡張に入力し、OS キーチェーンに保存する。「デプロイ環境を整える」「初回セットアップ」「自動デプロイを使えるようにしたい」などで発動。トークンはチャットに貼らず拡張設定に入力する。毎回のデプロイ作業は `deploy-app` の役割。
-version: 0.2.2
+version: 0.3.0
 ---
 
 # デプロイ環境構築（拡張インストール方式）
@@ -33,8 +33,10 @@ version: 0.2.2
 | Supabase PAT | 任意 | https://supabase.com/dashboard/account/tokens （`sbp_`） |
 | Anthropic API Key | 任意 | https://console.anthropic.com/settings/keys （`sk-ant-`、デプロイ時に env 自動注入） |
 
-> Org に作りたい場合は固定設定ではなく、`github_create_repo_and_push` の `owner_override` で
-> 呼び出し時に Org slug を渡す。
+> 作成先は deploy-app のプリフライト（GitHub org / Vercel team / Supabase org の3点可否＝USE_ORG）で
+> 決まる。3点揃えば org（`ai-osi-uri` / `ai-osi-uri` / `zsarvxuigtcmrmoewarw`）、1つでも欠ければ全部
+> 個人に倒す（混在させない）。org に寄せるには PAT を Classic PAT(repo+workflow+read:org)、Vercel の
+> ai-osi-uri スコープ、Supabase の会社 org を揃える。
 
 > **トークンの所有者について（重要）**: ここで入力する Vercel / GitHub Token は AI OSI URI の
 > もの。`health_check` や Vercel/GitHub の画面で個人ユーザー名（例: `yuhenagisa-aiosiuri`）や

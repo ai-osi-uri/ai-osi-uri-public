@@ -2,7 +2,7 @@
 
 対象プラグイン: osi-creative, osi-docs, osi-deploy, osi-knowledge, osi-finance, osi-backoffice
 
-以下の 27 箇所に要注意語が残っています。publish 前に人手で確認してください（自動削除は文書を壊すため行いません）。
+以下の 26 箇所に要注意語が残っています。publish 前に人手で確認してください（自動削除は文書を壊すため行いません）。
 
 | ファイル | 行 | 語 | 抜粋 |
 |---|---|---|---|
@@ -19,7 +19,6 @@
 | plugins/osi-deploy/skills/setup-deploy-environment/SKILL.md | 13 | 共有ドライブ | > 旧版は `.deploy-credentials/.env` にトークンを書き込んでいたが、平文・共有ドライブ同期・ |
 | plugins/osi-deploy/skills/setup-deploy-environment/SKILL.md | 19 | 共有ドライブ | （社内手順：共有ドライブ「環境構築キット」参照） |
 | plugins/osi-deploy/skills/deploy-app/references/aws-app-gotchas.md | 54 | 共有ドライブ | 初回 apply 前に **`tf-state-backend` スキル**を呼ぶ（state基盤の作成＋backend.tf差し込み）。既存のローカルstateアプリは同スキルの migrate-existing（`aws_terrafo |
-| plugins/osi-deploy/skills/gh-create-repo-and-push/SKILL.md | 31 | GITHUB_ORG | > 旧版では `.env` の `GITHUB_ORG` で作成先を切り替えていたが、拡張版では固定の Org 設定を |
 | plugins/osi-deploy/skills/aws-static-deploy/SKILL.md | 30 | 共有ドライブ | 共有ドライブの `.deploy-credentials/.env` は **任意フォールバック**としてのみ参照する。 |
 | plugins/osi-docs/skills/deck-composition/SKILL.md | 58 | CAIO | - ❌「コア事業の説明」→ ✅「では本丸の CAIO 事業を——仕組み・価格・現状を見ていく」 |
 | plugins/osi-docs/skills/deck-composition/SKILL.md | 66 | CAIO | 複数スライドで使う用語・略語（CAIO, ARR, NPS 等）は、**初出のスライドで**定義する。5枚後に「Xとは」を置かない。定義はサブタイトルにインラインで入れるか、使い始める前に定義スライドを1枚置く。 |

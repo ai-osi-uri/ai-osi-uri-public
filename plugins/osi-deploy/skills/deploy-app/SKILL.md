@@ -1,7 +1,7 @@
 ---
 name: deploy-app
 description: AI OSI URI が Cowork から **任意の業種のアプリを新規に作って公開する**ための唯一のオーケストレータスキル。「アプリ作って」「LP 立ち上げて」「○○屋向けの在庫管理アプリ作って」「予約サイトを作って」「会員制のサブスク SaaS 作って」「業務系のシステム作って」「LP 公開して」など、ユーザーが新しいアプリの作成と公開を依頼したときに発動する。
-version: 0.3.0
+version: 0.4.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb
@@ -23,6 +23,27 @@ AWS で公開するところまで 1 つの対話で完結させる。
 > CORS は Lambda 側で処理、source_arn はアカウント ID 込み、terraform は arm64、
 > Bedrock は use case フォーム提出が前提、format はマジックバイト判定）。
 > コロワイド 2 アプリで確立。同じ罠で時間を溶かさない。
+
+---
+
+## 作成先の決定ルール（最優先・all-or-personal）
+
+アプリ作成前に必ず「org 利用可否」をプリフライト判定し、その結果を全リソースへ一貫適用する。
+**org と個人を混在させない**（例: git だけ org・Supabase は個人、は禁止）。
+
+- 判定 `USE_ORG = (github_org_ok && vercel_team_ok && supabase_org_ok)`
+  - `github_org_ok`: PAT が Org `ai-osi-uri` にリポ作成できる（403 / org 未所属なら false）
+  - `vercel_team_ok`: Vercel の `ai-osi-uri` スコープ/Team がトークンで使える
+  - `supabase_org_ok`: `supabase_list_organizations` に会社 org `zsarvxuigtcmrmoewarw`
+    （"shared@ai-osi-uri.com's Org"）がある
+- **USE_ORG が真（3つ全部OK）** → 全リソースを org 配下に作る
+  - GitHub owner=`ai-osi-uri` ／ Vercel scope=`ai-osi-uri` ／ Supabase org=`zsarvxuigtcmrmoewarw`
+- **USE_ORG が偽（1つでも欠ける）** → 全リソースを個人アカウント配下に作る
+  - GitHub owner=`personal` ／ Vercel=個人スコープ ／ Supabase=個人 org
+- 判定結果（USE_ORG と各 slug）を atomic に明示的に渡す。作成・更新は deploy-app /
+  update-deploy 経由のみ（手作業で個人配下に作らない）。
+
+---
 
 ## 設計原則
 
@@ -200,7 +221,12 @@ OS キーチェーン保存）が保持し、デプロイ操作は拡張の MCP 
 | `supabase_list_projects` / `supabase_set_auth_url` | Supabase ref 特定・Auth URL 本番反映 |
 | `stripe_create_product_and_price` / `stripe_create_payment_link` / `stripe_create_webhook` | Stripe（`mode:"test"` 既定 / `"live"` は `confirm_live:true` 必須） |
 
-- Org 配下に作る場合は `github_create_repo_and_push` の `owner_override` に Org slug を渡す。
+- 作成先は「作成先の決定ルール」の `USE_ORG` に従う。真なら `github_create_repo_and_push` に
+  `owner_override:"ai-osi-uri"`、偽なら `"personal"` を渡す（3点セットで揃わなければ personal に倒す
+  ＝org と個人を混在させない）。403（org 権限なし）は「欠け」として personal 扱いにし、必要なら
+  Classic PAT(repo+workflow+read:org) 差し替えを案内。
+- Supabase を新規作成する場合、`USE_ORG` が真なら `organization_id:"zsarvxuigtcmrmoewarw"`、
+  偽なら個人 org に作る。
 - AI 機能つきアプリは `vercel_create_project_and_deploy` が拡張保存の `ANTHROPIC_API_KEY` を
   デプロイ env に自動注入する（`include_anthropic_key:false` で抑止）。
 
@@ -457,8 +483,8 @@ Step 1: フロントエンドの scaffold 確認
     Phase 1 のエンティティに沿った API routes / pages を仮実装
   - LP: HTML 1 枚ならそのまま、複数なら index.html + pages/
 
-Step 2: gh-create-repo-and-push を呼ぶ
-Step 3: vercel-connect-and-deploy を呼ぶ (ENV_VARS_JSON 込み)
+Step 2: gh-create-repo-and-push を呼ぶ（owner_override は USE_ORG に従い "ai-osi-uri" / "personal"）
+Step 3: vercel-connect-and-deploy を呼ぶ（repo_owner は USE_ORG に従い "ai-osi-uri" / 個人、ENV_VARS_JSON 込み）
 Step 4: (Supabase あり) supabase-set-auth-url
 Step 5: (Stripe あり、Phase 2 以降) stripe-create-product → vercel-set-env → vercel-redeploy
 Step 6: (Supabase あり) migration apply (Supabase Dashboard SQL editor で手動 or supabase CLI)
