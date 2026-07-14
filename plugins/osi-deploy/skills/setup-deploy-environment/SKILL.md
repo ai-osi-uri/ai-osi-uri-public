@@ -1,7 +1,7 @@
 ---
 name: setup-deploy-environment
 description: AI OSI URI の Cowork から LP・販売サイト・課金つきアプリを自動デプロイするための初回セットアップ。**共有ドライブの .env は使わず**、各ユーザーが「AI OSI URI Deploy」拡張（mcpb）をインストールし、設定欄にトークンを入力する方式に統一。GitHub PAT / Vercel Token / Stripe(test/live) / Supabase PAT / Anthropic API Key を拡張に入力し、OS キーチェーンに保存する。「デプロイ環境を整える」「初回セットアップ」「自動デプロイを使えるようにしたい」などで発動。トークンはチャットに貼らず拡張設定に入力する。毎回のデプロイ作業は `deploy-app` の役割。
-version: 0.3.0
+version: 0.3.1
 ---
 
 # デプロイ環境構築（拡張インストール方式）
@@ -45,8 +45,17 @@ version: 0.3.0
 
 ## Step 3: 検証
 
+> **重要（初回の詰まり防止）**：拡張をインストール／更新したら、**Claude を完全終了して
+> 再起動**してから `health_check` を呼ぶ。拡張は再起動しないと有効化されず、`health_check` が
+> ツール未検出／false を返して詰まる。ウィンドウの×で閉じるだけでは再起動にならない
+> （画面左上の Claude → Claude を終了 → もう一度起動）。
+
 拡張を有効化後、`health_check` ツールを呼ぶと各トークンの有効性をまとめて確認できる
 （値は末尾4文字のみのマスク表示）。`github.valid` / `vercel.valid` などが true なら準備完了。
+
+> **DB を使うアプリは Supabase PAT が必須**：`supabase.valid:true` でないと deploy-app の
+> Supabase 自動プロビジョニング（プロジェクト作成→キー取得）が動かず、「Supabase プロジェクト
+> 設定できない」で止まる。DB／ログイン／保存が要るアプリを作る予定なら Supabase PAT を入れる。
 
 ## 完了後
 

@@ -1,7 +1,7 @@
 ---
 name: deploy-app
 description: AI OSI URI が Cowork から **任意の業種のアプリを新規に作って公開する**ための唯一のオーケストレータスキル。「アプリ作って」「LP 立ち上げて」「○○屋向けの在庫管理アプリ作って」「予約サイトを作って」「会員制のサブスク SaaS 作って」「業務系のシステム作って」「LP 公開して」など、ユーザーが新しいアプリの作成と公開を依頼したときに発動する。
-version: 0.4.0
+version: 0.5.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb
@@ -42,6 +42,29 @@ AWS で公開するところまで 1 つの対話で完結させる。
   - GitHub owner=`personal` ／ Vercel=個人スコープ ／ Supabase=個人 org
 - 判定結果（USE_ORG と各 slug）を atomic に明示的に渡す。作成・更新は deploy-app /
   update-deploy 経由のみ（手作業で個人配下に作らない）。
+
+---
+
+## 実行の絶対ルール（コネクタ必須・拡張ロード確認）★フレッシュ環境の詰まり防止
+
+1. **着手前に拡張のロードを確認する。** `health_check` を呼び、AI OSI URI Deploy の
+   ツール（`github_*` / `vercel_*` / `supabase_*`）が**実際に呼べる**かを見る。
+   - ツールが見つからない／呼べない → 拡張が未ロード。**次の2点をユーザーにそのまま提示**して
+     いったん停止する（ループしない・見切り発車しない）:
+     1. **再起動していない（最有力）** — mcpb 拡張はインストール／key 入力だけでは有効化されず、
+        Claude を完全終了→再起動して初めてサーバが起動する。今のウィンドウのままだとずっと
+        「起動できない／ツールが無い」状態。**×で閉じるのは再起動ではない**。画面左上の
+        「Claude」→「Claude を終了」→もう一度起動が必要。
+     2. **拡張がまだ「無効」** — インストール済みでもトグルが OFF のことがある。
+        設定 → 拡張機能 で該当拡張が**有効(オン)**か確認する。
+     案内後の手順：①拡張を有効化 → ②Claude を完全終了して再起動 → ③新しいチャットで
+     もう一度お願いします、で再確認する。
+   - トークンが `valid:false` → `setup-deploy-environment`（該当トークン入力）へ案内して停止。
+   - この確認が通るまで実ビルドに進まない（**ループしない・見切り発車しない**）。
+2. **コネクタが使えるなら、git / Vercel / Supabase の操作は必ず AI OSI URI Deploy の
+   ツールで行う。手動の `npm` / `gh` / `vercel` / `supabase` CLI にフォールバックしない。**
+   コネクタ経由で失敗したら、手で作り直さず**失敗の原因（ツールの戻り値）を提示して止まる**。
+   （手動フォールバックが「コネクター経由で実行できません」の無限ループと二重作成の元凶。）
 
 ---
 
@@ -484,13 +507,39 @@ Step 1: フロントエンドの scaffold 確認
   - LP: HTML 1 枚ならそのまま、複数なら index.html + pages/
 
 Step 2: gh-create-repo-and-push を呼ぶ（owner_override は USE_ORG に従い "ai-osi-uri" / "personal"）
+Step 2.5: (Supabase あり) Supabase をプロビジョニング（下の「Supabase プロビジョニング」参照）。
+          既存 project を使うか、無ければ作成→provision 完了まで待って URL/anon/service_role を取得。
+          idempotency 原則で、env が揃ってから Vercel を作る。
 Step 3: vercel-connect-and-deploy を呼ぶ（repo_owner は USE_ORG に従い "ai-osi-uri" / 個人、ENV_VARS_JSON 込み）
-Step 4: (Supabase あり) supabase-set-auth-url
-Step 5: (Stripe あり、Phase 2 以降) stripe-create-product → vercel-set-env → vercel-redeploy
-Step 6: (Supabase あり) migration apply (Supabase Dashboard SQL editor で手動 or supabase CLI)
+Step 4: (Supabase あり) migration を supabase_execute_sql で適用（手動 SQL editor に頼らない）
+Step 5: (Supabase あり) supabase-set-auth-url（app_url を Auth に反映）
+Step 6: (Stripe あり、Phase 2 以降) stripe-create-product → vercel-set-env → vercel-redeploy
 Step 7: app-smoke-test
 Step 8: (任意) slack-notify
 ```
+
+### Supabase プロビジョニング（新規ユーザーで必ず通す手順）
+
+「Supabase プロジェクト設定できない」の恒久対応。**個人ダッシュボードでの手作業に頼らず、
+AI OSI URI Deploy のツールで完結**させる。空の Supabase を持つ新規ユーザーでも詰まらない。
+
+1. `supabase_list_projects` で使える既存 project（`status=ACTIVE_HEALTHY`）を確認。あれば
+   その `ref` を再利用（重複作成しない）。
+2. 無ければ作成：
+   - `supabase_list_organizations` で org を取得。`USE_ORG` が真なら会社 org
+     `zsarvxuigtcmrmoewarw`、偽なら本人の org。**org が取れない（PATなし）なら
+     `setup-deploy-environment` の Supabase PAT 入力へ案内して停止**（手作業に逃げない）。
+   - `supabase_create_project({ name: "<repo>-db", organization_id, db_pass: <強力な乱数>, region: "ap-northeast-1" })`。
+     `db_pass` はチャットに出さず生成して控える。
+3. **provision 完了待ち（最重要）**：作成直後は使えない。`supabase_list_projects` を
+   10〜15 秒間隔でポーリングし、`status` が `ACTIVE_HEALTHY` になるまで待つ（目安 1〜2 分）。
+   ここを飛ばして次に進むと接続に失敗する（フレッシュ環境の典型的な詰まり）。
+4. `supabase_get_api_keys({ project_ref })` で `URL` / `anon` / `service_role` を取得。
+5. これらを **Vercel を作る前に** ENV へ：`NEXT_PUBLIC_SUPABASE_URL` /
+   `NEXT_PUBLIC_SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY`。
+6. スキーマ（テーブル）は `supabase_execute_sql` で適用（Dashboard の SQL editor 手作業に頼らない）。
+   マルチテナントの RLS が要るなら `supabase-multitenant-rls` を参照。
+7. デプロイ後、`supabase-set-auth-url` で本番 `app_url` を Auth の Site/Redirect に反映。
 
 ### ENV_VARS_JSON 構築ルール
 
