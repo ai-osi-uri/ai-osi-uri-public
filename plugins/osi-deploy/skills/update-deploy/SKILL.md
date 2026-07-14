@@ -14,7 +14,16 @@ description: |
   最後に `app-smoke-test` を呼んで「実際に直ったか」までを 1 つのフローで完結させる。
   新規アプリ作成（既存リポなし・新規リポを作る）は `deploy-app` の役割。
   本スキルは「ローカルから既存リモートを更新する」場合専用。
-version: 0.4.0
+version: 0.5.0
+requires_connectors:
+  - server: AI_OSI_URI_Deploy
+    provision: mcpb
+  - server: aws-api
+    provision: user-install
+  - server: cowork
+    provision: builtin
+  - server: computer-use
+    provision: builtin
 ---
 
 # update-deploy — 既存アプリを更新するオーケストレータ
@@ -58,18 +67,22 @@ DoD: smoke test の合格 evidence なしに「直りました」と報告しな
 | `repo_name` | `ai-catalog-navigator` | Vercel プロジェクト名と一致することが多い |
 | `repo_url` | `https://github.com/{owner}/{name}` | owner+name から組み立て |
 | `branch` | 既定 `main` | 「develop の修正」など明示時のみ変える |
-| `host` | `vercel` / `aws` | `list_projects`（Vercel MCP）の存在で判定 |
-| `vercel_project_id` | `prj_xxx`（host=vercel 時） | `get_project` で `latestDeployment.id` も取得 |
+| `host` | `vercel` / `aws` | `health_check` の `vercel.valid` と、対象リポ/プロジェクト名を特定できるかで判定 |
+| `vercel_project_id` | `prj_xxx`（host=vercel 時） | `vercel_get_project` で解決 |
 
-Vercel パスの追加情報取得（**ユーザーに聞かず先に MCP で引く**）：
+Vercel パスの追加情報取得（**ユーザーに聞かず先に AI OSI URI Deploy 拡張自身のツールで引く**。
+別立ての standalone Vercel コネクタは使わない — 拡張が自己完結して動くという設計原則に反するため）：
 
 ```
-mcp__9f2dbe40-...__list_teams                     # team_xxx を取得
-mcp__9f2dbe40-...__get_project                     # latestDeployment.id, framework, domains
-mcp__9f2dbe40-...__get_deployment                  # meta.githubCommitSha, githubRepo, branchAlias
+vercel_get_project({ project: vercel_project_name または vercel_project_id })
+  → link（連携先 repo_owner/repo_name・production_branch）、latest_deployment_id、prod_url を取得
 ```
 
-得られた `meta.githubCommitSha` は Phase 5 の「コミット一致検証」で使う。
+`link` が `null`、または `link.repo_owner`/`link.repo_name` が Phase 1 で特定した対象リポと
+一致しない場合は「未連携」とみなし、Phase 4 の push 前に `vercel_connect_git` を呼ぶ（後述）。
+
+`latest_deployment_id` は push 前のベースラインとして保持しておき、Phase 4-2 のポーリングで使う。
+`vercel_get_deployment_status` の `github_commit_sha` は Phase 5 の「コミット一致検証」で使う。
 
 ---
 
@@ -250,6 +263,25 @@ git -C <work_dir> status --porcelain | head -1
 `.deploy-marker` をタッチ）を 1 件追加してから github_push を呼ぶか、
 ユーザーに `git push origin <branch>` を一度だけ走らせてもらうかを選ぶ。
 
+### Step 4-0.7: 未連携なら push 前に Git 連携を張る（host=vercel・必須）
+
+Phase 1 で `link` が `null`、または対象リポと不一致だった場合、**push（Step 4-1）より前に**
+`vercel_connect_git` を呼ぶ。連携が無いまま push しても自動デプロイの Webhook が飛ばず
+「push したのに本番に反映されない」事故になるため、順序を守ること。
+
+```
+vercel_connect_git:
+  project: {vercel_project_id または vercel_project_name}
+  repo_owner: {repo_owner}
+  repo_name: {repo_name}
+```
+
+- `already_connected: true` → 何もせず Step 4-1 へ。
+- `already_linked_to` が返る（別リポに連携済み） → **`force_relink` で押し切らない**。
+  対象を取り違えている可能性が高いため、ユーザーに確認してから再実行する
+  （「やってはいけないこと」参照）。
+- `needs_github_app_grant: true` → 許可 URL を提示して中断、許可後に再実行。
+
 ### Step 4-1: github_push
 
 ```
@@ -265,8 +297,13 @@ mcp__AI_OSI_URI_Deploy__github_push:
 ### Step 4-2: Vercel 自動デプロイ監視（host=vercel）
 
 ```
-新 deployment_id を list_deployments で取得（since=直近）
-vercel_get_deployment_status を 10s 間隔で polling、最大 5 分
+Phase 1 で保持した latest_deployment_id と異なる ID が
+vercel_get_project の latest_deployment_id に現れるまでポーリング（10s 間隔、最大 2 分）。
+  → 現れない場合: 連携直後で反映が遅れている可能性、または push が本当に
+    対象ブランチへ届いたかを疑い、github_push の結果と vercel_get_project の
+    link を再確認する。
+新しい deployment_id が確認できたら vercel_get_deployment_status を 10s 間隔で
+polling（最大 5 分）。
 ERROR/CANCELED → vercel_get_build_logs で末尾取得 → 自動修正ループ（最大 3 回）
   典型: 型エラー、import 漏れ、env 不足 → 修正→github_push→再ポーリング
 READY → Phase 5 へ
@@ -289,7 +326,7 @@ evidence なしに完了宣言しない。以下を `update-progress.md` に貼�
 
 | 検証項目 | 方法 | 合格条件 |
 |---|---|---|
-| コミット一致 | `git rev-parse HEAD` ↔ Vercel `meta.githubCommitSha` | 完全一致 |
+| コミット一致 | `git rev-parse HEAD` ↔ `vercel_get_deployment_status` の `github_commit_sha` | 完全一致 |
 | 本番反映 | `curl -sf {APP_URL}/{修正ページ}` の中身 grep | 期待文字列が出る |
 | AI 修正の場合 | 実際にリクエスト送信、レスポンス全長計測 | 文末が `。` で終わる／JSON が valid／指定文字数届く |
 | smoke test | `app-smoke-test` skill 呼び出し | 全項目 PASS |
@@ -310,7 +347,7 @@ evidence なしに完了宣言しない。以下を `update-progress.md` に貼�
   - {file_path_2}
 
 検証:
-  - コミット一致: ✓ ({sha} = vercel meta.githubCommitSha)
+  - コミット一致: ✓ ({sha} = vercel github_commit_sha)
   - 本番反映: ✓ (期待文字列「{string}」検出)
   - smoke test: ✓ ({checks_passed}/{total})
 
@@ -332,6 +369,9 @@ evidence なしに完了宣言しない。以下を `update-progress.md` に貼�
 | 3 | 該当箇所が複数 | 全箇所を提示し選んでもらう |
 | 4 | `index.lock: File exists` | Step 4-0 の pre-push hygiene を実行（`mv .git/*.lock *.lock.old`）。サンドボックスから rm 不可な仕様 |
 | 4 | `git commit` が `nothing to commit` で失敗 | Step 4-0.5 のとおり、既に commit 済みなら微小差分（`.deploy-marker` 等）を追加してから `github_push` |
+| 4 | `vercel_connect_git` が `already_linked_to` で別リポを返す | 対象リポと現連携先が食い違っている＝別アプリを触ろうとしている可能性が高いため、`force_relink` で押し切らず必ずユーザーに確認してから再実行 |
+| 4 | `vercel_connect_git` が `needs_github_app_grant` を返す | 許可 URL を提示して中断、許可後に再実行 |
+| 4 | 新 deployment_id がタイムアウトまで現れない | 連携直後の反映遅延、または push が対象ブランチへ届いていない可能性を疑い、`github_push` の結果と `vercel_get_project` の `link` を再確認 |
 | 4 | Vercel ビルド失敗 | `vercel_get_build_logs` 取得 → 自動修正ループ（最大 3 回） |
 | 4 | 自動修正ループも失敗 | ログを提示して中断、ユーザー判断待ち |
 | 5 | smoke test 失敗 | 「コミットは反映済みだが期待通り動いていない」と正直に報告 |
@@ -345,6 +385,8 @@ evidence なしに完了宣言しない。以下を `update-progress.md` に貼�
 - 「コミットされた」「READY になった」だけで「直りました」と顧客に伝えない。**Phase 5 の evidence が揃って初めて完了**。
 - AI 機能の `max_tokens` を闇雲に最大化しない（コスト直撃）。**ユーザー要望に合った値**（例: 4096→16384）に留め、根拠を `update-progress.md` に記す。
 - AWS パスでインフラ変更（terraform）を本スキルから直接行わない（`tf-state-backend` / `aws-static-deploy` の管轄）
+- `vercel_connect_git` が「別リポに連携済み」を返したとき、確認なしに `force_relink:true` で押し切らない。
+  対象を取り違えている可能性が高い（別アプリの Vercel プロジェクトを触ろうとしているサイン）。
 
 ---
 

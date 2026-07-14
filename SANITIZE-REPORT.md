@@ -14,7 +14,7 @@
 | plugins/osi-deploy/skills/tf-state-backend/SKILL.md | 3 | 共有ドライブ | description: AI OSI URI が Cowork/Terraform で公開した AWS アプリの **Terraform state を、揮発する作業フォルダではなく自社AWSアカウントの共有S3バケット（+DynamoD |
 | plugins/osi-deploy/skills/tf-state-backend/SKILL.md | 60 | 共有ドライブ | 6. コード一式＋HANDOFF を共有ドライブへ退避（揮発対策） |
 | plugins/osi-deploy/skills/tf-state-backend/SKILL.md | 145 | 共有ドライブ | 復旧時にバケット/キーが分からなくなる**。コード一式を共有ドライブの案件フォルダへ退避する。 |
-| plugins/osi-deploy/skills/update-deploy/SKILL.md | 57 | GITHUB_ORG | \| `repo_owner` \| `ai-osi-uri` または個人 username \| 既定は GITHUB_ORG / GITHUB_USERNAME \| |
+| plugins/osi-deploy/skills/update-deploy/SKILL.md | 66 | GITHUB_ORG | \| `repo_owner` \| `ai-osi-uri` または個人 username \| 既定は GITHUB_ORG / GITHUB_USERNAME \| |
 | plugins/osi-deploy/skills/setup-deploy-environment/SKILL.md | 3 | 共有ドライブ | description: AI OSI URI の Cowork から LP・販売サイト・課金つきアプリを自動デプロイするための初回セットアップ。**共有ドライブの .env は使わず**、各ユーザーが「AI OSI URI Deploy」 |
 | plugins/osi-deploy/skills/setup-deploy-environment/SKILL.md | 13 | 共有ドライブ | > 旧版は `.deploy-credentials/.env` にトークンを書き込んでいたが、平文・共有ドライブ同期・ |
 | plugins/osi-deploy/skills/setup-deploy-environment/SKILL.md | 19 | 共有ドライブ | （社内手順：共有ドライブ「環境構築キット」参照） |
