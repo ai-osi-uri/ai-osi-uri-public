@@ -1,7 +1,7 @@
 ---
 name: deploy-app
 description: AI OSI URI が Cowork から **任意の業種のアプリを新規に作って公開する**ための唯一のオーケストレータスキル。「アプリ作って」「LP 立ち上げて」「○○屋向けの在庫管理アプリ作って」「予約サイトを作って」「会員制のサブスク SaaS 作って」「業務系のシステム作って」「LP 公開して」など、ユーザーが新しいアプリの作成と公開を依頼したときに発動する。
-version: 0.5.1
+version: 0.5.2
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb
@@ -187,7 +187,7 @@ Phase 5-V / Phase 7-A の完了レポートを出してよいのは、**下の�
 | Vercel パス: Vercel Token 入力済み | `health_check` の `vercel.valid` | 拡張設定で Vercel Token 入力 |
 | AWS パス: `AWS_PROFILE` + ローカルに `claude` CLI | MCP or 環境変数 + `which claude` | 案内して中断 |
 | Stripe ありの場合 | Stripe MCP 接続済み | レジストリ案内 |
-| Supabase ありの場合 | Supabase PAT + プロジェクト ref | Dashboard URL 案内 |
+| Supabase ありの場合 | `health_check` の `supabase.valid: true`（PAT入力済み） | `setup-deploy-environment` を案内。プロジェクト・キーはユーザーに聞かず、下記「Supabase プロビジョニング」節の手順でClaudeが用意する（既存プロジェクト再利用の判定精度は #27 参照） |
 
 ---
 
@@ -241,7 +241,11 @@ OS キーチェーン保存）が保持し、デプロイ操作は拡張の MCP 
 |---|---|
 | `github_create_repo_and_push` / `github_push` | 新規リポ作成＋push / 既存リポ再push（ビルド修正） |
 | `vercel_create_project_and_deploy` / `vercel_get_deployment_status` / `vercel_get_build_logs` | Vercel 作成・本番デプロイ・監視 |
-| `supabase_list_projects` / `supabase_set_auth_url` | Supabase ref 特定・Auth URL 本番反映 |
+| `supabase_list_organizations` | Organization 一覧取得（`organization_id` 特定） |
+| `supabase_create_project` | 新規 Supabase プロジェクト作成（`db_pass` は自動生成） |
+| `supabase_get_api_keys` | URL・anon key・service_role key 取得 → `ENV_VARS_JSON` に反映 |
+| `supabase_execute_sql` | migration SQL 適用 |
+| `supabase_list_projects` / `supabase_set_auth_url` | 既存プロジェクトの確認 / Auth URL 本番反映 |
 | `stripe_create_product_and_price` / `stripe_create_payment_link` / `stripe_create_webhook` | Stripe（`mode:"test"` 既定 / `"live"` は `confirm_live:true` 必須） |
 
 - 作成先は「作成先の決定ルール」の `USE_ORG` に従う。真なら `github_create_repo_and_push` に
