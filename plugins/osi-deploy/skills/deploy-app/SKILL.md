@@ -1,7 +1,7 @@
 ---
 name: deploy-app
 description: AI OSI URI が Cowork から **任意の業種のアプリを新規に作って公開する**ための唯一のオーケストレータスキル。「アプリ作って」「LP 立ち上げて」「○○屋向けの在庫管理アプリ作って」「予約サイトを作って」「会員制のサブスク SaaS 作って」「業務系のシステム作って」「LP 公開して」など、ユーザーが新しいアプリの作成と公開を依頼したときに発動する。
-version: 0.5.0
+version: 0.5.1
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb
@@ -522,6 +522,9 @@ Step 8: (任意) slack-notify
 
 「Supabase プロジェクト設定できない」の恒久対応。**個人ダッシュボードでの手作業に頼らず、
 AI OSI URI Deploy のツールで完結**させる。空の Supabase を持つ新規ユーザーでも詰まらない。
+
+> **静的サイト / LP はこの手順を丸ごとスキップ**（GitHub + Vercel のみで一発完結・Supabase PAT 不要）。
+> DB・ログイン・保存・会員・予約など**データを保存する必要があるアプリのときだけ**本手順を通す。
 
 1. `supabase_list_projects` で使える既存 project（`status=ACTIVE_HEALTHY`）を確認。あれば
    その `ref` を再利用（重複作成しない）。
