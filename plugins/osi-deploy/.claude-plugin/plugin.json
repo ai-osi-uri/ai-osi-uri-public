@@ -1,6 +1,6 @@
 {
   "name": "osi-deploy",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "requires_connectors": [
     "AI OSI URI Deploy"
   ],

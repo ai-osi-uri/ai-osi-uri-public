@@ -1,7 +1,7 @@
 ---
 name: deploy-app
-description: AI OSI URI が Cowork から **任意の業種のアプリを新規に作って公開する（またはローカルにプロジェクトとして書き出す）**ための唯一のオーケストレータスキル。「アプリ作って」「LP 立ち上げて」「○○屋向けの在庫管理アプリ作って」「予約サイトを作って」「会員制のサブスク SaaS 作って」「業務系のシステム作って」「LP 公開して」など、ユーザーが新しいアプリの作成と公開を依頼したときに発動する。出力先は Vercel / AWS のクラウド公開に加え、「ローカルで動くアプリを作って」「クラウドに出さずローカルにプロジェクトとして出力して」「ローカルで動かせる形で書き出して」など**クラウドに出さずローカルフォルダに runnable なプロジェクト一式を出す**依頼でも発動する（Phase 4-L）。
-version: 0.5.3
+description: AI OSI URI が Cowork から **任意の業種のアプリを新規に作って公開する**ための唯一のオーケストレータスキル。「アプリ作って」「LP 立ち上げて」「○○屋向けの在庫管理アプリ作って」「予約サイトを作って」「会員制のサブスク SaaS 作って」「業務系のシステム作って」「LP 公開して」など、ユーザーが新しいアプリの作成と公開を依頼したときに発動する。
+version: 0.5.4
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb
@@ -12,16 +12,10 @@ requires_connectors:
 
 ---
 
-# deploy-app v3.3 — 汎用アプリ作成エントリポイント
+# deploy-app v3.2 — 汎用アプリ作成エントリポイント
 
 「アプリ作って」と言われたら、業種・規模に関わらず要件を聞き出して、Vercel か
-AWS で公開する（または**ローカルにプロジェクトとして書き出す**）ところまで 1 つの対話で完結させる。
-
-> **出力先は 3 択**：クラウド公開（Vercel / AWS）に加え、**ローカル・プロジェクト出力**
-> （クラウドに出さず、runnable な Next.js プロジェクト一式をローカルフォルダへ書き出し、
-> その場で `npm install && npm run dev` して動かせる状態にする）を選べる。詳細は Phase 4-L。
-> ※ これは GaiXer App Builder 向けの `.gaixerapp.json` バンドルとは別物。こちらは素の
-> プロジェクトをファイルとして出す（外部通信・クラウド課金なしで完結）。
+AWS で公開するところまで 1 つの対話で完結させる。
 
 > **AWS パスで着手する前に必ず参照**：[references/aws-app-gotchas.md](references/aws-app-gotchas.md)
 > — 最小構成テンプレ（S3+CloudFront+Lambda+API Gateway+DynamoDB+Bedrock）と、
@@ -178,9 +172,7 @@ Phase 5-V / Phase 7-A の完了レポートを出してよいのは、**下の�
 | Stripe webhook | `app-smoke-test` で webhook に無署名 POST | 400 が返る |
 | AWS API | `curl -i https://{ALB_DNS}/health` | 200 |
 | マルチテナント | 2人目ユーザーで他テナント不可視 | 他テナントデータ 0 件 |
-| **ローカル出力: ビルド** | 出力フォルダで `npm install && npm run build` | どちらも成功（終了コード 0） |
-| **ローカル出力: 起動実体** | `npm run dev` 起動中に `curl -sf http://localhost:3000` を grep | 期待文字列（アプリ名等）が出る |
-| **Drive 記録**（クラウド公開時のみ） | `{案件}/{アプリ名}/アプリ情報_README.md` 生成 + `_アプリ台帳.md` 追記 | 両ファイルがドライブに存在し公開URLが記載 |
+| **Drive 記録** | `{案件}/{アプリ名}/アプリ情報_README.md` 生成 + `_アプリ台帳.md` 追記 | 両ファイルがドライブに存在し公開URLが記載 |
 
 検証の実行は `app-smoke-test` に委譲してよいが、**結果（evidence）は必ず
 `deploy-progress.md` の「完了」欄に貼る**。検証していない項目を完了扱いにしない。
@@ -207,17 +199,12 @@ Phase 1: アプリ定義
   Step 1-A: 入力解析 (詳細あり / 一言依頼 / 既存コードあり)
   Step 1-B: ギャップ埋め (一言依頼の場合のみ、targeted 質問 2-3 個)
 Phase 2: インフラ判断 (内部判定マトリクス → AWS or Vercel 推奨)
-Phase 3: ホスティング選択 + プラン承認 (Vercel / AWS / ローカル出力)
+Phase 3: ホスティング選択 + プラン承認
 
 [Vercel パス] (軽量案件)
   Phase 4-V: scaffold 生成 → atomic 連鎖 (gh push → Vercel → Supabase → smoke)
   Phase 4.9-V: ドライブへ接続情報を記録（アプリ情報README + 台帳追記）★必須ゲート
   Phase 5-V: 完了レポート
-
-[ローカル出力パス] (クラウドに出さない)
-  Phase 4-L: プロジェクトをローカルフォルダに scaffold（データ層はローカル完結）
-             → ローカルで install / build / dev を実際に通す → 完了レポート
-             ※ gh push / Vercel / AWS / クラウド provisioning は一切しない
 
 [AWS パス] (エンタープライズ)
   Phase 4-A: インフラ構築 (spec.md+infra-decision.md 生成 → Claude Code 引き渡し
@@ -241,13 +228,12 @@ OS キーチェーン保存）が保持し、デプロイ操作は拡張の MCP 
 確認手順：
 1. `health_check` ツールを呼ぶ。
 2. 使うパスに必要なトークンが揃っているか確認：
-   - **ローカル出力パス（Phase 4-L）: クラウドトークン不要**。`node -v` / `npm -v` が通ることだけ確認し、health_check のトークン検査はスキップしてよい。
-   - クラウド公開の全パス: `github.valid: true`
+   - 全パス: `github.valid: true`
    - Vercel パス: `vercel.valid: true`
    - Stripe 利用時: `stripe.test` / `stripe.live`（使う方）
    - Supabase 利用時: `supabase.valid: true`
    - AI 機能つき: `anthropic.valid: true`
-3. 不足していれば `setup-deploy-environment`（拡張インストール＋トークン入力）を案内して中断（ローカル出力パスは対象外）。
+3. 不足していれば `setup-deploy-environment`（拡張インストール＋トークン入力）を案内して中断。
 
 ### Step 0-2: 使用する拡張ツール
 
@@ -494,12 +480,10 @@ Phase 1 (アプリ定義) と Phase 2 (インフラ判断) の結果をプラン
   - [推奨] Vercel
   - AWS で立てたい (将来のスケールや業務系を見据えて)
   - LP のみ静的サイトとして AWS S3+CloudFront に置く
-  - ローカルにプロジェクトとして書き出す (クラウドに出さず、その場で動かす → Phase 4-L)
 
 このプランで進めますか?
   [はい、Vercel で進める]
   [AWS に変更]
-  [ローカルにプロジェクト出力]
   [プランを修正したい]
 ```
 
@@ -861,48 +845,6 @@ EC・予約・SaaSなど「お客さん向けUI」と「事務局向けUI」が�
   6. **AI 機能がある場合**：1 回テストして response time が 30 秒以内であることを確認
      （超えるなら CDN フェッチをビルド時に前倒し）
 ```
-
----
-
-## Phase 4-L: ローカル・プロジェクト出力（クラウドに出さない）
-
-用途: Vercel/AWS に公開せず、**runnable な Next.js プロジェクト一式をローカルフォルダに書き出す**。
-外部通信・クラウド課金なしで、その場で `npm install && npm run dev` して動かせる状態にするのがゴール。
-（GaiXer 向けの `.gaixerapp.json` バンドルとは別。こちらは素のプロジェクトをファイルとして出す。）
-
-### 前提の違い（クラウドパスと比べて）
-- **クラウドトークン不要**。Phase 0 は「Node/npm がローカルにあること」だけ確認（`node -v` / `npm -v`）。
-- `github_create_repo_and_push` / `vercel_*` / AWS / `supabase_*` は**一切呼ばない**（拡張ツール不使用）。
-- ネットワークに出ない。データ層は**ローカルで完結**する構成にする（下記）。
-- 「コネクタ必須」の絶対ルール（拡張ロード確認）は本パスには適用しない。ローカルの Node だけで進める。
-
-### Step 1: 出力先フォルダの確定
-- 出力先を確認（既定: `~/projects/{kebab-project-name}`）。ユーザー指定があればそれ。
-- 既存フォルダなら上書き/別名を確認してから進む。
-
-### Step 2: scaffold（ローカル実行向け設定）
-- スタックは Vercel パスと同じ **Next.js(App Router) + TypeScript(strict) + Tailwind**。ただし接続先は全てローカル。
-- **データ層はローカル完結を既定**にする（ユーザーが望まない限りクラウドDBを使わない）:
-  - 小規模/PoC/一般業務 → **SQLite**（`better-sqlite3` もしくは Prisma + sqlite）。追加サービス不要で `npm run dev` だけで動く。**既定はこれ**。
-  - どうしても Postgres が要る → **`docker-compose.yml` で Postgres を同梱**し、接続先を `.env.local` に書く。docker 前提を README に明記。
-- **認証**が要る場合もローカル完結にする（簡易なメール+パスワードのローカル実装、または Supabase local）。クラウド Clerk/Supabase は使わない。
-- `harness-init` を呼び、`CLAUDE.md` / `README.md` / `init.sh` を同梱（起動・検証コマンドを自己記述）。
-- 秘密情報は `.env.local`（`.gitignore` 済み）に置き、`.env.example` を同梱。ダミー値のみ。
-
-### Step 3: ローカル検証（DoD）— 証拠なしに「完了」と言わない
-出力フォルダで実際に回して evidence を残してから完了レポートを出す:
-1. `npm install` が成功する
-2. `npm run build` が成功する（型・ビルドが通る）
-3. `npm run dev` で起動し、`curl -sf http://localhost:3000` の中身に期待文字列（アプリ名等）が出る
-4. DB を使うなら「1レコード作成 → 一覧取得」が通る（スモーク）
-
-いずれか落ちたら**直してから**完了を宣言する（ローカルなので修正ループは軽い）。
-
-### Step 4: 完了レポート
-- 出力先パス、起動コマンド（`cd {dir} && npm install && npm run dev`）を明示。
-- データ前提を明記（SQLite なら追加不要 / Postgres なら `docker compose up -d` の手順）。
-- **クラウド未デプロイ**であることを明示。「後で公開したくなったら同じリポで Vercel パス（`vercel-connect-and-deploy`）へ」も1行添える。
-- Drive 台帳への記録は不要（クラウド公開物ではないため）。ローカル成果物として扱う。
 
 ---
 
