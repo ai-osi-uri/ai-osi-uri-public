@@ -7,7 +7,7 @@
   },
   "metadata": {
     "description": "AI OSI URI 公開プラグイン（外部配布用サブセット）。",
-    "version": "0.7.5"
+    "version": "0.7.6"
   },
   "plugins": [
     {
@@ -23,6 +23,25 @@
         "thank-you",
         "investor",
         "narration"
+      ],
+      "strict": false
+    },
+    {
+      "name": "osi-creative-openrouter",
+      "source": "./plugins/osi-creative-openrouter",
+      "description": "OpenRouter 経由で AI 動画・画像・音声を生成する制作パイプライン一式（5スキル：ai-video-production-or / vp-core-or / vp-character-action-or / vp-corporate-narrated-or / vp-moveboard-or）。osi-creative（fal + ElevenLabs）と対を成す、単一 API キーで完結する版。別途 osi-creative-openrouter.mcpb を Claude Desktop に入れて OpenRouter API キーを設定して使う。references / templates / scripts は osi-creative から流用するため、両方インストール前提。",
+      "version": "0.1.0",
+      "category": "creative",
+      "tags": [
+        "openrouter",
+        "ai-video",
+        "veo",
+        "seedance",
+        "kling",
+        "nano-banana",
+        "tts",
+        "gpt-4o-mini-tts",
+        "single-key"
       ],
       "strict": false
     },

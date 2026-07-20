@@ -1,0 +1,11 @@
+{
+  "name": "osi-creative-openrouter",
+  "version": "0.1.0",
+  "description": "OpenRouter経由でAI動画・画像・音声を生成する制作パイプライン一式（5スキル：ai-video-production-or / vp-core-or / vp-character-action-or / vp-corporate-narrated-or / vp-moveboard-or）。別途 osi-creative-openrouter.mcpb を Claude Desktop に入れて OpenRouter API キーを設定して使う。",
+  "author": {
+    "name": "AI OSI URI",
+    "url": "https://ai-osi-uri.com"
+  },
+  "keywords": ["openrouter", "video", "image", "tts", "ai-video", "veo", "seedance", "kling", "nano-banana"],
+  "homepage": "https://ai-osi-uri.com"
+}
