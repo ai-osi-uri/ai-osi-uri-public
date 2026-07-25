@@ -1,7 +1,7 @@
 ---
 name: deploy-app
-description: AI OSI URI が Cowork から **任意の業種のアプリを新規に作って公開する**ための唯一のオーケストレータスキル。「アプリ作って」「LP 立ち上げて」「○○屋向けの在庫管理アプリ作って」「予約サイトを作って」「会員制のサブスク SaaS 作って」「業務系のシステム作って」「LP 公開して」など、ユーザーが新しいアプリの作成と公開を依頼したときに発動する。
-version: 0.5.5
+description: AI OSI URI が Cowork から **任意の業種のアプリを新規に作って公開する**ための唯一のオーケストレータスキル。「アプリ作って」「LP 立ち上げて」「○○屋向けの在庫管理アプリ作って」「予約サイトを作って」「会員制のサブスク SaaS 作って」「業務系のシステム作って」「LP 公開して」「デスクトップアプリを作って」「Windows/Mac 対応のアプリ」など、ユーザーが新しいアプリの作成と公開を依頼したときに発動する。
+version: 0.6.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb
@@ -12,10 +12,9 @@ requires_connectors:
 
 ---
 
-# deploy-app v3.2 — 汎用アプリ作成エントリポイント
+# deploy-app v4.0 — 汎用アプリ作成エントリポイント（Web / AWS / Desktop）
 
-「アプリ作って」と言われたら、業種・規模に関わらず要件を聞き出して、Vercel か
-AWS で公開するところまで 1 つの対話で完結させる。
+「アプリ作って」と言われたら、業種・規模に関わらず要件を聞き出して、Vercel・AWS・Desktop（Electron）で公開するところまで 1 つの対話で完結させる。
 
 > **AWS パスで着手する前に必ず参照**：[references/aws-app-gotchas.md](references/aws-app-gotchas.md)
 > — 最小構成テンプレ（S3+CloudFront+Lambda+API Gateway+DynamoDB+Bedrock）と、
@@ -93,7 +92,7 @@ AWS で公開するところまで 1 つの対話で完結させる。
 > [docs/deploy-app-local-clone-and-idempotency.md](../../../../docs/deploy-app-local-clone-and-idempotency.md)。
 
 ### 原則
-1. **正本は GitHub リモート。ローカルクローンは“そのマシンの作業コピー”**。誰でも clone し直せる。
+1. **正本は GitHub リモート。ローカルクローンは"そのマシンの作業コピー"**。誰でも clone し直せる。
 2. **Vercel プロジェクトは 1 リポにつき 1 つ。create は一度きり**。以降の更新は git push＝CI 自動デプロイ。
 3. **provision → env 収集 → 単一 create**。Supabase/Stripe を先に作り env を全部そろえてから Vercel を 1 回だけ作る。
 4. **本番URLは production alias（`<project>-<team>.vercel.app`）**。per-deploy 固定URLを正本にしない。
@@ -127,7 +126,7 @@ Claude Code への引き渡し → ポーリング → 復帰）。途中でセ�
 
 最初の実作業（Phase 4 着手）に入る前に `{OUTPUTS}/deploy-progress.md` を作成し、
 各フェーズの完了時に更新する。AWS パスで Drive 案件フォルダがある場合は、同ファイルを
-`21.PJT資料/{ID}.{企業名}/03_制作・成果物/` にもミラーする。
+`03.PJT資料/{ID}.{企業名}/03_制作・成果物/` にもミラーする。
 
 ```markdown
 # Deploy Progress — {PROJECT_NAME}
@@ -173,6 +172,8 @@ Phase 5-V / Phase 7-A の完了レポートを出してよいのは、**下の�
 | AWS API | `curl -i https://{ALB_DNS}/health` | 200 |
 | マルチテナント | 2人目ユーザーで他テナント不可視 | 他テナントデータ 0 件 |
 | **Drive 記録** | `{案件}/{アプリ名}/アプリ情報_README.md` 生成 + `_アプリ台帳.md` 追記 | 両ファイルがドライブに存在し公開URLが記載 |
+| Desktop: GH Actions 成功 | GitHub API で workflow run の `conclusion` | `success`（全 matrix job） |
+| Desktop: Release asset 存在 | GitHub API で release の `assets` 配列 | 対象 OS 分の asset が存在 |
 
 検証の実行は `app-smoke-test` に委譲してよいが、**結果（evidence）は必ず
 `deploy-progress.md` の「完了」欄に貼る**。検証していない項目を完了扱いにしない。
@@ -188,6 +189,9 @@ Phase 5-V / Phase 7-A の完了レポートを出してよいのは、**下の�
 | AWS パス: `AWS_PROFILE` + ローカルに `claude` CLI | MCP or 環境変数 + `which claude` | 案内して中断 |
 | Stripe ありの場合 | Stripe MCP 接続済み | レジストリ案内 |
 | Supabase ありの場合 | `health_check` の `supabase.valid: true`（PAT入力済み） | `setup-deploy-environment` を案内。プロジェクト・キーはユーザーに聞かず、下記「Supabase プロビジョニング」節の手順でClaudeが用意する（既存プロジェクト再利用の判定精度は #27 参照） |
+| Desktop パス: GitHub PAT に `workflow` スコープ | `health_check` の `github.valid` + PAT スコープ確認 | `setup-deploy-environment` を案内。Classic PAT なら `repo` + `workflow` が必要 |
+| Desktop パス（署名あり）: Apple Developer ID | ユーザーに確認 | Apple Developer Program ($99/年) の登録を案内 |
+| Desktop パス（署名あり）: Windows コード署名証明書 | ユーザーに確認 | Azure Trusted Signing または EV/OV 証明書の取得を案内 |
 
 ---
 
@@ -213,6 +217,11 @@ Phase 3: ホスティング選択 + プラン承認
   Phase 6-A: 動作確認 (smoke test + migration)
   Phase 6.9-A: ドライブへ接続情報を記録（アプリ情報README + 台帳追記）★必須ゲート
   Phase 7-A: 完了レポート
+
+[Desktop パス] (デスクトップアプリ)
+  Phase 4-D: Electron scaffold 生成 → GH Actions workflow 同梱 → push → CI ビルド監視
+  Phase 4.9-D: ドライブへ接続情報を記録（アプリ情報README + 台帳追記）★必須ゲート
+  Phase 5-D: 完了レポート（DL リンク付き）
 ```
 
 ---
@@ -296,7 +305,7 @@ AWS パスは AWS_PROFILE in .env でも MCP 経由でも OK。優先順位は M
 | **detailed** | 業種 + エンティティ + ロール + 規模 + 機能 のうち 3 つ以上読み取れる | Step 2 (確認のみ) |
 | **sparse** | 業種だけ・ジャンルだけ・「○○屋向け××」程度 | Step 1-B (ギャップ埋め) |
 | **既存コードあり** | 「~/Desktop/xxx に HTML がある」「フォルダがある」 | Phase 3 (Vercel/AWS-static で軽量パス) |
-| **iOS モバイル** | 「iOS アプリ作って」「iPhone アプリ」「TestFlight に上げて」「Xcode Cloud で」「Swift/SwiftUI で」等の iOS ネイティブ依頼 | 本スキルでは扱わない → `ios-mobile-release` を案内して停止（Xcode バージョンは N-1 ポリシーで管理）。将来 Android は別スキル `android-mobile-release`（未実装）へ |
+| **desktop** | 「デスクトップアプリ」「Windows/Mac で動くアプリ」「オフラインで使えるアプリ」等の明示 | Step 1-B (ギャップ埋め) + Desktop パス確定 |
 | **わからない** | 何も読み取れない | AskUserQuestion で「どの種別？」を確認 |
 
 ### Step 1-B: ギャップ埋め (sparse の場合のみ)
@@ -390,6 +399,7 @@ AskUserQuestion:
 | 機密性レベル | 公開可 (LP) / 個人情報あり / 機微情報あり (医療・金融) |
 | 想定規模 | 〜50 / 〜500 / 5000+ 人 |
 | 課金 | 無料 / 月額 / 一回購入 / 内部利用のみ |
+| 配布形態 | Web / Desktop / 両方 |
 
 ユーザーに最終確認:
 ```
@@ -423,6 +433,9 @@ Phase 1 で確定したアプリ定義シートから、**インフラ構成**�
 | 業務系・在庫等 (内部) | 〜500 | 任意 | **AWS** (project-template) |
 | 機微情報 (医療/金融) | 任意 | 任意 | **AWS + 3 省ガイドライン強化** |
 | マルチテナント SaaS | 中規模以上 | 課金あり | **AWS** (本格運用) |
+| ローカルファイル操作・オフライン必須 | 任意 | 任意 | **Desktop（Electron）** |
+| OS ネイティブ連携（トレイ・通知・ショートカット） | 任意 | 任意 | **Desktop（Electron）** |
+| ハードウェア連携（USB・シリアル・BLE） | 任意 | 任意 | **Desktop（Electron）** |
 
 ### AWS パス判定時のみ詳細確認
 
@@ -444,6 +457,27 @@ Q3: コンプライアンス
 Q4: ドメイン (任せる / 指定)
 
 Q5: 通知メール (CloudWatch アラート用、任意)
+```
+
+### Desktop パス判定時の詳細確認
+
+Desktop パスを判定した場合、以下を確認 (AskUserQuestion):
+
+```
+Q1: 対象 OS
+  - Windows のみ
+  - Mac のみ
+  - Windows + Mac（推奨）
+  - Windows + Mac + Linux
+
+Q2: コード署名
+  - 社内ツール / PoC（署名なし = SmartScreen / Gatekeeper 警告あり、無料）
+  - 顧客配布 / 製品（署名あり = Apple Developer ID + Windows 証明書が必要）
+  - わからない（署名なしで先に進め、後で追加可能）
+
+Q3: 自動更新
+  - あり（electron-updater + GitHub Releases、推奨）
+  - なし（手動で新バージョンを DL してもらう）
 ```
 
 ---
@@ -481,10 +515,12 @@ Phase 1 (アプリ定義) と Phase 2 (インフラ判断) の結果をプラン
   - [推奨] Vercel
   - AWS で立てたい (将来のスケールや業務系を見据えて)
   - LP のみ静的サイトとして AWS S3+CloudFront に置く
+  - デスクトップアプリ (Electron, GitHub Actions でビルド → GitHub Releases で配布)
 
 このプランで進めますか?
   [はい、Vercel で進める]
   [AWS に変更]
+  [Desktop で進める]
   [プランを修正したい]
 ```
 
@@ -747,7 +783,7 @@ EC・予約・SaaSなど「お客さん向けUI」と「事務局向けUI」が�
 
 ### Step 1: 保存先フォルダを決める
 
-- Drive 案件フォルダがある場合：`21.PJT資料/{ID}.{企業名}/` 配下に `{アプリ名}/` を作る。
+- Drive 案件フォルダがある場合：`03.PJT資料/{ID}.{企業名}/` 配下に `{アプリ名}/` を作る。
 - 案件が紐づかない場合：ユーザーに保存先フォルダを確認（既定は作業中の案件フォルダ直下）。
 - 全社横断台帳のパスが指定/既知ならそれも控える（Step 3）。
 
@@ -845,6 +881,193 @@ EC・予約・SaaSなど「お客さん向けUI」と「事務局向けUI」が�
      作り、それぞれが他テナントのデータを見えないことを確認
   6. **AI 機能がある場合**：1 回テストして response time が 30 秒以内であることを確認
      （超えるなら CDN フェッチをビルド時に前倒し）
+```
+
+---
+
+## Phase 4-D: Desktop パスの実行（Electron + GitHub Actions）
+
+> Desktop パスは Cowork で Electron scaffold を生成し、GitHub Actions の matrix ビルドで
+> Windows/Mac/Linux 向けのインストーラーを自動生成する。Cowork のサンドボックス（Linux）では
+> macOS の署名・Notarization ができないため、**ビルド・署名・配布は GitHub Actions に委譲**する。
+
+### Step 1: Electron scaffold 生成
+
+`electron-scaffold-and-build` atomic スキルを呼ぶ。以下の構成を生成:
+
+```
+{project}/
+├── package.json              # electron-builder config 込み
+├── electron-builder.yml      # ビルド詳細設定（ターゲット OS・インストーラー形式）
+├── src/
+│   ├── main/
+│   │   ├── index.ts          # Electron main process
+│   │   ├── preload.ts        # contextBridge（セキュリティ境界）
+│   │   └── ipc-handlers.ts   # IPC ハンドラ（ファイル操作等）
+│   └── renderer/
+│       ├── index.html
+│       ├── App.tsx            # React（Phase 1 のエンティティに沿った画面）
+│       └── ...
+├── .github/
+│   └── workflows/
+│       └── build-and-release.yml   # GitHub Actions matrix ビルド
+├── CLAUDE.md
+└── DEPLOY.md
+```
+
+Phase 1 のエンティティ・ロール・機能に沿った画面を `renderer/` に仮実装する。
+Web（Next.js）との違い: ルーティングは `react-router-dom`、API は IPC 経由（HTTP ではない）。
+
+### Step 2: GitHub Actions workflow 同梱
+
+`build-and-release.yml` を scaffold に含める。タグ push (`v*`) で自動トリガー:
+
+```yaml
+name: Build & Release
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            platform: mac
+          - os: windows-latest
+            platform: win
+          - os: ubuntu-latest
+            platform: linux
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm ci
+      - name: Build & Sign
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # macOS（署名ありの場合のみ）
+          CSC_LINK: ${{ secrets.MAC_CERTIFICATE }}
+          CSC_KEY_PASSWORD: ${{ secrets.MAC_CERTIFICATE_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          # Windows（署名ありの場合のみ）
+          WIN_CSC_LINK: ${{ secrets.WIN_CERTIFICATE }}
+          WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CERTIFICATE_PASSWORD }}
+        run: npx electron-builder --${{ matrix.platform }} --publish always
+```
+
+署名なし（PoC/社内）の場合は `CSC_*` / `APPLE_*` / `WIN_CSC_*` の env 行を削除した
+軽量版を使う（Secrets 未設定でも CI が通る）。
+
+### Step 3: gh-create-repo-and-push（共通）
+
+`gh-create-repo-and-push` を呼ぶ（owner_override は `USE_ORG` に従う）。
+**Vercel パスと完全に同じツール**を使う。Desktop 固有の処理はない。
+
+### Step 4: 初回タグ push → Actions トリガー
+
+```bash
+# Cowork が github_push で実行:
+# 1. v0.1.0 タグを打つ（Actions の on.push.tags トリガー）
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+`github_push` でタグ付き push を行い、GitHub Actions のビルドを開始する。
+
+### Step 5: desktop-release-monitor（CI 完了監視）
+
+`desktop-release-monitor` atomic スキルを呼ぶ。GitHub API で Actions の
+workflow run 状態を 15 秒間隔でポーリングし、進捗を実況:
+
+```
+🟡 Windows ビルド中...
+🟢 Mac ビルド完了 (3:42)
+🟢 Linux ビルド完了 (2:15)
+🟢 Windows ビルド完了 (4:28)
+✅ 全プラットフォームのビルド完了 — GitHub Release を確認中...
+🟢 Release v0.1.0 公開済み (3 assets)
+```
+
+タイムアウト 15 分。失敗時は `desktop-release-monitor` がビルドログを取得して提示。
+
+### Step 6: Release asset URL 取得
+
+GitHub Releases API から各 OS のダウンロード URL を取得:
+
+```
+GET /repos/{owner}/{repo}/releases/latest
+→ assets[]: { name, browser_download_url, size }
+```
+
+### Desktop パスの冪等ガード
+
+- GitHub Release は同一タグで 1 回のみ。再ビルドが必要な場合はタグを削除 → 再作成、
+  または `workflow_dispatch` で手動トリガー。
+- `vercel_create_project_and_deploy` のような「二重作成」リスクはない（Release は
+  タグに紐づくため名前衝突しない）。
+
+### Desktop パスのローカルクローン
+
+Vercel パスと同じく `~/projects/<repo-name>` に clone。`DEPLOY.md` には:
+- 更新は `clone → 修正 → push → tag → CI 自動ビルド`
+- `update-deploy` で再ビルド可能（Desktop 対応版）
+
+---
+
+## Phase 4.9-D: ドライブへ接続情報を記録（必須・アプリ台帳）
+
+> **DoD ゲート（必須）**：この記録を完了するまで Phase 5-D 完了レポートを出さない。
+> 手順・テンプレは **Phase 4.9-V と同一**（`アプリ情報_README.md` 生成 + `_アプリ台帳.md`
+> 追記 + evidence を `deploy-progress.md` に貼る）。Desktop パスでは接続先に
+> GitHub Releases URL・各 OS のダウンロードリンクを記載する。
+
+Desktop 固有の `アプリ情報_README.md` 記載項目:
+
+| 種別 | URL / ID |
+| --- | --- |
+| 📦 GitHub | {REPO_URL} |
+| 📥 GitHub Releases | {RELEASE_URL} |
+| 🪟 Windows DL | {.exe リンク} |
+| 🍎 Mac DL | {.dmg リンク} |
+| 🐧 Linux DL | {.AppImage リンク} |
+| 署名 | あり（Apple Developer ID + Windows Authenticode）/ なし |
+
+---
+
+## Phase 5-D: Desktop 完了レポート
+
+> **DoD ゲート（必須）**：Phase 4.9-D（Drive 記録）の evidence を `deploy-progress.md` に
+> 貼ってからこのレポートを出す。GitHub Actions の全 OS ビルドが `success` であることを
+> 確認してから完了と書く。
+
+```
+🎉 デスクトップアプリ完了 (Desktop パス)
+
+【ダウンロード】
+  Windows: {.exe リンク}
+  Mac: {.dmg リンク}
+  Linux: {.AppImage リンク}
+
+【リポジトリ】 {REPO_URL}
+【GitHub Releases】 {RELEASE_URL}
+【構成】 Electron + React + electron-builder
+【署名】 {あり / なし（社内PoC）}
+【自動更新】 {electron-updater（GitHub Releases 経由）/ なし}
+
+【次にやること】
+  1. 各 OS でインストール → 起動確認
+  2. Windows（署名なし）: SmartScreen 警告 →「詳細情報」→「実行」
+  3. Mac（署名なし）: 「開発元を検証できません」→ システム設定 > セキュリティ で許可
+  4. Mac（署名あり）: Gatekeeper が自動で通過することを確認
+  5. 更新版リリース: main に push + `git tag v0.2.0 && git push origin v0.2.0`
+     → GitHub Actions 自動ビルド → Release 自動公開
+  6. 本番化（署名追加）: setup-deploy-environment で証明書を登録
 ```
 
 ---
@@ -1101,6 +1324,10 @@ curl -i "https://$ALB_DNS/health"
 | 5-A | docker build 失敗 | Dockerfile を Cowork が確認、修正案を提示 |
 | 5-A | ECS task 起動失敗 | ECS event + CloudWatch Logs を取得、原因分析 |
 | 6-A | smoke test 失敗 | health endpoint 実装漏れの可能性、ログ確認案内 |
+| 4-D | scaffold 生成失敗 | Electron テンプレートをフォールバックで使用 |
+| 4-D | GH Actions ビルド失敗（1 OS） | `desktop-release-monitor` がログを取得、修正案を提示して `github_push` で再トリガー |
+| 4-D | GH Actions ビルド失敗（署名エラー） | 署名なしに切り替えるか、証明書 Secrets の設定を案内 |
+| 4-D | GH Actions タイムアウト | `workflow_dispatch` で手動再トリガー、または Actions の制限を案内 |
 
 ---
 
@@ -1119,6 +1346,11 @@ curl -i "https://$ALB_DNS/health"
 - **sparse 入力は推測を出してユーザー確認**: 一言依頼でも「業種から推測したロール
   候補・エンティティ候補・規模候補」を提示して、ユーザーは選ぶだけにする。3 個以上
   続けて自由記述させない
+- **Desktop パスでは GitHub Actions がビルドを実行**: Cowork のサンドボックス（Linux）では
+  macOS のコード署名・Notarization ができないため、GitHub Actions の matrix ビルドに委譲。
+  Cowork は scaffold 生成・push・CI 監視に専念する（Vercel パスと同じ体験）
+- **Desktop パスの更新は `update-deploy`**: 初回デプロイ後の修正は `update-deploy` を使い、
+  `git push` + tag で GitHub Actions を再トリガーする
 
 ---
 
@@ -1131,9 +1363,8 @@ curl -i "https://$ALB_DNS/health"
 - `app-smoke-test` — 両パスの最終チェック
 - `aws-static-deploy` — 静的サイト軽量 AWS パス用
 - `switch-to-live-mode` — Stripe テスト→本番化
-- `ios-mobile-release` — **iOS ネイティブアプリ**（Xcode Cloud / TestFlight / App Store 申請）。
-  本スキル（deploy-app）は Web / SaaS 専用。iOS 依頼は必ず `ios-mobile-release` に委譲する
-  （Xcode バージョンは N-1 ポリシー固定、カナリアで N を並行監視）。
+- `electron-scaffold-and-build` — Desktop パスの scaffold 生成 + GH Actions workflow 同梱
+- `desktop-release-monitor` — Desktop パスの GitHub Actions ビルド監視
 - Claude Code 側:
   - `/initialize-project` — placeholder 置換、AWS パスで使用
   - `/setup-infra` — Terraform apply (インフラ構築)、AWS パスで使用
