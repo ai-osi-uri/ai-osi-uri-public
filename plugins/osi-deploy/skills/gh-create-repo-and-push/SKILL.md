@@ -1,6 +1,6 @@
 ---
 name: gh-create-repo-and-push
-description: ローカル作業ディレクトリの内容を新規 GitHub リポジトリに作成して push する atomic スキル。認証は AI OSI URI Deploy 拡張（mcp/ai-osi-uri-deploy）が保持する GitHub PAT を使い、`.env` は読まない。拡張の MCP ツール `github_create_repo_and_push` を呼ぶだけ。命名衝突時の自動採番・PAT 入り remote の削除はツール側が担当。オーケストレータ `deploy-app` の Step 1 相当として呼ばれる。「GitHub に push して」「リポジトリ作って push」「新しい repo に上げて」「コードを GitHub に上げて」などで発動。GitHub PAT の入力は拡張設定の役割。リポ作成のみ・push のみの片割れ作業には使わない。
+description: ローカル作業ディレクトリの内容を新規 GitHub リポジトリに作成して push する atomic スキル。認証は AI OSI URI Deploy 拡張（mcp/ai-osi-uri-deploy）が保持する GitHub PAT を使い、`.env` は読まない。拡張の MCP ツール `github_create_repo_and_push` を呼ぶだけ。命名衝突時の自動採番・PAT 入り remote の削除はツール側が担当。オーケストレータ `create-app`（旧 deploy-app） の Step 1 相当として呼ばれる。「GitHub に push して」「リポジトリ作って push」「新しい repo に上げて」「コードを GitHub に上げて」などで発動。GitHub PAT の入力は拡張設定の役割。リポ作成のみ・push のみの片割れ作業には使わない。
 version: 0.3.0
 ---
 
@@ -28,7 +28,7 @@ version: 0.3.0
 | `commit_message` | 任意 | 初回コミットメッセージ（デフォルト `Initial scaffold`） |
 | `owner_override` | 任意 | 呼び出し側（deploy-app）の `USE_ORG` 判定に従う。真=`"ai-osi-uri"`、偽=`"personal"`。atomic 単体呼び出し時の既定は personal（安全側） |
 
-> 作成先ポリシー（2026-07）: org と個人を混在させない。deploy-app が GitHub/Vercel/Supabase の
+> 作成先ポリシー（2026-07）: org と個人を混在させない。create-app（旧 deploy-app）が GitHub/Vercel/Supabase の
 > org 3点をプリフライト判定し（USE_ORG）、全部揃えば `"ai-osi-uri"`、1つでも欠ければ `"personal"`
 > を `owner_override` に渡す。403（org 権限なし）は「欠け」として personal に倒す。
 

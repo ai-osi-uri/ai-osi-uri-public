@@ -1,6 +1,6 @@
 ---
 name: tf-state-backend
-description: AI OSI URI が Cowork/Terraform で公開した AWS アプリの **Terraform state を、揮発する作業フォルダではなく自社AWSアカウントの共有S3バケット（+DynamoDBロック）で一元管理する** atomic スキル。state用バケット/ロックテーブルが無ければ自動作成（idempotent）し、`backend "s3"` を infra に差し込み、既存のローカルstateを `-migrate-state` でS3へ移行し、S3格納を検証し、コード一式とHANDOFFを共有ドライブへ退避するまでを担当する。「stateはどこにある？」「tfstateが消えると困る」「Terraform stateをS3に」「リモートbackendに移行」「orphan化が心配」「stateを安全に管理したい」「別セッションでもterraformを続けたい」「stateが揮発する作業領域にしか無い」など、Terraform state の置き場所・移行・保全に関わるリクエストで発動する。新規アプリでは `deploy-app` の初回 apply 前に呼ばれて最初からS3 backendにする使い方と、既にローカルstateで動いている既存アプリを移行する使い方の両方に対応。アプリ本体のデプロイ（リソース作成）は `aws-static-deploy` / `deploy-app` の役割で、本スキルは state の管理基盤だけを担う。日本語の AI OSI URI デプロイ運用に特化。
+description: AI OSI URI が Cowork/Terraform で公開した AWS アプリの **Terraform state を、揮発する作業フォルダではなく自社AWSアカウントの共有S3バケット（+DynamoDBロック）で一元管理する** atomic スキル。state用バケット/ロックテーブルが無ければ自動作成（idempotent）し、`backend "s3"` を infra に差し込み、既存のローカルstateを `-migrate-state` でS3へ移行し、S3格納を検証し、コード一式とHANDOFFを共有ドライブへ退避するまでを担当する。「stateはどこにある？」「tfstateが消えると困る」「Terraform stateをS3に」「リモートbackendに移行」「orphan化が心配」「stateを安全に管理したい」「別セッションでもterraformを続けたい」「stateが揮発する作業領域にしか無い」など、Terraform state の置き場所・移行・保全に関わるリクエストで発動する。新規アプリでは `create-app`（旧 deploy-app） の初回 apply 前に呼ばれて最初からS3 backendにする使い方と、既にローカルstateで動いている既存アプリを移行する使い方の両方に対応。アプリ本体のデプロイ（リソース作成）は `aws-static-deploy` / `create-app`（旧 deploy-app） の役割で、本スキルは state の管理基盤だけを担う。日本語の AI OSI URI デプロイ運用に特化。
 version: 0.1.0
 ---
 
@@ -14,7 +14,7 @@ Cowork のセッション作業フォルダ（`.../outputs/...`）は**セッシ
 セッション/フォルダから独立させる。これにより**どのセッションからでも `terraform init` だけで
 同じ state を参照**できる。
 
-> アプリ本体（S3+CloudFront / Lambda / DynamoDB 等）の作成は `aws-static-deploy` / `deploy-app`。
+> アプリ本体（S3+CloudFront / Lambda / DynamoDB 等）の作成は `aws-static-deploy` / `create-app`（旧 deploy-app）。
 > 本スキルは **state の置き場所だけ**を扱う atomic スキル。
 
 ---
@@ -187,6 +187,6 @@ rsync -a $EXC "$REPO_DIR/" "<Drive案件フォルダ>/aws-repo-<PROJECT>/"
 
 ## このスキルが呼ばれる場面
 
-- `deploy-app` の **AWSパス初回 apply 前**（bootstrap-new）：新規アプリを最初からS3 backendに。
+- `create-app`（旧 deploy-app） の **AWSパス初回 apply 前**（bootstrap-new）：新規アプリを最初からS3 backendに。
 - 既にローカルstateで動いている**既存アプリの移行**（migrate-existing）：単体で発動。
 - 「stateどこ？」「orphanが怖い」「別セッションで続けたい」等の**state保全の相談**。

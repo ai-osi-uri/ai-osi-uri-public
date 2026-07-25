@@ -1,10 +1,10 @@
 {
   "name": "osi-deploy",
-  "version": "0.9.0",
+  "version": "1.0.0",
   "requires_connectors": [
     "AI OSI URI Deploy"
   ],
-  "description": "AI OSI URI のアプリ・LP・販売サイト・SaaS デプロイ自動化。Vercel パス（軽量）と AWS パス（業務系）、GCP（BigQuery / Cloud Run を REST で操作・CLI不要）、iOS ネイティブの Xcode Cloud / TestFlight / App Store 申請（Xcode バージョンは N-1 ポリシー固定＋週次カナリア）までカバー。Stripe Live モード切り替え・Supabase Auth URL 更新・スモークテストまで一気通貫。",
+  "description": "AI OSI URI のアプリ作成・公開自動化。Web（Vercel / AWS）、Desktop（Electron）、Mobile、ローカル出力に対応。create-app を入口に要件定義からデプロイ・配布まで一気通貫。",
   "author": {
     "name": "AI OSI URI",
     "email": "yuhenagisa@ai-osi-uri.com"
@@ -12,18 +12,22 @@
   "homepage": "https://github.com/ai-osi-uri/ai-osi-uri-public",
   "license": "UNLICENSED",
   "keywords": [
-    "deploy",
-    "vercel",
+    "app-store",
     "aws",
-    "gcp",
     "bigquery",
+    "create-app",
+    "deploy",
+    "desktop",
+    "electron",
+    "gcp",
     "github",
+    "ios",
+    "mobile",
+    "saas",
     "stripe",
     "supabase",
-    "saas",
-    "ios",
-    "xcode-cloud",
     "testflight",
-    "app-store"
+    "vercel",
+    "xcode-cloud"
   ]
 }

@@ -1,6 +1,9 @@
 ---
 name: deploy-app
-description: AI OSI URI が Cowork から **任意の業種のアプリを新規に作って公開する**ための唯一のオーケストレータスキル。「アプリ作って」「LP 立ち上げて」「○○屋向けの在庫管理アプリ作って」「予約サイトを作って」「会員制のサブスク SaaS 作って」「業務系のシステム作って」「LP 公開して」「デスクトップアプリを作って」「Windows/Mac 対応のアプリ」など、ユーザーが新しいアプリの作成と公開を依頼したときに発動する。
+description: >
+  ⚠️ 非推奨 — `create-app` に統合されました。「アプリ作って」等の発話は create-app が処理します。
+  Desktop（Electron）・Mobile・ローカル出力は create-app にのみ対応。
+  互換性のため残していますが、新しい機能は create-app に追加されます。
 version: 0.6.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
@@ -9,8 +12,16 @@ requires_connectors:
     provision: user-install
   - server: slack
     provision: user-install
+---
+
+> ⚠️ **このスキルは非推奨です。`create-app` に統合されました。**
+> Desktop（Electron）・Mobile（iOS/Android）・ローカル出力パスは `create-app` にのみ対応しています。
+> このスキルが発動した場合は `create-app` の手順に従ってください。
+>
+> Web パス（Vercel / AWS）の既存手順は下記にそのまま残しています。
 
 ---
+
 
 # deploy-app v4.0 — 汎用アプリ作成エントリポイント（Web / AWS / Desktop）
 

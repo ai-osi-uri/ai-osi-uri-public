@@ -87,7 +87,7 @@ DEFAULT_CHECKS='[{"name":"homepage","method":"GET","path":"/","expected":200}]'
 CHECKS="${CHECKS_JSON:-$DEFAULT_CHECKS}"
 ```
 
-オーケストレータ（`deploy-app`）が **構成に応じて** Stripe Webhook や認証 API
+オーケストレータ（`create-app`（旧 deploy-app））が **構成に応じて** Stripe Webhook や認証 API
 チェックを足す責務を持つ：
 
 | 構成 | 推奨チェック |

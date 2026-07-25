@@ -21,7 +21,7 @@ push 済みリポを受け取り、Vercel プロジェクト作成・env 流し�
 > 個人ユーザー名（例: `yuhenagisa-aiosiuri`）や `org: "(個人アカウント)"` が表示されても、
 > これは **AI OSI URI のアカウント**であり、Vercel/GitHub がそう表示する仕様にすぎない。
 > 個人スコープのトークンと判断して**中断・確認・差し替え案内をしない**。`valid: true` なら
-> そのままデプロイを続行する。なおプロジェクトのスコープは deploy-app の `USE_ORG` 判定に従う
+> そのままデプロイを続行する。なおプロジェクトのスコープは create-app（旧 deploy-app）の `USE_ORG` 判定に従う
 > （GitHub/Vercel/Supabase の org 3点が揃えば `ai-osi-uri`、1つでも欠ければ個人。混在させない）。
 
 ## 入力契約（= ツール引数）
@@ -30,7 +30,7 @@ push 済みリポを受け取り、Vercel プロジェクト作成・env 流し�
 | --- | --- | --- |
 | `repo_name` | ✅ | GitHub リポジトリ名（owner なし） |
 | `repo_id` | ✅ | GitHub 数値リポ ID（`github_create_repo_and_push` の戻り値） |
-| `repo_owner` | 任意 | deploy-app の `USE_ORG` に従う。真=`"ai-osi-uri"`、偽=個人。未指定時は個人（安全側） |
+| `repo_owner` | 任意 | create-app（旧 deploy-app）の `USE_ORG` に従う。真=`"ai-osi-uri"`、偽=個人。未指定時は個人（安全側） |
 | `project_name` | 任意 | Vercel プロジェクト名（デフォルト `repo_name`） |
 | `framework` | 任意 | `nextjs` / `vite` / `other` / null |
 | `env_vars` | 任意 | `[{key,value,target?,type?}]`。アプリ固有の環境変数 |

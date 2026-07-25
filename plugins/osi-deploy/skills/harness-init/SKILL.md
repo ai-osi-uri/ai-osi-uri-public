@@ -1,6 +1,6 @@
 ---
 name: harness-init
-description: 生成・デプロイするアプリのリポジトリに「ハーネスエンジニアリング」の最小構成（AGENTS.md / CLAUDE.md・init.sh・claude-progress.md・feature_list.json）を仕込む atomic スキル。エージェント（Codex / Claude Code）が長時間・複数セッションでも文脈を失わず、検証なしに完了宣言せず、1機能ずつ証拠ありで進められるように、指示・環境・状態・フィードバックの4サブシステムをリポジトリに自己記述させる。プロジェクトのスタック（INSTALL/VERIFY/START コマンド、テスト・Lint）を受け取り、プレースホルダを実値に埋めて配置する。「ハーネスを入れて」「AGENTS.md を作って」「このリポにハーネスエンジニアリングを仕込んで」「エージェントが迷子にならないようにして」「進捗管理とfeature_listを入れて」など、リポジトリにエージェント運用の足場を入れるリクエストで発動する。通常はオーケストレータ deploy-app の scaffold 直後（Vercel パス Phase 4-V / AWS パス Phase 4-A）から呼ばれる。実デプロイ・課金・インフラ構築は行わない（それぞれ vercel-connect-and-deploy / aws-static-deploy / setup-infra の役割）。
+description: 生成・デプロイするアプリのリポジトリに「ハーネスエンジニアリング」の最小構成（AGENTS.md / CLAUDE.md・init.sh・claude-progress.md・feature_list.json）を仕込む atomic スキル。エージェント（Codex / Claude Code）が長時間・複数セッションでも文脈を失わず、検証なしに完了宣言せず、1機能ずつ証拠ありで進められるように、指示・環境・状態・フィードバックの4サブシステムをリポジトリに自己記述させる。プロジェクトのスタック（INSTALL/VERIFY/START コマンド、テスト・Lint）を受け取り、プレースホルダを実値に埋めて配置する。「ハーネスを入れて」「AGENTS.md を作って」「このリポにハーネスエンジニアリングを仕込んで」「エージェントが迷子にならないようにして」「進捗管理とfeature_listを入れて」など、リポジトリにエージェント運用の足場を入れるリクエストで発動する。通常はオーケストレータ create-app（旧 deploy-app）の scaffold 直後（Vercel パス Phase 4-V / AWS パス Phase 4-A）から呼ばれる。実デプロイ・課金・インフラ構築は行わない（それぞれ vercel-connect-and-deploy / aws-static-deploy / setup-infra の役割）。
 version: 0.1.0
 ---
 
@@ -14,7 +14,7 @@ version: 0.1.0
 harnesses for long-running agents"。
 
 このスキルは **ファイルを置いて埋めるところまで**が責任範囲。実ビルド・デプロイ・
-課金・インフラ構築は呼び出し側（`deploy-app` や各 atomic）に委譲する。
+課金・インフラ構築は呼び出し側（`create-app`（旧 deploy-app） や各 atomic）に委譲する。
 
 ---
 
@@ -157,7 +157,7 @@ TARGET: <dir>
 
 ## 関連スキル
 
-- `deploy-app` — オーケストレータ。scaffold 直後に本スキルを呼ぶ
+- `create-app`（旧 deploy-app） — オーケストレータ。scaffold 直後に本スキルを呼ぶ
 - `gh-create-repo-and-push` — 本スキルで足場を入れてから push すると初回コミットに含められる
 - `app-smoke-test` — feature_list.json の verification と役割が連続する（HTTP 検証）
 - `vercel-connect-and-deploy` / `aws-static-deploy` — 実デプロイ（本スキルの後段）

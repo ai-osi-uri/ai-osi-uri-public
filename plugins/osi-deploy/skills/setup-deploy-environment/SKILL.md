@@ -1,12 +1,12 @@
 ---
 name: setup-deploy-environment
-description: AI OSI URI の Cowork から LP・販売サイト・課金つきアプリを自動デプロイするための初回セットアップ。**共有ドライブの .env は使わず**、各ユーザーが「AI OSI URI Deploy」拡張（mcpb）をインストールし、設定欄にトークンを入力する方式に統一。GitHub PAT / Vercel Token / Stripe(test/live) / Supabase PAT / Anthropic API Key を拡張に入力し、OS キーチェーンに保存する。「デプロイ環境を整える」「初回セットアップ」「自動デプロイを使えるようにしたい」などで発動。トークンはチャットに貼らず拡張設定に入力する。毎回のデプロイ作業は `deploy-app` の役割。
+description: AI OSI URI の Cowork から LP・販売サイト・課金つきアプリを自動デプロイするための初回セットアップ。**共有ドライブの .env は使わず**、各ユーザーが「AI OSI URI Deploy」拡張（mcpb）をインストールし、設定欄にトークンを入力する方式に統一。GitHub PAT / Vercel Token / Stripe(test/live) / Supabase PAT / Anthropic API Key を拡張に入力し、OS キーチェーンに保存する。「デプロイ環境を整える」「初回セットアップ」「自動デプロイを使えるようにしたい」などで発動。トークンはチャットに貼らず拡張設定に入力する。毎回のデプロイ作業は `create-app`（旧 deploy-app） の役割。
 version: 0.3.2
 ---
 
 # デプロイ環境構築（拡張インストール方式）
 
-自動デプロイ系スキル（`deploy-app` など）が使う認証情報を、**Google Drive の共有 `.env`
+自動デプロイ系スキル（`create-app`（旧 deploy-app） など）が使う認証情報を、**Google Drive の共有 `.env`
 ではなく「AI OSI URI Deploy」拡張（mcpb）に入力**する。トークンは `sensitive` 指定で OS の
 キーチェーンに暗号化保存され、拡張内の MCP サーバープロセスにのみ渡る。**1 ユーザー 1 回**。
 
@@ -38,7 +38,7 @@ version: 0.3.2
 | iOS Distribution Cert (.p12) を base64 化 | iOS のみ | Keychain から書き出した `.p12` を base64（`ios-mobile-release` の references 参照） |
 | iOS Distribution Cert .p12 のパスワード | iOS のみ | 書き出し時に付けたパスワード |
 
-> 作成先は deploy-app のプリフライト（GitHub org / Vercel team / Supabase org の3点可否＝USE_ORG）で
+> 作成先は create-app（旧 deploy-app）のプリフライト（GitHub org / Vercel team / Supabase org の3点可否＝USE_ORG）で
 > 決まる。3点揃えば org（`ai-osi-uri` / `ai-osi-uri` / `zsarvxuigtcmrmoewarw`）、1つでも欠ければ全部
 > 個人に倒す（混在させない）。org に寄せるには PAT を Classic PAT(repo+workflow+read:org)、Vercel の
 > ai-osi-uri スコープ、Supabase の会社 org を揃える。
@@ -65,13 +65,13 @@ version: 0.3.2
 > ここで即落ちる（fastlane まで進めて 8 分待って気付く事故を防ぐ）。Distribution Cert
 > (`.p12`) も同時に基本検証する。詳細は `ios-mobile-release/references/n1-policy.md`。
 
-> **DB を使うアプリは Supabase PAT が必須**：`supabase.valid:true` でないと deploy-app の
+> **DB を使うアプリは Supabase PAT が必須**：`supabase.valid:true` でないと create-app（旧 deploy-app）の
 > Supabase 自動プロビジョニング（プロジェクト作成→キー取得）が動かず、「Supabase プロジェクト
 > 設定できない」で止まる。DB／ログイン／保存が要るアプリを作る予定なら Supabase PAT を入れる。
 
 ## 完了後
 
-`deploy-app` が使える。「LP を公開して」「Stripe つきでデプロイ」「SaaS を立ち上げて」など。
+`create-app`（旧 deploy-app） が使える。「LP を公開して」「Stripe つきでデプロイ」「SaaS を立ち上げて」など。
 
 ## よくある罠：GitHub PAT が突然 401 を返す
 

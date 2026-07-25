@@ -12,7 +12,7 @@ description: |
   該当ファイルを修正し、AI OSI URI Deploy 拡張の `github_push` で push、
   Vercel の自動再デプロイを `vercel_get_deployment_status` で監視、
   最後に `app-smoke-test` を呼んで「実際に直ったか」までを 1 つのフローで完結させる。
-  新規アプリ作成（既存リポなし・新規リポを作る）は `deploy-app` の役割。
+  新規アプリ作成（既存リポなし・新規リポを作る）は `create-app`（旧 deploy-app） の役割。
   本スキルは「ローカルから既存リモートを更新する」場合専用。
   スコープ注記: 対象は **Web / SaaS（Vercel / AWS）のみ**。iOS ネイティブアプリの更新
   （Xcode Cloud のワークフロー変更・Xcode バージョン繰り上げ・新ビルドの TestFlight 昇格 等）は
@@ -31,7 +31,7 @@ requires_connectors:
 
 # update-deploy — 既存アプリを更新するオーケストレータ
 
-`deploy-app` が「新規作成」を担うのに対し、本スキルは「既にある GitHub リポ＋
+`create-app`（旧 deploy-app） が「新規作成」を担うのに対し、本スキルは「既にある GitHub リポ＋
 Vercel/AWS のデプロイを、ローカル修正→push→自動再デプロイ→検証」まで貫通する。
 
 ## いつ発動するか
@@ -41,7 +41,7 @@ Vercel/AWS のデプロイを、ローカル修正→push→自動再デプロ�
 - 「○○のコピー直して再デプロイ」「文言修正して反映」
 - Vercel/AWS にすでに公開済みのリポを編集したい全シナリオ
 
-新規 LP/SaaS を 0 から作る依頼（リポ未作成）は `deploy-app` を使うこと。
+新規 LP/SaaS を 0 から作る依頼（リポ未作成）は `create-app`（旧 deploy-app） を使うこと。
 
 ## ハーネス（必須）
 
@@ -395,7 +395,7 @@ evidence なしに完了宣言しない。以下を `update-progress.md` に貼�
 
 ## 関連スキル
 
-- `deploy-app` — 新規アプリ作成（既存リポなしならこちら）
+- `create-app`（旧 deploy-app） — 新規アプリ作成（既存リポなしならこちら）
 - `gh-create-repo-and-push` — 新規リポ作成 atomic
 - `vercel-connect-and-deploy` — 新規 Vercel プロジェクト atomic（本スキルは既存プロジェクトの再デプロイのみ）
 - `app-smoke-test` — Phase 5 の検証で呼ばれる
