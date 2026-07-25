@@ -44,6 +44,27 @@
         <false/>
     </dict>
 
+    <!--
+        Export Compliance (Encryption Regulations).
+        Set to <false/> if the app only uses OS-provided encryption:
+          - HTTPS/TLS via URLSession
+          - CryptoKit standard hashes (SHA256 etc.) for auth nonces
+          - Sign in with Apple, OAuth PKCE
+        This is the default Golden Template posture; every scaffolded app
+        gets automatic Export Compliance approval at TestFlight upload time
+        (no manual "Encryption Documentation" click in ASC).
+
+        Change to <true/> ONLY if you add:
+          - Custom encryption / E2E messaging
+          - Third-party crypto libraries beyond OS defaults
+          - File-level encryption using non-standard algorithms
+        Doing so requires uploading annual Self Classification Report + ERN.
+
+        Reference: https://developer.apple.com/documentation/security/complying_with_encryption_export_regulations
+    -->
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
+
     <!-- Standard iOS requirements -->
     <key>UILaunchScreen</key>
     <dict>
