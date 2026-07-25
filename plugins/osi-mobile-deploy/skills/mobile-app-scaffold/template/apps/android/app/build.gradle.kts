@@ -85,6 +85,8 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+    // XML テーマ (Theme.Material3.*) を使うために Material Components を入れる。
+    implementation("com.google.android.material:material:1.12.0")
 
     implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
     implementation("com.google.firebase:firebase-analytics-ktx")

@@ -1,0 +1,14 @@
+
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!--
+        AI OSI URI scaffold のプレースホルダロゴ。"M" 一文字をベクターで描く。
+        adaptive icon の 108x108 キャンバスに、内側 72dp のセーフゾーンで収まる大きさ。
+    -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M32,72 L32,36 L44,36 L54,58 L64,36 L76,36 L76,72 L68,72 L68,50 L58,72 L50,72 L40,50 L40,72 Z" />
+</vector>

@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- app_name is overridden per-flavor via resValue in build.gradle.kts -->
-    <color name="ic_launcher_background">#FFFFFF</color>
+    <!-- app_name は build.gradle.kts の resValue で flavor ごとに差し替わる。 -->
 </resources>

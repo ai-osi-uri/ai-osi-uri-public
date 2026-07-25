@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- adaptive icon の背景色。白い "M" のフォアグラウンドが読めるように濃い紫を敷く。 -->
+    <color name="ic_launcher_background">#FF6200EE</color>
+</resources>
