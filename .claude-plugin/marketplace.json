@@ -7,7 +7,7 @@
   },
   "metadata": {
     "description": "AI OSI URI 公開プラグイン（外部配布用サブセット）。",
-    "version": "0.7.6"
+    "version": "0.8.1"
   },
   "plugins": [
     {
@@ -63,8 +63,8 @@
     {
       "name": "osi-deploy",
       "source": "./plugins/osi-deploy",
-      "description": "アプリ・LP・SaaS デプロイ自動化：Vercel（軽量）と AWS（業務系）両対応。Terraform state を共有S3 backendで一元管理（tf-state-backend）。Stripe Live 切替・Supabase Auth 更新・スモークテストまで一気通貫。クラウドに出さずローカルにプロジェクトを書き出す local-project-output、オンプレ GaiXer が取り込める .gaixerapp.json を吐く gaixer-app-export も追加。非エンジニア向け入口 app-concierge（「公開されてる?/動かない/データ見せて」を平易に確認・triage）を追加。",
-      "version": "0.8.5",
+      "description": "アプリ・LP・SaaS デプロイ自動化：Vercel（軽量）と AWS（業務系）両対応。Terraform state を共有S3 backendで一元管理（tf-state-backend）。Stripe Live 切替・Supabase Auth 更新・スモークテストまで一気通貫。クラウドに出さずローカルにプロジェクトを書き出す local-project-output、オンプレ App Builder が取り込める .appbuilder.json を吐く app-builder-export も追加。非エンジニア向け入口 app-concierge（「公開されてる?/動かない/データ見せて」を平易に確認・triage）を追加。",
+      "version": "0.8.6",
       "category": "deploy",
       "tags": [
         "deploy",
@@ -116,8 +116,8 @@
     {
       "name": "osi-backoffice",
       "source": "./plugins/osi-backoffice",
-      "description": "バックオフィス業務自動化。契約書の内容チェック→DocuSign 署名依頼（contract-docusign-send）。任意のアップロード契約書を S3 署名付きURL経由で DocuSign に取り込み、送付方向（自社送付／先方送付）を選択。送付は人が DocuSign 上で行う安全設計（自動送付しない）。",
-      "version": "0.1.2",
+      "description": "バックオフィス業務自動化。契約書の内容チェック→DocuSign 署名依頼（contract-docusign-send）と、名刺のラクスル入稿用PDF自動生成（meishi-generator：氏名・役職等を伝えるだけで原本.aiテンプレの可変部分を差し替えた入稿PDFを生成、CMYK・トンボ維持）。送付・発注は人が行う安全設計（自動送付・自動発注しない）。",
+      "version": "0.2.0",
       "category": "backoffice",
       "tags": [
         "backoffice",
@@ -125,7 +125,9 @@
         "docusign",
         "esignature",
         "nda",
-        "review"
+        "review",
+        "meishi",
+        "raksul"
       ],
       "strict": false
     }

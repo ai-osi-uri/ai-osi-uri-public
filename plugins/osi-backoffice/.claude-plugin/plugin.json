@@ -1,8 +1,8 @@
 {
   "name": "osi-backoffice",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "requires_connectors": [],
-  "description": "AI OSI URI のバックオフィス業務自動化。契約書の内容チェック→DocuSign 署名依頼（contract-docusign-send）。送付は人が DocuSign 上で行う安全設計（自動送付しない）。今後の契約締結・各種申請・労務まわりのバックオフィス系スキルの集約先。",
+  "description": "AI OSI URI のバックオフィス業務自動化。契約書の内容チェック→DocuSign 署名依頼（contract-docusign-send）と、名刺のラクスル入稿用PDF自動生成（meishi-generator：原本.aiの可変部分だけ差し替え・CMYK維持）。送付・発注は人が行う安全設計。今後の契約締結・各種申請・労務まわりのバックオフィス系スキルの集約先。",
   "author": {
     "name": "AI OSI URI",
     "email": "yuhenagisa@ai-osi-uri.com"
@@ -15,6 +15,9 @@
     "docusign",
     "esignature",
     "nda",
-    "review"
+    "review",
+    "meishi",
+    "business-card",
+    "raksul"
   ]
 }

@@ -13,8 +13,6 @@ description: >
   （initial-proposal / proposal-estimate / proposal-package）の担当。本スキルは「相手の設計を
   クラウド上に実装する技術・デリバリー提案」専用。
 requires_connectors:
-  - server: notion
-    provision: user-install
   - server: box
     provision: user-install
 ---
@@ -46,7 +44,7 @@ requires_connectors:
    3回レンダリング（下記「アーキ図の作り方」）。
 6. **pptx生成**：scripts/deck_helpers.py を import して各スライドを組む（下記「pptxの作り方」）。
 7. **QA**：references/structure.md の QA 手順（markitdown＋画像化＋サブエージェント点検）を回す。
-8. （任意）Drive 格納・Notion 反映は proposal-package の流儀に合わせる。v1モック画面＋Vercel
+8. （任意）Drive 格納・営業管理表への反映は proposal-package の流儀に合わせる。v1モック画面＋Vercel
    公開が要るなら deploy-app と連携。
 
 ## アーキ図の作り方（scripts/arch_diagram.py）
