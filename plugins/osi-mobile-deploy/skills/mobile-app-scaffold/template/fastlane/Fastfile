@@ -1,0 +1,183 @@
+# MyApp — Fastfile.
+#
+# Lanes:
+#   platform :ios do
+#     lane :ios_beta_auto        # xcodegen + gym + pilot (skip processing wait)
+#     lane :ios_get_status       # report latest TestFlight build
+#   end
+#   platform :android do
+#     lane :android_beta_auto    # bundleRelease + upload_to_play_store (internal)
+#     lane :android_promote_internal_to_production
+#   end
+
+fastlane_version "2.222.0"
+default_platform :ios
+
+IOS_PROJECT_ROOT = File.expand_path("../apps/ios", __dir__)
+IOS_PROJECT_FILE = "MyApp.xcodeproj"
+IOS_SCHEME       = "MyApp"
+
+IOS_APP_ID_BY_FLAVOR = {
+  "dev"  => "com.example.myapp.dev",
+  "stg"  => "com.example.myapp.stg",
+  "prod" => "com.example.myapp",
+}
+IOS_CONFIGURATION_BY_FLAVOR = {
+  "dev"  => "Release-Dev",
+  "stg"  => "Release-Stg",
+  "prod" => "Release-Prod",
+}
+
+ANDROID_PROJECT_ROOT = File.expand_path("../apps/android", __dir__)
+ANDROID_PACKAGE_BY_FLAVOR = {
+  "dev"  => "com.example.myapp.dev",
+  "stg"  => "com.example.myapp.stg",
+  "prod" => "com.example.myapp",
+}
+
+def load_app_store_connect_api_key!
+  app_store_connect_api_key(
+    key_id:       ENV.fetch("APP_STORE_CONNECT_API_KEY_ID"),
+    issuer_id:    ENV.fetch("APP_STORE_CONNECT_API_KEY_ISSUER_ID"),
+    key_filepath: ENV["APP_STORE_CONNECT_API_KEY_PATH"],
+    key_content:  ENV["APP_STORE_CONNECT_API_KEY_B64"],
+    is_key_content_base64: !ENV["APP_STORE_CONNECT_API_KEY_B64"].nil?,
+    in_house:  false,
+    duration:  1200,
+  )
+end
+
+# =========================================================================
+# iOS
+# =========================================================================
+platform :ios do
+  before_all do
+    setup_ci if is_ci
+  end
+
+  desc "Build MyApp iOS and upload to TestFlight (auto build number + skip polling)"
+  lane :ios_beta_auto do |options|
+    flavor        = (options[:flavor] || "dev").to_s
+    configuration = IOS_CONFIGURATION_BY_FLAVOR.fetch(flavor) { UI.user_error!("bad flavor #{flavor}") }
+    app_id        = IOS_APP_ID_BY_FLAVOR.fetch(flavor)
+    api_key       = load_app_store_connect_api_key!
+
+    Dir.chdir(IOS_PROJECT_ROOT) do
+      # 1. Regenerate .xcodeproj (guard against source drift)
+      sh "xcodegen generate"
+
+      # 2. Bump build number to Apple's max + 1
+      latest = latest_testflight_build_number(
+        app_identifier: app_id,
+        api_key:        api_key,
+        initial_build_number: 0,
+      )
+      increment_build_number(
+        xcodeproj:    IOS_PROJECT_FILE,
+        build_number: (latest.to_i + 1).to_s,
+      )
+
+      # 3. Archive + export (Automatic Signing)
+      gym(
+        project:          IOS_PROJECT_FILE,
+        scheme:           IOS_SCHEME,
+        configuration:    configuration,
+        clean:            true,
+        export_method:    "app-store",
+        output_directory: "build/ios/ipa",
+        output_name:      "MyApp-#{flavor}.ipa",
+        xcargs:           "-allowProvisioningUpdates DEVELOPMENT_TEAM=#{ENV.fetch('APPLE_TEAM_ID')}",
+      )
+    end
+
+    # 4. Upload to TestFlight (skip waiting for processing — much faster CI)
+    pilot(
+      api_key:                           api_key,
+      app_identifier:                    app_id,
+      ipa:                               File.join(IOS_PROJECT_ROOT, "build/ios/ipa/MyApp-#{flavor}.ipa"),
+      skip_waiting_for_build_processing: true,
+      changelog:                         options[:notes],
+      distribute_external:               false,
+    )
+  end
+
+  desc "Report the latest processed TestFlight build status"
+  lane :ios_get_status do |options|
+    flavor  = (options[:flavor] || "dev").to_s
+    api_key = load_app_store_connect_api_key!
+    latest  = latest_testflight_build_number(
+      app_identifier: IOS_APP_ID_BY_FLAVOR.fetch(flavor),
+      api_key:        api_key,
+    )
+    UI.important "Latest TestFlight build for #{flavor}: #{latest}"
+  end
+end
+
+# =========================================================================
+# Android
+# =========================================================================
+platform :android do
+  desc "Build AAB and upload to Play Internal Track (draft)"
+  lane :android_beta_auto do |options|
+    flavor  = (options[:flavor] || "dev").to_s
+    pkg     = ANDROID_PACKAGE_BY_FLAVOR.fetch(flavor) { UI.user_error!("bad flavor #{flavor}") }
+    variant = "#{flavor}Release"
+
+    # 1. Bump versionCode to (Play internal max) + 1
+    latest = 0
+    begin
+      latest = google_play_track_version_codes(
+        package_name: pkg,
+        track:        "internal",
+        json_key:     ENV.fetch("GOOGLE_PLAY_JSON_KEY_PATH"),
+      ).max.to_i
+    rescue => e
+      UI.important "google_play_track_version_codes failed (#{e.class}: #{e.message}) — starting from 0"
+    end
+    next_code = latest + 1
+    build_gradle = File.join(ANDROID_PROJECT_ROOT, "app/build.gradle.kts")
+    sh %(sed -i.bak 's/versionCode = [0-9][0-9]*/versionCode = #{next_code}/' "#{build_gradle}")
+    File.delete("#{build_gradle}.bak") if File.exist?("#{build_gradle}.bak")
+
+    # 2. Gradle bundle (already invoked from CI, but idempotent locally)
+    Dir.chdir(ANDROID_PROJECT_ROOT) do
+      sh "./gradlew bundle#{flavor.capitalize}Release --no-daemon"
+    end
+
+    aab = Dir.glob(File.join(ANDROID_PROJECT_ROOT,
+      "app/build/outputs/bundle/#{variant}/**/*.aab")).first
+    UI.user_error!("no AAB produced") if aab.nil?
+
+    # 3. Upload to Play Internal Track (draft — never auto-rollout)
+    upload_to_play_store(
+      package_name:            pkg,
+      aab:                     aab,
+      track:                   "internal",
+      release_status:          "draft",
+      json_key:                ENV.fetch("GOOGLE_PLAY_JSON_KEY_PATH"),
+      skip_upload_metadata:    true,
+      skip_upload_changelogs:  false,
+      skip_upload_images:      true,
+      skip_upload_screenshots: true,
+    )
+  end
+
+  desc "Promote a build from internal → production (10% rollout by default)"
+  lane :android_promote_internal_to_production do |options|
+    flavor   = (options[:flavor] || "prod").to_s
+    rollout  = (options[:rollout] || 0.1).to_f
+    upload_to_play_store(
+      package_name:     ANDROID_PACKAGE_BY_FLAVOR.fetch(flavor),
+      track:            "internal",
+      track_promote_to: "production",
+      rollout:          rollout.to_s,
+      json_key:         ENV.fetch("GOOGLE_PLAY_JSON_KEY_PATH"),
+      skip_upload_aab:  true,
+      skip_upload_apk:  true,
+      skip_upload_metadata:    true,
+      skip_upload_changelogs:  true,
+      skip_upload_images:      true,
+      skip_upload_screenshots: true,
+    )
+  end
+end

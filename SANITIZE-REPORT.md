@@ -1,8 +1,8 @@
 # サニタイズ要確認レポート
 
-対象プラグイン: osi-creative, osi-creative-openrouter, osi-docs, osi-deploy, osi-knowledge, osi-finance, osi-backoffice
+対象プラグイン: osi-creative, osi-creative-openrouter, osi-docs, osi-deploy, osi-mobile-deploy, osi-knowledge, osi-finance, osi-backoffice
 
-以下の 25 箇所に要注意語が残っています。publish 前に人手で確認してください（自動削除は文書を壊すため行いません）。
+以下の 26 箇所に要注意語が残っています。publish 前に人手で確認してください（自動削除は文書を壊すため行いません）。
 
 | ファイル | 行 | 語 | 抜粋 |
 |---|---|---|---|
@@ -10,7 +10,7 @@
 | plugins/osi-deploy/skills/setup-deploy-environment/SKILL.md | 3 | 共有ドライブ | description: AI OSI URI の Cowork から LP・販売サイト・課金つきアプリを自動デプロイするための初回セットアップ。**共有ドライブの .env は使わず**、各ユーザーが「AI OSI URI Deploy」 |
 | plugins/osi-deploy/skills/setup-deploy-environment/SKILL.md | 13 | 共有ドライブ | > 旧版は `.deploy-credentials/.env` にトークンを書き込んでいたが、平文・共有ドライブ同期・ |
 | plugins/osi-deploy/skills/setup-deploy-environment/SKILL.md | 19 | 共有ドライブ | （社内手順：共有ドライブ「環境構築キット」参照） |
-| plugins/osi-deploy/skills/update-deploy/SKILL.md | 66 | GITHUB_ORG | \| `repo_owner` \| `ai-osi-uri` または個人 username \| 既定は GITHUB_ORG / GITHUB_USERNAME \| |
+| plugins/osi-deploy/skills/update-deploy/SKILL.md | 69 | GITHUB_ORG | \| `repo_owner` \| `ai-osi-uri` または個人 username \| 既定は GITHUB_ORG / GITHUB_USERNAME \| |
 | plugins/osi-deploy/skills/deploy-app/references/aws-app-gotchas.md | 54 | 共有ドライブ | 初回 apply 前に **`tf-state-backend` スキル**を呼ぶ（state基盤の作成＋backend.tf差し込み）。既存のローカルstateアプリは同スキルの migrate-existing（`aws_terrafo |
 | plugins/osi-deploy/skills/tf-state-backend/SKILL.md | 3 | 共有ドライブ | description: AI OSI URI が Cowork/Terraform で公開した AWS アプリの **Terraform state を、揮発する作業フォルダではなく自社AWSアカウントの共有S3バケット（+DynamoD |
 | plugins/osi-deploy/skills/tf-state-backend/SKILL.md | 60 | 共有ドライブ | 6. コード一式＋HANDOFF を共有ドライブへ退避（揮発対策） |
@@ -23,6 +23,7 @@
 | plugins/osi-docs/skills/architecture-proposal/SKILL.md | 12 | yourrecord | ※ 自社サービス（CAIO / yourrecord 等）の新規営業・初回提案・見積提案は別スキル |
 | plugins/osi-docs/skills/architecture-proposal/SKILL.md | 12 | CAIO | ※ 自社サービス（CAIO / yourrecord 等）の新規営業・初回提案・見積提案は別スキル |
 | plugins/osi-docs/skills/architecture-proposal/scripts/deck_helpers.py | 11 | CAIO | # ---- ブランド配色（CAIO資料準拠 / EDIT可） ---- |
+| plugins/osi-mobile-deploy/skills/deploy-mobile-app/SKILL.md | 127 | GITHUB_ORG | \| GITHUB_ORG \| `ai-osi-uri` / `personal` \| `deploy-app` の `USE_ORG` 判定に準拠 \| |
 | plugins/osi-backoffice/skills/contract-docusign-send/SKILL.md | 50 | 共有ドライブ | - **Drive（マウント済み共有ドライブ）**：格納先 `30.契約管理/`。書き込みはマウント経由で Drive に同期される。 |
 | plugins/osi-backoffice/skills/contract-docusign-send/references/setup.md | 39 | 共有ドライブ | - Drive（共有ドライブ `30.契約管理/`）がマウントされていること（格納先）。 |
 | plugins/osi-backoffice/skills/contract-docusign-send/references/docusign-and-s3.md | 26 | 共有ドライブ | - **file tools（Mac）**：outputs と共有ドライブのみ書ける。 |

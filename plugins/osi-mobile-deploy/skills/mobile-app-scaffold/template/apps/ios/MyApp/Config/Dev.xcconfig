@@ -1,0 +1,5 @@
+#include "Base.xcconfig"
+
+PRODUCT_BUNDLE_IDENTIFIER = com.example.myapp.dev
+APP_FLAVOR = dev
+APP_DISPLAY_NAME = MY_APP_DISPLAY_NAME Dev

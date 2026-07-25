@@ -1,0 +1,23 @@
+// Shared build settings across all flavors.
+// See Dev.xcconfig / Prod.xcconfig for per-flavor overrides.
+
+MARKETING_VERSION = 1.0.0
+CURRENT_PROJECT_VERSION = 1
+
+// Signing (Automatic)
+CODE_SIGN_STYLE = Automatic
+DEVELOPMENT_TEAM = MY_APP_TEAM_ID
+CODE_SIGN_IDENTITY = Apple Distribution
+
+// Common
+SWIFT_VERSION = 5.10
+IPHONEOS_DEPLOYMENT_TARGET = 17.0
+ENABLE_BITCODE = NO
+ONLY_ACTIVE_ARCH[config=Debug] = YES
+
+// Info.plist reference
+INFOPLIST_FILE = MyApp/Resources/Info.plist
+INFOPLIST_KEY_UILaunchScreen_Generation = YES
+
+// AppIcon
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon

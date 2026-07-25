@@ -80,6 +80,27 @@
       "strict": false
     },
     {
+      "name": "osi-mobile-deploy",
+      "source": "./plugins/osi-mobile-deploy",
+      "description": "ネイティブモバイルアプリ（iOS / Android）作成〜配信自動化：「モバイルアプリ作って」の一言で、SwiftUI + Kotlin Compose の Golden Template から新規リポを起こし、Firebase プロビジョニング・アイコン生成・GitHub Secrets 投入・CI 自動修正ループを回し、TestFlight / Google Play Internal Track まで到達させる。osi-deploy（Web / SaaS）と対を成すモバイル配信専用プラグイン。10スキル：deploy-mobile-app（オーケストレータ）／ mobile-app-scaffold ／ mobile-firebase-setup ／ mobile-secrets-sync ／ mobile-icon-generator ／ mobile-crash-triage ／ mobile-update-deploy ／ mobile-app-smoke-test ／ ios-testflight-deploy ／ android-play-deploy。",
+      "version": "0.1.0",
+      "category": "deploy",
+      "tags": [
+        "mobile",
+        "ios",
+        "android",
+        "swiftui",
+        "kotlin",
+        "compose",
+        "testflight",
+        "google-play",
+        "fastlane",
+        "firebase",
+        "xcode"
+      ],
+      "strict": false
+    },
+    {
       "name": "osi-knowledge",
       "source": "./plugins/osi-knowledge",
       "description": "知識管理：Obsidian への自律キャプチャと過去ノート参照、Google Calendar の空き時間取得。",

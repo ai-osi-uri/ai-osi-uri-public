@@ -14,7 +14,10 @@ description: |
   最後に `app-smoke-test` を呼んで「実際に直ったか」までを 1 つのフローで完結させる。
   新規アプリ作成（既存リポなし・新規リポを作る）は `deploy-app` の役割。
   本スキルは「ローカルから既存リモートを更新する」場合専用。
-version: 0.5.0
+  スコープ注記: 対象は **Web / SaaS（Vercel / AWS）のみ**。iOS ネイティブアプリの更新
+  （Xcode Cloud のワークフロー変更・Xcode バージョン繰り上げ・新ビルドの TestFlight 昇格 等）は
+  本スキルでは扱わず、`ios-mobile-release` に委譲する（Xcode バージョンは N-1 ポリシー固定）。
+version: 0.5.1
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb

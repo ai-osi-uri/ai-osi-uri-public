@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>$(DEVELOPMENT_LANGUAGE)</string>
+    <key>CFBundleDisplayName</key>
+    <string>$(APP_DISPLAY_NAME)</string>
+    <key>CFBundleExecutable</key>
+    <string>$(EXECUTABLE_NAME)</string>
+    <key>CFBundleIdentifier</key>
+    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>$(APP_DISPLAY_NAME)</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>$(MARKETING_VERSION)</string>
+    <key>CFBundleVersion</key>
+    <string>$(CURRENT_PROJECT_VERSION)</string>
+
+    <!-- Required for iOS 11+ apps built with asset catalog icons (prevents ITMS validation error) -->
+    <key>CFBundleIconName</key>
+    <string>AppIcon</string>
+    <key>CFBundleIcons</key>
+    <dict>
+        <key>CFBundlePrimaryIcon</key>
+        <dict>
+            <key>CFBundleIconName</key>
+            <string>AppIcon</string>
+        </dict>
+    </dict>
+
+    <!-- Flavor discriminator (dev / stg / prod), read from xcconfig -->
+    <key>AppFlavor</key>
+    <string>$(APP_FLAVOR)</string>
+
+    <!-- App Transport Security -->
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <false/>
+    </dict>
+
+    <!-- Standard iOS requirements -->
+    <key>UILaunchScreen</key>
+    <dict>
+        <key>UIColorName</key>
+        <string>LaunchBackground</string>
+    </dict>
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+    </array>
+    <key>UISupportedInterfaceOrientations~ipad</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationPortraitUpsideDown</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+
+    <!--
+        NOTE: UIAppFonts is intentionally OMITTED here.
+        Add fonts only when you actually place .otf/.ttf files under
+        Resources/Fonts/ AND include them in the Copy Bundle Resources phase.
+        A declared-but-missing font file causes a startup crash.
+
+        Example (uncomment when you have fonts):
+        <key>UIAppFonts</key>
+        <array>
+            <string>NotoSansJP-Regular.otf</string>
+        </array>
+    -->
+
+    <!--
+        NOTE: CFBundleURLTypes for Google Sign-In is intentionally OMITTED here.
+        Adding an empty $(REVERSED_CLIENT_ID) scheme causes a startup crash.
+        Only add this block AFTER you create the OAuth client in Firebase
+        Console → Authentication → Sign-in method → Google, and after the
+        REVERSED_CLIENT_ID is available in your xcconfig.
+    -->
+</dict>
+</plist>

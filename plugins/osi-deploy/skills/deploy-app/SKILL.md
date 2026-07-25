@@ -1,7 +1,7 @@
 ---
 name: deploy-app
 description: AI OSI URI が Cowork から **任意の業種のアプリを新規に作って公開する**ための唯一のオーケストレータスキル。「アプリ作って」「LP 立ち上げて」「○○屋向けの在庫管理アプリ作って」「予約サイトを作って」「会員制のサブスク SaaS 作って」「業務系のシステム作って」「LP 公開して」など、ユーザーが新しいアプリの作成と公開を依頼したときに発動する。
-version: 0.5.4
+version: 0.5.5
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb
@@ -296,6 +296,7 @@ AWS パスは AWS_PROFILE in .env でも MCP 経由でも OK。優先順位は M
 | **detailed** | 業種 + エンティティ + ロール + 規模 + 機能 のうち 3 つ以上読み取れる | Step 2 (確認のみ) |
 | **sparse** | 業種だけ・ジャンルだけ・「○○屋向け××」程度 | Step 1-B (ギャップ埋め) |
 | **既存コードあり** | 「~/Desktop/xxx に HTML がある」「フォルダがある」 | Phase 3 (Vercel/AWS-static で軽量パス) |
+| **iOS モバイル** | 「iOS アプリ作って」「iPhone アプリ」「TestFlight に上げて」「Xcode Cloud で」「Swift/SwiftUI で」等の iOS ネイティブ依頼 | 本スキルでは扱わない → `ios-mobile-release` を案内して停止（Xcode バージョンは N-1 ポリシーで管理）。将来 Android は別スキル `android-mobile-release`（未実装）へ |
 | **わからない** | 何も読み取れない | AskUserQuestion で「どの種別？」を確認 |
 
 ### Step 1-B: ギャップ埋め (sparse の場合のみ)
@@ -1130,6 +1131,9 @@ curl -i "https://$ALB_DNS/health"
 - `app-smoke-test` — 両パスの最終チェック
 - `aws-static-deploy` — 静的サイト軽量 AWS パス用
 - `switch-to-live-mode` — Stripe テスト→本番化
+- `ios-mobile-release` — **iOS ネイティブアプリ**（Xcode Cloud / TestFlight / App Store 申請）。
+  本スキル（deploy-app）は Web / SaaS 専用。iOS 依頼は必ず `ios-mobile-release` に委譲する
+  （Xcode バージョンは N-1 ポリシー固定、カナリアで N を並行監視）。
 - Claude Code 側:
   - `/initialize-project` — placeholder 置換、AWS パスで使用
   - `/setup-infra` — Terraform apply (インフラ構築)、AWS パスで使用

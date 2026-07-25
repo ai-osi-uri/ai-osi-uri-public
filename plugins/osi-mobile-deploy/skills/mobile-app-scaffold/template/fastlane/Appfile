@@ -1,0 +1,3 @@
+# App Store Connect / Apple Developer identifiers are supplied per-lane via
+# `IOS_APP_ID_BY_FLAVOR` in the Fastfile. Keeping this file minimal so that
+# the same repo can hold multiple flavors without a single default.

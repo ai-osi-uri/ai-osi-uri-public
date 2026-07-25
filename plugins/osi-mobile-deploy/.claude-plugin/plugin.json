@@ -1,0 +1,28 @@
+{
+  "name": "osi-mobile-deploy",
+  "version": "0.1.0",
+  "requires_connectors": [
+    "AI OSI URI Deploy"
+  ],
+  "description": "AI OSI URI のネイティブモバイルアプリ（iOS / Android）作成〜配信自動化。「モバイルアプリ作って」の一言で、SwiftUI + Jetpack Compose の Golden Template から新規リポを起こし、Firebase プロビジョニング・アイコン生成・GitHub Secrets 投入・CI 自動修正ループを回し、TestFlight / Google Play Internal Track まで到達させる。osi-deploy（Web / SaaS）と対を成すモバイル配信専用プラグイン。",
+  "author": {
+    "name": "AI OSI URI",
+    "email": "yuhenagisa@ai-osi-uri.com"
+  },
+  "homepage": "https://github.com/ai-osi-uri/ai-osi-uri-public",
+  "license": "UNLICENSED",
+  "keywords": [
+    "mobile",
+    "ios",
+    "android",
+    "swiftui",
+    "kotlin",
+    "compose",
+    "testflight",
+    "google-play",
+    "fastlane",
+    "firebase",
+    "xcode",
+    "gradle"
+  ]
+}
