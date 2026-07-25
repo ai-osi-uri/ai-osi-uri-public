@@ -1,21 +1,27 @@
 ---
 name: mobile-secrets-sync
 description: |
-  モバイル配信に必要な GitHub Actions Secrets（App Store Connect API Key、iOS Distribution
-  証明書 P12、Android Keystore、Google Play Service Account JSON など計 10+ 個）を、
-  macOS Keychain から取得して GitHub リポに投入する atomic スキル。GitHub REST API +
-  libsodium sealed box で暗号化投入。REST が使えない環境用に Chrome MCP でブラウザ経由
-  fallback も持つ。オーケストレータ `deploy-mobile-app` から Phase 5 で呼ばれる。
-  単体で「モバイルの Secrets 入れて」でも発動する。
-version: 0.1.0
+  モバイル配信に必要な GitHub Actions Secrets（iOS Distribution 証明書 / ASC API Key /
+  Android Keystore / Play SA JSON / Firebase config 等・計 10〜13 個）を **全部自動で**
+  GitHub リポに投入する atomic スキル。macOS Keychain から既存値を読み出し、Android keystore
+  が未生成なら `mobile_generate_keystore` で新規生成、libsodium sealed_box 暗号化を経て
+  `github_set_secrets_batch` で一括 PUT する。keystore は Drive にも自動バックアップ。
+  オーケストレータ `deploy-mobile-app` から Phase 5 で呼ばれるが、単体で「Secrets 入れて」
+  でも発動する。
+  前提: AI OSI URI Deploy 拡張 **v1.17.3 以降**（`github_set_secrets_batch` /
+  `github_set_secret` / `github_list_secrets` / `mobile_generate_keystore` を含む）。
+version: 0.2.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb
-  - server: computer-use
+  - server: cowork
     provision: builtin
 ---
 
-# mobile-secrets-sync — Keychain → GitHub Secrets の一括投入
+# mobile-secrets-sync — GitHub Secrets への全自動投入
+
+**手動 curl / bash / libsodium install はもう不要**。v0.2.0 から MCP ツール
+`github_set_secrets_batch` + `mobile_generate_keystore` に完全委譲する。
 
 ## 入力契約
 
@@ -24,154 +30,204 @@ requires_connectors:
 | `repo_owner` | ✅ | GitHub owner |
 | `repo_name` | ✅ | GitHub repo name |
 | `targets` | 任意 | `ios` / `android` / `both`（既定: `both`） |
-| `include_firebase` | 任意 | Firebase の plist/json も同時に投入（既定: false — `mobile-firebase-setup` で既に投入済みの想定） |
+| `include_firebase` | 任意 | GoogleService-Info.plist / google-services.json も投入（既定: true） |
+| `generate_keystore_if_missing` | 任意 | Keychain に Android keystore 無い場合に自動生成（既定: true） |
+| `keystore_backup_dir` | 任意 | keystore バックアップ先 Drive パス（既定: `21.PJT資料/00.共通/mobile-release/keystores/`） |
+| `dry_run` | 任意 | true なら「何を投入するか」だけ表示して PUT はしない |
 
-## 投入する Secrets（source は macOS Keychain）
+## 投入する Secrets（12〜13個）
 
-### iOS 用（7 個）
+### iOS 7個
 
-| Secret 名 | Keychain service | 内容 |
-|---|---|---|
-| `APPLE_TEAM_ID` | `APPLE_TEAM_ID` | 10桁英数（例: `24X327Z9SJ`） |
-| `APP_STORE_CONNECT_API_KEY_ID` | `APP_STORE_CONNECT_API_KEY_ID` | 10桁英数（例: `79L9K48XS6`） |
-| `APP_STORE_CONNECT_API_KEY_ISSUER_ID` | `APP_STORE_CONNECT_API_KEY_ISSUER_ID` | UUID |
-| `APP_STORE_CONNECT_API_KEY_B64` | `APP_STORE_CONNECT_API_KEY_B64` | .p8 ファイルの base64 |
-| `IOS_DIST_CERT_P12_B64` | `IOS_DIST_CERT_P12_B64` | Distribution 証明書 .p12 の base64 |
-| `IOS_DIST_CERT_PASSWORD` | `IOS_DIST_CERT_PASSWORD` | .p12 のパスワード |
-| `IOS_KEYCHAIN_PASSWORD` | `IOS_KEYCHAIN_PASSWORD` | CI 上で作る一時 Keychain のパスワード |
-
-### Android 用（5 個）
-
-| Secret 名 | Keychain service | 内容 |
-|---|---|---|
-| `ANDROID_KEYSTORE_B64` | `ANDROID_KEYSTORE_B64` | release.keystore の base64 |
-| `ANDROID_KEYSTORE_PASSWORD` | `ANDROID_KEYSTORE_PASSWORD` | keystore のパスワード |
-| `ANDROID_KEY_ALIAS` | `ANDROID_KEY_ALIAS` | key alias（例: `upload`） |
-| `ANDROID_KEY_PASSWORD` | `ANDROID_KEY_PASSWORD` | key alias のパスワード |
-| `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` | `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` | Play Publisher API 用 SA JSON |
-
-### Firebase 用（`include_firebase: true` のみ、任意）
-
-| Secret 名 | 内容 |
+| Secret 名 | Keychain source |
 |---|---|
-| `GOOGLE_SERVICE_INFO_PLIST_DEV_B64` | iOS Firebase config の base64 |
-| `GOOGLE_SERVICES_JSON_DEV_B64` | Android Firebase config の base64 |
+| `APPLE_TEAM_ID` | `security find-generic-password -s APPLE_TEAM_ID` |
+| `APP_STORE_CONNECT_API_KEY_ID` | 同上 (10文字英数) |
+| `APP_STORE_CONNECT_API_KEY_ISSUER_ID` | 同上 (UUID) |
+| `APP_STORE_CONNECT_API_KEY_B64` | 同上 (.p8 の base64) |
+| `IOS_DIST_CERT_P12_B64` | 同上 (Distribution 証明書 .p12 の base64) |
+| `IOS_DIST_CERT_PASSWORD` | 同上 |
+| `IOS_KEYCHAIN_PASSWORD` | 同上（CI 上で作る一時 Keychain のパスワード） |
 
-## ワークフロー
+### Android 5個
+
+| Secret 名 | 由来 |
+|---|---|
+| `ANDROID_KEYSTORE_B64` | Keychain（既存）or `mobile_generate_keystore` の戻り値 `keystore_b64` |
+| `ANDROID_KEYSTORE_PASSWORD` | 同上 `keystore_password` |
+| `ANDROID_KEY_ALIAS` | 同上 `alias`（既定 `upload`） |
+| `ANDROID_KEY_PASSWORD` | 同上 `key_password` |
+| `GOOGLE_PLAY_JSON_KEY_B64` | Keychain の `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` を base64 化 |
+
+### Firebase 2〜4個（`include_firebase: true` のみ）
+
+| Secret 名 | 由来 |
+|---|---|
+| `GOOGLE_SERVICE_INFO_PLIST_DEV_B64` | `mobile-firebase-setup` が既に投入済み or 案件フォルダから取得 |
+| `GOOGLE_SERVICE_INFO_PLIST_PROD_B64` | 同上 |
+| `GOOGLE_SERVICES_JSON_DEV_B64` | 同上 |
+| `GOOGLE_SERVICES_JSON_PROD_B64` | 同上 |
+
+## 実行フロー（全自動）
+
+### Step 1: 前提チェック
 
 ```
-1. 前提チェック（Keychain の各 secret が読めるか）
-2. GitHub リポの public key を取得
-3. libsodium sealed box で暗号化
-4. REST API で PUT 投入
-5. 結果を返す（成功一覧 / 失敗一覧）
+1. github_list_secrets({repo_owner, repo_name}) を叩いて既存 Secret を確認
+   → 全部揃っていて再投入不要ならスキップ判定
+2. mobile_health_check({check_apple: true, check_google: true}) で
+   拡張側の ASC / Play 認証が生きていることを確認
+3. targets が android/both なら keytool が sandbox にあるか
+   （mobile_generate_keystore の内部で自動確認・不足なら fail）
 ```
 
-### Step 1: Keychain 読み出し
+### Step 2: 値の収集
+
+Keychain から bash で読み出し。**この部分だけは MCP ツールでは代替できない**（Keychain
+アクセスは macOS ネイティブ）。以下のスクリプトを組み立てて実行:
 
 ```bash
-read_secret() {
+#!/bin/bash
+set -e
+declare -A SECRETS
+
+read_keychain() {
   local svc="$1"
-  local val
-  val=$(security find-generic-password -s "$svc" -a "$USER" -w 2>/dev/null || true)
-  if [ -z "$val" ]; then
-    echo "MISSING: $svc" >&2
-    return 1
-  fi
-  printf '%s' "$val"
+  security find-generic-password -s "$svc" -a "$USER" -w 2>/dev/null || echo ""
 }
 
-# iOS
-APPLE_TEAM_ID="$(read_secret APPLE_TEAM_ID)"
-APP_STORE_CONNECT_API_KEY_ID="$(read_secret APP_STORE_CONNECT_API_KEY_ID)"
-# ... 他も同様
+# --- iOS ---
+if [[ "$TARGETS" == "ios" || "$TARGETS" == "both" ]]; then
+  SECRETS[APPLE_TEAM_ID]="$(read_keychain APPLE_TEAM_ID)"
+  SECRETS[APP_STORE_CONNECT_API_KEY_ID]="$(read_keychain APP_STORE_CONNECT_API_KEY_ID)"
+  SECRETS[APP_STORE_CONNECT_API_KEY_ISSUER_ID]="$(read_keychain APP_STORE_CONNECT_API_KEY_ISSUER_ID)"
+  SECRETS[APP_STORE_CONNECT_API_KEY_B64]="$(read_keychain APP_STORE_CONNECT_API_KEY_B64)"
+  SECRETS[IOS_DIST_CERT_P12_B64]="$(read_keychain IOS_DIST_CERT_P12_B64)"
+  SECRETS[IOS_DIST_CERT_PASSWORD]="$(read_keychain IOS_DIST_CERT_PASSWORD)"
+  SECRETS[IOS_KEYCHAIN_PASSWORD]="$(read_keychain IOS_KEYCHAIN_PASSWORD)"
+fi
+
+# --- Android ---
+if [[ "$TARGETS" == "android" || "$TARGETS" == "both" ]]; then
+  SECRETS[GOOGLE_PLAY_JSON_KEY_B64]="$(read_keychain GOOGLE_PLAY_SERVICE_ACCOUNT_JSON | base64)"
+  # keystore の値は次の Step で（既存 or 生成）
+fi
+
+# 出力: name=value を1行ずつ（NULL区切りが理想だがまず素朴に）
+for k in "${!SECRETS[@]}"; do
+  # 値に改行が入る可能性のある .p8 base64 等は事前に tr -d '\n' で1行化
+  v="${SECRETS[$k]}"
+  echo "${k}=${v}"
+done > /tmp/secrets-collected.env
 ```
 
-**halt & ask**: 1 つでも MISSING なら以下を提示して停止:
+**halt & ask**: iOS 側で1つでも空なら以下を提示して停止:
 
 ```
-以下の secrets が Keychain にありません。ターミナルで登録してください:
+以下の iOS secrets が Keychain にありません。ターミナルで登録してください:
 
   security add-generic-password -U -s "APPLE_TEAM_ID" -a "$USER" -w "24X327Z9SJ"
-  security add-generic-password -U -s "APP_STORE_CONNECT_API_KEY_ID" -a "$USER" -w "79L9K48XS6"
+  security add-generic-password -U -s "APP_STORE_CONNECT_API_KEY_ID" -a "$USER" -w "..."
+  security add-generic-password -U -s "APP_STORE_CONNECT_API_KEY_ISSUER_ID" -a "$USER" -w "UUID"
+  security add-generic-password -U -s "APP_STORE_CONNECT_API_KEY_B64" -a "$USER" -w "$(base64 -i AuthKey_XXXXXXXXXX.p8)"
+  security add-generic-password -U -s "IOS_DIST_CERT_P12_B64" -a "$USER" -w "$(base64 -i dist.p12)"
+  security add-generic-password -U -s "IOS_DIST_CERT_PASSWORD" -a "$USER" -w "PASSWORD"
+  security add-generic-password -U -s "IOS_KEYCHAIN_PASSWORD" -a "$USER" -w "$(openssl rand -base64 24)"
+
+登録後に「登録した」と返してください。
+```
+
+### Step 3: Android keystore（既存 or 新規生成）
+
+```
+既存確認:
+  ANDROID_KEYSTORE_B64="$(read_keychain ANDROID_KEYSTORE_B64)"
+
+  if [ -z "$ANDROID_KEYSTORE_B64" ] && [ "$generate_keystore_if_missing" = "true" ]; then
+    # MCP 呼出（Claude が実行）
+    result = mobile_generate_keystore({
+      alias: "upload",
+      validity_days: 10000,
+      keystore_type: "PKCS12",
+      key_algorithm: "RSA"
+    })
+    → 戻り値の keystore_b64 / keystore_password / key_password / alias を採用
+
+    # Keychain にも保存（次回以降の再生成防止）
+    security add-generic-password -U -s "ANDROID_KEYSTORE_B64" -a "$USER" -w "$KEYSTORE_B64"
+    security add-generic-password -U -s "ANDROID_KEYSTORE_PASSWORD" -a "$USER" -w "$KEYSTORE_PW"
+    security add-generic-password -U -s "ANDROID_KEY_ALIAS" -a "$USER" -w "$KEY_ALIAS"
+    security add-generic-password -U -s "ANDROID_KEY_PASSWORD" -a "$USER" -w "$KEY_PW"
+
+    # Drive にも .jks 実ファイルをバックアップ（重要: 失うとアプリ更新不可）
+    echo "$KEYSTORE_B64" | base64 --decode > /tmp/{repo_name}-release.jks
+    → mcp__cowork__ の Drive ツールで
+       {keystore_backup_dir}/{repo_name}-release.jks にアップロード
+       同時に metadata JSON (パスワード除く・alias・作成日・sha256) も
+       {keystore_backup_dir}/{repo_name}-release.meta.json に置く
+    → パスワード類は別途 1Password / Vault にも入れるよう案内（本スキルは Drive まで）
+  elif [ -z "$ANDROID_KEYSTORE_B64" ]; then
+    halt & ask: Keychain に無いので generate_keystore_if_missing:true で再実行するか、
+                手動で security add-generic-password で登録してほしい
+  fi
+```
+
+### Step 4: `github_set_secrets_batch` で一括 PUT
+
+```
+Claude が MCP ツールを呼ぶ:
+
+github_set_secrets_batch({
+  repo_owner: "<repo_owner>",
+  repo_name: "<repo_name>",
+  secrets: {
+    APPLE_TEAM_ID: "...",
+    APP_STORE_CONNECT_API_KEY_ID: "...",
+    APP_STORE_CONNECT_API_KEY_ISSUER_ID: "...",
+    APP_STORE_CONNECT_API_KEY_B64: "...",
+    IOS_DIST_CERT_P12_B64: "...",
+    IOS_DIST_CERT_PASSWORD: "...",
+    IOS_KEYCHAIN_PASSWORD: "...",
+    ANDROID_KEYSTORE_B64: "...",
+    ANDROID_KEYSTORE_PASSWORD: "...",
+    ANDROID_KEY_ALIAS: "upload",
+    ANDROID_KEY_PASSWORD: "...",
+    GOOGLE_PLAY_JSON_KEY_B64: "...",
+    GOOGLE_SERVICE_INFO_PLIST_DEV_B64: "...",  // include_firebase:true のみ
+    GOOGLE_SERVICES_JSON_DEV_B64: "..."         // 同上
+  }
+})
+```
+
+戻り値の `results` を人間可読に整形して報告:
+
+```
+✅ 投入完了 (13/13)
+  - APPLE_TEAM_ID: updated
+  - APP_STORE_CONNECT_API_KEY_ID: created
   ...
-
-登録が終わったら「登録した」と言ってください。もう一度実行します。
 ```
 
-### Step 2〜4: GitHub REST API で投入
+失敗があれば失敗リストを提示して halt。
 
-```bash
-# public key 取得
-PUBKEY_JSON=$(curl -sS -H "Authorization: token $GITHUB_PAT" \
-  -H "Accept: application/vnd.github+json" \
-  "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/actions/secrets/public-key")
-KEY_ID=$(echo "$PUBKEY_JSON" | jq -r .key_id)
-PUB_KEY_B64=$(echo "$PUBKEY_JSON" | jq -r .key)
-
-# 1個ずつ暗号化して PUT
-put_secret() {
-  local name="$1"
-  local value="$2"
-  local encrypted
-  encrypted=$(node -e '
-    const sodium = require("libsodium-wrappers");
-    (async () => {
-      await sodium.ready;
-      const pk = sodium.from_base64(process.argv[1], sodium.base64_variants.ORIGINAL);
-      const enc = sodium.crypto_box_seal(process.argv[2], pk);
-      process.stdout.write(sodium.to_base64(enc, sodium.base64_variants.ORIGINAL));
-    })();
-  ' "$PUB_KEY_B64" "$value")
-
-  curl -sS -X PUT \
-    -H "Authorization: token $GITHUB_PAT" \
-    -H "Accept: application/vnd.github+json" \
-    "https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/actions/secrets/$name" \
-    -d "$(jq -n --arg v "$encrypted" --arg k "$KEY_ID" \
-           '{encrypted_value: $v, key_id: $k}')"
-}
-
-put_secret "APPLE_TEAM_ID" "$APPLE_TEAM_ID"
-put_secret "APP_STORE_CONNECT_API_KEY_ID" "$APP_STORE_CONNECT_API_KEY_ID"
-# ... 全 secret 分繰り返し
-```
-
-**注意**:
-- `libsodium-wrappers` は Cowork の Node 環境にあることが多いが、無い場合は `npm i -g libsodium-wrappers` を一時的に流す。
-- 大きな値（.p12 の base64 は 3〜10KB）は `-d @-` でパイプ入力にする（コマンドラインの ARG_MAX を超えないため）。
-
-### Fallback: Chrome MCP でブラウザ経由
-
-REST API が使えない環境（GitHub PAT に `repo` scope が無い、org policy で API が blocked など）は
-Chrome MCP でダッシュボード操作にフォールバック:
+### Step 5: 検証
 
 ```
-1. mcp__claude-in-chrome__navigate:
-   https://github.com/{repo_owner}/{repo_name}/settings/secrets/actions
-
-2. 各 secret に対して:
-   a. mcp__claude-in-chrome__navigate:
-      https://github.com/{repo_owner}/{repo_name}/settings/secrets/actions/new
-   b. mcp__claude-in-chrome__form_input で
-      "name" フィールド → secret 名
-      "value" フィールド → secret 値
-   c. mcp__claude-in-chrome__computer で "Add secret" ボタンを click
-   d. success トースト or "Secrets" ページに遷移したことを確認
-
-3. Chrome セッションのログインが切れていたら computer-use で 2FA を促す
+github_list_secrets({repo_owner, repo_name}) を再度叩いて、
+期待した全 Secret 名が存在することを確認。
 ```
-
-処理数が 10+ 個あるので、進捗を都度ログに出しつつユーザーに時間がかかる旨を伝える。
 
 ## 戻り値
 
 ```json
 {
-  "secrets_set": ["APPLE_TEAM_ID", "APP_STORE_CONNECT_API_KEY_ID", ...],
-  "secrets_skipped": [],
-  "secrets_failed": [],
-  "method": "rest_api"   // or "chrome_fallback"
+  "repo": "ai-osi-uri/{repo_name}",
+  "total": 13,
+  "succeeded": 13,
+  "failed": 0,
+  "generated_keystore": true,
+  "keystore_backup_path": "21.PJT資料/00.共通/mobile-release/keystores/{repo_name}-release.jks",
+  "method": "github_set_secrets_batch (MCP v1.17.3+)"
 }
 ```
 
@@ -179,16 +235,21 @@ Chrome MCP でダッシュボード操作にフォールバック:
 
 | 症状 | 対応 |
 |---|---|
-| Keychain に secret 無し | 登録コマンドを提示、halt |
-| GitHub REST 401 | GITHUB_PAT の scope 不足。案内して halt |
-| GitHub REST 403 | Org の Secret 投入権限不足。オーナー確認 |
-| libsodium が無い | `npm install libsodium-wrappers` を案内 |
-| Chrome fallback で 2FA が必要 | computer-use でユーザーに 2FA を促す |
-| Secret の値が空文字 | Keychain の登録ミス。halt |
+| Keychain に iOS secret 無し | 登録コマンド提示、halt |
+| keytool 無し | mobile_generate_keystore が fail 返却 → JDK 案内、halt |
+| github_set_secrets_batch で 403 | GITHUB_PAT の scope 不足（`repo`+`workflow`）、案内、halt |
+| Drive バックアップ失敗 | Cowork の Drive tool 状態確認、非致命的（Secret は既に投入済み） |
+| 一部 Secret のみ失敗 | 失敗した Secret 名を提示、再実行を案内 |
 
 ## 注意事項
 
-- **既存の同名 Secret は上書き**（PUT の POSIX）。それが困る運用なら事前に一覧を出してユーザー確認する。
-- **サイズ制限**: GitHub Actions Secret は 64KB まで。.p12 の base64 が超えることは通常無い。
-- **本番リリース用の Secret 差し替え**は「案件が本番化する時」にユーザーが `mobile-secrets-sync` を明示的に `environment: prod` で呼ぶ運用（v1 は環境固定なしで dev のみ）。
-- Keychain の値そのものをチャットに出さない（機微値）。secret 名と `MISSING` / `OK` の状態だけ表示する。
+- **既存の同名 Secret は上書き**（`github_set_secrets_batch` の semantics）。同名を守りたいなら
+  事前に `github_list_secrets` で確認。
+- **サイズ制限**: GitHub Actions Secret は 64KB まで。.p12 base64（〜5KB）や keystore base64
+  （〜3.7KB）は余裕。
+- **keystore は絶対に失わない**: 失うとアプリ更新不可（新規 keystore で署名した AAB は
+  Play が「別アプリ」扱いする）。Drive バックアップ + 1Password の 2重化必須。
+- **Play App Signing を使う場合**、アップロード鍵は差し替え可能だが「初回アップロード鍵の
+  base64」は Play Console に登録済みの状態なので、差し替える時は Play サポート経由。
+- Keychain の値そのものをチャットに出さない（機微値）。secret 名と `OK` / `MISSING` の
+  状態だけ表示。

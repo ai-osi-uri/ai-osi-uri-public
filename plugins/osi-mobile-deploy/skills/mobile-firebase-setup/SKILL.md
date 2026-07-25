@@ -3,11 +3,13 @@ name: mobile-firebase-setup
 description: |
   モバイルアプリ用に Firebase プロジェクトを新規作成し、iOS App と Android App を追加、
   `GoogleService-Info.plist` / `google-services.json` を取得して base64 化 → GitHub Secrets
-  に投入する atomic スキル。AI OSI URI Deploy 拡張の `firebase_create_project` /
-  `firebase_add_ios_app` / `firebase_add_android_app` / `firebase_get_ios_config` /
-  `firebase_get_android_config` を使う。オーケストレータ `deploy-mobile-app` から
-  Phase 3 で呼ばれる。単体で「モバイルの Firebase 設定して」でも発動する。
-version: 0.1.0
+  に **`github_set_secrets_batch` で一括自動投入** する atomic スキル。AI OSI URI Deploy
+  拡張の `firebase_api` / `firebase_list_projects` / `firebase_add_ios_app` /
+  `firebase_add_android_app` / `firebase_get_ios_config` / `firebase_get_android_config`
+  + `github_set_secrets_batch` を使う。オーケストレータ `deploy-mobile-app` から Phase 3
+  で呼ばれる。単体で「モバイルの Firebase 設定して」でも発動する。
+  前提: AI OSI URI Deploy 拡張 **v1.17.3 以降**（`github_set_secrets_batch` 必須）。
+version: 0.2.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb
@@ -103,34 +105,26 @@ firebase_get_android_config({ app_id: "1:xxx:android:yyy" })
   → apps/android/app/src/dev/google-services.json に保存
 ```
 
-### Step 6: GitHub Secrets 投入
+### Step 6: GitHub Secrets へ一括投入（`github_set_secrets_batch` を1回叩くだけ）
 
-各 config を base64 化して GitHub Secrets に投入。
+拡張 v1.17.3+ の MCP ツールで完結。手動 curl / libsodium install は不要:
 
-```bash
+```
+# Step 6-1: base64 化（sandbox の bash で）
 IOS_B64=$(base64 -i "apps/ios/{APP_NAME}/Resources/GoogleService-Info-Dev.plist" | tr -d '\n')
 ANDROID_B64=$(base64 -i "apps/android/app/src/dev/google-services.json" | tr -d '\n')
-```
 
-MCP には `github_secrets_set` が無いので REST API + libsodium sealed box を使う。
-
-```
-# Step 6-1: リポの public key を取得
-GET https://api.github.com/repos/{repo_owner}/{repo_name}/actions/secrets/public-key
-  Authorization: token $GITHUB_PAT
-  → { key_id, key }   # key は base64 の X25519 public key
-
-# Step 6-2: sealed box で暗号化（Node.js の場合）
-const sodium = require('libsodium-wrappers');
-await sodium.ready;
-const publicKey = sodium.from_base64(pubkey_b64, sodium.base64_variants.ORIGINAL);
-const encrypted = sodium.crypto_box_seal(secret_value, publicKey);
-const encrypted_b64 = sodium.to_base64(encrypted, sodium.base64_variants.ORIGINAL);
-
-# Step 6-3: 投入
-PUT https://api.github.com/repos/{repo_owner}/{repo_name}/actions/secrets/{SECRET_NAME}
-  Authorization: token $GITHUB_PAT
-  Body: { encrypted_value: encrypted_b64, key_id: key_id }
+# Step 6-2: Claude が MCP ツールを呼ぶ
+github_set_secrets_batch({
+  repo_owner: "{repo_owner}",
+  repo_name: "{repo_name}",
+  secrets: {
+    GOOGLE_SERVICE_INFO_PLIST_DEV_B64: "<IOS_B64>",
+    GOOGLE_SERVICES_JSON_DEV_B64: "<ANDROID_B64>"
+  }
+})
+  → 公開鍵取得は自動で1回のみ。libsodium sealed_box 暗号化も自動。
+  → 戻り値の results で全 Secret の created/updated 状態を確認。
 ```
 
 **投入する secret 名**（環境ごと）:
@@ -140,15 +134,15 @@ PUT https://api.github.com/repos/{repo_owner}/{repo_name}/actions/secrets/{SECRE
 | iOS | `GOOGLE_SERVICE_INFO_PLIST_DEV_B64` | GoogleService-Info-Dev.plist を base64 化 |
 | Android | `GOOGLE_SERVICES_JSON_DEV_B64` | google-services.json (dev) を base64 化 |
 
-**stg / prod を後で足す時**は `_STG_B64` / `_PROD_B64` サフィックスで追加する。
+**stg / prod を後で足す時**は `_STG_B64` / `_PROD_B64` サフィックスで追加する（`environment`
+引数を prod 指定して再実行）。
 
-### Fallback: Chrome MCP でブラウザ経由投入
+### 検証
 
-REST API が使えない環境（GitHub PAT の scope 不足など）は Chrome MCP でダッシュボード操作にフォールバック:
-
-1. `mcp__claude-in-chrome__navigate` → `https://github.com/{owner}/{repo}/settings/secrets/actions/new`
-2. `mcp__claude-in-chrome__form_input` で Name と Value を入れる
-3. `mcp__claude-in-chrome__computer` で「Add secret」を click
+```
+github_list_secrets({repo_owner, repo_name}) を叩き、
+期待した Secret 名が存在することを確認。
+```
 
 ## 戻り値
 
@@ -175,8 +169,8 @@ REST API が使えない環境（GitHub PAT の scope 不足など）は Chrome 
 | Firebase プロジェクト quota 超過 | ユーザーに古いプロジェクトの削除を促す or `use_existing_project` を指定 |
 | Bundle ID / Package Name の重複追加 | `firebase_list_ios_apps` / `firebase_list_android_apps` で existing 確認 |
 | `firebase_add_ios_app` が「App is being created」で 409 | 30 秒待って再試行 |
-| GitHub Secrets 投入で 403 | PAT の scope に `repo` + `admin:repo_hook` が必要。案内して停止 |
-| libsodium 依存が入っていない | `npm install libsodium-wrappers` を local_clone_dir/package.json に一時的に足す（scaffold 側で最初から入っていることが望ましい） |
+| GitHub Secrets 投入で 403 | PAT の scope に `repo` + `workflow` が必要。案内して停止 |
+| `github_set_secrets_batch` ツールが見つからない | 拡張が v1.17.3 未満。新しい .mcpb をインストール後 Claude 完全再起動 |
 
 ## 注意事項
 
