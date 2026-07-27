@@ -1,14 +1,16 @@
 # osi-deploy
 
-AI OSI URI のアプリ・LP・販売サイト・SaaS デプロイ自動化。Vercel パス（軽量）と AWS パス（業務系）に加えて、iOS ネイティブの Xcode Cloud / TestFlight / App Store 申請までカバー。Stripe Live モード切り替え・Supabase Auth URL 更新・スモークテストまで一気通貫。
+AI OSI URI のアプリ作成・公開自動化。Web、Desktop、Mobile、ローカル出力に対応し、DNS設定・事前診断・公開後の更新まで扱う。
 
 ## スキル一覧
 
-- `deploy-app` — Web / SaaS の新規作成オーケストレータ（Vercel / AWS を判定して起動）
+- `create-app` — Web / Desktop / Mobile / ローカル出力を判定する新規作成オーケストレータ
 - `setup-deploy-environment` — 初期セットアップ（GitHub / Vercel / Stripe / Supabase / ASC キー投入）
 - `gh-create-repo-and-push`
 - `vercel-connect-and-deploy`
 - `aws-static-deploy`
+- `aws-route53`
+- `deploy-preflight`
 - `supabase-set-auth-url`
 - `app-smoke-test`
 - `switch-to-live-mode`

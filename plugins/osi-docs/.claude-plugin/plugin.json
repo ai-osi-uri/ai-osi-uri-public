@@ -1,8 +1,8 @@
 {
   "name": "osi-docs",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "requires_connectors": [],
-  "description": "AI OSI URI の文書・契約・業務フロー・事業計画作成。事業計画ビルダー（財務3表連動モデル＋ピッチ＋報告）・pptx-custom・NDA 自動生成・業務 AS-IS/TO-BE スイムレーン作成。企業の業績・財務分析レポート（証券アナリスト形式・出資/買収検討用）作成にも対応。",
+  "description": "AI OSI URI の文書・契約・業務フロー・事業計画・構成図作成。財務モデル、企業分析、提案資料に加え、手描き配線図から物理・論理構成図とBOMを生成する。",
   "author": {
     "name": "AI OSI URI",
     "email": "yuhenagisa@ai-osi-uri.com"
@@ -21,6 +21,9 @@
     "cashflow",
     "financial-report",
     "company-analysis",
-    "equity-research"
+    "equity-research",
+    "network-diagram",
+    "wiring-diagram",
+    "bom"
   ]
 }

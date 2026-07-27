@@ -7,7 +7,7 @@
   },
   "metadata": {
     "description": "AI OSI URI 公開プラグイン（外部配布用サブセット）。",
-    "version": "0.8.3"
+    "version": "0.9.0"
   },
   "plugins": [
     {
@@ -48,23 +48,26 @@
     {
       "name": "osi-docs",
       "source": "./plugins/osi-docs",
-      "description": "文書・契約・業務フロー・事業計画作成：事業計画ビルダー（財務3表連動モデル＋ピッチ＋報告）・pptx-custom・NDA 自動生成・業務 AS-IS/TO-BE スイムレーン作成。",
-      "version": "0.2.7",
+      "description": "文書・契約・業務フロー・事業計画・構成図作成。財務モデル、企業分析、提案資料に加え、手描き配線図から物理・論理構成図とBOMを生成。",
+      "version": "0.4.0",
       "category": "docs",
       "tags": [
         "docs",
         "pptx",
         "nda",
         "business-flow",
-        "contract"
+        "contract",
+        "network-diagram",
+        "wiring-diagram",
+        "bom"
       ],
       "strict": false
     },
     {
       "name": "osi-deploy",
       "source": "./plugins/osi-deploy",
-      "description": "アプリ・LP・SaaS デプロイ自動化：Vercel（軽量）と AWS（業務系）両対応。Terraform state を共有S3 backendで一元管理（tf-state-backend）。Stripe Live 切替・Supabase Auth 更新・スモークテストまで一気通貫。クラウドに出さずローカルにプロジェクトを書き出す local-project-output、オンプレ App Builder が取り込める .appbuilder.json を吐く app-builder-export、任意スタックの生アプリを docker build→save して .tar.gz で渡す app-builder-container-export も追加。非エンジニア向け入口 app-concierge（「公開されてる?/動かない/データ見せて」を平易に確認・triage）を追加。",
-      "version": "1.1.0",
+      "description": "アプリ作成・公開自動化。Web、Desktop、Mobile、ローカル出力に対応し、create-app を入口にDNS設定、事前診断、公開後の更新まで一気通貫で扱う。",
+      "version": "1.2.0",
       "category": "deploy",
       "tags": [
         "deploy",
@@ -75,7 +78,9 @@
         "supabase",
         "saas",
         "terraform-state",
-        "concierge"
+        "concierge",
+        "route53",
+        "preflight"
       ],
       "strict": false
     },

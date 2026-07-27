@@ -1,0 +1,4 @@
+interface:
+  display_name: "Network Diagram Package"
+  short_description: "Generate network diagrams and BOM from verified data"
+  default_prompt: "確定済みネットワークデータから構成図とBOMを作成してください。"

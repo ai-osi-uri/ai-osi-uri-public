@@ -1,0 +1,4 @@
+interface:
+  display_name: "Wiring Diagram Intake"
+  short_description: "Convert hand-drawn wiring diagrams into verified data"
+  default_prompt: "手描き配線図を解析して確認可能な構造化データにしてください。"

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Wiring Diagram Package"
+  short_description: "Orchestrate wiring intake diagrams and BOM delivery"
+  default_prompt: "配線図の解析から構成図とBOM作成まで一括で進めてください。"
