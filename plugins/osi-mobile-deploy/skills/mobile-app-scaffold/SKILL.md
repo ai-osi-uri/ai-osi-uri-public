@@ -1,22 +1,65 @@
 ---
 name: mobile-app-scaffold
 description: |
-  osi-mobile-deploy の Golden Template（SwiftUI + Kotlin Compose の空の Hello World
-  ネイティブアプリ）から新規リポジトリを起こす atomic スキル。テンプレを clone → 6箇所を
-  置換（App Name / Bundle ID / Package Name / Team ID / Application ID / Display Name）→
-  GitHub に新規リポ作成 → push まで実行する。オーケストレータ `deploy-mobile-app` から
-  Phase 2 で呼ばれる。単体で「モバイルアプリのテンプレを起こして」「Golden Template から
-  リポ作って」でも発動する。
-version: 0.1.0
+  AI OSI URI の新規モバイルアプリを **iOS = SwiftUI / Android = Kotlin + Jetpack Compose**
+  のネイティブスタックで起こす atomic スキル。**Flutter は greenfield では選ばない**
+  （既存 Flutter アプリの改修に限り `flutter-swift-parity-port` を別途使う）。
+  Golden Template（SwiftUI @main + Compose @Composable の Hello World、Firebase SPM/BOM 済み、
+  CI・fastlane・xcconfig・flavor・アイコン全部入り）を clone → 6 箇所置換
+  （App Name / Bundle ID / Package Name / Team ID / Display Name / パッケージパス）→ GitHub に
+  新規リポ作成 → push まで実行する。「モバイルアプリのテンプレを起こして」「Golden Template
+  からリポ作って」「SwiftUI + Compose の新規アプリを scaffold して」「iOS ネイティブアプリの
+  雛形を作って」「Kotlin Compose の新規リポを作って」「iPhone / Android アプリを一から
+  始めたい」「新規モバイルの骨格を作って」「Flutter じゃなくてネイティブで新規アプリを
+  作って」でも発動する。オーケストレータ `deploy-mobile-app` から Phase 2 で呼ばれる。
+version: 0.2.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb
 ---
 
-# mobile-app-scaffold — Golden Template から新規モバイルリポを起こす
+# mobile-app-scaffold — Golden Template（SwiftUI + Compose）から新規モバイルリポを起こす
+
+**方針**：AI OSI URI の新規モバイルアプリは **ネイティブ 2 本立て**（iOS = SwiftUI、
+Android = Kotlin + Jetpack Compose）を **既定**とする。単一コードベースの誘惑（Flutter /
+React Native）は greenfield では **選ばない**。理由は次の通り:
+
+- OS 標準のアクセシビリティ・ハプティクス・写真ピッカー・通知権限フローに素直に乗れる
+- iOS 26 / Android 15 の新機能（Live Activities, Predictive Back, Widget, etc.）に **その日から**追えて、bridge の遅延を待たなくてよい
+- クラッシュログが `symbolicate` / `mapping.txt` で 1 発で読める（Flutter engine の thunk を辿らなくてよい）
+- Firebase iOS SDK / Firebase Android SDK は SwiftUI / Compose 対応が公式でドキュメント化されている
+- AI OSI URI の実運用（MustPost の Flutter→SwiftUI 移植）で「結局ネイティブに寄せる」という結論に至った
+
+**Flutter を選ぶのは、既存の Flutter アプリの改修が必要な場合だけ**（そのときは
+`flutter-swift-parity-port` の 5 フェーズ移植ワークフローに乗る）。**新規で Flutter を
+書き始めることは、本プラグインでは行わない**。
 
 `template/` 配下の Golden Template（`apps/ios/` + `apps/android/` + `.github/workflows/` +
 `fastlane/`）を clone し、プレースホルダを置換して GitHub に push する。
+
+## Golden Template のスタック（既定）
+
+| プラットフォーム | UI | 言語 | 最小サポート | ビルド | CI |
+|---|---|---|---|---|---|
+| iOS | **SwiftUI** (`@main App`) | Swift 5.10+ | **iOS 16.0** | xcodegen + xcodebuild + fastlane pilot | `.github/workflows/ios-release-auto.yml` |
+| Android | **Jetpack Compose** (`@Composable`) | Kotlin 1.9+ | **minSdk 26** (Android 8.0) | Gradle + Kotlin DSL + fastlane supply | `.github/workflows/android-release-auto.yml` |
+
+**DI**：v1 は SwiftUI 側は `@StateObject` / `@EnvironmentObject`、Compose 側は
+`viewModel()` + `remember`。DI コンテナ（Swinject / Hilt）は 3 画面以上に増えた時点で
+導入する（初期は入れない）。
+
+**Networking**：iOS は `URLSession` + `async/await`、Android は `Ktor client` + `coroutines`。
+`Alamofire` / `Retrofit` は v1 では入れない（薄い層を素で書いた方が Firebase Functions v2
+の Callable レスポンス整形に馴染む）。
+
+**Firebase 配線**：iOS は SPM + `FirebaseCore.configure()` を AppDelegate に置く
+（`FirebaseApp.app() != nil` guard あり）。Android は `google-services` plugin +
+`FirebaseApp.initializeApp(this)` を `Application.onCreate()` に置く。両方とも
+plist / json 未配置でも起動時に crash しない guard 済み。
+
+**リリース自動化**：本スキルで scaffold 後、`ios-testflight-deploy` と
+`android-play-deploy` が CI を回して TestFlight / Play Internal Track まで届ける。
+`.github/workflows/*-release-auto.yml` は「今日の罠回避全部入り」の実運用版を同梱。
 
 ## 入力契約
 
@@ -137,8 +180,65 @@ mcp__AI_OSI_URI_Deploy__github_create_repo_and_push:
   repo_name: {app_name_lower}
   owner_override: {ai-osi-uri or personal}
   private: true
-  description: "{app_name} — created by AI OSI URI osi-mobile-deploy"
+  description: "{app_name} — created by AI OSI URI osi-mobile-deploy (SwiftUI + Compose)"
 ```
+
+## 生成される Golden Template のプロジェクトレイアウト
+
+```
+apps/
+  ios/
+    project.yml                  # xcodegen spec — 「xcodegen generate」で .xcodeproj を再生成可
+    MyApp/
+      App/
+        MyAppApp.swift           # @main の SwiftUI App
+        AppDelegate.swift        # FirebaseApp.configure() を guard 付きで呼ぶ
+      ContentView.swift          # Hello World の SwiftUI View
+      Config/
+        Base.xcconfig
+        Dev.xcconfig
+        Prod.xcconfig
+      Resources/
+        Info.plist               # CFBundleIconName あり、UIAppFonts なし、REVERSED_CLIENT_ID なし
+        Assets.xcassets/AppIcon.appiconset/   # iOS 26 の single-icon 形式
+        GoogleService-Info-Dev.plist.sample   # mobile-firebase-setup が実物に差し替え
+  android/
+    settings.gradle.kts
+    build.gradle.kts
+    app/
+      build.gradle.kts           # Kotlin + Compose + dev/stg/prod flavor + Firebase BOM
+      src/main/
+        AndroidManifest.xml
+        java/com/example/myapp/
+          MyApplication.kt       # Application.onCreate で FirebaseApp.initializeApp を guard
+          MainActivity.kt        # ComponentActivity + setContent {}
+          ui/MainScreen.kt       # Hello World の @Composable
+          ui/theme/{Color,Theme,Type}.kt
+        res/{mipmap-*/, values/, xml/, mipmap-anydpi-v26/}
+      google-services.json.sample
+    gradle/wrapper/gradle-wrapper.{jar,properties}
+    gradlew / gradlew.bat
+.github/workflows/
+  ios-release-auto.yml           # push → TestFlight（罠回避全部入り／`ios-testflight-deploy` 参照）
+  android-release-auto.yml       # push → Play Internal Track
+fastlane/
+  Fastfile                       # ios_beta_auto + android_beta_auto レーン
+  Appfile
+  Pluginfile
+Gemfile
+.gitignore
+README.md
+```
+
+**同梱の「今日の罠回避」**（Golden Template に既に入っている）:
+
+- `FirebaseApp.configure()` は plist が無くても crash しない guard 付き
+- `Info.plist` に `CFBundleIconName` + `CFBundleIcons`（ITMS-90XXX ガード）
+- `UIAppFonts` を **敢えて入れていない**（missing-font crash 回避）
+- Google Sign-In の URL scheme を **敢えて入れていない**（空の REVERSED_CLIENT_ID で crash 回避）
+- iOS CI は macOS 15 + Xcode 26.x + P12 一時 keychain + auto-signing + flavor 3 種
+- IPA 再パッケージは `ditto` で SwiftSupport 保全（ITMS-90426 ガード）
+- Android は `versionCode` を Play internal max + 1 に自動採番
 
 ## 戻り値
 
@@ -161,10 +261,24 @@ mcp__AI_OSI_URI_Deploy__github_create_repo_and_push:
 | 同名 GitHub リポあり | `mobile-update-deploy` に切り替え確認 |
 | プレースホルダ置換で「MyApp」がユーザー入力の app_name に含まれる | 事前に `[[ "$APP_NAME" =~ ^[A-Za-z][A-Za-z0-9]*$ ]]` で validate |
 | bundle_id が `com.example.*` のまま | halt & ask（App Store Connect に登録できない） |
+| ユーザーが「Flutter で作って」と要求 | 本プラグインの既定はネイティブ 2 本立て。既存 Flutter アプリからの移行なら `flutter-swift-parity-port` を案内。新規で Flutter を採用したい特殊事情があるなら、その理由を明示的に確認したうえで本スキルの対象外として halt |
 
 ## 注意事項
 
-- **Bundle ID / Package Name は同じ値で OK**（`com.aiosiuri.foo` 統一）。iOS と Android で分けたい特別な理由がある時だけ変える。
-- **Team ID が Keychain に無い** → Phase 0 でチェック済み前提。抜けていれば halt。
-- Golden Template 側にある `.github/workflows/*.yml` は既に「今日の罠回避全部入り」。scaffold 時に workflow は書き換えない（Bundle ID / Package Name の env だけ差し替える）。
-- `Podfile` は入っていない（SPM のみで組む前提）。Firebase iOS SDK も SPM から入れる。
+- **既定はネイティブ 2 本立て**：iOS = SwiftUI, Android = Kotlin + Jetpack Compose。Flutter / React Native は greenfield では選ばない
+- **Bundle ID / Package Name は同じ値で OK**（`com.aiosiuri.foo` 統一）。iOS と Android で分けたい特別な理由がある時だけ変える
+- **Team ID が Keychain に無い** → Phase 0 でチェック済み前提。抜けていれば halt
+- Golden Template 側にある `.github/workflows/*.yml` は既に「今日の罠回避全部入り」。scaffold 時に workflow は書き換えない（Bundle ID / Package Name の env だけ差し替える）
+- `Podfile` は入っていない（SPM のみで組む前提）。Firebase iOS SDK も SPM から入れる
+- iOS デプロイメントターゲットは **16.0** を既定（`apps/ios/project.yml`）。より広い互換性が必要な案件でも 16 未満には下げない
+- Android は **minSdk 26**（Android 8.0）を既定（`apps/android/app/build.gradle.kts`）。26 未満は adaptive icon / Compose の JVM 要件で古くなり過ぎるので下げない
+
+## 関連スキル
+
+- `deploy-mobile-app` — 本スキルを Phase 2 で呼ぶオーケストレータ
+- `mobile-firebase-setup` — scaffold 直後に呼ばれる Firebase プロビジョニング
+- `mobile-secrets-sync` — TestFlight / Play 配信に必要な GitHub Secrets 投入
+- `mobile-icon-generator` — 1024x1024 PNG から全 density アイコン生成
+- `ios-testflight-deploy` — iOS の実配信（fastlane pilot + altool）
+- `android-play-deploy` — Android の実配信（Gradle + bundletool + Play API）
+- `flutter-swift-parity-port` — **既存 Flutter アプリからの移行時のみ** 使う（新規では使わない）

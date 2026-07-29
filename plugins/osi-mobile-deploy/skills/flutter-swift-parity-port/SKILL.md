@@ -1,20 +1,41 @@
 ---
 name: flutter-swift-parity-port
 description: |
-  既存 Flutter (Dart) アプリの UI/UX を SwiftUI ネイティブに **1 対 1 の見た目パリティで**
-  移植するための systematic ワークフロー skill。「Flutter を SwiftUI に置き換える」
-  「Flutter 版と挙動をそろえて」「MustPost SwiftUI ポート」「Dart のこの画面を Swift に
-  移して」「UI parity を取って」「iOS ネイティブに置き換えたい」「Kotlin/Swift のバイリンガル
-  アプリ化」などのリクエストで発動する。感覚頼りの「なんとなく似せる」を避け、①inventory
-  （Widget と SwiftUI View を表で対応付ける）→ ②diff（Dart 側と Swift 側を並列で読んで
-  違いを列挙）→ ③優先度バッチで直す → ④ビルド + 検証 → ⑤機能単位でコミット、の 5 フェーズで
-  進める。日本語ラベルは Dart の String literal から**逐語**で持ってくる。iOS の `TabView` を
-  Flutter の `BottomNavigationBar` の代わりに使う等、iOS ネイティブが妥当な逸脱は
-  parity 違反にしない（判断基準を references/deviation-policy.md に置く）。
-version: 0.1.0
+  **既存 Flutter (Dart) アプリを SwiftUI ネイティブに移行**するときだけ使う、専用の
+  migration ワークフロー skill。**新規モバイルアプリの構築には使わない**（新規は
+  `mobile-app-scaffold` で SwiftUI + Jetpack Compose のネイティブスタックから始めるのが
+  AI OSI URI の既定）。既存 Flutter プロダクトを iOS ネイティブに置き換える必要が
+  出た局面（例: MustPost の SwiftUI 化・Firebase Auth の keychain 事情・OS 新機能の
+  即時追随・チーム構成の変更）で、感覚頼りの「なんとなく似せる」を避けて 1 対 1 の
+  見た目パリティを取るための systematic な 5 フェーズを提供する。「Flutter を SwiftUI に
+  置き換える」「Flutter 版と挙動をそろえて」「Dart のこの画面を Swift に移して」
+  「UI parity を取って」「Flutter から iOS ネイティブに移行したい」などの
+  **移行前提** のリクエストで発動する。「新規で Flutter アプリを作って」「Flutter で
+  作りたい」は本スキルの対象外（新規開発では Flutter を選ばない方針。`mobile-app-scaffold`
+  にネイティブで作るよう案内すること）。
+version: 0.2.0
 ---
 
-# flutter-swift-parity-port — Flutter → SwiftUI 見た目パリティ移植ワークフロー
+# flutter-swift-parity-port — 既存 Flutter → SwiftUI 移植 workflow (migration only)
+
+## いつ使うか / 使わないか
+
+| シチュエーション | 本スキル | 代わりに使うスキル |
+|---|---|---|
+| **既存の** Flutter アプリを SwiftUI に置き換える | ✅ 使う | — |
+| Flutter 版と SwiftUI 版が並走している間、見た目を parity にしたい | ✅ 使う | — |
+| Dart の特定画面を Swift に移す（部分移植） | ✅ 使う | — |
+| **新規** で iOS / Android アプリを作る | ❌ 使わない | **`mobile-app-scaffold`**（既定は SwiftUI + Jetpack Compose） |
+| 新規で「Flutter で作りたい」と要望が来た | ❌ 使わない | ネイティブ既定を説明したうえで、それでも Flutter を選ぶ強い理由があるかを確認する |
+| 既存 SwiftUI アプリの機能追加 | ❌ 使わない | `mobile-update-deploy` |
+
+> **AI OSI URI の方針**：新規モバイルアプリの既定スタックは **iOS = SwiftUI /
+> Android = Kotlin + Jetpack Compose**。Flutter は既存資産の移行時にのみ扱う。
+> 実運用（MustPost の Flutter→SwiftUI 移植）で得た結論：新規で Flutter を選ぶより、
+> 最初からネイティブで書いた方が総コストが低い。詳細は `mobile-app-scaffold/SKILL.md`
+> の冒頭「方針」参照。
+
+---
 
 **問題**: Flutter アプリの SwiftUI 移植を「見た目で似せる」感覚でやると、色が微妙に違う・
 余白が違う・日本語が意訳される・ボタンが 1 個消える、といった小さなズレが積み重なり、
@@ -197,7 +218,6 @@ CI (`ios-release-auto.yml`) が回って TestFlight まで届く。Flutter ユ�
 
 - `references/deviation-policy.md` — iOS ネイティブに寄せてよい / 寄せてはいけない判定
 - `references/design-system-map.md` — Dart Material / Cupertino → SwiftUI 標準への写像表
-- `references/label-parity-checklist.md` — 日本語ラベル逐語コピーの徹底方法
 
 ---
 
@@ -215,6 +235,9 @@ CI (`ios-release-auto.yml`) が回って TestFlight まで届く。Flutter ユ�
 
 ## やってはいけないこと
 
+- **新規プロジェクトを Flutter で起こす**：AI OSI URI の既定はネイティブ 2 本立て。
+  Flutter を採用したい強い事情があるなら、それを明示的にユーザーと確認したうえで
+  本プラグインの対象外として halt する
 - **感覚で「似せる」**：diff を書かずに移植すると必ず後から発覚してリワークになる
 - **日本語ラベルの意訳**：`「投稿する」` を `Post` に変えると Flutter ユーザーが違和感を持つ
 - **全部を parity にしようとする**：iOS ネイティブが妥当な逸脱 (TabView / sheet 等) は
@@ -226,6 +249,10 @@ CI (`ios-release-auto.yml`) が回って TestFlight まで届く。Flutter ユ�
 
 ## 関連スキル
 
-- `mobile-app-scaffold` — 新規 SwiftUI 骨格作成（Flutter との共存はしない、別リポで作る）
+- `mobile-app-scaffold` — **新規モバイルアプリの標準入口**（SwiftUI + Jetpack Compose の
+  ネイティブ Golden Template）。Flutter からの移行後、SwiftUI 側で足りない機能を
+  追加したくなったら、まずこの Golden Template のパターンに寄せる
 - `ios-sim-auth-backdoor` — Sim で「サインイン済み」画面を出すための前提 skill
+  （Flutter → SwiftUI 移植で認証状態を保ちながら差分検証するときに必須）
 - `mobile-update-deploy` — 移植後の局所修正を回す
+- `deploy-mobile-app` — 新規モバイル作成オーケストレータ（本スキルは呼ばない）

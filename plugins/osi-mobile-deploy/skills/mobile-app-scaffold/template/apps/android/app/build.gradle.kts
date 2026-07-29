@@ -1,3 +1,12 @@
+// Android app module for MyApp
+//
+// Stack policy (AI OSI URI osi-mobile-deploy 既定):
+//   UI:            Jetpack Compose (@Composable)
+//   言語:          Kotlin 1.9+
+//   最小サポート:  minSdk 26 (Android 8.0)
+//   Firebase:      google-services plugin + Firebase BOM
+//   Flutter:       greenfield では選ばない (既存移行は flutter-swift-parity-port)
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -11,7 +20,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.myapp"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0.0"

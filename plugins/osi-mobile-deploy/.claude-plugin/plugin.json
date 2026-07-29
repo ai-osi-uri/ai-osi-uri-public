@@ -1,10 +1,10 @@
 {
   "name": "osi-mobile-deploy",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "requires_connectors": [
     "AI OSI URI Deploy"
   ],
-  "description": "AI OSI URI のネイティブモバイルアプリ（iOS / Android）作成〜配信自動化。「モバイルアプリ作って」の一言で、SwiftUI + Jetpack Compose の Golden Template から新規リポを起こし、Firebase プロビジョニング・アイコン生成・GitHub Secrets 投入・CI 自動修正ループを回し、TestFlight / Google Play Internal Track まで到達させる。0.3.0 で MustPost SwiftUI 移植で獲得した実運用ノウハウを追加：iOS Simulator + Firebase Auth の keychain + Custom Token バックドア（ios-sim-auth-backdoor）／Flutter→SwiftUI パリティ移植ワークフロー（flutter-swift-parity-port）／Cloud Functions v2 apiv2 の IAM allUsers 付与 + camelCase encoder pin（apiv2-callable-iam-gotchas）／Firestore composite index の REST 冪等一括作成（firestore-bulk-index-sync）／xcodegen による stale .xcodeproj 修復（xcodegen-project-regen）／本番実運用中の ios-release-auto.yml 全文同梱。osi-deploy（Web / SaaS）と対を成すモバイル配信専用プラグイン。",
+  "description": "AI OSI URI のネイティブモバイルアプリ（iOS / Android）作成〜配信自動化。**新規モバイルアプリの既定スタック: iOS = SwiftUI (iOS 16+) / Android = Kotlin + Jetpack Compose (minSdk 26)。Flutter は原則使用しない（既存 Flutter アプリの移行時のみ flutter-swift-parity-port で例外的に扱う）**。「モバイルアプリ作って」の一言で、SwiftUI + Jetpack Compose の Golden Template から新規リポを起こし、Firebase プロビジョニング・アイコン生成・GitHub Secrets 投入・CI 自動修正ループを回し、TestFlight / Google Play Internal Track まで到達させる。0.4.0 で新規はネイティブ既定を明文化（mobile-app-scaffold / deploy-mobile-app / flutter-swift-parity-port を再フレーミング、Flutter は greenfield では選ばない方針を全スキルに反映）。0.3.0 で MustPost SwiftUI 移植で獲得した実運用ノウハウを追加：iOS Simulator + Firebase Auth の keychain + Custom Token バックドア（ios-sim-auth-backdoor）／Flutter→SwiftUI パリティ移植ワークフロー（flutter-swift-parity-port、移行専用に再フレーミング）／Cloud Functions v2 apiv2 の IAM allUsers 付与 + camelCase encoder pin（apiv2-callable-iam-gotchas）／Firestore composite index の REST 冪等一括作成（firestore-bulk-index-sync）／xcodegen による stale .xcodeproj 修復（xcodegen-project-regen）／本番実運用中の ios-release-auto.yml 全文同梱。osi-deploy（Web / SaaS）と対を成すモバイル配信専用プラグイン。",
   "author": {
     "name": "AI OSI URI",
     "email": "yuhenagisa@ai-osi-uri.com"
@@ -18,6 +18,7 @@
     "swiftui",
     "kotlin",
     "compose",
+    "native-first",
     "testflight",
     "google-play",
     "fastlane",
@@ -27,7 +28,7 @@
     "xcodegen",
     "cloud-functions-v2",
     "firestore-indexes",
-    "flutter-parity",
+    "flutter-migration",
     "custom-token"
   ]
 }

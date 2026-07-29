@@ -1,15 +1,19 @@
 ---
 name: deploy-mobile-app
 description: |
-  AI OSI URI が Cowork から **ネイティブモバイルアプリ（iOS / Android）を新規に作って
-  TestFlight / Google Play Internal Track まで配信する**ための唯一のオーケストレータ
-  スキル。「モバイルアプリ作って」「iOS アプリ作りたい」「Android アプリを立ち上げて」
-  「SwiftUI で ○○ アプリ」「Kotlin Compose で作って」「TestFlight に上げるところまで
-  やって」「ネイティブアプリ新規作成」「iPhone アプリ作って」「Play Store に出したい」
-  「iOS も Android も両方作って」など、モバイルアプリの新規作成と配信を依頼された
-  ときに必ず発動する。既存モバイルリポの局所修正は `mobile-update-deploy` の役割で、
-  本スキルは新規作成専用。Web / LP / SaaS の作成は `deploy-app`（osi-deploy）の担当。
-version: 0.1.0
+  AI OSI URI が Cowork から **ネイティブモバイルアプリ（iOS = SwiftUI / Android =
+  Kotlin + Jetpack Compose）を新規に作って TestFlight / Google Play Internal Track
+  まで配信する** ための唯一のオーケストレータスキル。**既定スタックはネイティブ 2 本立てで、
+  Flutter / React Native は greenfield では選ばない**（既存 Flutter アプリからの移行が
+  必要な場合のみ `flutter-swift-parity-port` を別途使う）。「モバイルアプリ作って」
+  「iOS アプリ作りたい」「Android アプリを立ち上げて」「SwiftUI で ○○ アプリ」
+  「Kotlin Compose で作って」「TestFlight に上げるところまでやって」「ネイティブアプリ
+  新規作成」「iPhone アプリ作って」「Play Store に出したい」「iOS も Android も両方
+  作って」「Flutter じゃなくてネイティブでモバイルアプリを作って」など、モバイルアプリの
+  新規作成と配信を依頼されたときに必ず発動する。既存モバイルリポの局所修正は
+  `mobile-update-deploy` の役割で、本スキルは新規作成専用。Web / LP / SaaS の作成は
+  `deploy-app`（osi-deploy）の担当。
+version: 0.2.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb
@@ -22,12 +26,20 @@ requires_connectors:
 # deploy-mobile-app — モバイルアプリ新規作成オーケストレータ
 
 「モバイルアプリ作って」と言われたら、業種・機能・iOS/Android の希望を聞き出して、
-Golden Template から新規リポを起こし、Firebase プロビジョニング・Secrets 投入・CI 監視・
-TestFlight / Play Internal Track 到達まで **1 つの対話で完結**させる。
+Golden Template（SwiftUI + Jetpack Compose のネイティブ 2 本立て）から新規リポを起こし、
+Firebase プロビジョニング・Secrets 投入・CI 監視・TestFlight / Play Internal Track 到達
+まで **1 つの対話で完結**させる。
 
 > **重要な設計原則**：本スキルは「判断・順序制御・引き渡し・監視」に専念する。実際の
 > scaffold / Firebase / Secrets / icon / deploy は atomic スキル（`mobile-*` / `ios-*` /
 > `android-*`）に委譲する。単一責任を守ることで、途中失敗しても再開できる。
+
+> **スタック方針**：AI OSI URI の新規モバイルアプリは **iOS = SwiftUI / Android =
+> Kotlin + Jetpack Compose** を既定とする。Flutter / React Native は greenfield では
+> 選ばない。ユーザーが明示的に「Flutter で作って」と要望した場合は、既定がネイティブで
+> ある旨と（採用したい強い事情があるかを）確認し、既存 Flutter アプリからの移行なら
+> `flutter-swift-parity-port` に案内する。新規で Flutter を選ぶ強い事情がなければ
+> ネイティブで進める。詳細は `mobile-app-scaffold/SKILL.md` の「方針」節を参照。
 
 ---
 
@@ -45,6 +57,7 @@ TestFlight / Play Internal Track 到達まで **1 つの対話で完結**させ�
 - Bundle ID (iOS): {BUNDLE_ID}
 - Package Name (Android): {PACKAGE_NAME}
 - Targets: {iOS / Android / both}
+- Stack: SwiftUI + Jetpack Compose (AI OSI URI 既定 — Flutter は不使用)
 - GitHub Org: {ai-osi-uri | personal}
 - Firebase Project: {project_id}
 
@@ -121,11 +134,21 @@ TestFlight / Play Internal Track 到達まで **1 つの対話で完結**させ�
 | APP_DESCRIPTION | `メモを記録するアプリ` | 「Hello World デモ」 |
 | CORE_FEATURES | `写真を投稿できる / 位置情報を保存` | `Hello World`（空） |
 | TARGETS | `iOS only` / `Android only` / `both` | `both` |
+| STACK | 既定は **iOS = SwiftUI / Android = Kotlin + Jetpack Compose**。Flutter は聞かない | ネイティブ 2 本立て |
 | BUNDLE_ID | `com.aiosiuri.foo` | `com.aiosiuri.{app_name_lower}` |
 | PACKAGE_NAME | `com.aiosiuri.foo` | Bundle ID と同じ |
 | DISPLAY_NAME | `Foo` | APP_NAME をそのまま |
 | GITHUB_ORG | `ai-osi-uri` / `personal` | `deploy-app` の `USE_ORG` 判定に準拠 |
 | ICON_SOURCE | 1024x1024 PNG / 画像URL / なし（nano-banana で生成） | なし |
+
+**「Flutter で作って」と要望が来たとき**:
+1. AI OSI URI の既定スタックがネイティブ 2 本立てで、実運用（MustPost 移植）で
+   得た結論に基づくものであることを説明
+2. 既存 Flutter アプリからの移行なら `flutter-swift-parity-port` を案内
+3. 新規で Flutter を採用したい強い理由（例：既存の Flutter プラグイン資産、チームの
+   Flutter 熟練度、社外の Flutter エコシステム上に SDK が乗る要件など）があるかを 1 問確認
+4. 強い理由が無ければネイティブで進める。ある場合は本スキルの対象外として halt し
+   ユーザー判断を仰ぐ（本プラグインは Flutter の scaffold は持たない）
 
 **確認プロンプト例**:
 
@@ -133,6 +156,7 @@ TestFlight / Play Internal Track 到達まで **1 つの対話で完結**させ�
 以下でよろしいですか？
 
   アプリ名: Foo
+  スタック: SwiftUI (iOS) + Jetpack Compose (Android)   ← AI OSI URI 既定のネイティブ 2 本立て
   Bundle ID: com.aiosiuri.foo
   Package Name: com.aiosiuri.foo
   ターゲット: iOS + Android
@@ -147,7 +171,7 @@ TestFlight / Play Internal Track 到達まで **1 つの対話で完結**させ�
 
 ## Phase 2: mobile-app-scaffold を呼ぶ
 
-Golden Template から新規リポを生成し、GitHub に push する。
+Golden Template（SwiftUI + Jetpack Compose）から新規リポを生成し、GitHub に push する。
 
 ```
 mobile-app-scaffold:
@@ -290,6 +314,10 @@ mobile-app-smoke-test:
 【リポジトリ】
   https://github.com/{repo_owner}/{repo_name}
 
+【スタック】
+  iOS: SwiftUI (deployment target iOS 16+)
+  Android: Kotlin + Jetpack Compose (minSdk 26)
+
 【配信先】
   📱 TestFlight: {link}   （processing 完了まで通常 10〜30 分）
   🤖 Play Internal Track: {link}
@@ -315,6 +343,7 @@ mobile-app-smoke-test:
 | 0 | Keychain に secret がない | 登録コマンドを案内、中断 |
 | 0 | `firebase.valid: false` | Google 認証 or Service Account 設定を案内、中断 |
 | 1 | APP_NAME が読み取れない | 「アプリ名は何にしますか？（英数字、例: Foo）」で 1 問だけ聞く |
+| 1 | 「Flutter で作って」と要望された | 既定がネイティブである旨と、既存 Flutter アプリからの移行かを確認。新規で Flutter を選ぶ強い事情が無ければネイティブで進める。強い事情があるなら本プラグインの対象外として halt |
 | 2 | 同名リポあり | 「既存のを更新しますか？（mobile-update-deploy へ）」で確認 |
 | 3 | Firebase プロジェクト作成失敗（quota 超過） | 既存プロジェクトを指定できるか確認 |
 | 5 | Secrets 投入失敗（REST API 401） | GitHub PAT の scope 不足 → 案内 |
@@ -325,6 +354,8 @@ mobile-app-smoke-test:
 
 ## やってはいけないこと
 
+- **新規で Flutter / React Native を採用する**：本プラグインの既定はネイティブ 2 本立て。
+  強い事情がある場合はユーザーに明示確認し、無ければネイティブで進める
 - **早期の「完了」宣言**：CI が green になっただけで「TestFlight に上がりました」と言わない。
   `ios_get_status` で processing 完了ビルドの ID が取れるまで待つ。
 - **既存リポの上書き**：同名リポがあれば新規作成せず、`mobile-update-deploy` に切り替え確認。
@@ -336,7 +367,7 @@ mobile-app-smoke-test:
 
 ## 関連スキル
 
-- `mobile-app-scaffold` — Phase 2 で呼ぶ
+- `mobile-app-scaffold` — Phase 2 で呼ぶ（SwiftUI + Compose の Golden Template）
 - `mobile-firebase-setup` — Phase 3 で呼ぶ
 - `mobile-icon-generator` — Phase 4 で呼ぶ
 - `mobile-secrets-sync` — Phase 5 で呼ぶ
@@ -345,3 +376,4 @@ mobile-app-smoke-test:
 - `mobile-update-deploy` — 既存リポの局所修正（本スキルの範疇外）
 - `ios-testflight-deploy` — 実配信の詳細ノウハウ（fastlane / altool の癖）
 - `android-play-deploy` — 実配信の詳細ノウハウ（Gradle / bundletool / Play API）
+- `flutter-swift-parity-port` — 既存 Flutter アプリの SwiftUI 移行時のみ（本スキルは呼ばない）

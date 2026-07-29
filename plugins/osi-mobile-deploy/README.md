@@ -4,14 +4,38 @@ AI OSI URI のネイティブモバイルアプリ（iOS / Android）作成〜�
 
 `osi-deploy`（Web / SaaS デプロイ）と対を成す、モバイル配信専用プラグイン。
 
+## スタック方針（重要）
+
+**AI OSI URI 新規モバイルアプリの既定スタック**:
+
+| プラットフォーム | UI | 言語 | 最小サポート |
+|---|---|---|---|
+| **iOS** | **SwiftUI** (`@main App`) | Swift 5.10+ | **iOS 16.0** |
+| **Android** | **Jetpack Compose** (`@Composable`) | Kotlin 1.9+ | **minSdk 26**（Android 8.0） |
+
+**Flutter は原則使用しない**（既存 Flutter アプリの移行時のみ `flutter-swift-parity-port` で例外的に扱う）。実運用（MustPost の Flutter→SwiftUI 移植）で得た結論として、新規で単一コードベース（Flutter / React Native）を採用するより、最初からネイティブで書いた方が総コストが低い。OS 標準のアクセシビリティ・ハプティクス・写真ピッカー・通知権限フローに素直に乗れる／iOS 26 / Android 15 の新機能に bridge 遅延なく追える／クラッシュログが 1 発で読める／Firebase iOS/Android SDK は SwiftUI / Compose 公式対応。
+
+新規で「Flutter で作りたい」という要望が来たら、既定がネイティブである旨と、既存資産の移行が必要かを確認する。単なる好みではネイティブで進めるのが本プラグインの方針。
+
 ## Changelog
+
+### v0.4.0 — 新規はネイティブ既定を明文化（2026-07）
+
+Flutter→SwiftUI ポートが実運用でほぼ稀（既存の移行案件だけ）と判明したので、新規モバイルアプリの既定スタックを **iOS = SwiftUI / Android = Kotlin + Jetpack Compose** に統一する方針を全スキルに反映。
+
+- **`mobile-app-scaffold` v0.2.0** — description をネイティブ 2 本立て既定に書き換え、Golden Template のスタック表を追加（iOS 16.0 / minSdk 26）。「Flutter で作って」が来た時の対応をエラーハンドリング表に追加。iOS deployment target を 17.0 → 16.0 に、Android minSdk を 24 → 26 に更新（プロジェクトポリシーに合わせる）
+- **`deploy-mobile-app` v0.2.0** — オーケストレータの description を「ネイティブ 2 本立て既定 + Flutter は greenfield では選ばない」に更新。Phase 1 ヒアリング表に「STACK」行を追加し、「Flutter で作って」要望への対応フローを Phase 1 と エラーハンドリング表に追記。完了レポートにスタック行を追加
+- **`flutter-swift-parity-port` v0.2.0** — description と冒頭を「**既存 Flutter アプリの SwiftUI 移行専用**」に再フレーミング。「いつ使うか / 使わないか」表を追加し、新規開発では使わないことを明示。技術的な 5 フェーズ workflow・逸脱ポリシー・Dart→SwiftUI 写像表は保持
+- **template/README.md** — 冒頭に「Flutter / React Native は使わない」の 1 行を追加
+- **template/apps/ios/project.yml** — スタックポリシーコメント追加、iOS deployment target を 16.0 に
+- **template/apps/android/app/build.gradle.kts** — スタックポリシーコメント追加、minSdk を 26 に
 
 ### v0.3.0 — MustPost SwiftUI 移植のノウハウ追加（2026-07）
 
 MustPost（Flutter → SwiftUI ネイティブ化）で獲得した実運用ノウハウを 5 スキルで追加。既存スキルとの重複は避け、実際にハマった問題単位で切り出している。
 
 - **`ios-sim-auth-backdoor`** — iOS Simulator で Firebase Auth の keychain 永続化を成立させる proper signing 既定（拡張 v1.18.5+ で `xcode_build_for_sim({code_signing: "auto"})` が既定に）と、`mustpost://debug/signin?token=XXX` の Custom Token deep link バックドア（AppDelegate と SwiftUI 側 DeepLinkHandler の両方に置くのがミソ）
-- **`flutter-swift-parity-port`** — Flutter → SwiftUI 移植を「感覚で似せる」ではなく inventory → diff → 優先度バッチ → build + 目視 → コミット の 5 フェーズで systematic に回す。日本語ラベル逐語コピー、iOS ネイティブに寄せてよい逸脱ポリシー、Dart→SwiftUI 写像早見表を同梱
+- **`flutter-swift-parity-port`** — Flutter → SwiftUI 移植を「感覚で似せる」ではなく inventory → diff → 優先度バッチ → build + 目視 → コミット の 5 フェーズで systematic に回す。日本語ラベル逐語コピー、iOS ネイティブに寄せてよい逸脱ポリシー、Dart→SwiftUI 写像早見表を同梱（v0.4.0 で移行専用として再フレーミング）
 - **`apiv2-callable-iam-gotchas`** — Cloud Functions v2（Cloud Run 実装）の apiv2-* が client から `UNAUTHENTICATED` / `communication error` になる 2 大原因（allUsers → roles/run.invoker の一括付与忘れ + JSONEncoder の snake_case 変換）を潰す
 - **`firestore-bulk-index-sync`** — `firebase deploy --only firestore:indexes` が 50+ index で詰まる問題を、Admin REST 直叩き（`collectionGroups/{cg}/indexes` POST）+ 409 と 400「not necessary」を成功に丸めて冪等化
 - **`xcodegen-project-regen`** — `git pull` 後の「Missing package product 'FirebaseCore'」× 14 個症状を `xcodegen generate --spec apps/ios/project.yml` + Reset/Resolve Packages で 30 秒修復
@@ -24,10 +48,10 @@ deploy-mobile-app オーケストレータ + 9 atomic を用意。
 ## スキル一覧
 
 **オーケストレータ**:
-- `deploy-mobile-app` — 「モバイルアプリ作って」で発動する新規作成の唯一の入口。ヒアリング → scaffold → Firebase → Secrets → push → CI 監視 → TestFlight / Play Internal Track 到達まで一気通貫。
+- `deploy-mobile-app` — 「モバイルアプリ作って」で発動する新規作成の唯一の入口。ヒアリング → scaffold（SwiftUI + Jetpack Compose）→ Firebase → Secrets → push → CI 監視 → TestFlight / Play Internal Track 到達まで一気通貫。**Flutter で新規は作らない**方針の明示付き。
 
 **atomic（新規作成）**:
-- `mobile-app-scaffold` — Golden Template（SwiftUI + Compose）から新規リポを clone → 6箇所置換 → GitHub push。
+- `mobile-app-scaffold` — **Golden Template（SwiftUI + Jetpack Compose）** から新規リポを clone → 6 箇所置換 → GitHub push。ネイティブ 2 本立て既定・iOS 16+ / minSdk 26 のポリシーを SKILL.md に明記。
 - `mobile-firebase-setup` — Firebase プロジェクト作成 + iOS/Android App 追加 + plist/json 取得 → base64 化 → GitHub Secrets 一括投入。
 - `mobile-secrets-sync` — GitHub リポに TestFlight / Play 配信に必要な Secrets 10 個を投入。
 - `mobile-icon-generator` — 1 枚の 1024x1024 PNG から iOS AppIcon / Android mipmap 全 density を一括生成。ソース画像が無ければ nano-banana で生成。
@@ -43,7 +67,7 @@ deploy-mobile-app オーケストレータ + 9 atomic を用意。
 
 **atomic（v0.3.0 追加：MustPost 移植ノウハウ）**:
 - `ios-sim-auth-backdoor` — Simulator 上で Firebase Auth の keychain と Custom Token deep link を両立させる 2 本立て（keychain + IME 罠を同時に潰す）。
-- `flutter-swift-parity-port` — Flutter → SwiftUI 見た目パリティ移植の 5 フェーズ workflow + 逸脱ポリシー + 写像表。
+- **`flutter-swift-parity-port`** — **既存 Flutter アプリ → SwiftUI 移行専用**（v0.4.0 で新規開発では使わないことを明示）。5 フェーズ workflow + 逸脱ポリシー + 写像表。
 - `apiv2-callable-iam-gotchas` — Cloud Functions v2 apiv2-* の allUsers invoker 一括付与 + camelCase encoder pin。
 - `firestore-bulk-index-sync` — 50+ composite index を Admin REST で冪等一括作成。
 - `xcodegen-project-regen` — stale .xcodeproj → Missing package product を 30 秒で修復。
@@ -86,8 +110,8 @@ Cowork で:
 
 とだけ言うと、`deploy-mobile-app` が発動して以下が自動で回る:
 
-1. アプリ情報のヒアリング（Bundle ID / GitHub Org 等）
-2. Golden Template から新規リポ生成 → GitHub push
+1. アプリ情報のヒアリング（Bundle ID / GitHub Org 等）— スタックは既定でネイティブ 2 本立て
+2. Golden Template（SwiftUI + Jetpack Compose）から新規リポ生成 → GitHub push
 3. Firebase プロジェクト新規作成 + iOS/Android App 追加 + plist取得
 4. GitHub Secrets 10個を投入
 5. CI 起動を検知 → iOS/Android の両ワークフローを監視

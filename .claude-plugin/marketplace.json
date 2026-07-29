@@ -7,7 +7,7 @@
   },
   "metadata": {
     "description": "AI OSI URI 公開プラグイン（外部配布用サブセット）。",
-    "version": "0.9.1"
+    "version": "0.9.2"
   },
   "plugins": [
     {
@@ -87,8 +87,8 @@
     {
       "name": "osi-mobile-deploy",
       "source": "./plugins/osi-mobile-deploy",
-      "description": "ネイティブモバイルアプリ（iOS / Android）作成〜配信自動化：「モバイルアプリ作って」の一言で、SwiftUI + Kotlin Compose の Golden Template から新規リポを起こし、Firebase プロビジョニング・アイコン生成・GitHub Secrets 投入・CI 自動修正ループを回し、TestFlight / Google Play Internal Track まで到達させる。osi-deploy（Web / SaaS）と対を成すモバイル配信専用プラグイン。15 スキル（10 コア + 5 MustPost 移植ノウハウ）：deploy-mobile-app（オーケストレータ）／ mobile-app-scaffold ／ mobile-firebase-setup ／ mobile-secrets-sync ／ mobile-icon-generator ／ mobile-crash-triage ／ mobile-update-deploy ／ mobile-app-smoke-test ／ ios-testflight-deploy（v0.2.0 で ios-release-auto.yml 全文同梱）／ android-play-deploy ／ ios-sim-auth-backdoor（Custom Token + keychain proper-signing）／ flutter-swift-parity-port（Flutter→SwiftUI 移植 workflow）／ apiv2-callable-iam-gotchas（Cloud Functions v2 IAM + camelCase）／ firestore-bulk-index-sync（Admin REST 冪等一括作成）／ xcodegen-project-regen（stale .xcodeproj 修復）。",
-      "version": "0.3.0",
+      "description": "ネイティブモバイルアプリ（iOS / Android）作成〜配信自動化。**新規モバイルアプリの既定スタック: iOS = SwiftUI (iOS 16+) / Android = Kotlin + Jetpack Compose (minSdk 26)。Flutter は原則使用しない（既存 Flutter アプリの移行時のみ flutter-swift-parity-port で例外的に扱う）**。「モバイルアプリ作って」の一言で、SwiftUI + Jetpack Compose の Golden Template から新規リポを起こし、Firebase プロビジョニング・アイコン生成・GitHub Secrets 投入・CI 自動修正ループを回し、TestFlight / Google Play Internal Track まで到達させる。osi-deploy（Web / SaaS）と対を成すモバイル配信専用プラグイン。15 スキル（10 コア + 5 MustPost 移植ノウハウ）：deploy-mobile-app（オーケストレータ、v0.2.0 でネイティブ既定明文化）／ mobile-app-scaffold（v0.2.0 で SwiftUI + Compose Golden Template 既定に）／ mobile-firebase-setup ／ mobile-secrets-sync ／ mobile-icon-generator ／ mobile-crash-triage ／ mobile-update-deploy ／ mobile-app-smoke-test ／ ios-testflight-deploy（v0.2.0 で ios-release-auto.yml 全文同梱）／ android-play-deploy ／ ios-sim-auth-backdoor（Custom Token + keychain proper-signing）／ flutter-swift-parity-port（v0.2.0 で既存 Flutter→SwiftUI 移行専用に再フレーミング）／ apiv2-callable-iam-gotchas（Cloud Functions v2 IAM + camelCase）／ firestore-bulk-index-sync（Admin REST 冪等一括作成）／ xcodegen-project-regen（stale .xcodeproj 修復）。",
+      "version": "0.4.0",
       "category": "deploy",
       "tags": [
         "mobile",
@@ -97,6 +97,7 @@
         "swiftui",
         "kotlin",
         "compose",
+        "native-first",
         "testflight",
         "google-play",
         "fastlane",
@@ -105,7 +106,7 @@
         "xcodegen",
         "cloud-functions-v2",
         "firestore-indexes",
-        "flutter-parity",
+        "flutter-migration",
         "custom-token"
       ],
       "strict": false

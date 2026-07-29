@@ -1,7 +1,13 @@
 # MyApp — Native mobile app (iOS + Android)
 
-Scaffolded by AI OSI URI **osi-mobile-deploy** plugin. This is a Hello World shell
-that already carries every hard-won lesson from the plugin's initial build:
+Scaffolded by AI OSI URI **osi-mobile-deploy** plugin. Native stack from day one:
+
+- **iOS**: SwiftUI (`@main App`), Swift 5.10+, deployment target **iOS 16.0**
+- **Android**: Jetpack Compose (`@Composable`), Kotlin 1.9+, **minSdk 26** (Android 8.0)
+- **Flutter / React Native は使いません**（新規開発の既定はネイティブ 2 本立て）。既存 Flutter アプリからの移行が必要な場合のみ `osi-mobile-deploy` の `flutter-swift-parity-port` スキルを別途使う。
+
+This is a Hello World shell that already carries every hard-won lesson from the
+plugin's initial build:
 
 - Guarded `FirebaseApp.configure()` so a missing `GoogleService-Info.plist` no
   longer crashes at startup.
