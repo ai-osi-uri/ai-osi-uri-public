@@ -6,9 +6,12 @@ description: |
   fastlane / GitHub Actions workflow を実行する。SwiftSupport 保全（ITMS-90426 回避）、
   xcrun actool による Assets.car 自前コンパイル、AuthKey_<ID>.p8 命名規約、
   pilot polling スキップ、CFBundleIconName + CFBundleIcons 設定、Xcode 26 選択、
-  bash 3.2 互換の case 文、といった落とし穴回避を「なぜそれが必要か」まで
-  references/altool-quirks.md に残す。単体で「TestFlight に上げて」「iOS を再配信」で発動する。
-version: 0.1.0
+  bash 3.2 互換の case 文、macos-15 runner + auto-signing (match なし) + P12 一時 keychain
+  投入、AppIcon60x60@2x/@3x.png の Payload 直下 cp、といった落とし穴回避を
+  「なぜそれが必要か」まで references/altool-quirks.md と
+  references/ios-release-auto.yml.example に残す。単体で「TestFlight に上げて」
+  「iOS を再配信」「fastlane で TestFlight」「auto-signing で TestFlight」で発動する。
+version: 0.2.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb
@@ -22,6 +25,22 @@ Golden Template には既に「動く形」で焼き込み済み。本スキル�
 2. ノウハウの根拠と「なぜこう書くか」の説明（references/ 配下）
 
 の 2 つを担う。**同じ罠で二度時間を溶かさない**ためのナレッジ層。
+
+> **v0.2.0 追記**: MustPost SwiftUI 移植で実運用中の `.github/workflows/ios-release-auto.yml`
+> の完全版を `references/ios-release-auto.yml.example` に同梱。必須 GitHub Secrets（7個）と
+> flavor ごとの plist secret 名も冒頭にコメントで明記。Golden Template から生成される
+> workflow はこれと 1:1 で対応する。追加獲得したノウハウ:
+>
+> - `macos-15` runner + Xcode 26.x 選択（Xcode 16 は iOS 26 SDK が無く ASC が 409 を返す）
+> - Preflight で必須 secrets を検査し早期 fail
+> - `xcodegen generate` は fastlane に入る**前**の CI step で必ず走らせる（stale .xcodeproj
+>   による Missing package product を潰す — `xcodegen-project-regen` skill 参照）
+> - flavor サフィックス mapping は bash 3.2 互換の `case` 文で書く
+> - AppIcon の legacy 命名（`AppIcon60x60@2x.png` / `AppIcon60x60@3x.png`）を Payload 直下に
+>   `cp` する step が必要（iOS 26 の altool validation 対策）
+> - Distribution 証明書は P12 (`IOS_DIST_CERT_P12_B64`) を CI の一時 keychain に import →
+>   `security set-key-partition-list -S apple-tool:,apple:` で codesign から見えるようにする
+> - fastlane match は使わず auto-signing 一本化（`xcargs: -allowProvisioningUpdates ...`）
 
 ## 入力契約
 
@@ -60,7 +79,29 @@ bundle exec fastlane ios ios_beta_auto flavor:"${FLAVOR:-dev}" notes:"${NOTES:-}
 
 `.github/workflows/ios-release-auto.yml` は push で自動起動する構成。何もせずに
 `git push origin main` するだけ。CI 監視は `deploy-mobile-app` / `mobile-update-deploy`
-が行う。
+が行う。完全な workflow は `references/ios-release-auto.yml.example` を参照。
+
+## 必須 GitHub Secrets
+
+`references/ios-release-auto.yml.example` の冒頭コメントにも記載。
+
+**iOS auto-signing に必要（7 個）**:
+
+| Secret 名 | 中身 |
+|---|---|
+| `APPLE_TEAM_ID` | Apple Developer Team ID (10桁) |
+| `APP_STORE_CONNECT_API_KEY_ID` | .p8 のファイル名に入る Key ID |
+| `APP_STORE_CONNECT_API_KEY_ISSUER_ID` | App Store Connect の Issuer UUID |
+| `APP_STORE_CONNECT_API_KEY_B64` | .p8 を base64 化した文字列 |
+| `IOS_DIST_CERT_P12_B64` | Distribution 証明書 .p12 を base64 |
+| `IOS_DIST_CERT_PASSWORD` | .p12 のパスワード |
+| `IOS_KEYCHAIN_PASSWORD` | CI 上の一時 keychain 用パスワード（任意で強め） |
+
+**flavor ごとの Firebase plist（3 個）**:
+
+- `GOOGLE_SERVICE_INFO_PLIST_DEV_B64`
+- `GOOGLE_SERVICE_INFO_PLIST_STG_B64`
+- `GOOGLE_SERVICE_INFO_PLIST_PROD_B64`
 
 ## fastlane lane の中身（`fastlane/Fastfile` の `ios_beta_auto`）
 
@@ -73,7 +114,7 @@ lane :ios_beta_auto do |options|
   app_id        = APP_ID_BY_FLAVOR.fetch(flavor)
   api_key       = load_app_store_connect_api_key!
 
-  # 1. xcodegen で .xcodeproj を再生成（ソース追加漏れの防止）
+  # 1. xcodegen で .xcodeproj を再生成（ソース追加漏れ + stale project の防止）
   Dir.chdir("apps/ios") { sh "xcodegen generate" }
 
   # 2. build number を Apple 側の最大値 + 1 に
@@ -160,6 +201,8 @@ end
 | `AuthKey_XXX.p8 not found` | ファイル名を `AuthKey_${KEY_ID}.p8` にする |
 | `Cannot find provisioning profile` | `xcargs: "-allowProvisioningUpdates"` を追加、または Developer Portal で App ID を事前登録 |
 | `Build number already used` | fastlane の `latest_testflight_build_number` で自動 increment（既に組み込み済み） |
+| `Missing package product 'FirebaseCore'` × 14 | `xcodegen generate` が抜けている（`xcodegen-project-regen` 参照） |
+| `SDK version 26.x is required but 16.x was found` | macos-14 → macos-15 に切替 + Xcode_26.app 選択 |
 
 ## 注意事項
 
@@ -167,3 +210,11 @@ end
 - **App Store review 提出は本スキルの範疇外**。`ios_submit_review` MCP で明示的に指示された時だけ。
 - **flavor 3 種類（dev/stg/prod）を最初から用意**。BundleID を分けることで Firebase / TestFlight を並行運用できる。v1 は dev のみ実運用、stg/prod は Golden Template に entry として残しつつ運用開始は案件が本番化したタイミング。
 - **CI で走らせる時の provisioning は Automatic**（`match` を使わない）。証明書は Distribution 1 枚を Keychain / GitHub Secrets 経由で流し込む。`match` を後で入れたくなった時は明示的に切り替える。
+- **P12 一時 keychain**: `security create-keychain` → `security import` → `security set-key-partition-list -S apple-tool:,apple:` の 3 手順を workflow で必ず踏む。partition-list を忘れると codesign が対話 prompt を出して CI が hang する。
+
+## 関連スキル
+
+- `xcodegen-project-regen` — CI 内 `xcodegen generate` の理由と手当て
+- `ios-sim-auth-backdoor` — Simulator QA 用の Custom Token 導線
+- `deploy-mobile-app` — 新規リポ作成 → 本 skill を Phase 6-7 で呼ぶ
+- `mobile-update-deploy` — 既存リポの局所修正 → 本 skill が CI で回る

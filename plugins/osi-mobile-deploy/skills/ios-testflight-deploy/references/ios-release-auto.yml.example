@@ -1,0 +1,188 @@
+# iOS Release (auto-signing, no match) — MustPost で実運用中のワークフロー全文。
+#
+# ここに書かれた step 順・env 名・secret 名は、
+# osi-mobile-deploy Golden Template と 1:1 で対応する。
+#
+# 必須の GitHub Secrets (7個):
+#   APPLE_TEAM_ID                       — Apple Developer Team ID (10桁)
+#   APP_STORE_CONNECT_API_KEY_ID        — .p8 のファイル名に入る Key ID
+#   APP_STORE_CONNECT_API_KEY_ISSUER_ID — ASC の Issuer UUID
+#   APP_STORE_CONNECT_API_KEY_B64       — .p8 を base64 化した文字列
+#   IOS_DIST_CERT_P12_B64               — Distribution 証明書 .p12 を base64
+#   IOS_DIST_CERT_PASSWORD              — .p12 のパスワード
+#   IOS_KEYCHAIN_PASSWORD               — CI の一時 keychain 用パスワード（任意で強め）
+#
+# 追加で（flavor ごとに）:
+#   GOOGLE_SERVICE_INFO_PLIST_DEV_B64   — GoogleService-Info-Dev.plist を base64
+#   GOOGLE_SERVICE_INFO_PLIST_STG_B64   — 同 STG
+#   GOOGLE_SERVICE_INFO_PLIST_PROD_B64  — 同 PROD
+#
+# 任意:
+#   SLACK_WEBHOOK_URL                   — 通知用（fastlane から使う）
+
+name: iOS Release (auto-signing)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/ios/**"
+      - "fastlane/**"
+      - "Gemfile*"
+      - ".github/workflows/ios-release-auto.yml"
+  workflow_dispatch:
+    inputs:
+      flavor:
+        description: "Flavor to release"
+        required: true
+        default: "dev"
+        type: choice
+        options: [dev, stg, prod]
+      notes:
+        description: "TestFlight what-to-test notes"
+        required: false
+        type: string
+
+concurrency:
+  group: ios-release-auto-${{ github.event.inputs.flavor || 'dev' }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: fastlane ios ios_beta_auto (flavor=${{ github.event.inputs.flavor || 'dev' }})
+    runs-on: macos-15
+    timeout-minutes: 90
+    env:
+      LANG: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+      FLAVOR:                                ${{ github.event.inputs.flavor || 'dev' }}
+      APPLE_TEAM_ID:                         ${{ secrets.APPLE_TEAM_ID }}
+      APP_STORE_CONNECT_API_KEY_ID:          ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+      APP_STORE_CONNECT_API_KEY_ISSUER_ID:   ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+      APP_STORE_CONNECT_API_KEY_B64:         ${{ secrets.APP_STORE_CONNECT_API_KEY_B64 }}
+      IOS_DIST_CERT_P12_B64:                 ${{ secrets.IOS_DIST_CERT_P12_B64 }}
+      IOS_DIST_CERT_PASSWORD:                ${{ secrets.IOS_DIST_CERT_PASSWORD }}
+      IOS_KEYCHAIN_PASSWORD:                 ${{ secrets.IOS_KEYCHAIN_PASSWORD }}
+      SLACK_WEBHOOK_URL:                     ${{ secrets.SLACK_WEBHOOK_URL }}
+      FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT:  120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Preflight — required secrets
+        run: |
+          missing=""
+          for key in APPLE_TEAM_ID APP_STORE_CONNECT_API_KEY_ID APP_STORE_CONNECT_API_KEY_ISSUER_ID APP_STORE_CONNECT_API_KEY_B64 IOS_DIST_CERT_P12_B64 IOS_DIST_CERT_PASSWORD IOS_KEYCHAIN_PASSWORD; do
+            if [ -z "${!key}" ]; then missing="$missing $key"; fi
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Missing required secrets:$missing"
+            exit 1
+          fi
+
+      - name: Select Xcode 26.x (iOS 26 SDK required by ASC — Xcode 16 gets 409 SDK rejection)
+        run: |
+          latest_xcode="$(ls /Applications | grep -E '^Xcode_26(\.[0-9]+)*\.app$' | sort -V | tail -1)"
+          if [ -z "$latest_xcode" ]; then
+            echo "::error::No Xcode 26.x found on runner — cannot satisfy ASC SDK requirement"; exit 1
+          fi
+          sudo xcode-select -s "/Applications/$latest_xcode/Contents/Developer"
+          xcodebuild -version
+
+      - name: Install XcodeGen (+ xcbeautify)
+        run: brew install xcodegen xcbeautify
+
+      - name: Setup Ruby (bundler cache)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+
+      - name: Restore App Store Connect .p8
+        run: |
+          mkdir -p "$RUNNER_TEMP/asc"
+          echo "$APP_STORE_CONNECT_API_KEY_B64" | base64 --decode \
+            > "$RUNNER_TEMP/asc/asc_api_key.p8"
+          echo "APP_STORE_CONNECT_API_KEY_PATH=$RUNNER_TEMP/asc/asc_api_key.p8" >> "$GITHUB_ENV"
+
+      - name: Import Distribution certificate into temp keychain
+        run: |
+          KEYCHAIN_PATH="$RUNNER_TEMP/app-signing.keychain-db"
+          CERT_PATH="$RUNNER_TEMP/dist_cert.p12"
+          echo "$IOS_DIST_CERT_P12_B64" | base64 --decode > "$CERT_PATH"
+          security create-keychain -p "$IOS_KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$IOS_KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERT_PATH" -P "$IOS_DIST_CERT_PASSWORD" \
+            -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple: \
+            -k "$IOS_KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH" >/dev/null
+          security list-keychain -d user -s "$KEYCHAIN_PATH" login.keychain
+          security default-keychain -s "$KEYCHAIN_PATH"
+          echo "MATCH_KEYCHAIN_NAME=$KEYCHAIN_PATH" >> "$GITHUB_ENV"
+          echo "MATCH_KEYCHAIN_PASSWORD=$IOS_KEYCHAIN_PASSWORD" >> "$GITHUB_ENV"
+
+      - name: Restore GoogleService-Info.plist for selected flavor
+        env:
+          GOOGLE_SERVICE_INFO_PLIST_DEV_B64:  ${{ secrets.GOOGLE_SERVICE_INFO_PLIST_DEV_B64 }}
+          GOOGLE_SERVICE_INFO_PLIST_STG_B64:  ${{ secrets.GOOGLE_SERVICE_INFO_PLIST_STG_B64 }}
+          GOOGLE_SERVICE_INFO_PLIST_PROD_B64: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST_PROD_B64 }}
+        run: |
+          # POSIX-portable flavor → suffix + secret name mapping (works on
+          # macOS default bash 3.2; bash 4+ ${FLAVOR^} syntax breaks there
+          # with "bad substitution").
+          case "$FLAVOR" in
+            dev)
+              B64="$GOOGLE_SERVICE_INFO_PLIST_DEV_B64"
+              SUFFIX="Dev"
+              SECRET_NAME="GOOGLE_SERVICE_INFO_PLIST_DEV_B64"
+              ;;
+            stg)
+              B64="$GOOGLE_SERVICE_INFO_PLIST_STG_B64"
+              SUFFIX="Stg"
+              SECRET_NAME="GOOGLE_SERVICE_INFO_PLIST_STG_B64"
+              ;;
+            prod)
+              B64="$GOOGLE_SERVICE_INFO_PLIST_PROD_B64"
+              SUFFIX="Prod"
+              SECRET_NAME="GOOGLE_SERVICE_INFO_PLIST_PROD_B64"
+              ;;
+            *)
+              echo "::error::Unknown flavor: $FLAVOR"; exit 1 ;;
+          esac
+          DEST="apps/ios/MustPost/Resources/GoogleService-Info-${SUFFIX}.plist"
+          if [ -n "$B64" ]; then
+            echo "$B64" | base64 --decode > "$DEST"
+            echo "✓ Restored $DEST from secret ($(wc -c < "$DEST") bytes)"
+          elif [ -f "${DEST}.sample" ]; then
+            cp "${DEST}.sample" "$DEST"
+            echo "::warning::Secret ${SECRET_NAME} is empty — using stub .sample. Firebase will crash at app launch. Set the secret to a real base64-encoded plist."
+          else
+            echo "::error::Neither secret ${SECRET_NAME} nor ${DEST}.sample exists. Cannot proceed."
+            exit 1
+          fi
+          # Diagnostic: check that the plist contains valid Firebase keys.
+          if ! grep -q "GOOGLE_APP_ID" "$DEST"; then
+            echo "::error::$DEST does not contain GOOGLE_APP_ID — malformed plist"
+            exit 1
+          fi
+          if grep -qE "REPLACE-WITH|REPLACEDev" "$DEST"; then
+            echo "::warning::$DEST contains stub placeholder values (REPLACE-WITH…) — Firebase will crash at runtime"
+          fi
+
+      - name: Materialize legacy AppIcon file names
+        run: |
+          APPICON_DIR="apps/ios/MustPost/Resources/Assets.xcassets/AppIcon.appiconset"
+          cp "$APPICON_DIR/AppIcon-120.png" "apps/ios/MustPost/Resources/AppIcon60x60@2x.png"
+          cp "$APPICON_DIR/AppIcon-180.png" "apps/ios/MustPost/Resources/AppIcon60x60@3x.png"
+
+      - name: XcodeGen — regenerate project
+        working-directory: apps/ios
+        run: xcodegen generate
+
+      - name: Fastlane ios_beta_auto
+        env:
+          NOTES:  ${{ github.event.inputs.notes || format('CI build {0} (auto push)', github.sha) }}
+        run: |
+          bundle exec fastlane ios ios_beta_auto flavor:"$FLAVOR" notes:"$NOTES"

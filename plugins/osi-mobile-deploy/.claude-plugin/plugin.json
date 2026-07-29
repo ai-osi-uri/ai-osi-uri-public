@@ -1,10 +1,10 @@
 {
   "name": "osi-mobile-deploy",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "requires_connectors": [
     "AI OSI URI Deploy"
   ],
-  "description": "AI OSI URI のネイティブモバイルアプリ（iOS / Android）作成〜配信自動化。「モバイルアプリ作って」の一言で、SwiftUI + Jetpack Compose の Golden Template から新規リポを起こし、Firebase プロビジョニング・アイコン生成・GitHub Secrets 投入・CI 自動修正ループを回し、TestFlight / Google Play Internal Track まで到達させる。osi-deploy（Web / SaaS）と対を成すモバイル配信専用プラグイン。",
+  "description": "AI OSI URI のネイティブモバイルアプリ（iOS / Android）作成〜配信自動化。「モバイルアプリ作って」の一言で、SwiftUI + Jetpack Compose の Golden Template から新規リポを起こし、Firebase プロビジョニング・アイコン生成・GitHub Secrets 投入・CI 自動修正ループを回し、TestFlight / Google Play Internal Track まで到達させる。0.3.0 で MustPost SwiftUI 移植で獲得した実運用ノウハウを追加：iOS Simulator + Firebase Auth の keychain + Custom Token バックドア（ios-sim-auth-backdoor）／Flutter→SwiftUI パリティ移植ワークフロー（flutter-swift-parity-port）／Cloud Functions v2 apiv2 の IAM allUsers 付与 + camelCase encoder pin（apiv2-callable-iam-gotchas）／Firestore composite index の REST 冪等一括作成（firestore-bulk-index-sync）／xcodegen による stale .xcodeproj 修復（xcodegen-project-regen）／本番実運用中の ios-release-auto.yml 全文同梱。osi-deploy（Web / SaaS）と対を成すモバイル配信専用プラグイン。",
   "author": {
     "name": "AI OSI URI",
     "email": "yuhenagisa@ai-osi-uri.com"
@@ -23,6 +23,11 @@
     "fastlane",
     "firebase",
     "xcode",
-    "gradle"
+    "gradle",
+    "xcodegen",
+    "cloud-functions-v2",
+    "firestore-indexes",
+    "flutter-parity",
+    "custom-token"
   ]
 }

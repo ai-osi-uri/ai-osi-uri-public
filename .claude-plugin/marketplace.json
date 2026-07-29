@@ -7,7 +7,7 @@
   },
   "metadata": {
     "description": "AI OSI URI 公開プラグイン（外部配布用サブセット）。",
-    "version": "0.9.0"
+    "version": "0.9.1"
   },
   "plugins": [
     {
@@ -87,8 +87,8 @@
     {
       "name": "osi-mobile-deploy",
       "source": "./plugins/osi-mobile-deploy",
-      "description": "ネイティブモバイルアプリ（iOS / Android）作成〜配信自動化：「モバイルアプリ作って」の一言で、SwiftUI + Kotlin Compose の Golden Template から新規リポを起こし、Firebase プロビジョニング・アイコン生成・GitHub Secrets 投入・CI 自動修正ループを回し、TestFlight / Google Play Internal Track まで到達させる。osi-deploy（Web / SaaS）と対を成すモバイル配信専用プラグイン。10スキル：deploy-mobile-app（オーケストレータ）／ mobile-app-scaffold ／ mobile-firebase-setup ／ mobile-secrets-sync ／ mobile-icon-generator ／ mobile-crash-triage ／ mobile-update-deploy ／ mobile-app-smoke-test ／ ios-testflight-deploy ／ android-play-deploy。",
-      "version": "0.1.0",
+      "description": "ネイティブモバイルアプリ（iOS / Android）作成〜配信自動化：「モバイルアプリ作って」の一言で、SwiftUI + Kotlin Compose の Golden Template から新規リポを起こし、Firebase プロビジョニング・アイコン生成・GitHub Secrets 投入・CI 自動修正ループを回し、TestFlight / Google Play Internal Track まで到達させる。osi-deploy（Web / SaaS）と対を成すモバイル配信専用プラグイン。15 スキル（10 コア + 5 MustPost 移植ノウハウ）：deploy-mobile-app（オーケストレータ）／ mobile-app-scaffold ／ mobile-firebase-setup ／ mobile-secrets-sync ／ mobile-icon-generator ／ mobile-crash-triage ／ mobile-update-deploy ／ mobile-app-smoke-test ／ ios-testflight-deploy（v0.2.0 で ios-release-auto.yml 全文同梱）／ android-play-deploy ／ ios-sim-auth-backdoor（Custom Token + keychain proper-signing）／ flutter-swift-parity-port（Flutter→SwiftUI 移植 workflow）／ apiv2-callable-iam-gotchas（Cloud Functions v2 IAM + camelCase）／ firestore-bulk-index-sync（Admin REST 冪等一括作成）／ xcodegen-project-regen（stale .xcodeproj 修復）。",
+      "version": "0.3.0",
       "category": "deploy",
       "tags": [
         "mobile",
@@ -101,7 +101,12 @@
         "google-play",
         "fastlane",
         "firebase",
-        "xcode"
+        "xcode",
+        "xcodegen",
+        "cloud-functions-v2",
+        "firestore-indexes",
+        "flutter-parity",
+        "custom-token"
       ],
       "strict": false
     },

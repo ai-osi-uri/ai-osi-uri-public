@@ -1,0 +1,51 @@
+# .github/workflows の post-deploy step。MustPost の実運用 workflow から抜粋。
+# firebase deploy 直後に、apiv2-* / content-* の Cloud Run サービスへ
+# allUsers → roles/run.invoker を冪等に付与する。
+
+- name: Post-deploy — grant allUsers invoker on callable services
+  run: |
+    set -e
+    TOKEN=$(gcloud auth print-access-token)
+    SERVICES=$(curl -s -H "Authorization: Bearer $TOKEN" \
+      -H "X-Goog-User-Project: mustpost-dev" \
+      "https://run.googleapis.com/v2/projects/mustpost-dev/locations/asia-northeast1/services?pageSize=200" \
+      | grep -oE '"services/[a-z0-9-]+"' | sort -u | sed 's|"services/||;s|"||')
+    COUNT_OK=0
+    COUNT_FAIL=0
+    COUNT_SKIP=0
+    for SVC in $SERVICES; do
+      case "$SVC" in
+        apiv2-*|content-*) ;;
+        *) COUNT_SKIP=$((COUNT_SKIP+1)); continue ;;
+      esac
+      URL="https://run.googleapis.com/v2/projects/mustpost-dev/locations/asia-northeast1/services/${SVC}:setIamPolicy"
+      STATUS=$(curl -s -o /tmp/setiam.json -w "%{http_code}" -X POST \
+        -H "Authorization: Bearer $TOKEN" \
+        -H "X-Goog-User-Project: mustpost-dev" \
+        -H "Content-Type: application/json" \
+        -d '{"policy":{"bindings":[{"role":"roles/run.invoker","members":["allUsers"]}]}}' \
+        "$URL")
+      if [ "$STATUS" = "200" ]; then
+        COUNT_OK=$((COUNT_OK+1))
+      else
+        COUNT_FAIL=$((COUNT_FAIL+1))
+        echo "::warning::${SVC}: setIamPolicy failed HTTP ${STATUS}"
+        cat /tmp/setiam.json | head -5
+      fi
+    done
+    echo "→ granted allUsers invoker on ${COUNT_OK} callable services (${COUNT_FAIL} failed, ${COUNT_SKIP} non-callable skipped)"
+
+# ─────────────────────────────────────────────────────────────────
+# Precondition: 組織ポリシーで allUsers が禁止されている場合、
+# 事前に project スコープの override を貼る（deploy job の最初の方）:
+#
+# - name: Allow public IAM members on this project (org policy override)
+#   run: |
+#     TOKEN=$(gcloud auth print-access-token)
+#     STATUS=$(curl -s -o /tmp/orgpolicy.json -w "%{http_code}" -X POST \
+#       -H "Authorization: Bearer $TOKEN" \
+#       -H "X-Goog-User-Project: mustpost-dev" \
+#       -H "Content-Type: application/json" \
+#       -d '{"name":"projects/mustpost-dev/policies/iam.allowedPolicyMemberDomains","spec":{"rules":[{"allowAll":true}]}}' \
+#       "https://orgpolicy.googleapis.com/v2/projects/mustpost-dev/policies")
+#     # 200 = created / 409 = already exists (どちらも OK)
