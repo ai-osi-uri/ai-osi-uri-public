@@ -5,7 +5,7 @@ version: 0.1.0
 requires_connectors:
   - server: ai-osi-uri-creative
     provision: user-install
-    tools: [generate_image, edit_image, submit_video, check_status, generate_music]
+    tools: [generate_image, edit_image, image_to_video, submit_video, check_status, generate_music]
 ---
 
 # vp-seamless-journey — 継ぎ目のない1本のカメラ移動 × 音楽同期の疾走感
@@ -29,8 +29,8 @@ requires_connectors:
 
 ## フロー
 
-1. **ジャーニー設計（無料）**：一本の移動を「起点画像 → ビート列（各ビートの被写体・カメラ・尺）→ 終点（誰/何で終わるか）」に分解。音楽があれば先に解析（`music-vibration.md`）。無ければ `generate_music` で先に作ってから解析。
-2. **起点画像**：既存カット（例：前シーンの車の最終フレーム）を使うか、無ければ `generate_image`（nano-banana-pro, 4K, テキスト/線なし）。
+1. **ジャーニー設計（無料）**：一本の移動を「起点画像 → ビート列（各ビートの被写体・カメラ・尺）→ 終点（誰/何で終わるか）」に分解。音楽があれば先に解析（`references/music-vibration.md`）。無ければ `generate_music` で先に作ってから解析。
+2. **起点画像**：既存カット（例：前シーンの車の最終フレーム）を使うか、無ければ `generate_image`（nano-banana-2, 4K, テキスト/線なし）。
 3. **連鎖生成（vp-core 承認ゲート）**：各ビートを「前カットの最終フレーム起点 + 短い連続モーションプロンプト（"seamless continuous motion, no cuts, never move backward"）」で i2v 生成。**途中のカットを差し替えたら、そのカット以降は最終フレームが変わるので全部作り直す（カスケード）**。カメラムーブ主体のビートは `vp-moveboard` のムーブボードを併用可。
 4. **尺同期＆連結（vp-core）**：各カットを固定タイムラインの尺へ `setpts` で合わせて連結。ビートに合わせて繋ぎ位置を微調整。
 5. **検証（vp-core）**：`references/seamless-continuation.md` の frame-diff QA で (a) モーション有無 (b) 継ぎ目の一致（A末 vs B頭の meanAbsDiff < 約5）(c) ムーブボード線の非映り込み、を自動チェック。

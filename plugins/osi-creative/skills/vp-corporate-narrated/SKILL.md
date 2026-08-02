@@ -19,7 +19,7 @@ OKWEB × JINEN 制作で確立。標準 60〜75分／約 $5〜$10。
 - ナレ：**`narration` スキルに委譲**（`../narration/SKILL.md`。声選択・感情タグ・発音辞書・誤読対策）
 - BGM：`../ai-video-production/references/bgm-selection.md`（ショートはYouTuber定番フリー曲）
 - モデル使い分け・単価：`../ai-video-production/references/model-comparison.md`
-- 落とし穴／チェック：`../ai-video-production/references/pitfalls.md`・`checklist.md`
+- 落とし穴／チェック：`../ai-video-production/references/pitfalls.md`・`../ai-video-production/references/checklist.md`
 - 合成スクリプト：`../ai-video-production/scripts/build_video.sh`（ffmpeg一式）・`make_subs.py`（SRT）
 
 ## フロー
@@ -61,6 +61,6 @@ final.mp4（BGM＋字幕）／字幕なし／BGMなし／subtitles.srt と、累
 - ✅ ナレは narration スキルに委譲（クリーンテキスト＋発音辞書）。原稿の字面は壊さない。
 - ✅ 声は日本語ネイティブ（既定 Konoha）。
 - ✅ 文章（台本・プロンプト・ナレ）を先に承認 → それから生成（vp-core ゲート）。
-- ✅ ショート/SNS狙いのBGMは AI生成より YouTuber定番フリー曲（`bgm-selection.md`）。
+- ✅ ショート/SNS狙いのBGMは AI生成より YouTuber定番フリー曲（`../ai-video-production/references/bgm-selection.md`）。
 
 生成・承認・連結ループは `vp-core` に委譲し、本メソッドは台本・プロンプト・ナレ原稿の作成に責任を持つ。

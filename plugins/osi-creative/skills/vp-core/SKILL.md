@@ -5,7 +5,7 @@ version: 0.1.0
 requires_connectors:
   - server: ai-osi-uri-creative
     provision: user-install
-    tools: [generate_image, edit_image, image_to_video, submit_video, check_status, generate_speech, generate_music]
+    tools: [generate_image, edit_image, image_to_video, submit_video, reference_to_video, check_status, generate_speech, generate_music]
 ---
 
 # vp-core — 動画制作の共通インナー（承認ゲート付き生成ループ）
@@ -24,14 +24,14 @@ requires_connectors:
 ## ループ（必ずこの順）
 
 ### STEP 1. プロンプト承認ゲート（★最重要・本スキルの肝）
-- **提示前に自己採点（必須）**：`ai-video-production/references/prompt-quality-rubric.md` でプロンプトを採点する。
+- **提示前に自己採点（必須）**：`../ai-video-production/references/prompt-quality-rubric.md` でプロンプトを採点する。
   MUST が1つでも ❌ なら**提示せずメソッドに直させて再採点**（proposal-self-review の動画版＝自分が最も厳しいレビュアーになって叩いてから出す）。
 - 合格したら、メソッドが書いた **プロンプトをそのままユーザーに提示**し（「自己採点で確認した点」を一文添えて）、承認 or 修正をもらう。
 - 「試作動画を見て直す」より前に、**まず文章（プロンプト）の段階で合意**する（生成コストを使う前に方向を固める）。
 - 修正要望があればメソッドにプロンプトを直させ、再提示。承認が出るまで生成しない。
 
 ### STEP 2. 生成（承認後のみ）
-- 画像：`generate_image`（nano-banana-pro, 4K, 16:9）。一貫性参照は `extra.image_urls`。
+- 画像：`generate_image`（nano-banana-2, 4K, 16:9）。一貫性参照は `extra.image_urls`。
 - 動画：**必ず非同期** `submit_video` → `check_status`（ブロッキング generate_video は使わない／タイムアウト #4）。
   - 並列は5本まで（6本以上で Forbidden #1）。塩漬けキュー（課金前ジョブが枠占有）に注意（fal Concurrency 0/N 確認）。クレジット切れ時はキューに入るが進まない→課金後に再投入。
   - **入力モードはメソッドが `plan` で指定する**。2系統あるので取り違えない：
@@ -52,11 +52,11 @@ requires_connectors:
 - 成果物を提示。累計コストを表示。
 
 ## 共通参照（オーケストレータ ai-video-production 配下の正本を参照）
-- `ai-video-production/references/prompt-quality-rubric.md` … ★提示前の自己採点ゲート（STEP 1で必須）
-- `ai-video-production/references/model-comparison.md` … モデル使い分け・単価
-- `ai-video-production/references/pitfalls.md` … 落とし穴（#1〜、Forbidden/塩漬け/ffmpeg/#17 i2v1フレーム目/#18 モーション予算）
-- `ai-video-production/references/character-consistency-pipeline.md` … 一貫性とプロンプト型（vp-character-action用）
-- `ai-video-production/references/moveboard.md` … 線駆動カメラムーブ＋reference-to-video（vp-moveboard用）
+- `../ai-video-production/references/prompt-quality-rubric.md` … ★提示前の自己採点ゲート（STEP 1で必須）
+- `../ai-video-production/references/model-comparison.md` … モデル使い分け・単価
+- `../ai-video-production/references/pitfalls.md` … 落とし穴（#1〜、Forbidden/塩漬け/ffmpeg/#17 i2v1フレーム目/#18 モーション予算）
+- `../ai-video-production/references/character-consistency-pipeline.md` … 一貫性とプロンプト型（vp-character-action用）
+- `../ai-video-production/references/moveboard.md` … 線駆動カメラムーブ＋reference-to-video（vp-moveboard用）
 
 ## 原則
 - ❌ 承認前に生成しない（プロンプトゲートを飛ばさない）

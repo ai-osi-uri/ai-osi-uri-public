@@ -1,11 +1,11 @@
 ---
 name: ai-video-production
-description: AI動画を作るオーケストレータ（ディスパッチャ）スキル。依頼から動画タイプを判定し、最適なメソッド（vp-character-action＝キャラ一貫アクション / vp-cinematic-camera-move＝1枚＋カメラムーブ / vp-corporate-narrated＝ナレ付き企業動画 等）へ振り分け、共通インナー vp-core（プロンプト承認ゲート→生成→検証→連結）で作る。「動画を作って」「動画作成」「PR動画」「IR動画」「採用動画」「企業説明動画」「ピッチ動画」「ナレーション付き動画」「アニメ動画」「実写動画」「ドキュメンタリー動画」「TikTok動画」「Reels動画」「このキャラで動画」「商品を動かして」など、AI動画制作のリクエスト全般で発動する。既存の動画台本テキストが渡された場合も発動する。「AI OSI URI Creative」コネクタ（旧 fal-video。動画・音楽・ナレーション・静止画[nano-banana]を内包）が Cowork に登録されていることを前提とする。PPT・スライドのみ、静止画のみの依頼では使わない。
+description: AI動画を作るオーケストレータ（ディスパッチャ）スキル。依頼から動画タイプを判定し、最適なメソッド（vp-character-action＝キャラ一貫アクション / vp-moveboard＝1枚＋カメラムーブ / vp-corporate-narrated＝ナレ付き企業動画 等）へ振り分け、共通インナー vp-core（プロンプト承認ゲート→生成→検証→連結）で作る。「動画を作って」「動画作成」「PR動画」「IR動画」「採用動画」「企業説明動画」「ピッチ動画」「ナレーション付き動画」「アニメ動画」「実写動画」「ドキュメンタリー動画」「TikTok動画」「Reels動画」「このキャラで動画」「商品を動かして」など、AI動画制作のリクエスト全般で発動する。既存の動画台本テキストが渡された場合も発動する。「AI OSI URI Creative」コネクタ（旧 fal-video。動画・音楽・ナレーション・静止画[nano-banana]を内包）が Cowork に登録されていることを前提とする。PPT・スライドのみ、静止画のみの依頼では使わない。
 version: 1.0.1
 requires_connectors:
   - server: ai-osi-uri-creative
     provision: user-install
-    tools: [generate_image, edit_image, generate_video, image_to_video, submit_video, check_status, generate_speech, generate_music]
+    tools: [generate_image, edit_image, generate_video, image_to_video, submit_video, reference_to_video, check_status, generate_speech, generate_music]
 ---
 
 # AI動画制作パイプライン（ディスパッチャ）
@@ -21,18 +21,18 @@ requires_connectors:
 | 依頼の型 | メソッド | 例 |
 |---|---|---|
 | 同一キャラ/マスコット/商品を崩さず動かす・アクション/PV | **`vp-character-action`**（✅メソッド化済み） | 「このキャラで動画」「マスコット動かして」「戦闘PV」 |
-| 1枚の画像＋カメラの動き（ドローン空撮含む） | **`vp-cinematic-camera-move`**（✅メソッド化済み） | 「この絵を動かして」「商品を回して」「空撮」 |
+| 1枚の画像＋カメラの動き（ドローン空撮含む） | **`vp-moveboard`**（✅メソッド化済み） | 「この絵を動かして」「商品を回して」「空撮」 |
 | ナレ付き企業動画（IR/採用/PR・12シーン） | **`vp-corporate-narrated`**（✅メソッド化済み） | 「採用動画」「会社説明動画」「IR動画」 |
 | 複数カットを1本の連続カメラ移動で継ぎ目なく繋ぐ／音楽同期の疾走感 | **`vp-seamless-journey`**（✅メソッド化済み） | 「シームレスに繋いで」「フラッシュじゃなく映像で繋いで」「音楽に合わせて疾走感」「引かずに前進するカメラで」 |
 
 - どのメソッドも、起草したプロンプトを **`vp-core` の承認ゲート**（プロンプトを先に承認 → 生成）に通す。
-- カメラムーブ系（空撮/絵の潜り込み/商品オービット/内装ウォークスルー等）は **`vp-cinematic-camera-move` へ委譲**する（本ファイル下部の旧「カメラムーブモード」節は参照用の要約に縮小済み。正本はメソッド＋ `references/cinematic-camera-move.md`）。
+- カメラムーブ系（空撮/絵の潜り込み/商品オービット/内装ウォークスルー等）は **`vp-moveboard` へ委譲**する（本ファイル下部の旧「カメラムーブモード」節は参照用の要約に縮小済み。正本はメソッド＋ `references/moveboard.md`）。
 - ナレ付き企業動画は **`vp-corporate-narrated` へ委譲**する（本ファイル下部の 12 Phase はメソッドが参照する詳細リファレンス兼フォールバックとして残す。テンプレ `templates/*` ・スクリプト `scripts/*` が正本）。
 - ナレ音声は能力アトミック **`narration`** に委譲（v3＋日本語声＋発音辞書）。BGMは将来 `music`、字幕は将来 `subtitle`。
 - 新しい動画タイプは「メソッドを1つ追加する」だけで拡張できる（本表に1行足す）。
 
-> **移行状況**：`vp-core` / `vp-character-action` / `vp-cinematic-camera-move` / `vp-corporate-narrated` の4スキルをメソッド化済み（3メソッド＋インナー稼働）。共通参照
-> （model-comparison / pitfalls / templates[prompts] / scripts / character-consistency-pipeline / cinematic-camera-move）は本スキル配下を正本として全メソッドで共有。ナレ音声（voice-strategy / narration-rules / 発音辞書）は **`narration` スキル**が正本。
+> **移行状況**：`vp-core`（インナー）＋ `vp-character-action` / `vp-moveboard` / `vp-corporate-narrated` / `vp-seamless-journey` の4メソッドが稼働中。共通参照
+> （model-comparison / pitfalls / templates[prompts] / scripts / character-consistency-pipeline / moveboard / drone-aerial-fpv）は本スキル配下を正本として全メソッドで共有。ナレ音声（voice-strategy / narration-rules / 発音辞書）は **`narration` スキル**が正本。
 
 ## 前提
 
@@ -60,11 +60,11 @@ requires_connectors:
 
 ---
 
-## カメラムーブ系 → `vp-cinematic-camera-move` へ委譲（要約）
+## カメラムーブ系 → `vp-moveboard` へ委譲（要約）
 
-「1枚の画像＋カメラの動き」（空撮／絵の潜り込み／商品オービット／内装ウォークスルー／人物微動／抽象）は **メソッド `vp-cinematic-camera-move` が担当**。ディスパッチャはここへ振るだけ。
+「1枚の画像＋カメラの動き」（空撮／絵の潜り込み／商品オービット／内装ウォークスルー／人物微動／抽象）は **メソッド `vp-moveboard` が担当**。ディスパッチャはここへ振るだけ。
 
-要点（正本は `vp-cinematic-camera-move/SKILL.md` ＋ `references/cinematic-camera-move.md`）：
+要点（正本は `../vp-moveboard/SKILL.md` ＋ `references/moveboard.md`）：
 - 入力は **`bytedance/seedance-2.0/reference-to-video`（参照）**。`image-to-video`（1フレーム目固定）は赤線が映るので使わない（#17）。
 - ルート線は **コードで1本だけ**描く（AIに描かせると2本目が出る）。**番号＋動き説明ラベル**で動きの種類・速度・高さ(3D)・orbit を補う。
 - ムーブボードは **vp-core の承認ゲート**で確定 → 短い動画プロンプトで生成。360°等は詰め込みすぎない（#18）。
@@ -158,20 +158,21 @@ no text overlays
 ## Phase 3.5: キービジュアル生成（画像起点・デフォルト）
 
 **デフォルトは画像起点フロー**。text-to-video で直接生成するより、まず Creative の
-`generate_image`（model: nano-banana / 4Kは nano-banana-pro）で キービジュアルを作り、
+`generate_image`（model: nano-banana-2。4K・複数参照に対応）で キービジュアルを作り、
 それを `image_to_video` で動かす方が、構図・ブランド・被写体の一貫性を制御しやすい。
 **画像も動画も同じ Creative コネクタ＝falキー1本で完結する。**
 
 ```
-generate_image（model: nano-banana-pro, 各シーンのキービジュアル, 4K, no text）
+generate_image（model: nano-banana-2, 各シーンのキービジュアル, 4K, no text）
    ↓ 画像を確認・採否
 image_to_video（採用画像 → 動画化, カメラワーク指定）
 ```
 
 - 画像プロンプトは Phase 3 のシーン別プロンプトの [SUBJECT][LIGHTING][SETTING][MOOD]
   をそのまま流用し、末尾に `4K, photorealistic, no text overlays` を付ける。
-- 被写体の一貫性が要る場合（同一人物・同一商品が複数シーンに出る）は、nano-banana の
-  subject consistency を活かし、1枚目を参照画像にして残りを生成する（`extra` で参照画像を渡す）。
+- 被写体の一貫性が要る場合（同一人物・同一商品が複数シーンに出る）は、参照画像を `extra.image_urls` で渡す。
+  **nano-banana-2 は人物参照を最大4枚、nano-banana-pro は最大5枚＋スタイル参照3枚**受け取れるので、
+  別角度・別表情をまとめて渡すと安定する（1枚だけ渡す運用は過去のもの）。
 - text-to-video を使うのは、抽象的・background 的なシーンで構図制御が要らない場合に限る。
 
 > **同一キャラ／商品を“ブレさせず”動画化したい案件**（アニメキャラ・企業マスコット・VTuber・商品PR 等）は、
@@ -180,7 +181,7 @@ image_to_video（採用画像 → 動画化, カメラワーク指定）
 > シートそのものが動き出す。起点は必ず「実シーンのキービジュアル」、設定シートは `generate_image` の参照
 > （`image_urls`）に渡して基準固定に使う——役割を分ける。
 
-コスト目安：画像 $0.02〜/枚（4K は nano-banana-pro で $0.30）+ 動画 image-to-video 分。試作（Phase 4）は必ずこの後で挟む。
+コスト目安：画像 約$0.08/枚（nano-banana-2・4K可）+ 動画 image-to-video 分。試作（Phase 4）は必ずこの後で挟む。
 
 ---
 
@@ -232,88 +233,20 @@ check_status x 2
 
 ---
 
-## Phase 6: ナレーション生成
+## Phase 6: ナレーション生成 → `narration` スキルに委譲
 
-**最重要：voice選択 → モデル選択 → テキスト最適化 → 感情タグ の4段階で決める。**
+**ナレの正本は `narration` スキル。ここでは方式を書かない**（二重管理をやめ、旧方式に戻る事故を防ぐ）。
 
-### Phase 6-1. 推奨デフォルト構成（v10で確立）
+- 原稿は**クリーンな漢字かな混じりのまま渡す**。字面を壊さない＝字幕と同一テキストで運用できる。
+- 読みの補正は**発音辞書(.pls)に外出し**する。誤読検出は `scripts/jp_yomi_check.py`（pyopenjtalk）で機械化。
+- 声は**日本語ネイティブ**（既定 **Konoha** / `T7yYq3WpB94yAuOXraRi`）。英語ベースの多言語voiceは使わない。
+- 感情タグ（`[thoughtful]` `[calm]` `[serious]` `[confident]` `[hopeful]` `[warm]` `[excited]`）は行頭に置く。
+  **12シーンの標準マップは `../narration/templates/voice-strategy.md` §3** が正本。
+- 手順・辞書登録・プラン要件・トラブルシュートは **`../narration/SKILL.md`** を参照。
 
-```
-Backend  : ElevenLabs DIRECT API（fal.ai 経由ではない直叩き）
-Voice    : ネイティブ・クローンvoice（GENEL voice等、ElevenLabs Library）
-Model    : elevenlabs-v3（最新、感情タグ対応）
-Stability: 0.35〜0.5（低いほど抑揚強）
-感情タグ : シーン別に [calm] [thoughtful] [confident] [hopeful] [warm] 等
-```
-
-### Phase 6-2. voice 選択フロー
-
-詳細は `../narration/templates/voice-strategy.md`。
-
-```
-Q: ElevenLabs Starter以上のプランがあるか？
-├─ Yes → ネイティブクローンvoice（GENEL等）を使う ★最推奨
-└─ No  → 組込voice（calm-female=Sarah, calm-male=Adam）
-         → ElevenLabs Starter（$5/月）にアップグレード推奨
-```
-
-GENEL voice ID: `GxhGYQesaQaYKePCZDEC`（公開クローン、商用OKを要確認）
-※ライブラリvoiceはStarter以上で API 経由利用可。Free tierは 402 エラー。
-
-### Phase 6-3. テキスト最適化（voice別）
-
-voice タイプ別に**逆方向の最適化**が必要。詳細は `../narration/templates/narration-rules.md`。
-
-**A. ネイティブクローンvoice（GENEL等）**：自然な日本語が基本だが、**読みが複数ある漢字はひらがな化**
-- 27年 → にじゅうななねん（しち化を防ぐ）
-- 4,800万件 → よんせんはっぴゃくまんけん（数字つぶれ防止）
-- 最大級 → さいだいきゅう（しつ化を防ぐ）
-- 蓄え → たくわえ（あろえ化を防ぐ）
-- 力 → ちから（ちいら化を防ぐ）
-- AI → エーアイ（カイーアイ化を防ぐ）
-- 見える化 → みえるか
-- OKWEB → オーケーウェブ（英字アルファベット読みを防ぐ）
-- 2030年代 → にせん、さんじゅうねんだい（さん→じゃん化を読点で回避）
-
-**B. 組込voice（Sarah等、多言語汎用）**：カタカナ強制＋二重母音
-- データ → デエタ、サービス → サアビス、プラットフォーム → プラットフォオム
-- ジネン → 々（じねん）などフリガナ括弧テクニック
-
-### Phase 6-4. 感情タグマップ（Eleven v3）
-
-テキスト先頭にタグを置くと、声の抑揚が変わる：
-
-| シーン傾向 | 推奨タグ |
-|---|---|
-| 問題提起・思慮深い | `[thoughtful]` |
-| 落ち着いた説明 | `[calm]` |
-| 重さ・問題意識 | `[serious]` |
-| 自信を示す | `[confident]` |
-| 期待感・クライマックス | `[hopeful]` |
-| 余韻・親しみ | `[warm]` |
-| ハイテンション（採用・PR） | `[excited]` |
-
-12シーン構成の標準マップ：①thoughtful → ②③calm → ④calm → ⑤serious → ⑥⑦confident → ⑧hopeful → ⑨calm → ⑩confident → ⑪hopeful → ⑫warm
-
-### Phase 6-5. 投入手順
-
-1. **試作 1本**：シーン1本だけで音質・抑揚・読みを確認
-2. **本番**：12本を6本ずつ並列投入（fal.ai並列上限考慮）
-3. 全DL確認
-
-ツール：`generate_speech`（ブロッキング、各5〜15秒）
-
-```typescript
-generate_speech({
-  text: "[calm] ...",
-  voice: "GxhGYQesaQaYKePCZDEC",  // GENEL voice_id
-  model: "elevenlabs-v3",
-  speed: 1.0,
-  stability: 0.35,
-})
-```
-
----
+> ⚠️ **旧方式は廃止**。原稿のひらがな化・カタカナ強制・二重母音化・々ハック（「27年→にじゅうななねん」
+> 「データ→デエタ」等）と GENEL voice 固定は、v2 で発音辞書方式に置き換わった。過去版の Phase 6 を
+> 参考にしないこと。
 
 ## Phase 7: SRT字幕生成
 
@@ -325,8 +258,8 @@ python3 scripts/make_subs.py \
   --out subtitles.srt
 ```
 
-字幕テキストは**漢字交じりの自然表記**（読みやすい）。
-ナレーション用とは別物（ナレ用はカタカナ強制でTTS最適化）。
+字幕テキストは**漢字交じりの自然表記**。v2 のナレは同じクリーンテキストを使うので、
+**字幕とナレ原稿は同一テキストで運用できる**（読みの補正は発音辞書側が持つ）。
 
 ---
 
@@ -377,13 +310,13 @@ BGM: $0.20
 
 1. `references/pitfalls.md` — 落とし穴と回避策（実戦から）
 2. `references/model-comparison.md` — 動画・音声・音楽モデル使い分け
-3. `../narration/templates/voice-strategy.md` — ★ナレーターvoice選択戦略（Eleven v3、GENEL、感情タグ）
-4. `../narration/templates/narration-rules.md` — TTS誤読対策（最重要）
+3. `../narration/SKILL.md` — ★ナレの正本（クリーンテキスト＋発音辞書。声・モデル・感情タグ）
+4. `../narration/templates/voice-strategy.md` — 声の選択・感情タグマップ（12シーン標準）
 5. 該当する `templates/prompts-{style}.md`
 6. `references/bgm-selection.md` — ★ショート向けBGM選定（YouTuber定番フリー曲・取得・著作権・途切れ防止）
-7. `references/cinematic-camera-move.md` — ★シネマティック・カメラムーブモード（どんな画像でも動かす汎用版：6プリセット・カメラ語彙・著作権注意）
+7. `references/moveboard.md` — ★ムーブボード（線駆動のカメラムーブ＋reference-to-video。6プリセット・カメラ語彙・著作権注意）
 8. `references/drone-aerial-fpv.md` — ★ドローン空撮プリセットの詳細（ヒアリング→クリーン起点→6ビート→Seedance 2.0）
-8. `references/character-consistency-pipeline.md` — ★キャラ／商品の一貫性モード（キービジュアル→設定シート→i2v。i2vは起点画像=1フレーム目の罠も）
+9. `references/character-consistency-pipeline.md` — ★キャラ／商品の一貫性モード（キービジュアル→設定シート→i2v。i2vは起点画像=1フレーム目の罠も）
 
 ## 必須スクリプト
 

@@ -5,7 +5,7 @@ version: 0.1.0
 requires_connectors:
   - server: ai-osi-uri-creative
     provision: user-install
-    tools: [generate_image, edit_image, submit_video, check_status]
+    tools: [generate_image, edit_image, submit_video, reference_to_video, check_status]
 ---
 
 # vp-moveboard — 1枚の画像をカメラムーブで魅せる（プロンプト作者）
@@ -30,7 +30,7 @@ requires_connectors:
 ## フロー
 
 1. **ヒアリング**（`AskUserQuestion`）：①元画像はある？(ある=自前/アップロード/URL、ない=生成) ②被写体タイプ(6プリセット) ③カメラムーブ ④迫力レベル(迫力重視/優雅/標準) ⑤尺(10/15秒)・縦横(16:9/9:16)・音。
-2. **ベース画像**：無ければ `generate_image`（nano-banana-pro, 4K, 指定アスペクト, テキスト/線なし）。
+2. **ベース画像**：無ければ `generate_image`（nano-banana-2, 4K, 指定アスペクト, テキスト/線なし）。
 3. **ムーブボードを作る（コード描画）**：パスを設計し、Python(Pillow)で1本の連続曲線＋矢印＋番号＋動き説明ラベルをベース画像に重ねる。スクリプト雛形は正本レシピ「STEP2」。
 4. **vp-core に渡す → プロンプト/ムーブボード承認ゲート**：ムーブボードを提示し「この動きでOK？/どこを変える？」。修正は**通過点の座標を直して描き直す**（一意・正確）。承認まで反復。
 5. **生成（vp-core）**：model=`bytedance/seedance-2.0/reference-to-video`、`image_url`=承認済みムーブボード、短い動画プロンプト、尺/比率指定。`submit_video`→`check_status`。

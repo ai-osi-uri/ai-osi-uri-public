@@ -4,7 +4,7 @@
 **ドローン空撮はこのモードの1プリセット**。被写体を問わず、同じ「ラベル付きムーブボード（絵コンテ）を**参照画像**にして、Seedance 2.0 **reference-to-video** で線どおりに動かす」で作る。
 
 確立元：2026-06 video-creator-market。元ネタ（ISTANBUL/SNSのテク）の核心は **(a) ルート＋番号＋動き説明ラベル付きの絵コンテを“参照画像(reference)”として渡す → (b) 短い動画プロンプトで「線の通りに飛べ／線は出すな」**。
-重要：**入力モードは `reference-to-video`（参照）であって `image-to-video`（1フレーム目固定）ではない**。i2v だと赤線が1フレーム目に映り込む（`references/pitfalls.md` #17）。参照モードなら線は出力に出ない。
+重要：**入力モードは `reference-to-video`（参照）であって `image-to-video`（1フレーム目固定）ではない**。i2v だと赤線が1フレーム目に映り込む（`pitfalls.md` #17）。参照モードなら線は出力に出ない。
 
 ---
 
@@ -70,7 +70,7 @@ dolly(forward|back) / crane(up|down) / tilt / whip / rack focus。
 
 ### STEP 1: ベース画像
 - 画像が**ある**：それを使う（名画・商品・自前写真など）。
-- 画像が**ない**：`generate_image`（`nano-banana-pro`、アスペクトは尺に合わせる）でクリーンな1枚を作る。
+- 画像が**ない**：`generate_image`（`nano-banana-2`、アスペクトは尺に合わせる）でクリーンな1枚を作る。
   - 画像プロンプト型：`{被写体の具体描写}, {光・雰囲気}, strong depth and layered foreground/midground/background, cinematic, 4K. No text, no overlays, no path lines.`
   - ※「奥行き（layered depth）」を入れると、後段のパララックス/潜り込みが効きやすい。
 
@@ -98,7 +98,7 @@ One continuous shot, {迫力レベルの動きワード}. {音: no music, only a
 ```
 for t in 0 5 10 14; do ffmpeg -y -ss $t -i out.mp4 -frames:v 1 chk_$t.png; done
 ```
-※ 360°など大きい動きが回りきらない/距離差でカットが入る場合は `references/pitfalls.md` #18 を参照（動きを詰め込みすぎない・一定距離・速度で詰める）。
+※ 360°など大きい動きが回りきらない/距離差でカットが入る場合は `pitfalls.md` #18 を参照（動きを詰め込みすぎない・一定距離・速度で詰める）。
 
 ---
 
@@ -109,7 +109,7 @@ for t in 0 5 10 14; do ffmpeg -y -ss $t -i out.mp4 -frames:v 1 chk_$t.png; done
 - **建築・内装**：`15-second smooth walkthrough, dolly forward through {room}, pass through the doorway, crane up to reveal the space. No text.`
 - **人物の微動**：`8-second living photo, very subtle parallax and breath-like motion, slow push-in on the subject's eyes. Keep identity intact. No text.`
 
-詳細な空撮の6ビートは `references/drone-aerial-fpv.md` を参照。
+詳細な空撮の6ビートは `drone-aerial-fpv.md` を参照。
 
 ---
 

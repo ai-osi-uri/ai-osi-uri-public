@@ -36,7 +36,7 @@ onset = librosa.onset.onset_detect(y=y, sr=sr, units='time')  # アタック（�
 ### STEP 4. 音の仕上げ
 - ナレ主役でBGMを引く（サイドチェイン・ダッキング）：
   `[music][voice]sidechaincompress=threshold=0.025:ratio=7:attack=5:release=400`
-- 全体 `afade=in:1.2` / `afade=out:2`。BGMはループの継ぎ目が“途切れ”に聞こえるので曲尺≥動画尺を選ぶ（`../ai-video-production/references/bgm-selection.md`）。
+- 全体 `afade=in:1.2` / `afade=out:2`。BGMはループの継ぎ目が“途切れ”に聞こえるので曲尺≥動画尺を選ぶ（`../../ai-video-production/references/bgm-selection.md`）。
 
 ## 鉄則
 - ✅ **音楽を先に置き、映像を後から音に同期**（逆にしない）。

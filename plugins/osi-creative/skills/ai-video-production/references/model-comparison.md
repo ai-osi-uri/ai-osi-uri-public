@@ -7,51 +7,61 @@
 
 ---
 
-## 動画モデル（2026現行・フラッグシップ3枠）
+## 動画モデル（2026-08 現行）
 
-> 2026年現在、fal 1本で下記すべてに通る。毎案件 AskUserQuestion で枠を選ばせてよい。
-> 価格は fal の従量（秒単価）。**8秒クリップ**を基準にした目安を併記する。
+> 単価は fal の従量（秒単価）。**8秒クリップ**基準の目安を併記。改定が速いので、金額は発注前に fal のモデルページで確認する。
 
-### Veo 3.1 Fast（`fal-ai/veo3.1/fast`）★標準デフォルト
-- 安く写実。環境・抽象・単独人物に最強の汎用枠
-- 単価：**$0.10/s**（720p/1080p, audio off）〜 $0.35/s（4K+audio） → 8s ≒ **$0.80〜**
-- ネイティブ音声トグル対応、最大 8s/生成（チェーンで延長可）
-- i2v は `fal-ai/veo3.1/fast/image-to-video`
-- **使用シーン**：オフィス、街、データ画面、抽象、自然、単独人物
-- **苦手**：複数人物の細かい相互作用（→ Kling 3.0）
+### 使い分けの原則：カットの性質で価格帯を分ける
 
-### Veo 3.1（`fal-ai/veo3.1`）ヒーローカット用
-- 最高品質・**4K**・ネイティブ音声同期。ナレ音声まで一発で乗せたいヒーローカット向け
-- 単価：**$0.20/s**（標準）〜 $0.60/s（4K+audio） → 8s ≒ **$1.60〜**
-- バリアント：`/image-to-video`, `/first-last-frame-to-video`, `/reference-to-video`, `/extend-video`（各 `/fast/` 版あり）
-- **使用シーン**：本当のヒーローカット1〜2本、最終ロゴカット
+**全カットを同じモデルで作らない。** 人物が破綻しない領域に高単価モデルを使うのは無駄。
 
-### Kling 3.0 Pro（`fal-ai/kling-video/o3/pro/text-to-video`）人物・連結に強い
-- 人物動作・物理表現が最強クラス。**最大6カット連結**・per-shot プロンプト（カットごとに尺指定）
-- 単価：**$0.112/s**（audio off）/ $0.168/s（audio on） → 8s ≒ **$0.90〜$1.34**
-- 最大 1080p、3〜15s
-- i2v は `fal-ai/kling-video/o3/pro/image-to-video`、廉価枠は `fal-ai/kling-video/o3/standard/text-to-video`
-- **使用シーン**：握手、対話、複数人会議、家族、コミュニティ、連続アクション
-- **苦手**：単純な環境カット（→ Veo 3.1 Fast の方が安い）
+| カットの性質 | 推奨 slug | 単価目安 | 理由 |
+|---|---|---|---|
+| 環境・風景・抽象（人物なし） | **`ltx23`** / `ltx23-fast` | $0.06 / $0.04 per s | 破綻リスクが低い領域。単発20秒・最大4Kで尺も稼げる |
+| 単独人物・標準カット | **`veo31-fast`** | $0.10〜 per s → 8s ≒ $0.80 | 安く写実。汎用の標準枠 |
+| **喋る人物・リップシンク** | **`happyhorse-i2v`** | $0.14〜0.18 per s | **日本語を含む7言語のネイティブ・リップシンク**。1080p 音声同期でこの価格は突出 |
+| 複数人物・対話・激しい動き | **`kling30`** / `kling30-i2v` | $0.112（音声off）/ $0.168（on）per s | 人物動作・物理表現。最大6カット連結・per-shot プロンプト |
+| キャラ一貫の連番カット | **`wan27-ref`** | $0.10 per s 一律 | キャラ参照＋声の一貫性を最安クラスで |
+| ムーブボード（線駆動カメラ） | **`seedance20-ref`** | $0.30 per s | 参照モード。線が出力に出ない（#17 の根本解決） |
+| ↑の当たり確認・試作 | **`seedance20-mini-ref`** | 最安ティア | 構図の当たりを安く取ってから本番へ |
+| ヒーローカット（1〜2本だけ） | **`veo31`**（4K・ネイティブ音声） | $0.20〜0.60 per s | 本当の見せ場に限定する |
 
-### Seedance 2.0（slug `seedance20`）コスパ＆モーション最強
-- 激しい動き・スポーツ・ダンス・衝突などの物理表現に強い。多参照入力（**画像9 / 動画3 / 音声3**）対応
-- 単価：**$0.3034/s**（標準）/ $0.2419/s（fast slug `seedance20-fast`） → 8s ≒ **$2.4 / $1.9**
-- 最大 720p（fal）、4〜15s（`duration: "auto"` で自動最適化）、ネイティブ音声込み
-- マルチショットは "Shot 1:" ラベルでプロンプト内指定
-- **使用シーン**：激しいモーション、モンタージュ、多素材参照の合成
-- ✅ **v0.5 で利用可**：`seedance20` / `seedance20-fast` / `seedance20-i2v` で呼べる（生 `bytedance/seedance-2.0/...` も可）
+### 注意すべき課金の癖
 
-### レガシー／フォールバック枠（コネクタに slug 登録済み・引き続き使用可）
+- **Seedance 2.0 は常に音声込みで課金**（$0.3034/s〜）。無音カットに使うと割高。無音なら `kling30`（音声off $0.112/s）や `ltx23` に逃がすとコストが約1/3。
+- **エンドポイントの名前空間がベンダーごとに違う**。`fal-ai/` のほか `bytedance/` `alibaba/` `minimax/` `google/` がある。slug を使えば意識不要。
+
+### 連結・尺の制御
+
+| 用途 | slug |
+|---|---|
+| 参照画像でキャラ一貫 | `veo31-ref` / `wan27-ref` / `seedance20-ref` |
+| 開始/終了フレーム指定（厳密な構図制御。躍動感は落ちる） | `veo31-flf` |
+| 生成済み動画の尺を延長 | `veo31-extend` |
+
+### Kling の系統に注意
+
+fal 上では **`v3` 系と `O3` 系が別ライン**として並存する（どちらも 2026-02 追加）。
+- `kling30` / `kling30-i2v` → **O3 ライン**（`fal-ai/kling-video/o3/pro/...`）
+- `kling3` / `kling3-i2v` → **v3 ライン**（`fal-ai/kling-video/v3/pro/...`）
+
+slug 名が紛らわしいので、指定時は `list_models` で endpoint を確認する。
+
+### Seedance 2.5 について（2026-08 時点）
+
+2026-07-31 に発表。単発30秒・参照最大50点・4K・3Dカメラブロックアウトと大幅強化されているが、
+**fal.ai には未提供**（fal 公式が「未リリース」と明記）。Volcano Ark / BytePlus 側で API 開放が近いとされる。
+fal に載り次第 `seedance25*` を追加する。**それまでは 2.0 で組む。**
+
+### レガシー／フォールバック枠
+
 | slug | 用途 |
 |---|---|
-| `veo3-fast` / `veo3` | Veo 3 系（旧標準）。3.1 が使えない時のフォールバック |
-| `kling25` / `kling25-i2v` | Kling 2.5 Turbo Pro。3.0 が使えない時のフォールバック |
-| `minimax` / `minimax-i2v` | MiniMax Hailuo 02。$0.15〜$0.50、予算逼迫時 |
-| `hunyuan` | Tencent Hunyuan。抽象・風景・エモーショナル |
-| `luma` | Luma Dream Machine。text+image 両対応、滑らかなカメラ |
-
----
+| `veo3` / `veo3-fast` | Veo 3 系（旧標準）。3.1 が不調なときのみ |
+| `kling25` / `kling25-i2v` | Kling 2.5 Turbo Pro |
+| `minimax` / `minimax-i2v` | MiniMax Hailuo 02 |
+| `hunyuan` | Tencent Hunyuan |
+| `luma` | Luma Dream Machine |
 
 ## 推奨シーン別配分
 
@@ -86,12 +96,25 @@
 
 ## 静止画モデル（i2v 起点フレーム用）
 
-i2v（image-to-video）は「静止画を作る → `image_to_video` の起点に渡す」流れ。**起点の静止画は Creative コネクタの `generate_image` で作る**（v0.6.0〜 画像も Creative に統合。fal 経由で nano-banana を呼ぶので **fal キー1本で完結＝別 Gemini キー・別コネクタ不要**）。
+i2v は「静止画を作る → `image_to_video` の起点に渡す」流れ。起点画像は Creative の `generate_image` で作る
+（fal 経由なので **fal キー1本で完結**。別 Gemini キーは不要）。
 
-| 画像手段 | モデル | ツール | 強み | 鍵 |
-|---|---|---|---|---|
-| **Creative の画像** ★既定 | nano-banana / nano-banana-pro(4K) | `generate_image` / `edit_image` | **キャラ/絵柄の一貫性**・雰囲気・量産。Creative 内で完結 | `FAL_KEY`（既存） |
-| `openai-image`（任意・別コネクタ） | OpenAI GPT Image 2 | `openai_generate_image` / `openai_edit_image` | **画面内テキスト/ロゴ/コピー焼き込み**・指示追従 | `OPENAI_API_KEY` |
+| slug | 実体 | 単価目安 | 使いどころ |
+|---|---|---|---|
+| **`nano-banana-2`** ★既定 | Gemini 3.1 Flash Image | 約 $0.08/枚 | 4K・複数参照・確実なテキスト描画。ほぼこれで足りる |
+| `nano-banana-pro` | Gemini 3 Pro Image | 約 $0.15/枚 | **人物参照5枚＋スタイル参照3枚**。キャラ一貫性が最重要なときだけ |
+| `nano-banana` | Gemini 2.5 Flash Image（初代） | 約 $0.039/枚 | レガシー。Google は Nano Banana 2 系への移行を推奨 |
+| `flux` | FLUX schnell | 最安 | 雰囲気だけのラフ |
+
+### キャラ一貫性で使える参照枚数（Google 公式）
+
+| | nano-banana-2 | nano-banana-pro |
+|---|---|---|
+| オブジェクト参照 | 最大10枚 | 最大6枚 |
+| **人物（キャラ一貫性）** | **最大4枚** | **最大5枚** |
+| スタイル参照 | 非対応 | 最大3枚 |
+
+→ 設定シート1枚だけを参照に渡す運用は過去のもの。**別角度・別表情を複数枚まとめて渡せる**。
 
 ### 使い分け（動画フレーム用途）
 - **多シーンで同じ人物・世界観を揃えたい**（動画の基本）→ Creative の `generate_image` で1枚キーフレームを作り、`edit_image` で「同じ人物のまま別シーン」を派生させると一貫性が保てる
@@ -110,120 +133,33 @@ i2v（image-to-video）は「静止画を作る → `image_to_video` の起点�
 
 ---
 
-## 音声系モデル
+## 音声系モデル → `narration` スキルが正本
 
-> **重要**：v8〜v24の検証で確立した結論
-> - 日本語動画は **ElevenLabs DIRECT API + Eleven v3 + クローンvoice** が最高品質
-> - fal.ai プロキシ経由よりも DIRECT が安定（402エラーなし、感情タグ完全対応）
+ナレの声・モデル・パラメータ・発音辞書は **`../../narration/`** に集約した。ここでは重複させない。
 
-### ElevenLabs v3（`elevenlabs-v3`）★現在の標準（2025〜）
-- 最新モデル、**感情タグ対応**（`[calm]` `[hopeful]` 等）
-- クローンvoice との相性が抜群、抑揚が自然
-- 単価：~$0.30 / 1K chars
-- 1動画 12シーンで約 $0.50
-- **stability**: 0.35〜0.5（低いほど抑揚強）
-- **推奨**：すべてのIR/PR/採用動画はこれを使う
-- **必ずTTSルール（../narration/templates/narration-rules.md §8）を遵守**
+| 知りたいこと | 参照先 |
+|---|---|
+| 声の選択・感情タグマップ・プラン要件 | `../../narration/templates/voice-strategy.md` |
+| 発音辞書ルールの作り方（alias / IPA） | `../../narration/templates/narration-rules.md` |
+| 手順（誤読検出→辞書登録→生成） | `../../narration/SKILL.md` |
 
-### ElevenLabs Multilingual v2（`elevenlabs-v2`）
-- 安定的、日本語OK、感情タグ非対応
-- 単価：~$0.18 / 1K chars
-- **使用シーン**：v3 が不調・ベータが嫌なとき
+要点だけ：**日本語ネイティブ声（既定 Konoha）× `elevenlabs-v3` × クリーンテキスト＋発音辞書**。
+原稿の字面を壊す旧方式（ひらがな化・カタカナ強制・GENEL固定）は廃止。
 
-### ElevenLabs Turbo v2.5（`elevenlabs-turbo`）
-- 高速・安価
-- 単価半額
-- 品質はやや劣る
-- **使用シーン**：プロト試聴
-
-### 利用方法：DIRECT API 推奨
-fal.ai 経由ではなく、**ElevenLabs Direct API** を直接呼ぶのが本番運用の鉄則。
-理由：
-- ライブラリvoice（GENEL等）が確実に使える
-- voice_settings（stability, similarity_boost）の細かい制御
-- 感情タグ `[calm]` `[hopeful]` 等が完全に効く
-- レスポンスが速い、エラーが少ない
-
-```bash
-ELEVENLABS_API_KEY=sk_xxx
-curl -X POST https://api.elevenlabs.io/v1/text-to-speech/$VOICE_ID \
-  -H "xi-api-key: $ELEVENLABS_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "text": "[calm]人の価値は、正しく評価されているでしょうか。",
-    "model_id": "eleven_v3",
-    "voice_settings": {"stability": 0.4, "similarity_boost": 0.85}
-  }' --output scene01.mp3
-```
-
----
+コスト目安：v3 で 12シーン約 $0.50。
 
 ## 音楽系モデル
 
-### Stable Audio（`stable-audio`）★標準
-- 1〜47秒のクリップ生成
-- 単価 $0.20 / clip
-- ループで長尺カバー（ffmpeg `-stream_loop -1`）
-- **注意**：レスポンスは `audio_file.url` で返ってくる（MCP の extractMediaUrl で拾えない場合あり）
-
-### CassetteAI（`cassetteai`）
-- 最大 3分まで一発生成
-- 単価高め
-- ループ不要
-
-### Lyria 2（`lyria2`）
-- 高品質、短尺
-- ヒーロースティング向け
-
----
-
-## ボイスプリセット
-
-### A. 多言語汎用voice（fal.ai 経由でも DIRECT でも使える）
-
-`list_voices` で確認：
-
-| プリセット | ElevenLabs voice | 用途 |
-|---|---|---|
-| calm-male | Adam | 落ち着いた男性、企業VI標準 |
-| deep-male | Onyx | ドキュメンタリー、深い声 |
-| calm-female | Rachel / Sarah | 落ち着いた女性、IR・PR |
-| warm-female | Bella | 温かい、ブランド紹介 |
-| energetic-male | Antoni | 力強い、ピッチ・ホテル起業家系 |
-
-**注意**：これらは英語ベースの多言語voice。日本語の癖（長音脱落、小書き分離）あり。
-../narration/templates/narration-rules.md §1〜§7 のカタカナ強制ルールが必須。
-
-### B. ネイティブクローンvoice ★現在の標準
-
-| Voice ID | 名前 | 性別 | 特徴 |
+| slug | 実体 | 最大尺 | 使いどころ |
 |---|---|---|---|
-| `GxhGYQesaQaYKePCZDEC` | **GENEL voice** | 女性 | **★OKWEB×JINENで採用。日本人ネイティブクローン、自然な抑揚** |
+| **`stable-audio-3`** ★既定 | Stable Audio 3 Medium | **6分20秒** | **一発生成でループ不要**＝BGMの継ぎ目が途切れて聞こえる問題が構造的に消える。学習データが全てライセンス済みで商用の法務リスクが低い（年商$1M超は法的補償付きの Enterprise あり） |
+| `stable-audio-3-sfx` | Stable Audio 3 Small SFX | 2分 | 効果音 |
+| `cassetteai` | CassetteAI | 3分 | 最安クラス（$0.02/出力分）。尺が足りるなら実用 |
+| `lyria2` | Google Lyria 2 | 30秒 | 短尺スティング |
+| `stable-audio` | Stable Audio Open（レガシー） | 47秒 | ループ必須で継ぎ目が出る。新規では使わない |
 
-**使うには**：ElevenLabs **Starter プラン以上 ($5/月)** が必須。
-Free tier では `402 paid_plan_required` エラー。
-
-**癖**：自然な日本語だが、漢字の読み判定にやや誤り。
-../narration/templates/narration-rules.md §8 のひらがな化ルールが必須。
-（27年→にじゅうななねん、AI→エーアイ、見える化→みえるか、等）
-
-### Voice 選択の最終ルール
-
-```
-社内動画制作の標準フロー:
-1. ElevenLabs Starter 以上に加入
-2. GENEL voice (GxhGYQesaQaYKePCZDEC) をデフォルト
-3. テキストを §8 のひらがな化ルールで最適化
-4. Eleven v3 + 感情タグ + stability 0.35
-5. DIRECT API で生成
-6. ffmpeg で動画合成
-
-→ プロ品質ナレーションが 1動画あたり $0.50 で完成。
-```
-
-詳細は **`../narration/templates/voice-strategy.md`** を必ず読むこと。
-
----
+> **ショート/SNS狙いは AI生成より「YouTuber定番のフリー曲」が刺さる**ことが多い。
+> 選定・取得・著作権・途切れ防止は `bgm-selection.md` を参照。
 
 ## コスト試算式
 
@@ -247,9 +183,9 @@ BGMコスト = $0.20
 
 - [ ] スタイル決定（ドキュメンタリー実写 / アニメ / ピッチ）
 - [ ] シーン別モデル選択（上記マッピング参照）
-- [ ] voice 選択（A 汎用 or B クローン）
-- [ ] ElevenLabs プラン確認（Starter以上ならGENEL OK）
-- [ ] テキスト最適化（voice 型に合わせて ../narration/templates/narration-rules.md 参照）
-- [ ] 感情タグマップ確認（../narration/templates/voice-strategy.md §3）
+- [ ] voice 選択（日本語ネイティブ。既定 Konoha）
+- [ ] ElevenLabs プラン確認（Library voice は Starter 以上）
+- [ ] ナレ原稿はクリーンなまま（発音辞書で読みを補正／`../../narration/SKILL.md`）
+- [ ] 感情タグマップ確認（`../../narration/templates/voice-strategy.md` §3）
 - [ ] BGM 選定
 - [ ] コスト見積もり（$5〜$10レンジ内か）
