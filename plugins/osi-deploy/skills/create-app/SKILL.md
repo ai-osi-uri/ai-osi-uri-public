@@ -41,14 +41,25 @@ requires_connectors:
 
 ---
 
-## 作成先の決定ルール（all-or-personal）
+## 作成先の決定ルール（org or 個人）
 
-アプリ作成前に「org 利用可否」をプリフライト判定し、全リソースへ一貫適用する。
-**org と個人を混在させない**。
+リポジトリの作成先は `health_check` の `github.repo_target` が示す。**推測しない。**
 
-- `USE_ORG = (github_org_ok && vercel_team_ok && supabase_org_ok)`
-- **真** → 全リソースを `ai-osi-uri` org 配下に
-- **偽** → 全リソースを個人アカウント配下に
+| `github.repo_target` | 意味 | 既定の作成先 |
+|---|---|---|
+| `org:<slug>` | 拡張設定の「GitHub Organization」に slug が入っている | その Org 配下 |
+| `personal:<username>` | Org 未設定 | 個人アカウント配下 |
+
+**重要:** `GITHUB_ORG` が未設定だと、`github_create_repo_and_push` は `owner_override` を
+渡さない限り**必ず個人アカウント**（`POST /user/repos`）に作りにいく。
+Org 配下に置きたいのに設定が空、というのが最も多い取り違えなので、Phase 3 のプラン提示で
+**作成先を必ず明示してユーザーの承認を取る**。
+
+- `repo_target` が意図と違う → `owner_override` を渡す（`'personal'` で個人、Org slug でその Org）。
+  恒久的に変えるなら拡張設定の「GitHub Organization」を埋めてもらう
+- 403 が返ったら、エラー本文の `target` フィールドで**どちらに作りにいって失敗したか**を確認する。
+  個人で 403 なら PAT に個人リポの作成権限がないだけで、Org 側の権限は無関係
+- **org と個人を混在させない**。GitHub を Org にしたら Vercel / Supabase も Org / Team 側に寄せる
 
 ---
 
@@ -102,7 +113,13 @@ Phase N:   完了レポート
    - Stripe: `stripe.test` / `stripe.live`
    - Supabase: `supabase.valid: true`
    - AI 機能: `anthropic.valid: true`
-3. 不足 → `setup-deploy-environment` を案内して中断
+3. **`github.repo_target` を読み、リポジトリの作成先を確定する**（[作成先の決定ルール](#作成先の決定ルールorg-or-個人)）。
+   `personal:` になっていて Org に置きたい場合は、Phase 3 のプランで作成先を明示して承認を取り、
+   `github_create_repo_and_push` に `owner_override: "<org slug>"` を渡す
+4. 不足 → `setup-deploy-environment` を案内して中断
+
+> `health_check` はトークンの**有効性**しか見ない。「リポジトリを作れるか」までは判定できないため、
+> 403 が出たら第一容疑は権限ではなく**作成先の取り違え**。まず `repo_target` を疑うこと。
 
 ### 使用する拡張ツール
 
@@ -177,10 +194,14 @@ Phase N:   完了レポート
 【アプリ定義】名前 / 業種 / 概要
 【ターゲット】Web / Desktop / Mobile / ローカル
 【構成】Vercel + Supabase / Electron + SQLite / React Native 等
+【作成先】ai-osi-uri org 配下 / 個人アカウント配下（health_check の repo_target）
 【配布方法】Vercel URL / GitHub Releases / TestFlight 等
 
 このプランで進めますか？
 ```
+
+**【作成先】は省略しない。** ここを黙って進めると、意図と違う場所にリポジトリができ、
+後から移すか作り直すことになる。
 
 ---
 
@@ -318,6 +339,7 @@ scaffold → gh-create-repo-and-push → harness-init
 | Phase | 失敗 | 対応 |
 |---|---|---|
 | 0 | 拡張未導入 / トークン不足 | setup-deploy-environment 案内 |
+| 4 | リポジトリ作成が 403 | **まず作成先を疑う。** エラー本文の `target` を見る。`user/repos` なら個人に作りにいっている → `owner_override` に Org slug を渡して再実行。`orgs/<slug>` なら PAT の Resource owner / Administration 権限を確認 |
 | 1 | 業種不明 | 再度聞く |
 | 2 | ターゲット不確定 | デフォルト Web-Vercel |
 | 3 | プラン却下 | Phase 1-2 に戻る |
