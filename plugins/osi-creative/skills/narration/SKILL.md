@@ -29,11 +29,10 @@ ElevenLabs v3 ＋ 日本語ネイティブ声で、**原稿を壊さず**に自�
 2. **読みチェック＆辞書生成**：
    `python3 scripts/jp_yomi_check.py narration.txt --glossary dict-{会社}.csv --out-pls dict-{会社}.pls --report review.md`
    → `review.md` の要レビュー（固有名詞・英字）を消し込み、誤読は CSV に正読み追記 → 再実行。
-3. **会社別辞書を登録**：`create_pronunciation_dictionary` で登録（`name` は案件名）。以後 id/version はコネクタが管理するので、生成時は辞書名を渡すだけでよい。
-   - **BYOK版（自分の鍵）**：`pls_path` にローカルの `.pls` を渡せる。
-   - **マネージド版（ゲートウェイ経由）**：ローカルファイルを読めないので **`rules` 配列で渡す**
-     （`{string_to_replace, type:"alias", alias}` / `{..., type:"phoneme", phoneme, alphabet:"ipa"}`）。
-     `pls_path` を渡すとその旨のエラーが返る。辞書名はテナントごとに名前空間が切られるため、他社の辞書と衝突しない。
+3. **会社別辞書を登録**：`create_pronunciation_dictionary(name, pls_path)` で登録（`name` は案件名）。
+   以後 id/version はコネクタが管理するので、生成時は辞書名を渡すだけでよい。
+   `.pls` を作らずに直接渡したいときは `rules` 配列でもよい
+   （`{string_to_replace, type:"alias", alias}` / `{..., type:"phoneme", phoneme, alphabet:"ipa"}`）。
 4. **生成**：`generate_speech`
    ```jsonc
    generate_speech({

@@ -64,6 +64,7 @@ deploy-mobile-app オーケストレータ + 9 atomic を用意。
 **atomic（実配信の詳細ノウハウ層）**:
 - `ios-testflight-deploy` — fastlane + altool で TestFlight にアップロード。SwiftSupport 保全・actool 自前コンパイル・AuthKey 命名など全部入り。v0.2.0 で `ios-release-auto.yml` 全文同梱。
 - `android-play-deploy` — Gradle + bundletool + Play Publisher API で Internal Track にアップロード。track: internal → 昇格は `android_promote` MCP で。
+- `ios-appstore-release` — **TestFlight より先**（ビルド昇格・App Store 申請・審査追跡）と Xcode バージョンの N-1 ピン運用（週次カナリア）。2026-08 に osi-deploy から移設。ビルド〜TestFlight の正本 CI は GitHub Actions（`ios-testflight-deploy`）で、本スキルの Xcode Cloud 操作は代替経路。**internal 扱い**（外部配布には含めない）。
 
 **atomic（v0.3.0 追加：MustPost 移植ノウハウ）**:
 - `ios-sim-auth-backdoor` — Simulator 上で Firebase Auth の keychain と Custom Token deep link を両立させる 2 本立て（keychain + IME 罠を同時に潰す）。

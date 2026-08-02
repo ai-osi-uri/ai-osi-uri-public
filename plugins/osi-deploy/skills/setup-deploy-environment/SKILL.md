@@ -1,6 +1,12 @@
 ---
 name: setup-deploy-environment
-description: AI OSI URI の Cowork から LP・販売サイト・課金つきアプリを自動デプロイするための初回セットアップ。**共有ドライブの .env は使わず**、各ユーザーが「AI OSI URI Deploy」拡張（mcpb）をインストールし、設定欄にトークンを入力する方式に統一。GitHub PAT / Vercel Token / Stripe(test/live) / Supabase PAT / Anthropic API Key を拡張に入力し、OS キーチェーンに保存する。「デプロイ環境を整える」「初回セットアップ」「自動デプロイを使えるようにしたい」などで発動。トークンはチャットに貼らず拡張設定に入力する。毎回のデプロイ作業は `create-app`（旧 deploy-app） の役割。
+description: |
+  デプロイを使えるようにする初回セットアップ。**共有ドライブの .env は使わず**、
+  各ユーザーが「AI OSI URI Deploy」拡張（mcpb）を入れて設定欄に GitHub PAT / Vercel
+  Token / Stripe / Supabase PAT / Anthropic API Key を入力し、OS
+  キーチェーンに保存する方式に統一。「デプロイ環境を整える」「初回セットアップ」
+  「自動デプロイを使えるようにしたい」で発動。トークンはチャットに貼らせない。
+  毎回のデプロイは `create-app` の役割。
 version: 0.3.2
 ---
 
@@ -35,7 +41,7 @@ version: 0.3.2
 | App Store Connect API Key ID | iOS のみ | https://appstoreconnect.apple.com/access/integrations/api → Team Keys（10文字英数） |
 | App Store Connect Issuer ID | iOS のみ | 同上ページ最上部の UUID |
 | App Store Connect API Key (.p8) を base64 化した文字列 | iOS のみ | 発行した `.p8` を `base64 -i AuthKey_XXXXXXXXXX.p8 \| pbcopy` |
-| iOS Distribution Cert (.p12) を base64 化 | iOS のみ | Keychain から書き出した `.p12` を base64（`ios-mobile-release` の references 参照） |
+| iOS Distribution Cert (.p12) を base64 化 | iOS のみ | Keychain から書き出した `.p12` を base64（`ios-appstore-release` の references 参照） |
 | iOS Distribution Cert .p12 のパスワード | iOS のみ | 書き出し時に付けたパスワード |
 
 > 作成先は create-app（旧 deploy-app）のプリフライト（GitHub org / Vercel team / Supabase org の3点可否＝USE_ORG）で
@@ -58,12 +64,12 @@ version: 0.3.2
 拡張を有効化後、`health_check` ツールを呼ぶと各トークンの有効性をまとめて確認できる
 （値は末尾4文字のみのマスク表示）。`github.valid` / `vercel.valid` などが true なら準備完了。
 
-> **iOS の追加検証**: iOS のリリース系（`ios-mobile-release` / Xcode Cloud / TestFlight）を
+> **iOS の追加検証**: iOS のリリース系（`ios-appstore-release` / Xcode Cloud / TestFlight）を
 > 使うなら、`mobile_health_check`（AI OSI URI Deploy 拡張 v1.15+）を追加で呼ぶ。ASC の
 > Key ID / Issuer / .p8 が揃っているか、JWT が生成できるか、`GET /v1/apps` が 200 を返すかを
 > 一括で確認する。`.p8` が改行込みで欠けていたり、Issuer と Key ID が入れ替わっていると
 > ここで即落ちる（fastlane まで進めて 8 分待って気付く事故を防ぐ）。Distribution Cert
-> (`.p12`) も同時に基本検証する。詳細は `ios-mobile-release/references/n1-policy.md`。
+> (`.p12`) も同時に基本検証する。詳細は `ios-appstore-release/references/n1-policy.md`（osi-mobile-deploy）。
 
 > **DB を使うアプリは Supabase PAT が必須**：`supabase.valid:true` でないと create-app（旧 deploy-app）の
 > Supabase 自動プロビジョニング（プロジェクト作成→キー取得）が動かず、「Supabase プロジェクト

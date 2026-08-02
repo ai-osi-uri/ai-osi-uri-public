@@ -1,14 +1,9 @@
 ---
 name: mobile-firebase-setup
 description: |
-  モバイルアプリ用に Firebase プロジェクトを新規作成し、iOS App と Android App を追加、
-  `GoogleService-Info.plist` / `google-services.json` を取得して base64 化 → GitHub Secrets
-  に **`github_set_secrets_batch` で一括自動投入** する atomic スキル。AI OSI URI Deploy
-  拡張の `firebase_api` / `firebase_list_projects` / `firebase_add_ios_app` /
-  `firebase_add_android_app` / `firebase_get_ios_config` / `firebase_get_android_config`
-  + `github_set_secrets_batch` を使う。オーケストレータ `deploy-mobile-app` から Phase 3
-  で呼ばれる。単体で「モバイルの Firebase 設定して」でも発動する。
-  前提: AI OSI URI Deploy 拡張 **v1.17.3 以降**（`github_set_secrets_batch` 必須）。
+  モバイルアプリ用の Firebase プロジェクトを作成し、iOS / Android アプリを追加して
+  config を GitHub Secrets に投入する。`deploy-mobile-app` の Phase 3 から呼ばれる。
+  単体では「モバイルの Firebase 設定して」で発動。
 version: 0.2.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy

@@ -1,6 +1,12 @@
 ---
 name: aws-static-deploy
-description: 既に GitHub に push 済みの静的サイト（HTML / Vite build / Next.js export）を AWS のS3 + CloudFront + ACM + Route 53 で公開する atomic スキル。CloudFront OAC でS3 を非公開のまま配信、SPA フォールバック、Japan 限定 geo restriction（医療系前提、オプション解除可）まで含めて初回デプロイを完結する。完了時に CloudFront ドメインおよび（カスタムドメイン指定時は）独自ドメインの APP_URL を返す。オーケストレータ `create-app`（旧 deploy-app） から呼ばれる前提だが、単独でも動く。「AWS で LP 公開して」「S3 + CloudFront でデプロイ」「Vercel じゃなくて AWS に上げて」「CloudFront で配信したい」「AWS で静的サイトを公開」「カスタムドメインでAWS にデプロイ」など、AWS への静的サイト公開リクエスト全般で発動する。AWS クレデンシャル（AWS_PROFILE）の登録は `setup-deploy-environment` の役割。Next.js SSR / API Routes / 認証付き SaaS には使わない（Phase B の`aws-amplify-deploy` を使うこと）。
+description: |
+  GitHub に push 済みの静的サイト（HTML / Vite / Next.js export）を S3 + CloudFront +
+  ACM + Route 53 で公開する。CloudFront OAC で S3 を非公開のまま配信、SPA
+  フォールバック、Japan 限定 geo restriction（解除可）まで含めて初回デプロイを完結し
+  APP_URL を返す。`create-app` から呼ばれるほか、単体で「AWS で LP 公開して」「S3 +
+  CloudFront でデプロイ」「Vercel じゃなくて AWS に上げて」で発動。Next.js SSR / API
+  Routes / 認証付き SaaS には使わない。
 version: 0.1.0
 ---
 

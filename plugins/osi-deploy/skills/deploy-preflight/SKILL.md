@@ -1,6 +1,14 @@
 ---
 name: deploy-preflight
-description: AI OSI URI のデプロイを実行する「前」に、失敗しやすい前提条件を一括で機械チェックする atomic なプリフライト検証ゲート。AWS 認証と任意の期待アカウント ID の一致、`setup-deploy-environment` で保存する GitHub / Vercel 認証情報の有無、Terraform の `validate` と **S3 リモート backend が設定済みか**（ローカル state だけの orphan 危険を事前検出）、コンテナ系なら Dockerfile とヘルスチェック定義、課金ありなら Stripe 鍵、カスタムドメインの親 Hosted Zone 実在（`aws-route53` で逆引き）、git のブランチが upstream と同期済みか、ACM が us-east-1 かを PASS/FAIL/WARN のチェックリストで返し、**FAIL があればデプロイを止める**。同梱の `scripts/preflight.sh` が機械判定できる項目を自動実行する。「デプロイして大丈夫か確認して」「デプロイ前チェック」「プリフライト」「公開前に前提を検証して」「apply する前に確認して」「本番に上げる前チェック」「なぜデプロイが失敗するか事前に知りたい」など、`create-app` / `aws-static-deploy` / `update-deploy` の実行前に安全確認したいリクエストで発動する。デプロイ「後」の HTTP 動作確認は `app-smoke-test` の役割（本スキルは実行前ゲート）。実際のデプロイ・リソース作成は行わない（検証のみ・read-only）。日本語の AI OSI URI デプロイ運用に特化。
+description: |
+  デプロイを実行する **前** に、失敗しやすい前提条件を機械チェックするゲート。AWS
+  認証とアカウント ID、GitHub / Vercel 認証の有無、Terraform validate と **S3 リモート
+  backend の有無**（ローカル state だけの orphan 検出）、Dockerfile とヘルスチェック、
+  Stripe 鍵、親 Hosted Zone の実在、git の upstream 同期、ACM が us-east-1 か、を
+  PASS/FAIL/WARN で返し **FAIL があれば止める**。「デプロイ前チェック」
+  「プリフライト」「apply する前に確認して」「なぜデプロイが失敗するか事前に知りたい」
+  で発動。read-only で実際のデプロイはしない。デプロイ後の HTTP 確認は
+  `app-smoke-test`。
 version: 0.1.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy

@@ -1,6 +1,11 @@
 ---
 name: vercel-connect-and-deploy
-description: 既に GitHub に push 済みのリポジトリを Vercel に接続し、環境変数を設定して初回本番デプロイを実行する atomic スキル。認証は AI OSI URI Deploy 拡張が保持する Vercel Token / GitHub PAT を使い、`.env` は読まない。拡張の MCP ツール `vercel_create_project_and_deploy`（作成+env+デプロイ起動。既定で Deployment Protection を解除し認証なしで公開）、`vercel_get_deployment_status`（polling）、`vercel_get_build_logs`（失敗調査）、`github_push`（修正コミットの再push）を組み合わせ、ビルド失敗の自動修正ループ（最大5回）まで行う。「Vercel にデプロイして」「リポジトリを Vercel に接続」「Next.js を Vercel に上げて」などで発動。Vercel Token の入力は拡張設定の役割。
+description: |
+  GitHub に push 済みのリポを Vercel に接続し、
+  環境変数を設定して初回本番デプロイを実行する。作成 + env + デプロイ起動、polling、
+  ビルド失敗の自動修正ループ（最大 5 回）まで行い、既定で Deployment Protection
+  を解除して認証なしで公開する。`create-app` から呼ばれる。単体では「Vercel
+  にデプロイして」「Next.js を Vercel に上げて」で発動。
 version: 0.4.0
 ---
 

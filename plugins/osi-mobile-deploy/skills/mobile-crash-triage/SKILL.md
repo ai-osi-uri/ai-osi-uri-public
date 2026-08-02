@@ -1,14 +1,11 @@
 ---
 name: mobile-crash-triage
 description: |
-  TestFlight / Google Play Internal Track に配信済みのビルドがクラッシュした時に、
-  クラッシュログを取得・シンボリケート・分析して原因候補と修正提案を出す atomic スキル。
-  iOS は `ios_get_status` で対象ビルドの診断情報 + dSYM でシンボリケート。Android は
-  `android_get_status` + Firebase Crashlytics。取得したスタックトレースを LLM で解析し、
-  `references/known-crash-patterns.md` と照合して典型パターン（Firebase 未設定 / URL scheme
-  空 / font 欠落 / Assets.car 欠落 など）に落とし込む。**自動修正はしない**、修正提案までで
-  人が承認して `mobile-update-deploy` に渡す。「配信したアプリが起動しない」「TestFlight
-  ビルドが落ちる」「Play で ANR が出てる」で発動する。
+  TestFlight / Play に配信済みのビルドがクラッシュしたとき、
+  ログを取得・シンボリケートして原因候補と修正案を出す。
+  **自動修正はしない**（修正は人の承認後に `mobile-update-deploy`）。
+  「配信したアプリが起動しない」「TestFlight ビルドが落ちる」「Play で ANR が出てる」
+  で発動する。
 version: 0.1.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy

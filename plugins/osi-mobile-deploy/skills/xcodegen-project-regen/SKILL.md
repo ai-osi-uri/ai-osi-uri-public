@@ -1,17 +1,11 @@
 ---
 name: xcodegen-project-regen
 description: |
-  xcodegen で管理している iOS プロジェクトが `git pull` 後に「Missing package product
-  'FirebaseCore'」「Missing package product 'FirebaseAuth'」「Cannot find 'Firebase' in
-  scope」等を大量に吐くとき（14 個・20 個と束で出る症状）に、原因の**stale .xcodeproj**を
-  1 コマンドで直す atomic skill。.xcodeproj は project.yml から生成される derived
-  artifact なので、pull で project.yml が更新されたら `xcodegen generate --spec
-  apps/ios/project.yml` で必ず再生成する必要がある。加えて Xcode 側の Package Cache が
-  古いままだとダメなので、Reset Package Caches → Resolve Package Versions もセットで
-  案内する。「Missing package product FirebaseCore」「xcodeproj が壊れた」「pull したら
-  ビルドできない」「SPM の product が見つからない」「project.yml と xcodeproj が食い違う」
-  「xcodegen 再生成」「Package.resolved が古い」で発動する。iOS 側の onboarding
-  workflow にも組み込むこと。
+  xcodegen 管理の iOS プロジェクトで、pull 後に「Missing package product
+  'FirebaseCore'」「Cannot find 'Firebase' in scope」等が束で出るときの修復。原因は
+  stale .xcodeproj で、project.yml から再生成し Package Cache を reset する。
+  「xcodeproj が壊れた」「pull したらビルドできない」「SPM の product が見つからない」
+  で発動する。
 version: 0.1.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy

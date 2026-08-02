@@ -1,12 +1,11 @@
 ---
 name: mobile-update-deploy
 description: |
-  既にデプロイされている AI OSI URI のネイティブモバイルアプリ（iOS / Android）に対して、
-  ソースを最新化して局所修正→push→CI 監視→TestFlight/Play Internal Track 到達確認まで
-  行う atomic スキル。「モバイルアプリの ○○ を直して」「iOS の文言を修正して再配信」
-  「Android の crash を直して」「TestFlight の新しいビルドを上げて」「既存モバイルアプリに
-  ○○ 機能を足して」など、新規作成ではなく既存モバイルリポを更新する全リクエストで発動する。
-  Web版 `update-deploy` のモバイル相当。新規作成は `deploy-mobile-app` の役割。
+  既存のネイティブモバイルアプリを修正して再配信する（修正 → push → CI 監視 →
+  TestFlight / Play Internal 到達確認）。「モバイルアプリの○○を直して」「iOS
+  の文言を修正して再配信」「Android の crash を直して」
+  「既存モバイルアプリに機能を足して」で発動する。新規作成は `deploy-mobile-app`、Web
+  は `update-deploy`（osi-deploy）。
 version: 0.1.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy

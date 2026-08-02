@@ -1,13 +1,11 @@
 ---
 name: android-play-deploy
 description: |
-  Gradle + bundletool + Google Play Publisher API v3 で Android AAB を Play Console の
-  Internal Track にアップロードする atomic スキル。osi-mobile-deploy の Golden Template に
-  焼き込まれた `.github/workflows/android-release-auto.yml` + `fastlane/Fastfile` の
-  `android_beta_auto` lane を実行する。keystore の base64 復元、`versionCode` の自動増分、
-  Play Publisher API 認証、track=internal upload、bundletool でのローカル検証、を扱う。
-  トラック昇格（internal → alpha → production）は `android_promote` MCP で明示的に指示された
-  時のみ実行する。単体で「Play Internal に上げて」「Android を再配信」で発動する。
+  Android AAB を Google Play Internal Track にアップロードする。versionCode
+  の自動増分と bundletool でのローカル検証まで行う。トラック昇格（internal → alpha →
+  production）は明示指示があるときだけ実行する。`deploy-mobile-app` /
+  `mobile-update-deploy` から呼ばれる。単体では「Play Internal に上げて」「Android
+  を再配信して」で発動。
 version: 0.1.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy

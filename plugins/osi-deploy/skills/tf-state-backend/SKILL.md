@@ -1,6 +1,12 @@
 ---
 name: tf-state-backend
-description: AI OSI URI が Cowork/Terraform で公開した AWS アプリの **Terraform state を、揮発する作業フォルダではなく自社AWSアカウントの共有S3バケット（+DynamoDBロック）で一元管理する** atomic スキル。state用バケット/ロックテーブルが無ければ自動作成（idempotent）し、`backend "s3"` を infra に差し込み、既存のローカルstateを `-migrate-state` でS3へ移行し、S3格納を検証し、コード一式とHANDOFFを共有ドライブへ退避するまでを担当する。「stateはどこにある？」「tfstateが消えると困る」「Terraform stateをS3に」「リモートbackendに移行」「orphan化が心配」「stateを安全に管理したい」「別セッションでもterraformを続けたい」「stateが揮発する作業領域にしか無い」など、Terraform state の置き場所・移行・保全に関わるリクエストで発動する。新規アプリでは `create-app`（旧 deploy-app） の初回 apply 前に呼ばれて最初からS3 backendにする使い方と、既にローカルstateで動いている既存アプリを移行する使い方の両方に対応。アプリ本体のデプロイ（リソース作成）は `aws-static-deploy` / `create-app`（旧 deploy-app） の役割で、本スキルは state の管理基盤だけを担う。日本語の AI OSI URI デプロイ運用に特化。
+description: |
+  Terraform state を、揮発する作業フォルダではなく自社 AWS の共有 S3 バケット（+
+  DynamoDB ロック）で一元管理する。バケット/ロックテーブルの冪等作成、`backend "s3"`
+  の差し込み、既存ローカル state の `-migrate-state` 移行、S3 格納の検証まで。
+  「tfstate が消えると困る」「Terraform state を S3 に」「リモート backend に移行」
+  「orphan 化が心配」「別セッションでも terraform を続けたい」で発動。新規は
+  `create-app` の初回 apply 前、既存アプリは移行として使う。
 version: 0.1.0
 ---
 

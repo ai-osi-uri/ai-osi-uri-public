@@ -1,16 +1,22 @@
 ---
 name: switch-to-live-mode
-description: AI OSI URI が Cowork 上から既にデプロイ済みのアプリ（LP・販売サイト・SaaS）の Stripe を**テストモードから本番（Live）モードに切り替える**ための専用スキル。`deploy-with-stripe`で立ち上げた既存プロジェクトを対象に、Live モードで商品・価格・Payment Link / Webhookを再作成し、Vercel の環境変数（または HTML 内の Payment Link URL）を更新して、再デプロイまで自動で行う。「本番化して」「Live モードに切り替えて」「実際の課金を有効にして」「本番モードでデプロイし直して」「Stripe を本番にして」「テストモードを終了したい」「実際にお金を受け取れるようにして」など、デプロイ済みアプリを本番運用に切り替えるリクエストで発動する。**実際の課金が発生する重大な操作**なので、必ず複数のチェックポイントでユーザーに明示的な確認を取り、ロールバック手順も提示する。新規デプロイには使わないこと（その場合は `deploy-with-stripe` を使う）。
+description: |
+  デプロイ済みアプリの Stripe を **テストモードから本番（Live）に切り替える**。Live
+  で商品・価格・Payment Link・Webhook を再作成し、Vercel の環境変数（または HTML 内の
+  Payment Link URL）を更新して再デプロイまで行う。「本番化して」「Live
+  モードに切り替えて」「実際にお金を受け取れるようにして」「テストモードを終了したい」
+  で発動。**実課金が発生する重大操作**なので複数のチェックポイントで明示確認を取り、
+  ロールバック手順も提示する。新規デプロイには使わない（`create-app`）。
 version: 0.1.0
 ---
 
 # Stripe テストモード → 本番モード切替スキル（switch-to-live-mode）
 
-既に `deploy-with-stripe` でデプロイされた Stripe テストモード前提のアプリを、本番
+既に `create-app` でデプロイされた Stripe テストモード前提のアプリを、本番
 （Live）モードに切り替える。**実際の課金が発生する**操作のため、各ステップでユーザー
 の明示的な確認を取ること。
 
-このスキルは「切替」だけを担当する。新規デプロイは `deploy-with-stripe` を、
+このスキルは「切替」だけを担当する。新規デプロイは `create-app` を、
 初期環境構築は `setup-deploy-environment` を使う。
 
 ---
@@ -50,7 +56,7 @@ Stripe の本番リソース作成は **AI OSI URI Deploy 拡張のツールを 
 | 前提 | 確認方法 | 不足時の対応 |
 | --- | --- | --- |
 | `AI OSI URI Deploy` 拡張が有効 | `health_check` ツール | `setup-deploy-environment`（拡張導入）を案内 |
-| 切替対象のプロジェクトがデプロイ済み | Vercel に該当プロジェクトがある | `deploy-with-stripe` の実行を促す |
+| 切替対象のプロジェクトがデプロイ済み | Vercel に該当プロジェクトがある | `create-app` の実行を促す |
 | Stripe アカウントが Live 利用可能 | `/v1/account` の `charges_enabled: true` | Stripe Dashboard で本人確認・口座登録の完了を促す |
 | Stripe Live キーを拡張に入力済み | `health_check` の `stripe.live.valid: true` | 拡張設定の「Stripe Secret Key（本番/Live）」に `sk_live_` を入力 |
 | Live モードの Customer Portal 設定 | Dashboard → Settings → Customer portal（Live） | 未設定なら警告（任意で続行可） |

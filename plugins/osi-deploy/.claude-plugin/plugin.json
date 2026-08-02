@@ -4,7 +4,7 @@
   "requires_connectors": [
     "AI OSI URI Deploy"
   ],
-  "description": "AI OSI URI のアプリ作成・公開自動化。Web（Vercel / AWS）、Desktop（Electron）、Mobile、ローカル出力に対応。create-app を入口に要件定義からデプロイ・配布、DNS設定、事前診断まで一気通貫。",
+  "description": "AI OSI URI のアプリ作成・公開自動化。Web（Vercel / AWS）・Desktop（Electron）・ローカル出力に対応し、create-app を入口に DNS 設定・事前診断・公開後の更新まで一気通貫で扱う。**モバイル（iOS / Android）は osi-mobile-deploy に全面委譲**する。24 スキル。",
   "author": {
     "name": "AI OSI URI",
     "email": "yuhenagisa@ai-osi-uri.com"

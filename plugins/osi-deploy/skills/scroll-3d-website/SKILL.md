@@ -1,7 +1,13 @@
 ---
 name: scroll-3d-website
 description: |
-  Build premium 3D scroll-animated websites from scratch — the full pipeline from Next.js setup through canvas frame-sequence animations, smooth scroll, neumorphic design, and deploy. Use whenever the user mentions a 3D website, a scroll-animated landing page, a canvas frame sequence (like Apple's AirPods page), scroll-driven hero animations, smooth-scroll sites, premium/agency-quality landing pages, neumorphic or glassmorphic UI, or any site inspired by Igloo, Igloo Inc, Lusion, or Active Theory. Use it EVEN if the user doesn't say the word "3D" — phrases like "scroll animation", "frame sequence", "sticky canvas", "hero animation that plays on scroll", or "premium landing page with scroll effects" are all signals to use this skill. This is the whole pipeline in one place: stack selection, project scaffolding, frame-sequence engine, scroll math, Framer Motion patterns, design system, performance hardening, and deploy — don't stitch partial answers together when this skill covers it end-to-end.
+  Build premium 3D scroll-animated websites end to end — Next.js setup, canvas
+  frame-sequence engine, scroll math, smooth scroll, neumorphic design system,
+  performance hardening, and deploy. Triggers on "3D website", "scroll animation",
+  "frame sequence", "sticky canvas", "hero animation that plays on scroll", "premium
+  landing page with scroll effects", or sites in the vein of Igloo / Lusion / Active
+  Theory. The word "3D" is not required.
+
 ---
 
 # Build Premium 3D Scroll-Animated Websites
@@ -219,7 +225,7 @@ You've got this. Build something that makes people stop scrolling.
 
 - 静的書き出し（HTML / Vite build / Next export）→ `aws-static-deploy` または `vercel-connect-and-deploy`
 - リポ作成と push → `gh-create-repo-and-push`
-- 新規アプリの企画〜公開までを一気通貫で回すなら、オーケストレータ `deploy-app` から本スキルを
+- 新規アプリの企画〜公開までを一気通貫で回すなら、オーケストレータ `create-app` から本スキルを
   フロント構築フェーズとして呼ぶ。
 
 単一HTMLの軽量デモを素早く出したい場合は、Next.js を省いて 1 ファイルに収め、フレーム連番は

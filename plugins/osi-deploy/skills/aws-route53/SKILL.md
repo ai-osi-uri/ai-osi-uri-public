@@ -1,6 +1,12 @@
 ---
 name: aws-route53
-description: AI OSI URI の AWS アカウント上の Route 53 ホストゾーンに対して、アプリの初回デプロイとは独立に DNS レコードを操作する atomic スキル。親ドメインを含むホストゾーンの検索、任意レコード（A / AAAA / CNAME / TXT / MX / NS / CAA / alias）の追加・更新・削除、サブドメインの発行、メール系レコード（SPF / DKIM / DMARC）、ドメイン所有権確認用 TXT、他サービスへ向ける CNAME、CloudFront / ALB への alias、変更の反映待ち（INSYNC）と `dig` 検証までを行う。同梱の `scripts/route53.sh`（zone / list / get / upsert / delete / wait）で実働し、追加・更新は冪等な UPSERT、削除は現在値の取得と明示確認を必須にする。「サブドメインを追加して」「◯◯.example.com を作って」「Route53 にレコードを足して」「TXT レコードで所有権確認したい」「SPF/DKIM を設定して」「このドメインを別サービスに向けたい」「CNAME を張って」「DNS を書き換えて」「ネームサーバーを確認して」「反映されたか確認して」など、既存ホストゾーンへの DNS 操作全般で発動する。ホストゾーン（ドメイン）自体の新規購入・移管は対象外。アプリ初回公開時の自ドメイン用 ACM 検証 + alias 作成は `aws-static-deploy` / `create-app` が内部で行うので、そちらの初回フローと混同しないこと（本スキルは「既にあるゾーンへ独立にレコードを足す/直す」専用）。認証（AWS_PROFILE）の登録は `setup-deploy-environment` の役割。日本語の AI OSI URI デプロイ運用に特化。
+description: |
+  既存の Route 53 ホストゾーンに DNS レコードを足す・直す。A / CNAME / TXT / MX /
+  alias の冪等 UPSERT、SPF / DKIM / DMARC、所有権確認 TXT、反映待ち（INSYNC）と dig
+  検証まで。「サブドメインを追加して」「Route53 にレコードを足して」「SPF/DKIM
+  を設定して」「CNAME を張って」「DNS を書き換えて」で発動。
+  ドメイン自体の新規購入・移管は対象外。アプリ初回公開時の ACM 検証 + alias は
+  `aws-static-deploy` / `create-app` の中で行う。
 version: 0.1.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy

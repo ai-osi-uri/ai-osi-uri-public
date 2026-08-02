@@ -1,18 +1,13 @@
 ---
 name: deploy-mobile-app
 description: |
-  AI OSI URI が Cowork から **ネイティブモバイルアプリ（iOS = SwiftUI / Android =
-  Kotlin + Jetpack Compose）を新規に作って TestFlight / Google Play Internal Track
-  まで配信する** ための唯一のオーケストレータスキル。**既定スタックはネイティブ 2 本立てで、
-  Flutter / React Native は greenfield では選ばない**（既存 Flutter アプリからの移行が
-  必要な場合のみ `flutter-swift-parity-port` を別途使う）。「モバイルアプリ作って」
-  「iOS アプリ作りたい」「Android アプリを立ち上げて」「SwiftUI で ○○ アプリ」
-  「Kotlin Compose で作って」「TestFlight に上げるところまでやって」「ネイティブアプリ
-  新規作成」「iPhone アプリ作って」「Play Store に出したい」「iOS も Android も両方
-  作って」「Flutter じゃなくてネイティブでモバイルアプリを作って」など、モバイルアプリの
-  新規作成と配信を依頼されたときに必ず発動する。既存モバイルリポの局所修正は
-  `mobile-update-deploy` の役割で、本スキルは新規作成専用。Web / LP / SaaS の作成は
-  `deploy-app`（osi-deploy）の担当。
+  ネイティブモバイルアプリ（iOS = SwiftUI / Android = Kotlin + Jetpack Compose）
+  を新規に作って TestFlight / Google Play Internal Track
+  まで配信するオーケストレータ。「モバイルアプリ作って」「iOS アプリ作りたい」
+  「Android アプリを立ち上げて」「SwiftUI で○○」「Kotlin Compose で作って」「iPhone
+  アプリ作って」「Play Store に出したい」「TestFlight に上げるところまでやって」
+  で発動する。既定はネイティブ 2 本立て（新規で Flutter / React Native は選ばない）。
+  既存リポの修正は `mobile-update-deploy`、Web / SaaS は `create-app`（osi-deploy）。
 version: 0.2.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
@@ -140,7 +135,7 @@ Firebase プロビジョニング・Secrets 投入・CI 監視・TestFlight / Pl
 | BUNDLE_ID | `com.aiosiuri.foo` | `com.aiosiuri.{app_name_lower}` |
 | PACKAGE_NAME | `com.aiosiuri.foo` | Bundle ID と同じ |
 | DISPLAY_NAME | `Foo` | APP_NAME をそのまま |
-| GITHUB_ORG | `ai-osi-uri` / `personal` | `deploy-app` の `USE_ORG` 判定に準拠 |
+| GITHUB_ORG | `ai-osi-uri` / `personal` | `create-app` の `USE_ORG` 判定に準拠 |
 | ICON_SOURCE | 1024x1024 PNG / 画像URL / なし（nano-banana で生成） | なし |
 
 **「Flutter で作って」と要望が来たとき**:

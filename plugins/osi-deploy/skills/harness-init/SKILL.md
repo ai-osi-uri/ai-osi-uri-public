@@ -1,6 +1,12 @@
 ---
 name: harness-init
-description: 生成・デプロイするアプリのリポジトリに「ハーネスエンジニアリング」の最小構成（AGENTS.md / CLAUDE.md・init.sh・claude-progress.md・feature_list.json）を仕込む atomic スキル。エージェント（Codex / Claude Code）が長時間・複数セッションでも文脈を失わず、検証なしに完了宣言せず、1機能ずつ証拠ありで進められるように、指示・環境・状態・フィードバックの4サブシステムをリポジトリに自己記述させる。プロジェクトのスタック（INSTALL/VERIFY/START コマンド、テスト・Lint）を受け取り、プレースホルダを実値に埋めて配置する。「ハーネスを入れて」「AGENTS.md を作って」「このリポにハーネスエンジニアリングを仕込んで」「エージェントが迷子にならないようにして」「進捗管理とfeature_listを入れて」など、リポジトリにエージェント運用の足場を入れるリクエストで発動する。通常はオーケストレータ create-app（旧 deploy-app）の scaffold 直後（Vercel パス Phase 4-V / AWS パス Phase 4-A）から呼ばれる。実デプロイ・課金・インフラ構築は行わない（それぞれ vercel-connect-and-deploy / aws-static-deploy / setup-infra の役割）。
+description: |
+  生成するリポに「ハーネスエンジニアリング」の最小構成（AGENTS.md /
+  CLAUDE.md・init.sh・claude-progress.md・feature_list.json）を仕込み、
+  エージェントが長時間・複数セッションでも文脈を失わず、
+  検証なしに完了宣言しないようにする。`create-app` の scaffold 直後から呼ばれる。
+  単体では「ハーネスを入れて」「AGENTS.md を作って」
+  「エージェントが迷子にならないようにして」で発動。デプロイ・インフラ構築はしない。
 version: 0.1.0
 ---
 

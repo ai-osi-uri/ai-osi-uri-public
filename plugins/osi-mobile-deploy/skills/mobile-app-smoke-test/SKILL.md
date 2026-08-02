@@ -1,13 +1,10 @@
 ---
 name: mobile-app-smoke-test
 description: |
-  ローカルビルドした IPA / AAB を iOS Simulator / Android Emulator にインストールし、
-  起動して 5 秒待ってクラッシュ検知するだけの軽量スモークテスト atomic スキル。
-  iOS は `xcrun simctl` で Simulator 起動 → .app を install → launch → stderr 監視。
-  Android は `emulator` + `adb install` + `adb shell am start` + `logcat` 監視。
-  クラッシュしたら stderr / logcat を取得して `mobile-crash-triage` を呼ぶ。オーケストレータ
-  `deploy-mobile-app` / `mobile-update-deploy` から呼ばれる。単体で「iOS Simulator で起動確認」
-  「Emulator でスモークして」でも発動する。
+  ローカルビルドした IPA / AAB を Simulator / Emulator
+  で起動してクラッシュを検知する軽量スモークテスト。落ちたら `mobile-crash-triage`
+  に渡す。`deploy-mobile-app` / `mobile-update-deploy` から呼ばれる。
+  単体では「Simulator で起動確認して」で発動。
 version: 0.1.0
 ---
 

@@ -1,16 +1,11 @@
 ---
 name: ios-testflight-deploy
 description: |
-  fastlane + altool で iOS ビルドを TestFlight にアップロードする atomic スキル。
-  osi-mobile-deploy の Golden Template に焼き込まれた「今日獲得したノウハウ全部入り」の
-  fastlane / GitHub Actions workflow を実行する。SwiftSupport 保全（ITMS-90426 回避）、
-  xcrun actool による Assets.car 自前コンパイル、AuthKey_<ID>.p8 命名規約、
-  pilot polling スキップ、CFBundleIconName + CFBundleIcons 設定、Xcode 26 選択、
-  bash 3.2 互換の case 文、macos-15 runner + auto-signing (match なし) + P12 一時 keychain
-  投入、AppIcon60x60@2x/@3x.png の Payload 直下 cp、といった落とし穴回避を
-  「なぜそれが必要か」まで references/altool-quirks.md と
-  references/ios-release-auto.yml.example に残す。単体で「TestFlight に上げて」
-  「iOS を再配信」「fastlane で TestFlight」「auto-signing で TestFlight」で発動する。
+  fastlane + altool で iOS ビルドを TestFlight にアップロードする。
+  署名・アイコン・SwiftSupport まわりの落とし穴回避は references に理由付きで持つ。
+  `deploy-mobile-app` / `mobile-update-deploy` から呼ばれる。単体では「TestFlight
+  に上げて」「iOS を再配信して」で発動。TestFlight に上がった後のビルド昇格・App Store
+  申請・Xcode バージョン運用は `ios-appstore-release` の担当。
 version: 0.2.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy

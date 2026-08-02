@@ -1,15 +1,10 @@
 ---
 name: mobile-secrets-sync
 description: |
-  モバイル配信に必要な GitHub Actions Secrets（iOS Distribution 証明書 / ASC API Key /
-  Android Keystore / Play SA JSON / Firebase config 等・計 10〜13 個）を **全部自動で**
-  GitHub リポに投入する atomic スキル。macOS Keychain から既存値を読み出し、Android keystore
-  が未生成なら `mobile_generate_keystore` で新規生成、libsodium sealed_box 暗号化を経て
-  `github_set_secrets_batch` で一括 PUT する。keystore は Drive にも自動バックアップ。
-  オーケストレータ `deploy-mobile-app` から Phase 5 で呼ばれるが、単体で「Secrets 入れて」
-  でも発動する。
-  前提: AI OSI URI Deploy 拡張 **v1.17.3 以降**（`github_set_secrets_batch` /
-  `github_set_secret` / `github_list_secrets` / `mobile_generate_keystore` を含む）。
+  モバイル配信に必要な GitHub Actions Secrets（証明書 / ASC キー / keystore / Play SA
+  / Firebase config 等）を一括投入する。keystore が未生成なら作成して Drive
+  に退避する。`deploy-mobile-app` の Phase 5 から呼ばれる。単体では「モバイルの
+  Secrets を入れて」で発動。
 version: 0.2.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy

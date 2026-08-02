@@ -1,6 +1,11 @@
 ---
 name: gcp-ops
-description: AI OSI URI の Cowork から GCP を操作する atomic スキル。「AI OSI URI Deploy」拡張(v1.11.0+)の GCP ツール（gcp_health_check / gcp_api / bq_query）を使い、CLI 不要で BigQuery 検証・Cloud Run デプロイ・API 有効化・IAM・Resource Manager 等を REST 経由で実行する。認証は拡張設定の GCP_SERVICE_ACCOUNT_JSON / GCP_PROJECT（OS キーチェーン）。「GCP を操作して」「BigQuery を叩いて」「Cloud Run にデプロイ」「BigQuery の数字を検証」「API を有効化して」「gcp_api で〜」「gcloud 相当のことをして」などで発動。破壊的呼び出し(DELETE 等)は confirm:true、bq は既定 read-only。新規アプリの一括公開は deploy-app、AWS は aws-static-deploy の役割。
+description: |
+  Cowork から GCP を REST 経由で操作する（gcp_health_check / gcp_api / bq_query）。
+  BigQuery 検証・Cloud Run デプロイ・API 有効化・IAM・Resource Manager などを CLI
+  不要で実行する。「BigQuery を叩いて」「Cloud Run にデプロイ」「API を有効化して」
+  「gcloud 相当のことをして」で発動。破壊的呼び出しは confirm:true、bq は既定
+  read-only。
 version: 0.1.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy

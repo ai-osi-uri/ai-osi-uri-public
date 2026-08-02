@@ -1,22 +1,12 @@
 ---
 name: update-deploy
 description: |
-  既にデプロイされている AI OSI URI のアプリ（Vercel / AWS）に対して、ソースを
-  最新化して局所修正→push→自動再デプロイ→smoke test まで行う atomic スキル。
-  「○○アプリを直して」「○○のバグ修正して再デプロイ」「○○のmax_tokens上げて」
-  「アウトプット切れてるから直して」「公開済みアプリのコードをいじって」
-  「もう動いてるVercelアプリにパッチ当てて」「ai-catalog-navigator を直して」
-  「会員サイトの〜を直して」など、**新規作成ではなく既存リポを更新する**全リクエストで発動する。
-  リポURLまたはVercelプロジェクト名から GitHub リポを特定し、ローカルの clone を
-  確認（無ければユーザーに clone コマンドを案内、または gh CLI を計画的に使う）、
-  該当ファイルを修正し、AI OSI URI Deploy 拡張の `github_push` で push、
-  Vercel の自動再デプロイを `vercel_get_deployment_status` で監視、
-  最後に `app-smoke-test` を呼んで「実際に直ったか」までを 1 つのフローで完結させる。
-  新規アプリ作成（既存リポなし・新規リポを作る）は `create-app`（旧 deploy-app） の役割。
-  本スキルは「ローカルから既存リモートを更新する」場合専用。
-  スコープ注記: 対象は **Web / SaaS（Vercel / AWS）のみ**。iOS ネイティブアプリの更新
-  （Xcode Cloud のワークフロー変更・Xcode バージョン繰り上げ・新ビルドの TestFlight 昇格 等）は
-  本スキルでは扱わず、`ios-mobile-release` に委譲する（Xcode バージョンは N-1 ポリシー固定）。
+  既にデプロイ済みの **Web / SaaS アプリ（Vercel / AWS）** を、ソース最新化 → 局所修正
+  → push → 自動再デプロイ → smoke test まで一気に更新する。「○○アプリを直して」
+  「バグ修正して再デプロイ」「公開済みアプリのコードをいじって」「もう動いてる Vercel
+  アプリにパッチ当てて」など、**新規作成ではなく既存リポを更新する**依頼で発動する。
+  新規作成は `create-app`。**モバイルアプリの更新は
+  `mobile-update-deploy`（osi-mobile-deploy）**の担当で、本スキルは扱わない。
 version: 0.5.1
 requires_connectors:
   - server: AI_OSI_URI_Deploy

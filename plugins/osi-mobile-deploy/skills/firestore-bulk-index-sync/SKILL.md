@@ -1,15 +1,10 @@
 ---
 name: firestore-bulk-index-sync
 description: |
-  Firestore の composite index が 50 個・100 個と大量にある案件で、`firebase deploy
-  --only firestore:indexes` が「index limit」「操作進行中」「409 already exists」で
-  詰まる問題を、Firestore Admin REST API `collectionGroups/{cg}/indexes` を直叩きして
-  1 本ずつ冪等に create する形で解決する atomic skill。`firestore.indexes.json` を jq で
-  舐めて各 index を POST、HTTP 200 = created、409 = already exists、400 "not necessary"
-  = built-in index として skip、を全部「成功」に丸めることで、再 deploy が壊れない
-  ようにする。「firebase deploy indexes が落ちる」「firestore index limit」「409 で index
-  作れない」「大量の複合インデックスを一括作成」「MCP から firestore index を作る」
-  「index を CI で自動作成」「REST で firestore index を貼る」で発動する。
+  `firebase deploy --only firestore:indexes` が index limit / 409 already exists
+  で詰まるとき、Firestore Admin REST API を直叩きして composite index を 1
+  本ずつ冪等に作成する。「firestore の index が deploy できない」「index limit」「409
+  で index 作れない」「複合インデックスを一括作成」で発動する。
 version: 0.1.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy

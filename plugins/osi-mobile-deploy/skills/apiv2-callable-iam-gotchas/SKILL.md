@@ -1,18 +1,11 @@
 ---
 name: apiv2-callable-iam-gotchas
 description: |
-  Firebase Cloud Functions v2 (Cloud Run 実装) の HTTPS Callable / apiv2-* サービスで
-  「communication error」「UNAUTHENTICATED」「PERMISSION_DENIED」「USER_UNKNOWN_FIELDS」
-  がクライアント側に出るときの 2 大原因（IAM 未設定 + snake_case エンコーディング）を
-  一気通貫で潰す skill。(a) 新規に生成された Cloud Run サービス（apiv2-*, content-* …）は
-  既定で認証必須 → callable の匿名呼び出しが弾かれる。**deploy 後に allUsers →
-  roles/run.invoker を全 apiv2-* に一括付与**する。(b) Firebase の callable convention は
-  camelCase を期待するが、iOS 側の `JSONEncoder.keyEncodingStrategy = .convertToSnakeCase`
-  や Android 側の Retrofit 既定を放置すると `contentId` → `content_id` に化けて
-  `USER_UNKNOWN_FIELDS` で validation エラー。エンコーダを **明示的に camelCase 固定**する。
-  「callable が unauthenticated」「apiv2 が呼べない」「PERMISSION_DENIED runInvoker」
-  「USER_UNKNOWN_FIELDS content_id」「snake_case で落ちる」「Cloud Run の allUsers 付け方」
-  「Firebase Functions v2 IAM」「deploy したらクライアントから呼べない」で発動する。
+  Firebase Cloud Functions v2 の callable がクライアントから呼べないときの復旧。原因は
+  IAM 未付与（Cloud Run が既定で認証必須）か、snake_case
+  エンコーディングによるフィールド名の食い違いのいずれか。「callable が
+  unauthenticated」「PERMISSION_DENIED runInvoker」「USER_UNKNOWN_FIELDS」「apiv2
+  が呼べない」「deploy したらクライアントから呼べない」で発動する。
 version: 0.1.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy

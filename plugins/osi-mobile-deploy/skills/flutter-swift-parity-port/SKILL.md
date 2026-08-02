@@ -1,18 +1,11 @@
 ---
 name: flutter-swift-parity-port
 description: |
-  **既存 Flutter (Dart) アプリを SwiftUI ネイティブに移行**するときだけ使う、専用の
-  migration ワークフロー skill。**新規モバイルアプリの構築には使わない**（新規は
-  `mobile-app-scaffold` で SwiftUI + Jetpack Compose のネイティブスタックから始めるのが
-  AI OSI URI の既定）。既存 Flutter プロダクトを iOS ネイティブに置き換える必要が
-  出た局面（例: MustPost の SwiftUI 化・Firebase Auth の keychain 事情・OS 新機能の
-  即時追随・チーム構成の変更）で、感覚頼りの「なんとなく似せる」を避けて 1 対 1 の
-  見た目パリティを取るための systematic な 5 フェーズを提供する。「Flutter を SwiftUI に
-  置き換える」「Flutter 版と挙動をそろえて」「Dart のこの画面を Swift に移して」
-  「UI parity を取って」「Flutter から iOS ネイティブに移行したい」などの
-  **移行前提** のリクエストで発動する。「新規で Flutter アプリを作って」「Flutter で
-  作りたい」は本スキルの対象外（新規開発では Flutter を選ばない方針。`mobile-app-scaffold`
-  にネイティブで作るよう案内すること）。
+  既存の Flutter アプリを SwiftUI ネイティブに移行するときだけ使う 5
+  フェーズの移植ワークフロー。1 対 1 の見た目パリティを取ることに主眼を置く。「Flutter
+  を SwiftUI に置き換えて」「Flutter 版と挙動をそろえて」「Dart のこの画面を Swift
+  に移して」「UI parity を取って」で発動する。**新規開発には使わない**（新規は
+  `mobile-app-scaffold`）。
 version: 0.2.0
 ---
 

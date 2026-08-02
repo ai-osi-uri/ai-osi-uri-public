@@ -1,12 +1,9 @@
 ---
 name: mobile-icon-generator
 description: |
-  1枚の 1024x1024 PNG（またはユーザー指定の画像 URL）から、iOS AppIcon と Android
-  mipmap の全 density（mdpi/hdpi/xhdpi/xxhdpi/xxxhdpi + adaptive-icon）を一括生成
-  する atomic スキル。sips / ImageMagick / Node の sharp を用いて resize。ソース画像が
-  無ければ nano-banana MCP でロゴを生成する fallback を持つ。オーケストレータ
-  `deploy-mobile-app` から Phase 4 で呼ばれる。単体で「アプリのアイコン差し替えて」
-  「1024px のロゴから各サイズ生成して」でも発動する。
+  1枚の 1024x1024 画像から iOS AppIcon と Android mipmap の全サイズを一括生成する。
+  ソース画像が無ければロゴ生成にフォールバックする。`deploy-mobile-app` の Phase 4
+  から呼ばれる。単体では「アプリのアイコンを差し替えて」で発動。
 version: 0.1.0
 requires_connectors:
   - server: nano-banana

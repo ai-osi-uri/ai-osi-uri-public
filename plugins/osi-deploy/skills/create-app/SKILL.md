@@ -1,16 +1,17 @@
 ---
 name: create-app
-description: >
-  AI OSI URI が Cowork から **任意の業種のアプリを新規に作って公開する**ための唯一の
-  オーケストレータスキル。Web（Vercel / AWS）、Desktop（Electron）、Mobile（iOS / Android）、
-  ローカル出力（コンテナ / スタンドアロン）に対応。
-  「アプリ作って」「LP 立ち上げて」「○○屋向けの在庫管理アプリ作って」「予約サイトを作って」
-  「会員制のサブスク SaaS 作って」「業務系のシステム作って」「LP 公開して」
-  「デスクトップアプリを作って」「Electronで作って」「オフラインで使えるアプリ」
-  「PCにインストールできるアプリ」「iPhoneアプリを作って」「Androidアプリを作って」
-  「モバイルアプリを作って」「ローカルで動くアプリ」「コンテナで配布したい」
-  など、ユーザーが新しいアプリの作成と公開を依頼したときに発動する。
-  旧名 deploy-app。
+description: |
+  AI OSI URI が Cowork から
+  **アプリを新規に作って公開する**ための唯一のオーケストレータ。Web（Vercel / AWS）
+  ・Desktop（Electron）・ローカル出力（素のプロジェクト / コンテナ）に対応する。
+  「アプリ作って」「LP 立ち上げて」「○○屋向けの在庫管理アプリ作って」
+  「予約サイトを作って」「会員制のサブスク SaaS 作って」「業務系のシステム作って」
+  「デスクトップアプリを作って」「Electron で作って」「PC にインストールできるアプリ」
+  「ローカルで動くアプリ」で発動する。**モバイルアプリ（iOS / Android）は
+  `deploy-mobile-app`（osi-mobile-deploy）が直接受ける**ので「iPhone アプリ作って」
+  「Android アプリを作って」では発動しない。Web
+  前提で進めた結果モバイルと判明したときだけ Phase 4-M で委譲する。既存アプリの修正は
+  `update-deploy`。旧名 deploy-app。
 version: 1.0.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
@@ -368,7 +369,9 @@ scaffold → gh-create-repo-and-push → harness-init
 **Desktop パス:**
 - `electron-scaffold-and-build` — Electron scaffold + ビルド
 - `desktop-release-monitor` — GitHub Actions リリース監視
-- `ios-mobile-release` — iOS モバイルリリース管理
+
+**Mobile パス（委譲）:**
+- `deploy-mobile-app`（osi-mobile-deploy） — モバイルは全面委譲。詳細は [references/mobile-path.md](references/mobile-path.md)
 
 **ローカル出力:**
 - `local-project-output` — プロジェクト出力（生ソース一式）

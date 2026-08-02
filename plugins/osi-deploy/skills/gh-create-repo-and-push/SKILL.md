@@ -1,6 +1,10 @@
 ---
 name: gh-create-repo-and-push
-description: ローカル作業ディレクトリの内容を新規 GitHub リポジトリに作成して push する atomic スキル。認証は AI OSI URI Deploy 拡張（mcp/ai-osi-uri-deploy）が保持する GitHub PAT を使い、`.env` は読まない。拡張の MCP ツール `github_create_repo_and_push` を呼ぶだけ。命名衝突時の自動採番・PAT 入り remote の削除はツール側が担当。オーケストレータ `create-app`（旧 deploy-app） の Step 1 相当として呼ばれる。「GitHub に push して」「リポジトリ作って push」「新しい repo に上げて」「コードを GitHub に上げて」などで発動。GitHub PAT の入力は拡張設定の役割。リポ作成のみ・push のみの片割れ作業には使わない。
+description: |
+  ローカル作業ディレクトリを新規 GitHub リポジトリに作って push する。認証は AI OSI
+  URI Deploy 拡張の PAT を使い `.env` は読まない。`create-app` の Step 1
+  として呼ばれる。単体では「GitHub に push して」「リポジトリ作って push」で発動。
+  リポ作成のみ・push のみの片割れ作業には使わない。
 version: 0.3.0
 ---
 

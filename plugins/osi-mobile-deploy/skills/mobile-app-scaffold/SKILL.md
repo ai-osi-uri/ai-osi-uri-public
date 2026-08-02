@@ -1,17 +1,10 @@
 ---
 name: mobile-app-scaffold
 description: |
-  AI OSI URI の新規モバイルアプリを **iOS = SwiftUI / Android = Kotlin + Jetpack Compose**
-  のネイティブスタックで起こす atomic スキル。**Flutter は greenfield では選ばない**
-  （既存 Flutter アプリの改修に限り `flutter-swift-parity-port` を別途使う）。
-  Golden Template（SwiftUI @main + Compose @Composable の Hello World、Firebase SPM/BOM 済み、
-  CI・fastlane・xcconfig・flavor・アイコン全部入り）を clone → 6 箇所置換
-  （App Name / Bundle ID / Package Name / Team ID / Display Name / パッケージパス）→ GitHub に
-  新規リポ作成 → push まで実行する。「モバイルアプリのテンプレを起こして」「Golden Template
-  からリポ作って」「SwiftUI + Compose の新規アプリを scaffold して」「iOS ネイティブアプリの
-  雛形を作って」「Kotlin Compose の新規リポを作って」「iPhone / Android アプリを一から
-  始めたい」「新規モバイルの骨格を作って」「Flutter じゃなくてネイティブで新規アプリを
-  作って」でも発動する。オーケストレータ `deploy-mobile-app` から Phase 2 で呼ばれる。
+  Golden Template（SwiftUI + Jetpack Compose、Firebase / CI / fastlane 込み）
+  から新規モバイルリポを起こして GitHub に push する。`deploy-mobile-app` の Phase 2
+  から呼ばれる。単体では「モバイルの雛形を作って」「Golden Template からリポ作って」
+  で発動。
 version: 0.2.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy

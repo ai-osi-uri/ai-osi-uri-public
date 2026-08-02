@@ -1,6 +1,11 @@
 ---
 name: supabase-set-auth-url
-description: Supabase プロジェクトの Auth 設定（Site URL と Redirect URLs / uri_allow_list）を本番デプロイ後の URL に更新する atomic スキル。認証は AI OSI URI Deploy 拡張が保持する Supabase PAT を使い、`.env` は読まない。拡張の MCP ツール `supabase_set_auth_url` を呼ぶ。ローカル用に `http://localhost:3000/**` も自動で許可リストに含める。Magic Link が localhost に飛ぶ典型問題を一発で潰す。オーケストレータ `create-app`（旧 deploy-app） から呼ばれる前提だが単独でも動く。「Supabase Auth URL を更新して」「Site URL を本番に変えて」「Magic Link が localhost に飛ぶ」などで発動。DB スキーマ・edge function の操作には使わない。
+description: |
+  Supabase の Auth 設定（Site URL / Redirect URLs）を本番デプロイ後の URL に更新する。
+  localhost:3000 も自動で許可リストに含め、Magic Link が localhost
+  に飛ぶ典型問題を潰す。`create-app` から呼ばれる。単体では「Supabase Auth URL
+  を更新して」「Magic Link が localhost に飛ぶ」で発動。DB スキーマ・edge function
+  の操作には使わない。
 version: 0.2.1
 ---
 
