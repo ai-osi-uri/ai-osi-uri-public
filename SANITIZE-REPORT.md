@@ -26,7 +26,7 @@
 | plugins/osi-docs/skills/architecture-proposal/SKILL.md | 12 | yourrecord | ※ 自社サービス（CAIO / yourrecord 等）の新規営業・初回提案・見積提案は別スキル |
 | plugins/osi-docs/skills/architecture-proposal/SKILL.md | 12 | CAIO | ※ 自社サービス（CAIO / yourrecord 等）の新規営業・初回提案・見積提案は別スキル |
 | plugins/osi-docs/skills/architecture-proposal/scripts/deck_helpers.py | 11 | CAIO | # ---- ブランド配色（CAIO資料準拠 / EDIT可） ---- |
-| plugins/osi-mobile-deploy/skills/deploy-mobile-app/SKILL.md | 141 | GITHUB_ORG | \| GITHUB_ORG \| `ai-osi-uri` / `personal` \| `deploy-app` の `USE_ORG` 判定に準拠 \| |
+| plugins/osi-mobile-deploy/skills/deploy-mobile-app/SKILL.md | 143 | GITHUB_ORG | \| GITHUB_ORG \| `ai-osi-uri` / `personal` \| `deploy-app` の `USE_ORG` 判定に準拠 \| |
 | plugins/osi-backoffice/skills/contract-docusign-send/SKILL.md | 50 | 共有ドライブ | - **Drive（マウント済み共有ドライブ）**：格納先 `30.契約管理/`。書き込みはマウント経由で Drive に同期される。 |
 | plugins/osi-backoffice/skills/contract-docusign-send/references/setup.md | 39 | 共有ドライブ | - Drive（共有ドライブ `30.契約管理/`）がマウントされていること（格納先）。 |
 | plugins/osi-backoffice/skills/contract-docusign-send/references/docusign-and-s3.md | 26 | 共有ドライブ | - **file tools（Mac）**：outputs と共有ドライブのみ書ける。 |

@@ -11,6 +11,8 @@ description: >
 requires_connectors:
   - server: money-forward
     provision: user-install
+  - server: cowork
+    provision: builtin
 
 ---
 

@@ -21,6 +21,8 @@ requires_connectors:
     provision: builtin
   - server: computer-use
     provision: builtin
+  - server: ai-osi-uri-creative
+    provision: user-install
 ---
 
 # deploy-mobile-app — モバイルアプリ新規作成オーケストレータ

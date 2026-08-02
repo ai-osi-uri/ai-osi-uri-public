@@ -11,6 +11,8 @@ version: 0.1.0
 requires_connectors:
   - server: nano-banana
     provision: user-install
+  - server: ai-osi-uri-creative
+    provision: user-install
 ---
 
 # mobile-icon-generator — 1枚から全 density を生成

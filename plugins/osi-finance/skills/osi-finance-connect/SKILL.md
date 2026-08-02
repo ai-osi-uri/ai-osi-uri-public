@@ -16,6 +16,8 @@ requires_connectors:
     provision: user-install
   - server: AI_OSI_URI_Finance
     provision: mcpb
+  - server: money-forward
+    provision: user-install
 ---
 
 # osi-finance-connect（AI OSI URI Finance の OAuth 接続を Chrome 伴走で通す）
