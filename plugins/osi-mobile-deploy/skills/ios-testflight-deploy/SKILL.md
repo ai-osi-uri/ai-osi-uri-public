@@ -6,7 +6,7 @@ description: |
   `deploy-mobile-app` / `mobile-update-deploy` から呼ばれる。単体では「TestFlight
   に上げて」「iOS を再配信して」で発動。TestFlight に上がった後のビルド昇格・App Store
   申請・Xcode バージョン運用は `ios-appstore-release` の担当。
-version: 0.2.0
+version: 0.3.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb
@@ -69,6 +69,20 @@ bundle exec fastlane ios ios_beta_auto flavor:"${FLAVOR:-dev}" notes:"${NOTES:-}
 ```
 
 このモードは Mac local で完結。CI が調子悪い時のリカバリ用途にも使う。
+
+### ❗️ Pre-flight: flavor ごとの ASC App 記録確認（必須）
+
+flavor を新規に配信する場合、**CI を回す前に** Apple Developer Portal の Bundle ID と
+App Store Connect の App 記録の両方が存在することを確認する。片方でも欠けると
+fastlane `get_provisioning_profile` / `pilot` が 「Could not find App with App Identifier」
+で 37 秒で失敗する（MustPost 2026-08-05 の prod 初回配信で実際に踏んだ）。
+
+確認・自動化は `deploy-mobile-app/references/create-asc-app-record.rb` のヘルパーを使う。
+Bundle ID は API で作れるが、App 記録の作成は Admin role 必須なのでキーの role が
+不足なら Web UI で人が作る。詳細と背景は
+`deploy-mobile-app/references/asc-app-record-setup.md`。
+
+---
 
 ### モード B: GitHub Actions で走らせる（既定）
 
@@ -154,7 +168,7 @@ def ensure_assets_car_in_payload!(ipa:)
       UI.important "Assets.car missing — recompiling"
       partial = "#{tmp}/AssetsInfo.plist"
       sh "xcrun actool --compile '#{app_dir}' --platform iphoneos " \
-         "--minimum-deployment-target 17.0 --app-icon AppIcon " \
+         "--minimum-deployment-target 16.0 --app-icon AppIcon " \
          "--output-partial-info-plist '#{partial}' " \
          "apps/ios/MyApp/Resources/Assets.xcassets"
     end

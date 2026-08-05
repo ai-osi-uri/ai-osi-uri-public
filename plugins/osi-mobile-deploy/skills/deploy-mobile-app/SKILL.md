@@ -8,7 +8,7 @@ description: |
   アプリ作って」「Play Store に出したい」「TestFlight に上げるところまでやって」
   で発動する。既定はネイティブ 2 本立て（新規で Flutter / React Native は選ばない）。
   既存リポの修正は `mobile-update-deploy`、Web / SaaS は `create-app`（osi-deploy）。
-version: 0.2.0
+version: 0.3.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb
@@ -117,7 +117,34 @@ Firebase プロビジョニング・Secrets 投入・CI 監視・TestFlight / Pl
     security add-generic-password -U -s "APPLE_TEAM_ID" -a "$USER" -w "24X327Z9SJ"
     ```
 
-    ループしない・見切り発車しない。登録完了を待ってから Phase 1 へ。
+    ループしない・見切り発車しない。登録完了を待ってから Phase 4（ASC pre-flight）へ。
+
+4. **iOS を配信する場合、flavor ごとの ASC 事前登録を確認**（見落とすと CI 37 秒で死ぬ）:
+
+   - Apple Developer Portal に **Bundle ID** が登録されているか
+   - App Store Connect に **App 記録** があるか
+
+   確認は `references/create-asc-app-record.rb` を叩く:
+
+   ```bash
+   export ASC_KEY_ID="$(security find-generic-password -s APP_STORE_CONNECT_API_KEY_ID -a $USER -w)"
+   export ASC_ISSUER_ID="$(security find-generic-password -s APP_STORE_CONNECT_API_KEY_ISSUER_ID -a $USER -w)"
+   export ASC_P8_B64="$(security find-generic-password -s APP_STORE_CONNECT_API_KEY_B64 -a $USER -w)"
+   for FLAVOR in dev stg prod; do
+     export TARGET_BUNDLE_ID="com.aiosiuri.{app_lower}.$FLAVOR"
+     export TARGET_BUNDLE_NAME="{APP_NAME} $(echo $FLAVOR | tr a-z A-Z)"
+     export TARGET_APP_NAME="{APP_NAME}"
+     export TARGET_SKU="{app_lower}-$FLAVOR-$(date +%Y)"
+     bundle exec ruby scripts/create-asc-app-record.rb || echo "→ $FLAVOR: manual step needed"
+   done
+   ```
+
+   Bundle ID 作成は API で自動化される（App Manager role で足りる）。App 記録の作成は
+   Admin role 必須なので、失敗した flavor はスクリプトの案内どおり Web UI で作成する。
+   詳細と背景は `references/asc-app-record-setup.md` 参照（MustPost で実際に踏んだ罠つき）。
+
+   **どれか 1 flavor でも App 記録が無ければ、その flavor は Phase 6-7 で必ず失敗する**。
+   halt して人にお願いする（勝手に "あとで" と流さない）。
 
 ---
 

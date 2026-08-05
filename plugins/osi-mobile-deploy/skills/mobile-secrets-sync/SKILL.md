@@ -5,7 +5,7 @@ description: |
   / Firebase config 等）を一括投入する。keystore が未生成なら作成して Drive
   に退避する。`deploy-mobile-app` の Phase 5 から呼ばれる。単体では「モバイルの
   Secrets を入れて」で発動。
-version: 0.2.0
+version: 0.3.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb
@@ -58,10 +58,14 @@ requires_connectors:
 
 | Secret 名 | 由来 |
 |---|---|
-| `GOOGLE_SERVICE_INFO_PLIST_DEV_B64` | `mobile-firebase-setup` が既に投入済み or 案件フォルダから取得 |
-| `GOOGLE_SERVICE_INFO_PLIST_PROD_B64` | 同上 |
-| `GOOGLE_SERVICES_JSON_DEV_B64` | 同上 |
-| `GOOGLE_SERVICES_JSON_PROD_B64` | 同上 |
+| `GOOGLE_SERVICE_INFO_PLIST_DEV_B64`  | `mobile-firebase-setup` が既に投入済み or 案件フォルダから取得 — dev flavor iOS 必須 |
+| `GOOGLE_SERVICE_INFO_PLIST_STG_B64`  | 同上 — stg flavor を使う案件のみ |
+| `GOOGLE_SERVICE_INFO_PLIST_PROD_B64` | 同上 — **prod flavor 必須**（MustPost 2026-08 で追加忘れてブロックされた） |
+| `GOOGLE_SERVICES_JSON_DEV_B64`       | 同上 — dev flavor Android 必須 |
+| `GOOGLE_SERVICES_JSON_STG_B64`       | 同上 — stg flavor を使う案件のみ |
+| `GOOGLE_SERVICES_JSON_PROD_B64`      | 同上 — **prod flavor 必須** |
+| `FIREBASE_ANDROID_APP_ID`            | `firebase apps:list --json` or Firebase Console | Android Crashlytics / クラッシュレポート送信で使う |
+| `GCP_SA_KEY_JSON`                    | GCP Console → IAM → Service Accounts → Keys → Create JSON | Firebase Functions を CI で `firebase deploy --only functions` するなら必須（Firebase Admin + Cloud Run Admin + Cloud Functions Admin） |
 
 ## 実行フロー（全自動）
 
@@ -188,8 +192,12 @@ github_set_secrets_batch({
     ANDROID_KEY_ALIAS: "upload",
     ANDROID_KEY_PASSWORD: "...",
     GOOGLE_PLAY_JSON_KEY_B64: "...",
-    GOOGLE_SERVICE_INFO_PLIST_DEV_B64: "...",  // include_firebase:true のみ
-    GOOGLE_SERVICES_JSON_DEV_B64: "..."         // 同上
+    GOOGLE_SERVICE_INFO_PLIST_DEV_B64:  "...",   // include_firebase:true のみ
+    GOOGLE_SERVICE_INFO_PLIST_PROD_B64: "...",   // prod を配信するなら必須
+    GOOGLE_SERVICES_JSON_DEV_B64:       "...",
+    GOOGLE_SERVICES_JSON_PROD_B64:      "...",
+    FIREBASE_ANDROID_APP_ID:            "1:xxx:android:yyy",  // Android の Crashlytics などで使うとき
+    GCP_SA_KEY_JSON:                    "{...}"                // Firebase Functions を CI で deploy するなら
   }
 })
 ```

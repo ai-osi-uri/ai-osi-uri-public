@@ -19,6 +19,15 @@ AI OSI URI のネイティブモバイルアプリ（iOS / Android）作成〜�
 
 ## Changelog
 
+### v0.6.0 — ASC App 記録の Phase 0 事前登録（2026-08）
+
+MustPost の prod 初回 TestFlight 配信が 37 秒で失敗した実例（`Could not find App with App Identifier com.aiosiuri.mustpost.prod`）を教訓としてプラグインに定着させる。
+
+- **`deploy-mobile-app` v0.3.0** — Phase 0 に step 4 を追加：**flavor ごとの Apple Developer Portal Bundle ID + App Store Connect App 記録の存在確認を必須化**。`references/create-asc-app-record.rb` ヘルパーと `references/asc-app-record-setup.md` 詳細手順を同梱。Bundle ID は API で作成されるが、App 記録は Admin role 必須なので Web UI に誘導するフォールバック付き
+- **`ios-testflight-deploy` v0.3.0** — Pre-flight セクションを追加し、CI を回す前に ASC 登録の確認ヘルパーに飛ばせる。`ensure_assets_car_in_payload!` の actool `--minimum-deployment-target` を 17.0 → 16.0 に修正（Golden Template の project.yml と一致）
+- **`mobile-secrets-sync` v0.3.0** — Firebase 周りの Secrets を dev/stg/prod の 3 flavor に拡張し、MustPost で実際に必要だった `FIREBASE_ANDROID_APP_ID`（Android Crashlytics 用）と `GCP_SA_KEY_JSON`（`firebase deploy --only functions` 用）を一覧とバッチ例に追加
+- **`ci-failure-patterns.md`** — pattern #16 「Could not find App with App Identifier」を追加。症状（fastlane 37 秒失敗）・原因 (Bundle ID / App 記録 未登録)・修正（Phase 0 に戻って `create-asc-app-record.rb`）・再発防止（Phase 0 必須化）の 4 行完備
+
 ### v0.4.0 — 新規はネイティブ既定を明文化（2026-07）
 
 Flutter→SwiftUI ポートが実運用でほぼ稀（既存の移行案件だけ）と判明したので、新規モバイルアプリの既定スタックを **iOS = SwiftUI / Android = Kotlin + Jetpack Compose** に統一する方針を全スキルに反映。

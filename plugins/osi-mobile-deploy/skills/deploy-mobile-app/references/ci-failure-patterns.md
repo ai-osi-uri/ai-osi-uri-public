@@ -151,6 +151,22 @@ auto-fix push で回復する。**新しく踏んだ罠は必ずここに追記�
 
 ---
 
+### 16. `Could not find App with App Identifier ''com.xxx.yyy''` / `get_provisioning_profile` 失敗
+
+- **症状**: `.github/workflows/ios-release-auto.yml` の `Fastlane ios_beta_auto` step で（3060 秒で）失敗し、fastlane のログに次が出る:
+
+    ```
+    [!] Could not find App with App Identifier ''com.aiosiuri.mustpost.prod''
+    You can easily generate a new App ID on the Developer Portal using ''produce''
+    fastlane finished with errors
+    ```
+
+- **原因**: **Apple Developer Portal に Bundle ID が未登録**、または **App Store Connect に App 記録が未作成**。fastlane `get_provisioning_profile` は Bundle ID + App 記録の両方が存在する前提で動く。dev flavor だけ登録して prod flavor の準備を忘れるとこのパターン。
+- **修正**: **CI を回す前に Phase 0 に戻って** 事前登録をやる。自動化ヘルパー: `deploy-mobile-app/references/create-asc-app-record.rb`。Bundle ID は API で作成されるが、App 記録はキーの role が Admin でないと作らないので、スクリプトが案内する Web UI で人が作る。作成後に `git push` で同じワークフローを再実行すると通る。
+- **再発防止**: `deploy-mobile-app` Phase 0 に **flavor ごとの ASC 事前登録確認** を必須化（見落とすと CI 37 秒で死ぬ）。詳細と FAQ は `deploy-mobile-app/references/asc-app-record-setup.md`。
+
+---
+
 ## Android 系
 
 ### 11. `Execution failed for task ':app:validateSigningRelease'`
