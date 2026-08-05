@@ -69,7 +69,7 @@
       "name": "osi-mobile-deploy",
       "source": "./plugins/osi-mobile-deploy",
       "description": "ネイティブモバイルアプリ（iOS / Android）作成〜配信自動化。**既定スタック: iOS = SwiftUI (iOS 16+) / Android = Kotlin + Jetpack Compose (minSdk 26)。Flutter は新規では使わない**（既存 Flutter アプリの移行時のみ flutter-swift-parity-port）。「モバイルアプリ作って」の一言で、Golden Template から新規リポを起こし、Firebase プロビジョニング・アイコン生成・GitHub Secrets 投入・CI 自動修正ループを回して TestFlight / Google Play Internal Track まで到達させる。TestFlight より先（ビルド昇格・App Store 申請・Xcode の N-1 ピン運用）は ios-appstore-release が担当する。osi-deploy（Web / SaaS）と対を成すモバイル配信専用プラグイン。16 スキル。",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "category": "deploy",
       "tags": [
         "mobile",

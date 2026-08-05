@@ -4,8 +4,8 @@ description: |
   ローカルビルドした IPA / AAB を Simulator / Emulator
   で起動してクラッシュを検知する軽量スモークテスト。落ちたら `mobile-crash-triage`
   に渡す。`deploy-mobile-app` / `mobile-update-deploy` から呼ばれる。
-  単体では「Simulator で起動確認して」で発動。
-version: 0.1.0
+  単体では「Simulator で起動確認して」「全画面をタップして確認して」で発動。
+version: 0.2.0
 ---
 
 # mobile-app-smoke-test — Simulator / Emulator でのスモーク起動確認
@@ -17,19 +17,25 @@ version: 0.1.0
 | `work_dir` | ✅ | モバイルリポの絶対パス |
 | `targets` | 任意 | `ios` / `android` / `both`（既定: `both`） |
 | `wait_seconds` | 任意 | launch 後の待機秒数（既定: 5） |
-| `simulator_device` | 任意 | 既定: `iPhone 16` |
+| `simulator_device` | 任意 | 既定: `iPhone 17 Pro` |
 | `emulator_avd` | 任意 | 既定: `Pixel_8_API_34` |
+| `flavor` | 任意 | dev / stg / prod（既定: dev）。iOS の scheme / configuration 選択に効く |
+| `signin_after_launch` | 任意 | true にすると `ios-sim-auth-backdoor` を内部で呼び HomeView 到達を確認 |
+| `walk_all_tabs` | 任意 | true にすると TabView 全タブ + 設定画面を巡回して screenshot を残す |
 
 ## ワークフロー
 
 ```
 1. iOS の場合
-   a. .app を build（IPA は install できないので .app を Debug 用に生成）
-   b. simulator を boot（既に booted ならスキップ）
-   c. .app を install
-   d. launch
-   e. wait_seconds 待つ
-   f. crash check（`xcrun simctl spawn <UDID> log stream --level=debug --predicate ...` or 単純に app が生きているかを PID で確認）
+   a. xcodegen generate（stale project drift の予防）
+   b. .app を build（configuration は Debug-<Flavor>、単純 Debug は禁止）
+   c. simulator を boot（既に booted ならスキップ）
+   d. .app を install
+   e. launch
+   f. wait_seconds 待つ
+   g. crash check（`xcrun simctl spawn <UDID> log stream --level=debug --predicate ...` or 単純に app が生きているかを PID で確認）
+   h. signin_after_launch なら Custom Token deep link でサインイン → HomeView screenshot
+   i. walk_all_tabs なら 5 タブ + 設定画面を巡回して screenshot 保存
 2. Android の場合
    a. debug APK を build（./gradlew assembleDevDebug）
    b. emulator を boot
@@ -45,22 +51,36 @@ version: 0.1.0
 ```bash
 IOS_DIR="$WORK_DIR/apps/ios"
 APP_NAME="$(basename "$(find "$IOS_DIR" -maxdepth 1 -type d -name '*.xcodeproj' | head -1)" .xcodeproj)"
+FLAVOR="${FLAVOR:-dev}"
+FLAVOR_CAP="$(echo "$FLAVOR" | awk '{print toupper(substr($0,1,1)) tolower(substr($0,2))}')"
+# ← flavor=dev なら Dev、stg なら Stg、prod なら Prod
 
 # Debug ビルド
 cd "$IOS_DIR"
 xcodegen generate
+
 xcodebuild \
   -project "$APP_NAME.xcodeproj" \
-  -scheme "$APP_NAME" \
-  -configuration Debug \
+  -scheme "${APP_NAME}-${FLAVOR_CAP}" \
+  -configuration "Debug-${FLAVOR_CAP}" \
   -destination "generic/platform=iOS Simulator" \
   -derivedDataPath ./build \
   build
 
-APP_PATH="./build/Build/Products/Debug-iphonesimulator/$APP_NAME.app"
+# ← configuration は必ず "Debug-Dev" 等の合成名。単純 "Debug" は resource bundle が
+#    別ディレクトリに落ちて .app が中身空で fail する（xcodegen-project-regen 参照）
+
+APP_PATH="./build/Build/Products/Debug-${FLAVOR_CAP}-iphonesimulator/$APP_NAME.app"
+
+# .app 中身確認 (中身が無いビルド失敗の早期検出)
+if [ ! -x "$APP_PATH/$APP_NAME" ]; then
+  echo "❌ Build produced empty .app (no executable). Check configuration name."
+  ls -la "$APP_PATH"
+  exit 1
+fi
 
 # Simulator 起動
-SIM_DEVICE="${SIMULATOR_DEVICE:-iPhone 16}"
+SIM_DEVICE="${SIMULATOR_DEVICE:-iPhone 17 Pro}"
 SIM_UDID=$(xcrun simctl list devices "$SIM_DEVICE" | grep -oE '[0-9A-F-]{36}' | head -1)
 if [ -z "$SIM_UDID" ]; then
   echo "❌ Simulator '$SIM_DEVICE' が無い。 xcrun simctl list devices で確認"
@@ -145,6 +165,66 @@ fi
 }
 ```
 
+---
+
+## Simulator 座標系 — screenshot pixels ≠ tap points
+
+`xcode_sim_screenshot` は **retina pixels** で画像を返し、`xcode_sim_tap` は
+**points** で受ける。デバイスごとの倍率:
+
+| Device | Screenshot | Point | Ratio |
+|---|---|---|---|
+| iPhone 17 Pro | 934 × 1911 | 402 × 874 | 0.43 |
+| iPhone 15 Pro | 1179 × 2556 | 393 × 852 | 0.33 |
+| iPhone 15 | 1170 × 2532 | 390 × 844 | 0.33 |
+| iPad Pro 11 | 1668 × 2388 | 834 × 1194 | 0.50 |
+
+**必ず変換して tap する**:
+
+```
+screenshot 座標 (275, 1780) を iPhone 17 Pro で tap する場合
+→ tap 座標 (275*0.43, 1780*0.43) = (118, 813)
+```
+
+`xcode_sim_describe_ui` が accessibility tree を返してくれれば正確な frame が
+取れるが、launch 直後や SwiftUI で ax label が付いてないビューでは空を返す。
+その場合は screenshot + 座標変換で回避する（本 skill を使う典型パターン）。
+
+---
+
+## walk_all_tabs: 全画面パリティ E2E スイート
+
+TabView + サイド画面を巡回して screenshot を残すパターン。回帰検知や
+「Flutter → SwiftUI 移植で機能が抜けていないか」の証跡集めに使う。
+
+iPhone 17 Pro の TabView 座標（5 タブ + 中央 + ボタン）:
+
+```
+Home    tap(40,  813)
+Search  tap(118, 813)
+Post +  tap(200, 813)
+Notif   tap(277, 813)
+Profile tap(356, 813)
+```
+
+各タブ tap 後 2 秒待って screenshot。設定画面は Profile 経由:
+
+```
+1. Home tab   → screenshot(home.png)
+2. Search tab → screenshot(search.png)
+3. Notif tab  → screenshot(notif.png)
+4. Profile    → screenshot(profile.png)
+5. Profile 右上「⚙️」pill を tap(352, 86) → screenshot(settings.png)
+```
+
+Post + ボタンは Sim ではカメラが動かないため tap しないでスキップする（実機
+TestFlight でのみ検証）。
+
+保存先は `/tmp/mustpost_<screen>.png` にしておくと Claude が視認可能で
+UI parity 判定に使いやすい。
+
+---
+
 ## エラーハンドリング
 
 | 症状 | 対応 |
@@ -155,6 +235,12 @@ fi
 | adb がインストールされていない | `brew install --cask android-platform-tools` を案内 |
 | Debug ビルドが失敗 | エラーログを提示、`mobile-crash-triage` は crash log 前提なので該当せず「build 失敗」として返す |
 | crash した | `mobile-crash-triage` を呼ぶ提案をユーザーに提示 |
+| .app が生成されるが executable 無し | configuration 名が Debug-Dev になっていない → xcodegen-project-regen |
+| tap が効いていない | screenshot 座標をそのまま渡している。点比率で変換 (iPhone 17 Pro は 0.43) |
+| signin_after_launch で LoginView から進まない | インストール済み .app が古い commit のビルド（DEBUG deep link handler 未組込）→ 再ビルド + 上書き install、詳細は ios-sim-auth-backdoor |
+| walk_all_tabs で画面が変わらない | tap 座標が画面外（y=1780 等）に落ちている。0.43 倍する |
+
+---
 
 ## 注意事項
 
@@ -162,3 +248,5 @@ fi
 - **release ビルドは Simulator で crash することがある**（App Attest / DeviceCheck が Simulator では動かない）。smoke test は debug ビルドで OK。
 - **並列実行の注意**: iOS と Android を同時に走らせると Mac の負荷が高い。逐次でも 1〜2 分で終わる。
 - **wait_seconds を長くしても保証にはならない**。深いバグは実機 / 実データで初めて出る。あくまで「起動時 crash 検知」の位置づけ。
+- **configuration 名は必ず Debug-<Flavor>**。単純 "Debug" は xcodegen 環境では存在しない or 破損ビルドを作る。
+- **signin_after_launch を使う前提条件**: install する .app が DEBUG deep link handler を組み込んだ commit でビルドされていること（詳細 ios-sim-auth-backdoor Part B §3）。
