@@ -1,0 +1,215 @@
+# =============================================================
+# OSI Finance データレイアウト仕様（配布キットの正本）
+# =============================================================
+# このファイルが「フォルダ構成」と「台帳（2冊）のタブ・列」の唯一の正本。
+# - osi-finance-setup: 導入時にこの仕様どおりに Drive フォルダと台帳を生成する
+# - osi-finance-setup(スモーク) / osi-finance-monthly: 台帳ヘルスチェックでこの仕様と照合する
+# - 手書きの解説は skills/osi-finance-mf-sync/references/ledger-schema.md（本ファイルへの補足）
+# 組織固有の「実際の置き場所・ファイル名」は config/osi-finance-settings.md が持つ。
+# ここには汎用の規定値（default）だけを書き、実値は書かない。
+
+layout_version: 1
+updated: 2026-08-08
+
+# -------------------------------------------------------------
+# 1. フォルダ構成（ルート1点方式）
+# -------------------------------------------------------------
+# 顧客が決めるのは「ルートをどこに置くか」1点だけ。配下は常にこの規定ツリー。
+# 置き場所は Google Workspace の共有ドライブを推奨（個人依存・退職リスクの回避）。
+# 既存のフォルダ体系がある組織のみ、settings の Drive キーで名前を上書きできる。
+folders:
+  root:
+    default_name: "OSI Finance"
+    settings_key: DRIVE_BILLING_ROOT   # 既存キーを流用（ルート=請求管理ルート）
+    recommended_location: shared_drive # shared_drive | my_drive(共有必須)
+  children:
+    - name: "00.契約書"
+      settings_key: DRIVE_CONTRACTS
+      purpose: 契約PDFの正本（contract-intake が格納）
+    - name: "01.受領請求書"
+      settings_key: DRIVE_RECEIVED_INVOICES
+      purpose: 受領請求書PDF（YYYY-MM/ 配下）と支払管理台帳
+      contains_ledger: 支払管理台帳
+    - name: "02.送付請求書"
+      settings_key: DRIVE_SENT_INVOICES
+      purpose: 発行請求書PDF（YYYY-MM/ 配下）と請求管理台帳
+      contains_ledger: 請求管理台帳
+    - name: "03.経費管理"
+      settings_key: DRIVE_EXPENSE_ROOT
+      purpose: 経費まわりの証憑ルート
+      children:
+        - name: "カードSaaS証憑"
+          settings_key: DRIVE_CARD_SAAS_EVIDENCE
+          purpose: カード払い（自動課金SaaS）の証憑。台帳には起票しない
+        - name: "レシート未処理"
+          purpose: "紙レシートの投入口。人単位サブフォルダ {氏名}/（receipt-intake が申請者を特定）"
+
+# ルートに共有をかければ配下に継承される（共有はルート1点で管理する）。
+sharing:
+  grants:
+    - subject: 経理担当（人）
+      role: editor
+      required: true
+    - subject: コネクタ実行主体（サービスアカウントのメールアドレス。SA鍵方式のとき）
+      role: editor
+      required: true
+      note: 共有しないと AI OSI URI Finance 拡張が台帳を読み書きできない
+    - subject: 税理士・経営者など閲覧者
+      role: viewer
+      required: false
+  policy: |
+    「組織全体に共有」はしない（支払管理台帳に振込先口座が含まれるため）。
+    共有先は上記ホワイトリストのみ。追加はルートフォルダへの共有で行う。
+
+# -------------------------------------------------------------
+# 2. 台帳（形式＝ネイティブ Google スプレッドシート）
+# -------------------------------------------------------------
+# 配布物としては xlsx テンプレ（assets/templates/）を同梱し、setup が配置時に
+# Google スプレッドシート形式へ変換する。変換後のスプレッドシートIDを
+# settings（LEDGER_*_SHEET_ID）に記録して以後の読み書きに使う。
+ledger_format: google_spreadsheet   # xlsx はテンプレ搬送用。運用正本はスプレッドシート
+templates:
+  - assets/templates/請求管理台帳_テンプレート.xlsx
+  - assets/templates/支払管理台帳_テンプレート.xlsx
+
+ledgers:
+
+  請求管理台帳:   # AR・もらう側。02.送付請求書/ に置く
+    settings_keys: {file: LEDGER_BILLING_FILE, sheet_id: LEDGER_BILLING_SHEET_ID}
+    tabs:
+      - name: 発行者設定
+        required: true
+        kind: key_value   # 列: 項目 / 値 / 備考
+        rows: [発行者名義, 登録番号, 郵便番号, 住所, 振込先 銀行, 振込先 支店,
+               預金種別, 口座番号, 口座名義, 消費税率, 採番ルール, 支払サイト, 振込手数料]
+        note: osi-finance-settings の発行者情報と一致させる（請求書PDFに反映）
+      - name: 契約マスタ
+        required: true
+        key: 契約ID
+        columns:
+          - {name: 契約ID, required: true, type: id, note: "AR-C-連番（旧 C- は AR とみなす）"}
+          - {name: 取引先, required: true, type: string}
+          - {name: 取引先ID, required: false, type: id, note: "取引先マスタ（3桁）を使う組織のみ"}
+          - {name: 方向, required: false, type: enum, values: [受注, 発注], note: "AP契約も1表で持つ組織のみ（既定は受注）"}
+          - {name: 正式名称, required: true, type: string}
+          - {name: 郵便番号, required: false, type: string}
+          - {name: 住所, required: false, type: string}
+          - {name: 請求先To, required: true, type: string}
+          - {name: Toアドレス, required: true, type: email}
+          - {name: CC, required: false, type: string}
+          - {name: CCアドレス, required: false, type: email}
+          - {name: 契約種別, required: true, type: string}
+          - {name: 契約内容, required: true, type: string}
+          - {name: 金額区分, required: true, type: enum, values: [月額固定, 一括]}
+          - {name: "月額(税込)", required: false, type: number}
+          - {name: "一括額(税込)", required: false, type: number}
+          - {name: 税率, required: true, type: string, note: "例 10%"}
+          - {name: 契約開始, required: true, type: date}
+          - {name: 契約終了, required: false, type: date}
+          - {name: 支払サイト, required: true, type: string}
+          - {name: 契約書ファイル, required: false, type: path, note: 00.契約書/ 配下の相対パス}
+          - {name: ステータス, required: true, type: enum, values: [ドラフト, 有効, 終了], note: 締結済(有効)のみスケジュール展開}
+          - {name: 備考, required: false, type: string}
+      - name: 月次請求スケジュール
+        required: true
+        key: 契約ID+対象月
+        columns:
+          - {name: 契約ID, required: true, type: id}
+          - {name: 取引先, required: true, type: string}
+          - {name: 対象月, required: true, type: month, note: "YYYY-MM"}
+          - {name: 件名, required: true, type: string}
+          - {name: "請求額(税込)", required: true, type: number}
+          - {name: 請求書番号, required: false, type: id, note: "INV-YYYY-MM-連番3桁。invoice 発行時に確定"}
+          - {name: 請求日, required: false, type: date}
+          - {name: 支払期限, required: false, type: date}
+          - {name: 請求ステータス, required: true, type: enum, values: [未請求, 下書き済, 請求済, 入金済],
+             note: invoice が 未請求→下書き済 に更新。ar-sync の突合対象}
+          - {name: 送付請求書ファイル, required: false, type: path}
+          - {name: 入金日, required: false, type: date}
+          - {name: 入金額, required: false, type: number}
+          - {name: 備考, required: false, type: string}
+
+  支払管理台帳:   # AP・払う側。01.受領請求書/ に置く
+    settings_keys: {file: LEDGER_PAYMENT_FILE, sheet_id: LEDGER_PAYMENT_SHEET_ID}
+    tabs:
+      - name: 支払先マスタ
+        required: true
+        key: 支払先ID
+        columns:
+          - {name: 支払先ID, required: true, type: id, note: V-連番3桁}
+          - {name: 正式名称, required: true, type: string}
+          - {name: 既定支払方法, required: true, type: enum, values: [振込, カード],
+             note: カード＝台帳起票しない（会計のカード連携が自動仕訳）}
+          - {name: 既定勘定科目, required: false, type: string}
+          - {name: "既定税区分(MF)", required: false, type: string, note: MF の実在名に合わせる}
+          - {name: インボイス登録番号, required: false, type: string, note: T+13桁}
+          - {name: 振込先銀行, required: false, type: string}
+          - {name: 支店, required: false, type: string}
+          - {name: 預金種別, required: false, type: string}
+          - {name: 口座番号, required: false, type: string}
+          - {name: 口座名義, required: false, type: string}
+          - {name: 源泉対象, required: true, type: enum, values: [なし, あり]}
+          - {name: 備考, required: false, type: string}
+      - name: 月次支払管理
+        required: true
+        key: 請求書ID
+        columns:
+          - {name: 請求書ID, required: true, type: id,
+             note: "支払先ID+対象月(YYYYMM)+請求書番号。仕訳摘要に入れて MF 突合キーにする"}
+          - {name: 支払先ID, required: true, type: id}
+          - {name: 支払先名, required: true, type: string}
+          - {name: 対象月, required: true, type: month}
+          - {name: 勘定科目, required: true, type: string}
+          - {name: "税区分(MF)", required: true, type: string}
+          - {name: "金額(税抜)", required: true, type: number}
+          - {name: 消費税額, required: true, type: number}
+          - {name: "金額(税込)", required: true, type: number}
+          - {name: 源泉徴収税額, required: false, type: number}
+          - {name: 振込額, required: true, type: number}
+          - {name: 支払日, required: false, type: date}
+          - {name: 状態, required: true, type: enum, values: [未払予定, 支払済, 仕訳連携済]}
+          - {name: MF連携状態, required: true, type: enum, values: [未連携, 連携済]}
+          - {name: MF仕訳ID, required: false, type: id, note: mf-sync 成功時に書き戻し}
+          - {name: 請求書ファイル, required: false, type: path}
+      - name: 経費一覧
+        required: true
+        key: 経費ID
+        columns:
+          - {name: 経費ID, required: true, type: id}
+          - {name: 支払先ID, required: false, type: id}
+          - {name: 発生日, required: true, type: date}
+          - {name: 勘定科目, required: true, type: string}
+          - {name: "税区分(MF)", required: true, type: string}
+          - {name: "金額(税抜)", required: true, type: number}
+          - {name: 消費税額, required: true, type: number}
+          - {name: "金額(税込)", required: true, type: number}
+          - {name: 状態, required: true, type: enum, values: [未払予定, 支払済, 仕訳連携済]}
+          - {name: MF連携状態, required: true, type: enum, values: [未連携, 連携済]}
+          - {name: MF仕訳ID, required: false, type: id}
+          - {name: 備考, required: false, type: string}
+      - name: 月次支払スケジュール
+        required: false   # 発注契約の展開を使う組織のみ（contract-intake の AP 展開で作成）
+        key: 予定ID
+        columns:
+          - {name: 予定ID, required: true, type: id, note: "支払先ID+対象月(YYYYMM)"}
+          - {name: 契約ID, required: true, type: id, note: AP-C-連番}
+          - {name: 取引先ID, required: false, type: id, note: 取引先マスタ（3桁）と対応}
+          - {name: 支払先ID, required: true, type: id}
+          - {name: 支払先名, required: true, type: string}
+          - {name: 対象月, required: true, type: month}
+          - {name: "予定額(税込)", required: true, type: number}
+          - {name: 支払予定日, required: true, type: date}
+          - {name: 状態, required: true, type: enum, values: [未払予定, 請求書受領済, 支払済]}
+          - {name: 受領請求書ID, required: false, type: id, note: payment-detect が突合で記入}
+
+# -------------------------------------------------------------
+# 3. ヘルスチェック（setup スモーク／monthly 冒頭で実施）
+# -------------------------------------------------------------
+health_check:
+  folders: ルート配下に required な子フォルダが存在するか（名前は settings の実値で照合）
+  tabs: 各台帳に required なタブが存在するか
+  columns: 各タブの1行目ヘッダが本仕様の columns と順序・名称ともに一致するか
+  enums: 状態系の列に values 外の値が無いか（違反はレビュー対象として報告のみ）
+  on_failure: |
+    自動修復しない。差分（欠けたフォルダ/タブ/列・不明な値）を一覧で人に報告し、
+    「テンプレ再配置」「列名の復元」「settings の上書き設定」のいずれかを提案する。
