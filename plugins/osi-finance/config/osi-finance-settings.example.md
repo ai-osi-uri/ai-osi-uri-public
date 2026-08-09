@@ -85,16 +85,22 @@ references 側には「汎用ロジック・判断基準」だけを残します
 
 ## 5. Drive ルート・フォルダ構成
 
-請求・経費まわりの保存先ルートとサブフォルダ名。組織で名前が違う場合はここで差し替える。
+**規定はルート1点方式**（正本: `assets/schema/data-layout.yaml`）：「OSI Finance」ルートを
+共有ドライブに1つ作り、配下は規定ツリー（00.契約書／01.受領請求書／02.送付請求書／03.経費管理）で固定。
+その場合ここに書くのは**ルートの場所だけ**でよい。既存のフォルダ体系がある組織のみ、下表で名前を上書きする。
 
 | キー | 値（フォルダ名・パス） |
 |---|---|
-| 請求管理ルート | {{DRIVE_BILLING_ROOT 例: 31.請求管理}} |
-| └ 契約書 | {{DRIVE_CONTRACTS 例: 00.契約書}} |
-| └ 受領請求書（AP） | {{DRIVE_RECEIVED_INVOICES 例: 01.受領請求書}} |
-| └ 送付請求書（AR） | {{DRIVE_SENT_INVOICES 例: 02.送付請求書}} |
-| 経費管理ルート | {{DRIVE_EXPENSE_ROOT 例: 32.経費管理}} |
-| └ カードSaaS証憑 | {{DRIVE_CARD_SAAS_EVIDENCE 例: カードSaaS証憑}} |
+| OSI Finance ルートの場所 | {{DRIVE_ROOT_LOCATION 例: 共有ドライブ「経理」直下／マイドライブ（要・経理チーム共有）}} |
+| 請求管理ルート | {{DRIVE_BILLING_ROOT 規定: OSI Finance（上書き例: 31.請求管理）}} |
+| └ 契約書 | {{DRIVE_CONTRACTS 規定: 00.契約書}} |
+| └ 受領請求書（AP） | {{DRIVE_RECEIVED_INVOICES 規定: 01.受領請求書}} |
+| └ 送付請求書（AR） | {{DRIVE_SENT_INVOICES 規定: 02.送付請求書}} |
+| 経費管理ルート | {{DRIVE_EXPENSE_ROOT 規定: OSI Finance/03.経費管理（上書き例: 32.経費管理）}} |
+| └ カードSaaS証憑 | {{DRIVE_CARD_SAAS_EVIDENCE 規定: カードSaaS証憑}} |
+
+> **共有はルート1点**（経理担当=編集／コネクタのサービスアカウント=編集／税理士等=閲覧・任意）。
+> 「組織全体に共有」はしない（支払管理台帳に振込先口座が含まれるため）。
 
 ## 6. 台帳ファイル
 
