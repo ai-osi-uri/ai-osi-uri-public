@@ -1,10 +1,10 @@
 {
   "name": "osi-creative",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "requires_connectors": [
     "AI OSI URI Creative"
   ],
-  "description": "AI 動画制作（ディスパッチャ ai-video-production ＋ メソッド vp-*）・日本語音声ナレーション（narration：クリーンテキスト＋発音辞書）・出資お礼メッセージ生成。汎用クリエイティブスキル集。",
+  "description": "AI 動画制作（ディスパッチャ ai-video-production ＋ メソッド vp-*。15/30秒の動画名刺 vp-corporate-card / vp-personal-intro を含む）・日本語ナレーション（narration）・BGM/シグネチャー音源（music）・実写UGCリール編集・出資お礼メッセージ生成。",
   "author": {
     "name": "AI OSI URI",
     "email": "yuhenagisa@ai-osi-uri.com"
