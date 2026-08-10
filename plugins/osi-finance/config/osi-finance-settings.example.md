@@ -157,6 +157,8 @@ references 側には「汎用ロジック・判断基準」だけを残します
 | 支払管理台帳（AP・支払先マスタの正本） | {{LEDGER_PAYMENT_FILE 例: 支払管理台帳.xlsx}} |
 | 請求管理台帳 スプレッドシートID（ネイティブGoogle Sheets化した場合・自動追記用） | {{LEDGER_BILLING_SHEET_ID 例: 16Xm3-…（URL /d/<ここ>/edit）}} |
 | 支払管理台帳 スプレッドシートID（同上） | {{LEDGER_PAYMENT_SHEET_ID 例: 1dRNut-…}} |
+| 仕訳台帳 ファイル名（v4・内部仕訳帳） | {{LEDGER_JOURNAL_FILE 例: 仕訳台帳}} |
+| 仕訳台帳 スプレッドシートID | {{LEDGER_JOURNAL_SHEET_ID 例: 1BIRBN-…}} |
 
 > **台帳を自動追記したい場合**：台帳をネイティブ Google スプレッドシートにし、上記の各 `..._SHEET_ID` を入れる。
 > `AI OSI URI Deploy` 拡張の `sheets_append_row`（要：対象シートをサービスアカウントのメールに「編集者」で共有）で、
