@@ -8,7 +8,7 @@
 # 組織固有の「実際の置き場所・ファイル名」は config/osi-finance-settings.md が持つ。
 # ここには汎用の規定値（default）だけを書き、実値は書かない。
 
-layout_version: 3
+layout_version: 4
 updated: 2026-08-10
 
 # -------------------------------------------------------------
@@ -194,6 +194,64 @@ ledgers:
           - {name: 登録者, required: false, type: email, note: 操作者トラッキング（v3）。登録日・登録元と対}
           - {name: 更新者, required: false, type: email}
           - {name: 更新日時, required: false, type: date}
+
+  仕訳台帳:   # 会計・v4 新設。ルート直下（請求管理台帳と同じ共有範囲）に置く
+    settings_keys: {file: LEDGER_JOURNAL_FILE, sheet_id: LEDGER_JOURNAL_SHEET_ID}
+    note: |
+      内部仕訳帳。ACCOUNTING_SYNC=none の組織では会計の正本、mf/freee の組織では
+      エクスポート下書き＋突合の物差し。仕訳の生成は osi-finance-journal（人レビュー必須・
+      生成は案→承認で確定）。減価償却・引当等の決算整理は対象外（税理士の領分。手動行の追記は可）。
+    tabs:
+      - name: 仕訳帳
+        required: true
+        key: 仕訳ID
+        columns:
+          - {name: 仕訳ID, required: true, type: id, note: "J-YYYYMM-連番4桁"}
+          - {name: 日付, required: true, type: date, note: 計上日}
+          - {name: 借方科目, required: true, type: string, note: 勘定科目マスタの科目名}
+          - {name: "借方金額", required: true, type: number}
+          - {name: 貸方科目, required: true, type: string}
+          - {name: "貸方金額", required: true, type: number, note: 借方金額と一致（借貸一致チェック対象）}
+          - {name: "税区分", required: false, type: string}
+          - {name: 摘要, required: true, type: string, note: "参照ID（INV-…/経費ID）を必ず含める＝突合キー"}
+          - {name: 出所, required: true, type: enum, values: [AR請求, AR入金, AP支払, 経費, 手動]}
+          - {name: 参照ID, required: false, type: id, note: "元になった台帳行のキー。同じ 参照ID×出所 は再生成しない（重複防止）"}
+          - {name: 対象月, required: true, type: month}
+          - {name: 状態, required: true, type: enum, values: [案, 確定],
+             note: "journal が生成した直後は案。人レビュー後に確定。月次サマリは確定のみ集計"}
+          - {name: エクスポート済み, required: false, type: enum, values: [mf, freee, none],
+             note: 会計SaaSへ登録/出力済みか（二重計上防止フラグ）}
+          - {name: 作成者, required: false, type: email, note: 操作者トラッキング（v3）}
+          - {name: 作成日時, required: false, type: date}
+          - {name: 更新者, required: false, type: email}
+          - {name: 更新日時, required: false, type: date}
+      - name: 勘定科目マスタ
+        required: true
+        key: 科目コード
+        columns:
+          - {name: 科目コード, required: true, type: id, note: "4桁（1xxx資産/2xxx負債/4xxx収益/5xxx費用）"}
+          - {name: 科目名, required: true, type: string}
+          - {name: 区分, required: true, type: enum, values: [資産, 負債, 純資産, 収益, 費用]}
+          - {name: 税区分既定, required: false, type: string}
+          - {name: MF科目名, required: false, type: string, note: エクスポート時のマッピング}
+          - {name: freee科目名, required: false, type: string}
+          - {name: 作成者, required: false, type: email, note: 操作者トラッキング（v3）}
+          - {name: 作成日時, required: false, type: date}
+          - {name: 更新者, required: false, type: email}
+          - {name: 更新日時, required: false, type: date}
+        note: 標準28科目を初期セットとして同梱（最終的な科目体系は各社の税理士確認前提）
+      - name: 月次サマリ
+        required: true
+        key: 対象月
+        columns:
+          - {name: 対象月, required: true, type: month}
+          - {name: 売上高, required: true, type: number, note: 数式（仕訳帳の確定行を自動集計。手編集しない）}
+          - {name: 費用合計, required: true, type: number, note: 数式}
+          - {name: 営業利益, required: true, type: number, note: 数式}
+          - {name: 未仕訳件数, required: false, type: number, note: journal が検出結果を書き戻す}
+          - {name: クローズ状態, required: true, type: enum, values: [オープン, クローズ済]}
+          - {name: クローズ日, required: false, type: date}
+          - {name: クローズ操作者, required: false, type: email, note: クローズは人のボタンのみ}
 
   支払管理台帳:   # AP・払う側。01.受領請求書/ に置く
     settings_keys: {file: LEDGER_PAYMENT_FILE, sheet_id: LEDGER_PAYMENT_SHEET_ID}
