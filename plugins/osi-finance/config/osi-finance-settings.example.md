@@ -42,8 +42,22 @@ references 側には「汎用ロジック・判断基準」だけを残します
 |---|---|---|
 | GMAIL_INTAKE | {{選択: ON（既定）/ OFF}} | Gmail からの契約書・受領請求書・送信済み請求の検出と台帳整合 |
 | ACCOUNTING_SYNC | {{選択: mf / freee / none（既定）}} | 会計SaaSへの計上・突合（会計帳簿は会計SaaS側が正本。none=台帳のみ運用） |
-| BANK_RECON | {{選択: ON / OFF（既定）}} | 銀行明細（CSV/連携）による入金・支払の消込照合 |
+| BANK_RECON | {{選択: ON / OFF（既定）}} | 銀行明細（CSV/連携）による入金・支払の消込照合（CSV置き場: `04.連携データ/銀行/`＝DRIVE_SYNC_BANK） |
 | ESIGN | {{選択: docusign / none（既定）}} | 電子署名での契約書発送。none でもメール往復＋PDF保管で契約運用は成立 |
+
+> ACCOUNTING_SYNC=freee のときは freee の仕訳CSVを `04.連携データ/freee/`（DRIVE_SYNC_FREEE）に置く
+> 運用（osi-finance-freee-sync が突合。freee への書き込みはしない）。
+
+## 0-3. 操作者トラッキング（v3）
+
+**台帳への全書き込みで「誰がやったか」を記録する**（行の新規作成=作成者/作成日時、更新=更新者/更新日時。
+正本: `assets/schema/data-layout.yaml` の `operator_tracking`）。操作者は Cowork ログインユーザーの
+メールアドレスを自動記録する。以下は取得できない場合のフォールバックと、履歴の細かさの選択。
+
+| キー | 値 | 意味 |
+|---|---|---|
+| OPERATOR_EMAIL | {{任意 例: keiri@example.co.jp}} | ログインユーザーのメールが特定できない実行経路（定時ジョブ等）で使う既定の操作者 |
+| AUDIT_LOG | {{選択: on / off（既定）}} | on にすると請求管理台帳の「操作ログ」タブに変更前→変更後つきの履歴を追記（更新者列だけで足りない組織向け） |
 
 ## 1. 発行者情報（AR 請求書 発行元）
 
