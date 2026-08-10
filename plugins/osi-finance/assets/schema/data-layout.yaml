@@ -8,8 +8,8 @@
 # 組織固有の「実際の置き場所・ファイル名」は config/osi-finance-settings.md が持つ。
 # ここには汎用の規定値（default）だけを書き、実値は書かない。
 
-layout_version: 2
-updated: 2026-08-08
+layout_version: 3
+updated: 2026-08-10
 
 # -------------------------------------------------------------
 # 1. フォルダ構成（ルート1点方式）
@@ -46,6 +46,16 @@ folders:
           purpose: カード払い（自動課金SaaS）の証憑。台帳には起票しない
         - name: "レシート未処理"
           purpose: "紙レシートの投入口。人単位サブフォルダ {氏名}/（receipt-intake が申請者を特定）"
+    - name: "04.連携データ"
+      settings_key: DRIVE_SYNC_ROOT
+      purpose: 外部サービスとの CSV 受け渡し（v3 新設。連携トグルの freee／銀行が使う）
+      children:
+        - name: "freee"
+          settings_key: DRIVE_SYNC_FREEE
+          purpose: "freee 会計からエクスポートした仕訳CSV。osi-finance-freee-sync が突合に使う"
+        - name: "銀行"
+          settings_key: DRIVE_SYNC_BANK
+          purpose: "ネットバンキングの入出金明細CSV。osi-finance-bank-recon が突合に使う（口座番号を含むため Drive 外へ出さない・チャット出力ではマスク）"
 
 # ルートに共有をかければ配下に継承される（共有はルート1点で管理する）。
 sharing:
@@ -63,6 +73,26 @@ sharing:
   policy: |
     「組織全体に共有」はしない（支払管理台帳に振込先口座が含まれるため）。
     共有先は上記ホワイトリストのみ。追加はルートフォルダへの共有で行う。
+
+# -------------------------------------------------------------
+# 1-2. 操作者トラッキング（v3・全書き込み共通）
+# -------------------------------------------------------------
+# 台帳を共有された人が「誰の仕事か」を列だけで読めるようにする。認証ではなく監査用の自己申告メタデータ。
+operator_tracking:
+  applies_to: |
+    行を持つ全タブ。各タブは末尾に 作成者/作成日時/更新者/更新日時 の4列を持つ
+    （雛形マスタのみ 登録日・登録元との対で 登録者/更新者/更新日時）。
+  identity: |
+    Cowork にログインしているユーザーのメールアドレス。スキルはセッションのログインユーザーを自動記録。
+    取得できない場合は settings の OPERATOR_EMAIL、それも無ければ書き込み前に人へ確認する（空のまま書かない）。
+  rules: |
+    - 行の新規作成時：作成者・作成日時（JST YYYY-MM-DD HH:mm）を一度だけ記録し、以後上書きしない。
+      契約書を contract-draft で作った場合はその実行者、Gmail 取込なら取込実行者、コンソールならボタンを押した人。
+    - 既存行の更新時（ステータス変更・突合書き戻し・実績反映・条件修正など、スキル/コンソール経由の全書き込み）：
+      更新者・更新日時を毎回上書きする。
+    - 出所（手動/Gmail取込）は「経路」、作成者/更新者は「人」。2軸で provenance を持つ。
+    - 変更前→変更後の完全履歴が必要な組織のみ、請求管理台帳に「操作ログ」タブを有効化
+      （settings AUDIT_LOG: on|off・既定 off。列: 日時/操作者/対象/操作/変更前/変更後）。
 
 # -------------------------------------------------------------
 # 2. 台帳（形式＝ネイティブ Google スプレッドシート）
@@ -119,6 +149,10 @@ ledgers:
           - {name: ステータス, required: true, type: enum, values: [ドラフト, 送付済, 締結済],
              note: "締結済のみスケジュール展開。「終了」状態は持たない — 期間終了は契約終了日から導出する（v2）"}
           - {name: 備考, required: false, type: string}
+          - {name: 作成者, required: false, type: email, note: "操作者トラッキング（v3・operator_tracking 参照）。行を入れた人。以後不変"}
+          - {name: 作成日時, required: false, type: date}
+          - {name: 更新者, required: false, type: email, note: 最後に書き込んだ人。書き込みのたび上書き}
+          - {name: 更新日時, required: false, type: date}
       - name: 月次請求スケジュール
         required: true
         key: 契約ID+対象月
@@ -141,6 +175,10 @@ ledgers:
              note: "会計/銀行との突合結果。mf-sync/ar-sync 等が書き戻し、コンソールは表示のみ（v2）"}
           - {name: 突合日時, required: false, type: date}
           - {name: 備考, required: false, type: string}
+          - {name: 作成者, required: false, type: email, note: 操作者トラッキング（v3）}
+          - {name: 作成日時, required: false, type: date}
+          - {name: 更新者, required: false, type: email}
+          - {name: 更新日時, required: false, type: date}
       - name: 雛形マスタ
         required: false   # v2 新設。契約書雛形の索引（実体は 00.契約書/雛形/）
         key: 雛形ID
@@ -153,6 +191,9 @@ ledgers:
           - {name: 登録日, required: true, type: date}
           - {name: 登録元, required: true, type: enum, values: [AI生成, 実契約からの雛形化]}
           - {name: 使用回数, required: false, type: number, note: contract-draft が使用時に+1}
+          - {name: 登録者, required: false, type: email, note: 操作者トラッキング（v3）。登録日・登録元と対}
+          - {name: 更新者, required: false, type: email}
+          - {name: 更新日時, required: false, type: date}
 
   支払管理台帳:   # AP・払う側。01.受領請求書/ に置く
     settings_keys: {file: LEDGER_PAYMENT_FILE, sheet_id: LEDGER_PAYMENT_SHEET_ID}
@@ -175,6 +216,10 @@ ledgers:
           - {name: 口座名義, required: false, type: string}
           - {name: 源泉対象, required: true, type: enum, values: [なし, あり]}
           - {name: 備考, required: false, type: string}
+          - {name: 作成者, required: false, type: email, note: 操作者トラッキング（v3）}
+          - {name: 作成日時, required: false, type: date}
+          - {name: 更新者, required: false, type: email}
+          - {name: 更新日時, required: false, type: date}
       - name: 月次支払管理
         required: true
         key: 請求書ID
@@ -196,6 +241,10 @@ ledgers:
           - {name: MF連携状態, required: true, type: enum, values: [未連携, 連携済]}
           - {name: MF仕訳ID, required: false, type: id, note: mf-sync 成功時に書き戻し}
           - {name: 請求書ファイル, required: false, type: path}
+          - {name: 作成者, required: false, type: email, note: 操作者トラッキング（v3）}
+          - {name: 作成日時, required: false, type: date}
+          - {name: 更新者, required: false, type: email}
+          - {name: 更新日時, required: false, type: date}
       - name: 経費一覧
         required: true
         key: 経費ID
@@ -212,6 +261,10 @@ ledgers:
           - {name: MF連携状態, required: true, type: enum, values: [未連携, 連携済]}
           - {name: MF仕訳ID, required: false, type: id}
           - {name: 備考, required: false, type: string}
+          - {name: 作成者, required: false, type: email, note: 操作者トラッキング（v3）}
+          - {name: 作成日時, required: false, type: date}
+          - {name: 更新者, required: false, type: email}
+          - {name: 更新日時, required: false, type: date}
       - name: 月次支払スケジュール
         required: true    # v2で必須化。発注契約（方向=発注・締結済）から自動導出が標準動作
         key: 予定ID
@@ -230,6 +283,10 @@ ledgers:
           - {name: 突合結果, required: false, type: enum, values: [一致, 未計上],
              note: "会計/銀行との突合結果。mf-sync 等が書き戻し（v2）"}
           - {name: 突合日時, required: false, type: date}
+          - {name: 作成者, required: false, type: email, note: 操作者トラッキング（v3）}
+          - {name: 作成日時, required: false, type: date}
+          - {name: 更新者, required: false, type: email}
+          - {name: 更新日時, required: false, type: date}
 
 # -------------------------------------------------------------
 # 3. ヘルスチェック（setup スモーク／monthly 冒頭で実施）
@@ -237,7 +294,13 @@ ledgers:
 health_check:
   folders: ルート配下に required な子フォルダが存在するか（名前は settings の実値で照合）
   tabs: 各台帳に required なタブが存在するか
-  columns: 各タブの1行目ヘッダが本仕様の columns と順序・名称ともに一致するか
+  header_row: |
+    ヘッダ行は1行目とは限らない（実台帳ではタブにより3〜4行目にある）。各タブの先頭10行のうち
+    既知列名が最も多く一致する行をヘッダとして自動検出する（v3）。
+  columns: |
+    required な列がすべて存在するか（v3で順序不問に緩和）。既知列は名称一致で照合し、
+    未知の列（組織独自の列。例: 旧ID）は情報として報告のみ・エラーにしない。
+    スキル・コンソールは列番号を決め打ちせず、必ずヘッダ名で列を解決する。
   enums: 状態系の列に values 外の値が無いか（違反はレビュー対象として報告のみ）
   on_failure: |
     自動修復しない。差分（欠けたフォルダ/タブ/列・不明な値）を一覧で人に報告し、
