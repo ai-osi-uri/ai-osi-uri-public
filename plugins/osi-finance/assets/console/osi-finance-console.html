@@ -73,7 +73,8 @@
 <header>
   <h1>OSI Finance コンソール</h1>
   <span class="env ng" id="envBadge">接続確認中…</span>
-  <span class="co" id="coName">実台帳接続版 v0.17</span>
+  <button class="btn sm" onclick="reload()" title="台帳を再読込">🔄 再読込</button>
+  <span class="co" id="coName">実台帳接続版 v0.18</span>
 </header>
 <div id="banner"></div>
 
@@ -89,6 +90,8 @@
   <button data-t="ap">契約（発注）</button>
   <button data-t="billing">請求</button>
   <button data-t="payment">支払</button>
+  <button data-t="keihi">経費</button>
+  <button data-t="journal">仕訳</button>
   <button data-t="tpl">雛形</button>
   <button data-t="settings">設定（連携）</button>
 </div>
@@ -117,9 +120,24 @@
   <div class="bar"><h2>支払 <span class="n" id="pCount"></span></h2>
     <select id="mSelP" onchange="render()"></select><span class="sp"></span>
     <span id="reconP"></span>
-    <button class="btn ghost" onclick="copyPrompt('Gmailを確認して、新着の受領請求書を検出し、支払スケジュールと突合して「請求書受領済」への更新案を出してください。')">📥 Gmailを確認</button></div>
+    <button class="btn ghost" onclick="copyPrompt('Gmailを確認して、新着の受領請求書を検出し、支払スケジュールと突合して「請求書受領済」への更新案を出してください。')">📥 Gmailを確認</button>
+    <button class="btn p" onclick="copyPrompt('添付した請求書PDFを読み取り、支払管理台帳に支払予定として起票してください（振込のみ・カード払いは証憑保存のみ・人レビュー後に反映）。');toast('プロンプトをコピーしました。Cowork のチャットに貼り、請求書PDFを添付して送信してください')">📎 請求書を取り込む</button></div>
   <div id="pBox" class="loading">読み込み中…</div>
-  <p class="hint">💡 送金はしません。振込は人が実行し「支払済みにする」で記録します。</p>
+  <p class="hint">💡 送金はしません。振込は人が実行し「支払済みにする」で記録します。取込はプロンプトを貼って PDF を添付してください。</p>
+</div>
+<div class="card" id="tab-keihi" style="display:none">
+  <div class="bar"><h2>経費 <span class="n" id="kCount"></span></h2><span class="sp"></span>
+    <button class="btn p" onclick="copyPrompt('添付したレシート・領収書を読み取り、証憑として保存（電子帳簿保存法のスキャナ保存）したうえで、支払管理台帳の経費一覧に起票してください（人レビュー後に反映・作成者を記録）。');toast('プロンプトをコピーしました。Cowork のチャットに貼り、レシート画像/PDFを添付して送信してください')">📎 経費を取り込む</button></div>
+  <div id="kBox" class="loading">読み込み中…</div>
+  <p class="hint">💡 レシートをチャットに添付して取り込みます。カード払いの自動課金SaaSは会計側のカード連携が仕訳するため、証憑保存のみです。</p>
+</div>
+<div class="card" id="tab-journal" style="display:none">
+  <div class="bar"><h2>仕訳 <span class="n" id="jCount"></span></h2>
+    <select id="mSelJ" onchange="render()"></select><span class="sp"></span>
+    <button class="btn ghost" onclick="copyPrompt('未仕訳を検出してください（対象月 '+(document.getElementById('mSelJ').value||CUR)+'）。台帳にあるのに仕訳帳に無い行を出所別に一覧し、月次サマリの未仕訳件数を更新してください。')">🔍 未仕訳を検出</button>
+    <button class="btn p" onclick="copyPrompt((document.getElementById('mSelJ').value||CUR)+' の仕訳を生成してください。請求管理台帳（請求済→売上計上・入金済→入金消込）、支払管理台帳（支払済→支払計上）、経費一覧（→経費計上）から仕訳案を作り、レビュー後に仕訳台帳へ記帳してください（重複防止・借貸一致検算・作成者記録）。')">⚙️ この月の仕訳を生成</button></div>
+  <div id="jBox" class="loading">読み込み中…</div>
+  <p class="hint">💡 生成は「案」→ チャットでレビュー → 確定記帳（osi-finance-journal）。月次サマリは仕訳帳の確定行を自動集計します。</p>
 </div>
 <div class="card" id="tab-tpl" style="display:none">
   <div class="bar"><h2>契約書 雛形 <span class="n" id="tCount"></span></h2><span class="sp"></span>
@@ -156,6 +174,7 @@
 // ================= 設定 =================
 const BILLING_ID='16Xm3-Ajb3F6pXL_akz3KtTuGlVMC4LaF65AJa0jNgwU';
 const PAYMENT_ID='1dRNutbpWgnPqqlnhOpG015JDCcphfuSfmo52VvEG1DM';
+const JOURNAL_ID='1BIRBNY8OviE31CeOmJIHtMsBzAbdpqzmTBYZyXmvfsQ';
 const FIN_PREFIXES=['mcp__AI_OSI_URI_Finance__','mcp__remote-devices__AI_OSI_URI_Finance__','AI_OSI_URI_Finance__'];
 let FIN=null; // 検出された接頭辞
 const PROBES={ // 連携トグル → 疎通に使うツール候補（いずれか成功でOK）
@@ -192,7 +211,13 @@ async function rawCall(name,args){
 async function fin(tool,args){ if(!FIN) throw new Error('AI OSI URI Finance 未接続'); return rawCall(FIN+tool,args) }
 
 // ================= 状態 =================
-let contracts=[],billing=[],payments=[],templates=[],hdr={},CUR=new Date().toISOString().slice(0,7);
+let contracts=[],billing=[],payments=[],expenses=[],journal=[],templates=[],hdr={},CUR=new Date().toISOString().slice(0,7);
+async function reload(){toast('台帳を再読込しています…');await loadAll();render();toast('再読込しました')}
+// ヘッダ行の自動検出（1行目固定にしない・v3 ヘルスチェック準拠）
+function findHdr(values,mustCols){
+ for(let i=0;i<Math.min(values.length,8);i++){const row=values[i]||[];
+  if(mustCols.every(c=>row.includes(c))) return {row:i,headers:row}}
+ return null}
 let OPERATOR='', opResolve=null;
 function nowJST(){const d=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Tokyo'}));const p=n=>String(n).padStart(2,'0');
  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`}
@@ -222,7 +247,7 @@ async function boot(){
  if(!FIN){ badge.textContent='台帳未接続'; badge.className='env ng';
   document.getElementById('banner').style.display='block';
   document.getElementById('banner').innerHTML='<b>AI OSI URI Finance コネクタに接続できません。</b> このアーティファクトの設定で「AI OSI URI Finance」のツール使用を許可し、コネクタが有効か確認してください（health_check / sheets_* / mfi_*）。許可後にリロードしてください。';
-  ['arBox','apBox','bBox','pBox','tplBox'].forEach(id=>document.getElementById(id).innerHTML='<div class="loading">台帳未接続のため表示できません</div>');
+  ['arBox','apBox','bBox','pBox','kBox','jBox','tplBox'].forEach(id=>document.getElementById(id).innerHTML='<div class="loading">台帳未接続のため表示できません</div>');
   renderToggles(); log('起動: 台帳コネクタ未接続'); return; }
  badge.textContent='台帳接続OK'; badge.className='env ok'; log('起動: AI OSI URI Finance 接続確認（'+FIN+'）');
  await loadAll(); renderToggles(); render();
@@ -243,6 +268,20 @@ async function loadAll(){
   const h=ps.values[0]; hdr.ps=h;
   payments=(ps.values.slice(1)||[]).filter(r=>r[0]).map((r,i)=>{const o={__row:i+2};h.forEach((k,j)=>o[k]=r[j]??'');return o});
  }catch(e){payments=[];log('支払スケジュール読込エラー: '+e.message)}
+ try{
+  const ex=await fin('sheets_get_values',{spreadsheet_id:PAYMENT_ID,range:'経費一覧!A1:P200'});
+  const h=findHdr(ex.values||[],['支払先ID','費目']);
+  if(h){hdr.ex=h.headers;
+   expenses=(ex.values.slice(h.row+1)||[]).filter(r=>r&&r.some(c=>String(c||'').trim())).map((r,i)=>{const o={__row:h.row+2+i};h.headers.forEach((k,j)=>{if(k)o[k]=r[j]??''});return o});}
+  else expenses=[];
+ }catch(e){expenses=[];log('経費一覧読込エラー: '+e.message)}
+ journal=[];
+ for(const tab of ['仕訳帳','仕訳台帳','シート1']){
+  try{ const jn=await fin('sheets_get_values',{spreadsheet_id:JOURNAL_ID,range:tab+'!A1:Q500'});
+   if(jn.values&&jn.values[0]&&jn.values[0][0]==='仕訳ID'){ const h=jn.values[0]; hdr.jn=h; hdr.jnTab=tab;
+    journal=(jn.values.slice(1)||[]).filter(r=>r[0]).map((r,i)=>{const o={__row:i+2};h.forEach((k,j)=>{if(k)o[k]=r[j]??''});return o});
+    break; } }catch(e){}
+ }
  templates=[];
  for(const tab of ['雛形マスタ','シート1']){
   try{ const t=await fin('sheets_get_values',{spreadsheet_id:BILLING_ID,range:tab+'!A1:K50'});
@@ -319,6 +358,26 @@ function render(){
    return `<tr title="${whoP}"><td>${p['予定ID']}</td><td>${p['支払先名']}</td><td>${p['対象月']}</td><td>${p['支払予定日']||''}</td><td>${yen(p['予定額(税込)'])}</td><td><span class="badge ${sc}">${sl}</span></td><td class="acts">${acts.join('')}</td></tr>`}).join('')+'</tbody></table>'
   :'<div class="loading">この月の支払予定はありません（発注契約が締結されると自動導出されます）</div>';
  document.getElementById('pCount').textContent=rowsP.length+'件';
+ // 経費
+ const yenKey=(o,names)=>{for(const n of names){if(o[n]!==undefined&&o[n]!=='')return o[n]}return ''};
+ document.getElementById('kCount').textContent=expenses.length+'件';
+ document.getElementById('kBox').innerHTML=expenses.length?`<table><thead><tr><th>支払先ID</th><th>費目</th><th>発生月</th><th>内容</th><th>金額(税込)</th><th>備考</th></tr></thead><tbody>`+
+  expenses.map(x=>{const whoK=[x['作成者']?`作成: ${x['作成者']} ${x['作成日時']||''}`:'',x['更新者']?`更新: ${x['更新者']} ${x['更新日時']||''}`:''].filter(Boolean).join(' ／ ')||'作成者・更新者の記録なし';
+   return `<tr title="${whoK}"><td>${x['支払先ID']||''}</td><td>${x['費目']||''}</td><td>${x['発生月']||''}</td><td>${x['内容']||''}</td><td>${yen(yenKey(x,['金額（税込）','金額(税込)']))}</td><td style="font-size:12px;color:var(--sub)">${x['備考']||''}</td></tr>`}).join('')+'</tbody></table>'
+  :'<div class="loading">経費の記録がありません（「📎 経費を取り込む」からレシートを取り込めます）</div>';
+ // 仕訳
+ const monthsJ=[...new Set(journal.map(j=>j['対象月']))].filter(Boolean).sort();
+ const selJ=document.getElementById('mSelJ');
+ if(selJ._n!==monthsJ.length){const v=selJ.value||CUR;selJ.innerHTML=(monthsJ.length?monthsJ:[CUR]).map(m=>`<option ${m===v?'selected':''}>${m}</option>`).join('');selJ._n=monthsJ.length}
+ const moJ=selJ.value||CUR;
+ const rowsJ=journal.filter(j=>j['対象月']===moJ);
+ document.getElementById('jCount').textContent=rowsJ.length+'件';
+ document.getElementById('jBox').innerHTML=hdr.jn?(rowsJ.length?`<table><thead><tr><th>仕訳ID</th><th>日付</th><th>借方</th><th>金額</th><th>貸方</th><th>摘要</th><th>出所</th><th>状態</th></tr></thead><tbody>`+
+  rowsJ.map(j=>{const st=j['状態'];const sc=st==='確定'?'b-green':'b-amber';
+   const whoJ=[j['作成者']?`作成: ${j['作成者']} ${j['作成日時']||''}`:''].filter(Boolean).join('')||'作成者の記録なし';
+   return `<tr title="${whoJ}"><td>${j['仕訳ID']}</td><td>${j['日付']||''}</td><td>${j['借方科目']||''}</td><td>${yen(j['借方金額'])}</td><td>${j['貸方科目']||''}</td><td style="font-size:12px">${j['摘要']||''}</td><td><span class="badge ${j['出所']==='手動'?'b-gray':'b-purple'}">${j['出所']||''}</span></td><td><span class="badge ${sc}">${st||''}</span></td></tr>`}).join('')+'</tbody></table>'
+  :'<div class="loading">この月の仕訳はまだありません（「⚙️ この月の仕訳を生成」で作成できます）</div>')
+  :'<div class="loading">仕訳台帳に接続できません（仕訳帳タブが見つかりません）</div>';
  // 突合ボタン
  const rec=(target)=>{const b=[];
   if(SET.mf)b.push(`<button class="btn ghost" onclick="copyPrompt('台帳とMFを突合してください（${target==='billing'?'請求(AR)':'支払(AP)'}・対象月 ${target==='billing'?moB:moP}）。結果は台帳の突合結果・突合日時列に書き戻してください。')">🔄 MFと突合</button>`);
@@ -399,10 +458,10 @@ function renderToggles(){
 
 document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>{
  document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
- ['ar','ap','billing','payment','tpl','settings'].forEach(t=>document.getElementById('tab-'+t).style.display=b.dataset.t===t?'':'none');
+ ['ar','ap','billing','payment','keihi','journal','tpl','settings'].forEach(t=>document.getElementById('tab-'+t).style.display=b.dataset.t===t?'':'none');
 }));
 dlgOp.addEventListener('close',()=>{ if(opResolve&&!OPERATOR){opResolve(false);opResolve=null;} });
-log('コンソール起動（v0.17 実台帳接続版・操作者トラッキング）');
+log('コンソール起動（v0.18 経理コンソール: 経費・仕訳タブ / 操作者トラッキング）');
 boot();
 </script>
 </body>
