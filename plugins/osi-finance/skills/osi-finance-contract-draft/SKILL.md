@@ -18,8 +18,8 @@ description: >
 requires_connectors:
   - server: AI_OSI_URI_Finance
     provision: mcpb
-  - server: google-drive
-    provision: user-install
+  - server: drive-fs
+    provision: fs
 
 ---
 
