@@ -110,8 +110,8 @@
     {
       "name": "osi-finance",
       "source": "./plugins/osi-finance",
-      "description": "OSI Finance — 日本の中小企業向け 経理（請求AR・支払AP）自動化プロダクト。初回セットアップ（osi-finance-setup）・コネクタOAuth接続伴走（osi-finance-connect）・契約取込→請求スケジュール化・月次請求書発行・受領請求書の支払予定起票/取りこぼし検出・会計SaaS（v1=マネーフォワード）との突合（AP=osi-finance-mf-sync／AR=osi-finance-ar-sync で売上計上・入金消込）・月次クローズ・会計ダッシュボード（osi-finance-dashboard・MF正本）・紙レシートの証憑化＋UPSIDER明細突合と証憑添付漏れ検出（osi-finance-receipt-intake）を収録。MFを請求(AR)・支払(AP)双方の単一会計正本に。台帳テンプレ同梱、組織固有値は osi-finance-settings に外出しで非開発者でも導入可。発火evalデータセット＋runner・導入完了レポート・エラー処理ガイド同梱。送金しない／自動確定しない（人レビュー必須）。",
-      "version": "0.13.0",
+      "description": "OSI Finance — 日本の中小企業向け 経理（請求AR・支払AP）自動化プロダクト。初回セットアップ（osi-finance-setup）・コネクタOAuth接続伴走（osi-finance-connect）・契約取込→請求スケジュール化・月次請求書発行・受領請求書の支払予定起票/取りこぼし検出・会計SaaS（v1=マネーフォワード）との突合（AP=osi-finance-mf-sync／AR=osi-finance-ar-sync で売上計上・入金消込）・月次クローズ・会計ダッシュボード（osi-finance-dashboard・MF正本）・紙レシートの証憑化＋UPSIDER明細突合と証憑添付漏れ検出（osi-finance-receipt-intake）を収録。MFを請求(AR)・支払(AP)双方の単一会計正本に。台帳テンプレ同梱、組織固有値は osi-finance-settings に外出しで非開発者でも導入可。運用モード（編集可／参照専用）で書き込み可否を組織ごとに制御。発火evalデータセット＋runner・導入完了レポート・エラー処理ガイド・顧客向け導入手順書同梱。送金しない／自動確定しない（人レビュー必須）。",
+      "version": "0.14.0",
       "category": "finance",
       "tags": [
         "finance",
