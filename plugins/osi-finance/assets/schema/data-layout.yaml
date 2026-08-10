@@ -8,7 +8,7 @@
 # 組織固有の「実際の置き場所・ファイル名」は config/osi-finance-settings.md が持つ。
 # ここには汎用の規定値（default）だけを書き、実値は書かない。
 
-layout_version: 1
+layout_version: 2
 updated: 2026-08-08
 
 # -------------------------------------------------------------
@@ -25,7 +25,10 @@ folders:
   children:
     - name: "00.契約書"
       settings_key: DRIVE_CONTRACTS
-      purpose: 契約PDFの正本（contract-intake が格納）
+      purpose: 契約PDFの正本（contract-intake / contract-draft が格納）
+      children:
+        - name: "雛形"
+          purpose: "契約書雛形（TPL-xxx.docx）。雛形マスタと対で管理（contract-draft が登録）"
     - name: "01.受領請求書"
       settings_key: DRIVE_RECEIVED_INVOICES
       purpose: 受領請求書PDF（YYYY-MM/ 配下）と支払管理台帳
@@ -90,7 +93,12 @@ ledgers:
           - {name: 契約ID, required: true, type: id, note: "AR-C-連番（旧 C- は AR とみなす）"}
           - {name: 取引先, required: true, type: string}
           - {name: 取引先ID, required: false, type: id, note: "取引先マスタ（3桁）を使う組織のみ"}
-          - {name: 方向, required: false, type: enum, values: [受注, 発注], note: "AP契約も1表で持つ組織のみ（既定は受注）"}
+          - {name: 方向, required: true, type: enum, values: [受注, 発注],
+             note: "v2で必須化。受注→月次請求スケジュール／発注→月次支払スケジュールを展開"}
+          - {name: 出所, required: true, type: enum, values: [手動, Gmail取込],
+             note: "どの経路で台帳に入ったか（provenance）。コンソール/スキルが記録"}
+          - {name: 雛形ID, required: false, type: id, note: "契約書生成に使った雛形（TPL-xxx）。contract-draft が記録"}
+          - {name: envelope_id, required: false, type: id, note: "電子署名で発送した場合の封筒ID（DocuSign等）"}
           - {name: 正式名称, required: true, type: string}
           - {name: 郵便番号, required: false, type: string}
           - {name: 住所, required: false, type: string}
@@ -108,7 +116,8 @@ ledgers:
           - {name: 契約終了, required: false, type: date}
           - {name: 支払サイト, required: true, type: string}
           - {name: 契約書ファイル, required: false, type: path, note: 00.契約書/ 配下の相対パス}
-          - {name: ステータス, required: true, type: enum, values: [ドラフト, 有効, 終了], note: 締結済(有効)のみスケジュール展開}
+          - {name: ステータス, required: true, type: enum, values: [ドラフト, 送付済, 締結済],
+             note: "締結済のみスケジュール展開。「終了」状態は持たない — 期間終了は契約終了日から導出する（v2）"}
           - {name: 備考, required: false, type: string}
       - name: 月次請求スケジュール
         required: true
@@ -120,14 +129,30 @@ ledgers:
           - {name: 件名, required: true, type: string}
           - {name: "請求額(税込)", required: true, type: number}
           - {name: 請求書番号, required: false, type: id, note: "INV-YYYY-MM-連番3桁。invoice 発行時に確定"}
-          - {name: 請求日, required: false, type: date}
+          - {name: 請求日, required: true, type: date, note: "v2で必須化。既定＝対象月翌月1日（AR_PAYMENT_TERMS から導出）"}
           - {name: 支払期限, required: false, type: date}
-          - {name: 請求ステータス, required: true, type: enum, values: [未請求, 下書き済, 請求済, 入金済],
-             note: invoice が 未請求→下書き済 に更新。ar-sync の突合対象}
+          - {name: 請求ステータス, required: true, type: enum, values: [未請求, 下書き作成済, 請求済, 入金済],
+             note: "invoice が 未請求→下書き作成済 に更新。請求済・入金済は人のボタン/Gmail整合。
+                    差し戻し（→未請求）は人の操作のみ許可（v2）"}
           - {name: 送付請求書ファイル, required: false, type: path}
           - {name: 入金日, required: false, type: date}
           - {name: 入金額, required: false, type: number}
+          - {name: 突合結果, required: false, type: enum, values: [一致, 未計上],
+             note: "会計/銀行との突合結果。mf-sync/ar-sync 等が書き戻し、コンソールは表示のみ（v2）"}
+          - {name: 突合日時, required: false, type: date}
           - {name: 備考, required: false, type: string}
+      - name: 雛形マスタ
+        required: false   # v2 新設。契約書雛形の索引（実体は 00.契約書/雛形/）
+        key: 雛形ID
+        columns:
+          - {name: 雛形ID, required: true, type: id, note: TPL-連番3桁}
+          - {name: 雛形名, required: true, type: string}
+          - {name: 区分, required: true, type: enum, values: [受注用, 発注用, 共通]}
+          - {name: 用途メモ, required: false, type: string}
+          - {name: ファイルパス, required: true, type: path, note: 00.契約書/雛形/TPL-xxx.docx}
+          - {name: 登録日, required: true, type: date}
+          - {name: 登録元, required: true, type: enum, values: [AI生成, 実契約からの雛形化]}
+          - {name: 使用回数, required: false, type: number, note: contract-draft が使用時に+1}
 
   支払管理台帳:   # AP・払う側。01.受領請求書/ に置く
     settings_keys: {file: LEDGER_PAYMENT_FILE, sheet_id: LEDGER_PAYMENT_SHEET_ID}
@@ -188,7 +213,7 @@ ledgers:
           - {name: MF仕訳ID, required: false, type: id}
           - {name: 備考, required: false, type: string}
       - name: 月次支払スケジュール
-        required: false   # 発注契約の展開を使う組織のみ（contract-intake の AP 展開で作成）
+        required: true    # v2で必須化。発注契約（方向=発注・締結済）から自動導出が標準動作
         key: 予定ID
         columns:
           - {name: 予定ID, required: true, type: id, note: "支払先ID+対象月(YYYYMM)"}
@@ -199,8 +224,12 @@ ledgers:
           - {name: 対象月, required: true, type: month}
           - {name: "予定額(税込)", required: true, type: number}
           - {name: 支払予定日, required: true, type: date}
-          - {name: 状態, required: true, type: enum, values: [未払予定, 請求書受領済, 支払済]}
+          - {name: 状態, required: true, type: enum, values: [未払予定, 請求書受領済, 支払済],
+             note: "支払済は人のボタン操作で記録（送金はツール外）。差し戻しは人の操作のみ"}
           - {name: 受領請求書ID, required: false, type: id, note: payment-detect が突合で記入}
+          - {name: 突合結果, required: false, type: enum, values: [一致, 未計上],
+             note: "会計/銀行との突合結果。mf-sync 等が書き戻し（v2）"}
+          - {name: 突合日時, required: false, type: date}
 
 # -------------------------------------------------------------
 # 3. ヘルスチェック（setup スモーク／monthly 冒頭で実施）
