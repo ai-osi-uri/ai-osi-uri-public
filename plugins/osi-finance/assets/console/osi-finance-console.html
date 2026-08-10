@@ -175,7 +175,7 @@
 const BILLING_ID='16Xm3-Ajb3F6pXL_akz3KtTuGlVMC4LaF65AJa0jNgwU';
 const PAYMENT_ID='1dRNutbpWgnPqqlnhOpG015JDCcphfuSfmo52VvEG1DM';
 const JOURNAL_ID='1BIRBNY8OviE31CeOmJIHtMsBzAbdpqzmTBYZyXmvfsQ';
-const FIN_PREFIXES=['mcp__AI_OSI_URI_Finance__','mcp__remote-devices__AI_OSI_URI_Finance__','AI_OSI_URI_Finance__'];
+const FIN_PREFIXES=['mcp__AI_OSI_URI_Finance__','mcp__remote-devices__AI_OSI_URI_Finance__','AI_OSI_URI_Finance__','mcp__AI OSI URI Finance__','mcp__ai-osi-uri-finance__','mcp__AI_OSI_URI__Finance__',''];
 let FIN=null; // 検出された接頭辞
 const PROBES={ // 連携トグル → 疎通に使うツール候補（いずれか成功でOK）
  gmail:{label:'Gmail取込', tools:['mcp__Gmail__list_labels','mcp__gmail__list_labels'], err:'Gmail コネクタが未接続、またはこのコンソールに使用許可がありません'},
@@ -212,7 +212,12 @@ async function fin(tool,args){ if(!FIN) throw new Error('AI OSI URI Finance 未�
 
 // ================= 状態 =================
 let contracts=[],billing=[],payments=[],expenses=[],journal=[],templates=[],hdr={},CUR=new Date().toISOString().slice(0,7);
-async function reload(){toast('台帳を再読込しています…');await loadAll();render();toast('再読込しました')}
+async function reload(){
+ if(!FIN){ toast('接続を再確認しています…'); await boot();
+  if(FIN){ document.getElementById('banner').style.display='none'; toast('接続しました'); }
+  else toast('まだ接続できません。アーティファクトのコネクタ許可（AI OSI URI Finance）を確認してください');
+  return; }
+ toast('台帳を再読込しています…');await loadAll();render();toast('再読込しました')}
 // ヘッダ行の自動検出（1行目固定にしない・v3 ヘルスチェック準拠）
 function findHdr(values,mustCols){
  for(let i=0;i<Math.min(values.length,8);i++){const row=values[i]||[];
@@ -241,8 +246,9 @@ function colLetter(i){let s='';i++;while(i){s=String.fromCharCode(65+(i-1)%26)+s
 
 // ================= 読み込み =================
 async function boot(){
- // 接続検出
- for(const p of FIN_PREFIXES){ try{ await rawCall(p+'health_check'); FIN=p; break; }catch(e){} }
+ // 接続検出（失敗した試行は操作ログに出す＝診断用）
+ for(const p of FIN_PREFIXES){ try{ await rawCall(p+'health_check'); FIN=p; break; }
+  catch(e){ log(`接続試行 ${p||'(接頭辞なし)'}health_check → ${String(e&&e.message||e).slice(0,110)}`); } }
  const badge=document.getElementById('envBadge');
  if(!FIN){ badge.textContent='台帳未接続'; badge.className='env ng';
   document.getElementById('banner').style.display='block';
