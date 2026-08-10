@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OSI Finance コンソール</title>
+<style>
+  :root{color-scheme:light;
+    --ink:#1a1f2e; --sub:#5a6172; --line:#e4e7ee; --bg:#f7f8fb; --card:#fff;
+    --accent:#0f4c81; --accent-soft:#e8f0f8; --ok:#1a7f5a; --ok-soft:#e6f4ee;
+    --warn:#8a5a00; --warn-soft:#fdf3e0; --red:#b3261e; --red-soft:#fdecea; --purple:#5b3e96; --purple-soft:#efeaf8;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Hiragino Sans","Yu Gothic","Noto Sans JP",sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.6}
+  .wrap{max-width:1140px;margin:0 auto;padding:20px 18px 60px}
+  header{display:flex;align-items:center;gap:14px;margin-bottom:10px}
+  header h1{font-size:18px;font-weight:700}
+  header .env{font-size:11px;padding:3px 10px;border-radius:999px;font-weight:700}
+  header .env.ok{background:var(--ok-soft);color:var(--ok)}
+  header .env.ng{background:var(--red-soft);color:var(--red)}
+  header .co{margin-left:auto;font-size:12.5px;color:var(--sub)}
+  #banner{display:none;background:var(--red-soft);border-left:4px solid var(--red);border-radius:10px;padding:12px 16px;margin-bottom:12px;font-size:13px}
+  .tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:2px solid var(--line);flex-wrap:wrap}
+  .tabs button{border:none;background:none;padding:9px 15px;font-size:14px;font-weight:600;color:var(--sub);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap}
+  .tabs button.on{color:var(--accent);border-color:var(--accent)}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
+  .kpi .l{font-size:12px;color:var(--sub)}
+  .kpi .v{font-size:20px;font-weight:800;margin-top:2px}
+  .kpi .v small{font-size:12px;font-weight:600;color:var(--sub)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:14px}
+  .card h2{font-size:15px;display:flex;align-items:center;gap:10px;margin:0}
+  .card h2 .n{background:var(--accent-soft);color:var(--accent);border-radius:999px;font-size:11.5px;padding:2px 10px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{padding:7px 9px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+  th{color:var(--sub);font-size:11.5px;font-weight:600;white-space:nowrap;background:var(--bg)}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;white-space:nowrap}
+  .b-gray{background:var(--bg);color:var(--sub);border:1px solid var(--line)}
+  .b-blue{background:var(--accent-soft);color:var(--accent)}
+  .b-green{background:var(--ok-soft);color:var(--ok)}
+  .b-amber{background:var(--warn-soft);color:var(--warn)}
+  .b-red{background:var(--red-soft);color:var(--red)}
+  .b-purple{background:var(--purple-soft);color:var(--purple)}
+  .btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 12px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--ink)}
+  .btn:hover{background:var(--bg)}
+  .btn.p{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn.g{background:var(--ok);border-color:var(--ok);color:#fff}
+  .btn.sm{padding:3px 9px;font-size:11.5px}
+  .btn.ghost{border-style:dashed;color:var(--sub)}
+  .btn:disabled{opacity:.4;cursor:default}
+  .bar{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+  .bar .sp{margin-left:auto}
+  select{border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:13px;background:#fff}
+  .hint{font-size:12px;color:var(--sub);margin-top:8px}
+  .log{background:var(--bg);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--sub);max-height:140px;overflow:auto}
+  .log div{padding:2px 0;border-bottom:1px dashed var(--line)}
+  .acts{display:flex;gap:4px;flex-wrap:wrap}
+  .loading{color:var(--sub);font-size:13px;padding:14px}
+  dialog{border:none;border-radius:14px;padding:22px 24px;width:520px;max-width:94vw;box-shadow:0 10px 40px rgba(20,30,60,.25)}
+  dialog::backdrop{background:rgba(20,30,60,.35)}
+  dialog h3{font-size:15px;margin-bottom:12px}
+  dialog label{display:block;font-size:12px;color:var(--sub);margin:8px 0 2px}
+  dialog input,dialog select,dialog textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:13px;font-family:inherit}
+  dialog textarea{font-family:ui-monospace,monospace;font-size:12px;background:var(--bg)}
+  dialog .acts2{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;opacity:0;transition:.3s;pointer-events:none;z-index:99;max-width:84vw}
+  .toast.show{opacity:1}
+  .tgl{border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start}
+  @media(max-width:780px){.kpis{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>OSI Finance コンソール</h1>
+  <span class="env ng" id="envBadge">接続確認中…</span>
+  <span class="co" id="coName">実台帳接続版 v0.17</span>
+</header>
+<div id="banner"></div>
+
+<div class="kpis">
+  <div class="kpi"><div class="l">有効契約（受注 / 発注）</div><div class="v" id="k1">–</div></div>
+  <div class="kpi"><div class="l">今月の請求</div><div class="v" id="k2">–</div></div>
+  <div class="kpi"><div class="l">今月の支払予定</div><div class="v" id="k3">–</div></div>
+  <div class="kpi"><div class="l">未回収（入金待ち）</div><div class="v" id="k4">–</div></div>
+</div>
+
+<div class="tabs">
+  <button class="on" data-t="ar">契約（受注）</button>
+  <button data-t="ap">契約（発注）</button>
+  <button data-t="billing">請求</button>
+  <button data-t="payment">支払</button>
+  <button data-t="tpl">雛形</button>
+  <button data-t="settings">設定（連携）</button>
+</div>
+
+<div class="card" id="tab-ar">
+  <div class="bar"><h2>契約（受注） <span class="n" id="arCount"></span></h2><span class="sp"></span>
+    <button class="btn ghost" onclick="copyPrompt('Gmailを確認して、未取込の受注契約書がないか検出し、見つかったら契約マスタに出所=Gmail取込で起票案を出してください。')">📥 Gmailを確認</button>
+    <button class="btn p" onclick="copyPrompt('契約書を作成して起票してください。区分: 受注（AR）。使用する雛形・取引先・契約内容・金額・期間・特記事項は、このチャットで私に質問しながら埋めてください。生成した契約書は 00.契約書/ にドラフト保存し、契約台帳に「ドラフト」で起票してください。')">＋ 新規契約（プロンプトをコピー）</button></div>
+  <div id="arBox" class="loading">読み込み中…</div>
+</div>
+<div class="card" id="tab-ap" style="display:none">
+  <div class="bar"><h2>契約（発注） <span class="n" id="apCount"></span></h2><span class="sp"></span>
+    <button class="btn ghost" onclick="copyPrompt('Gmailを確認して、未取込の発注契約・受領契約書がないか検出し、契約マスタに出所=Gmail取込で起票案を出してください。')">📥 Gmailを確認</button>
+    <button class="btn p" onclick="copyPrompt('契約書を作成して起票してください。区分: 発注（AP）。使用する雛形・支払先・契約内容・金額・期間・特記事項は、このチャットで私に質問しながら埋めてください。生成した契約書は 00.契約書/ にドラフト保存し、契約台帳に「ドラフト」で起票してください。')">＋ 新規契約（プロンプトをコピー）</button></div>
+  <div id="apBox" class="loading">読み込み中…</div>
+</div>
+<div class="card" id="tab-billing" style="display:none">
+  <div class="bar"><h2>請求 <span class="n" id="bCount"></span></h2>
+    <select id="mSelB" onchange="render()"></select><span class="sp"></span>
+    <span id="reconB"></span>
+    <button class="btn ghost" onclick="copyPrompt('Gmailを確認して、送信済みの請求書と台帳の請求ステータスを整合してください（下書き作成済のまま送信済みの行を請求済に）。')">📥 Gmailを確認</button></div>
+  <div id="bBox" class="loading">読み込み中…</div>
+  <p class="hint">💡 「📧 Gmail下書き」はプロンプトをコピーします（Cowork に貼ると invoice スキルが単票発行）。状態ボタンは台帳に直接書き込みます。</p>
+</div>
+<div class="card" id="tab-payment" style="display:none">
+  <div class="bar"><h2>支払 <span class="n" id="pCount"></span></h2>
+    <select id="mSelP" onchange="render()"></select><span class="sp"></span>
+    <span id="reconP"></span>
+    <button class="btn ghost" onclick="copyPrompt('Gmailを確認して、新着の受領請求書を検出し、支払スケジュールと突合して「請求書受領済」への更新案を出してください。')">📥 Gmailを確認</button></div>
+  <div id="pBox" class="loading">読み込み中…</div>
+  <p class="hint">💡 送金はしません。振込は人が実行し「支払済みにする」で記録します。</p>
+</div>
+<div class="card" id="tab-tpl" style="display:none">
+  <div class="bar"><h2>契約書 雛形 <span class="n" id="tCount"></span></h2><span class="sp"></span>
+    <button class="btn p" onclick="copyPrompt('契約書の雛形を作成して登録してください。雛形名・区分（受注用/発注用/共通）・内容は、このチャットで私に質問しながら埋めてください。完成した雛形は 00.契約書/雛形/ に保存し、雛形マスタに登録してください。')">＋ 雛形を新規作成（プロンプトをコピー）</button></div>
+  <div id="tplBox" class="loading">読み込み中…</div>
+  <p class="hint">💡 実契約からの雛形化は、契約行の「☆ 雛形として登録」プロンプトで contract-draft スキルが行います。</p>
+</div>
+<div class="card" id="tab-settings" style="display:none">
+  <h2 style="margin-bottom:10px">操作者</h2>
+  <div class="tgl" style="margin-bottom:14px"><span style="font-size:22px">👤</span>
+    <div style="flex:1"><b style="display:block;font-size:14px">操作者メール</b>
+    <p style="font-size:12px;color:var(--sub);margin-top:2px" id="opShow">未設定（台帳への書き込み時に入力を求めます）</p></div>
+    <button class="btn sm" onclick="dlgOp.showModal()">設定</button></div>
+  <p class="hint" style="margin-bottom:14px">💡 台帳の全書き込みに「更新者・更新日時」として記録されます（監査用の自己申告。認証ではありません）。台帳を共有した相手が、誰の操作か列で読めるようになります。</p>
+  <h2 style="margin-bottom:10px">連携（ON にする時にコネクタ接続を確認します）</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px" id="toggles"></div>
+  <p class="hint">💡 ON 時に対象コネクタへ実際に疎通し、未接続・未許可ならエラーにして OFF に戻します。このアーティファクトに必要ツールの使用許可（コネクタ grant）が無い場合も同様にエラーになります。</p>
+</div>
+<div class="card"><h2 style="margin-bottom:8px">操作ログ</h2><div class="log" id="log"></div></div>
+</div>
+
+<dialog id="dlgOp">
+  <h3>操作者メール</h3>
+  <p style="font-size:12px;color:var(--sub);margin-bottom:6px">台帳に「誰が操作したか（更新者）」を記録するために使います。<b>Claude にログインしているメールアドレス</b>を入力してください。監査用の自己申告メタデータであり、認証ではありません。</p>
+  <label>メールアドレス</label><input id="opEmail" type="email" placeholder="you@example.co.jp">
+  <div class="acts2">
+    <button class="btn" onclick="dlgOp.close()">キャンセル</button>
+    <button class="btn p" onclick="setOperator()">この操作者で記録する</button>
+  </div>
+</dialog>
+<div class="toast" id="toast"></div>
+
+<script>
+// ================= 設定 =================
+const BILLING_ID='16Xm3-Ajb3F6pXL_akz3KtTuGlVMC4LaF65AJa0jNgwU';
+const PAYMENT_ID='1dRNutbpWgnPqqlnhOpG015JDCcphfuSfmo52VvEG1DM';
+const FIN_PREFIXES=['mcp__AI_OSI_URI_Finance__','mcp__remote-devices__AI_OSI_URI_Finance__','AI_OSI_URI_Finance__'];
+let FIN=null; // 検出された接頭辞
+const PROBES={ // 連携トグル → 疎通に使うツール候補（いずれか成功でOK）
+ gmail:{label:'Gmail取込', tools:['mcp__Gmail__list_labels','mcp__gmail__list_labels'], err:'Gmail コネクタが未接続、またはこのコンソールに使用許可がありません'},
+ mf:{label:'マネーフォワード 連携', tools:['mcp__money-forward__mfc_ca_currentOffice','mcp__MoneyForward__mfc_ca_currentOffice','mcp__moneyforward__mfc_ca_currentOffice'], err:'MoneyForward コネクタが未接続、またはこのコンソールに使用許可がありません'},
+ freee:{label:'freee 会計 連携（CSV）', check:()=>checkCsvFolder('freee'), err:'Google Drive に接続できないか、04.連携データ/freee が未作成です'},
+ bank:{label:'銀行明細取込（CSV）', check:()=>checkCsvFolder('銀行'), err:'Google Drive に接続できないか、04.連携データ/銀行 が未作成です'},
+ esign:{label:'電子署名（DocuSign）', tools:['mcp__Docusign__getUserInfo','mcp__docusign__getUserInfo','mcp__DocuSign__getUserInfo'], err:'DocuSign コネクタが未接続、またはこのコンソールに使用許可がありません'}};
+const SET={gmail:false,mf:false,freee:false,bank:false,esign:false};
+async function driveSearch(q){
+ const cands=['mcp__Google_Drive__search_files','mcp__google-drive__search_files','mcp__Google_Drive__search'];
+ const argsets=[{api_query:`name contains '${q}'`},{query:q},{semantic_query:q}];
+ let last=null;
+ for(const t of cands){ for(const a of argsets){ try{ return await rawCall(t,a); }catch(e){ last=e; } } }
+ throw new Error('Google Drive ツールに接続できません（このコンソールに Google Drive の使用許可を付与してください）');
+}
+async function checkCsvFolder(sub){
+ const r=await driveSearch('04.連携データ');
+ const s=JSON.stringify(r);
+ if(!s.includes('04.連携データ')) throw new Error(`Drive に「04.連携データ」フォルダが見つかりません。04.連携データ/${sub}/ を作成し、CSV を置いてから ON にしてください`);
+ const r2=await driveSearch(sub).catch(()=>null);
+ if(!r2||!JSON.stringify(r2).includes(sub)) throw new Error(`「04.連携データ/${sub}」フォルダが見つかりません。作成して CSV を置いてから ON にしてください`);
+}
+
+// ================= MCPブリッジ =================
+async function rawCall(name,args){
+ const f=(window.cowork&&window.cowork.callMcpTool)||(window.claude&&window.claude.callMcpTool);
+ if(!f) throw new Error('callMcpTool が利用できません（Cowork デスクトップのアーティファクトとして開いてください）');
+ const r=await f(name,args||{});
+ if(r&&r.isError) throw new Error((r.content&&r.content[0]&&r.content[0].text)||'tool error');
+ if(r&&r.structuredContent!==undefined) return r.structuredContent;
+ try{return JSON.parse(r.content[0].text)}catch(e){return r&&r.content&&r.content[0]&&r.content[0].text}
+}
+async function fin(tool,args){ if(!FIN) throw new Error('AI OSI URI Finance 未接続'); return rawCall(FIN+tool,args) }
+
+// ================= 状態 =================
+let contracts=[],billing=[],payments=[],templates=[],hdr={},CUR=new Date().toISOString().slice(0,7);
+let OPERATOR='', opResolve=null;
+function nowJST(){const d=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Tokyo'}));const p=n=>String(n).padStart(2,'0');
+ return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`}
+function renderOperator(){const el=document.getElementById('opShow');if(el)el.textContent=OPERATOR||'未設定（台帳への書き込み時に入力を求めます）'}
+function ensureOperator(){return new Promise(res=>{ if(OPERATOR){res(true);return;} opResolve=res; dlgOp.showModal(); })}
+function setOperator(){const v=document.getElementById('opEmail').value.trim();
+ if(!v||!v.includes('@')){toast('メールアドレスを入力してください');return;}
+ OPERATOR=v; dlgOp.close(); renderOperator(); log('操作者を設定: '+v);
+ if(opResolve){opResolve(true);opResolve=null;}}
+// 操作者列（更新者/更新日時）への書き込み。列が無い台帳では黙ってスキップ
+async function stampOperator(sheetId,tab,headers,row){
+ try{ const ci=headers.indexOf('更新者'); if(ci<0||!row) return;
+  if(headers[ci+1]==='更新日時') await fin('sheets_update_values',{spreadsheet_id:sheetId,range:`${tab}!${colLetter(ci)}${row}:${colLetter(ci+1)}${row}`,values:[[OPERATOR,nowJST()]]});
+  else await fin('sheets_update_values',{spreadsheet_id:sheetId,range:`${tab}!${colLetter(ci)}${row}`,values:[[OPERATOR]]});
+ }catch(e){ log('操作者記録エラー（続行）: '+e.message) }}
+function log(t){document.getElementById('log').insertAdjacentHTML('afterbegin',`<div>${new Date().toLocaleTimeString('ja-JP')}　${t}</div>`)}
+function toast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3200)}
+function yen(n){n=Number(String(n).replace(/[^\d.-]/g,''))||0;return '¥'+n.toLocaleString()}
+function copyPrompt(t){navigator.clipboard&&navigator.clipboard.writeText(t).catch(()=>{});toast('プロンプトをコピーしました。Cowork のチャットに貼り付けて実行してください');log('プロンプト連携: '+t.slice(0,42)+'…')}
+function colLetter(i){let s='';i++;while(i){s=String.fromCharCode(65+(i-1)%26)+s;i=Math.floor((i-1)/26)}return s}
+
+// ================= 読み込み =================
+async function boot(){
+ // 接続検出
+ for(const p of FIN_PREFIXES){ try{ await rawCall(p+'health_check'); FIN=p; break; }catch(e){} }
+ const badge=document.getElementById('envBadge');
+ if(!FIN){ badge.textContent='台帳未接続'; badge.className='env ng';
+  document.getElementById('banner').style.display='block';
+  document.getElementById('banner').innerHTML='<b>AI OSI URI Finance コネクタに接続できません。</b> このアーティファクトの設定で「AI OSI URI Finance」のツール使用を許可し、コネクタが有効か確認してください（health_check / sheets_* / mfi_*）。許可後にリロードしてください。';
+  ['arBox','apBox','bBox','pBox','tplBox'].forEach(id=>document.getElementById(id).innerHTML='<div class="loading">台帳未接続のため表示できません</div>');
+  renderToggles(); log('起動: 台帳コネクタ未接続'); return; }
+ badge.textContent='台帳接続OK'; badge.className='env ok'; log('起動: AI OSI URI Finance 接続確認（'+FIN+'）');
+ await loadAll(); renderToggles(); render();
+}
+async function loadAll(){
+ try{
+  const cm=await fin('sheets_get_values',{spreadsheet_id:BILLING_ID,range:'契約マスタ!A1:AH400'});
+  const h=cm.values[0]; hdr.cm=h;
+  contracts=(cm.values.slice(1)||[]).filter(r=>r[0]).map((r,i)=>{const o={__row:i+2};h.forEach((k,j)=>o[k]=r[j]??'');return o});
+ }catch(e){contracts=[];log('契約マスタ読込エラー: '+e.message)}
+ try{
+  const bs=await fin('sheets_get_values',{spreadsheet_id:BILLING_ID,range:'月次請求スケジュール!A1:T600'});
+  const h=bs.values[0]; hdr.bs=h;
+  billing=(bs.values.slice(1)||[]).filter(r=>r[0]).map((r,i)=>{const o={__row:i+2};h.forEach((k,j)=>o[k]=r[j]??'');return o});
+ }catch(e){billing=[];log('請求スケジュール読込エラー: '+e.message)}
+ try{
+  const ps=await fin('sheets_get_values',{spreadsheet_id:PAYMENT_ID,range:'月次支払スケジュール!A1:P400'});
+  const h=ps.values[0]; hdr.ps=h;
+  payments=(ps.values.slice(1)||[]).filter(r=>r[0]).map((r,i)=>{const o={__row:i+2};h.forEach((k,j)=>o[k]=r[j]??'');return o});
+ }catch(e){payments=[];log('支払スケジュール読込エラー: '+e.message)}
+ templates=[];
+ for(const tab of ['雛形マスタ','シート1']){
+  try{ const t=await fin('sheets_get_values',{spreadsheet_id:BILLING_ID,range:tab+'!A1:K50'});
+   if(t.values&&t.values[0]&&t.values[0][0]==='雛形ID'){ const h=t.values[0];
+    templates=(t.values.slice(1)||[]).filter(r=>r[0]).map(r=>{const o={};h.forEach((k,j)=>o[k]=r[j]??'');return o});
+    hdr.tplTab=tab; break; } }catch(e){}
+ }
+}
+
+// ================= 表示 =================
+const DIR_COL='方向';
+function dirOf(c){ return (c[DIR_COL]||'').includes('発注')||String(c['契約ID']).startsWith('AP-')?'ap':'ar' }
+function today(){return new Date().toISOString().slice(0,10)}
+function stC(c){const s=c['ステータス']||'';const end=c['契約終了']&&c['契約終了']<today();
+ if((s==='有効'||s==='締結済')&&end) return ['期間終了','b-gray'];
+ if(s==='有効'||s==='締結済') return ['締結済','b-green'];
+ if(s==='送付済') return ['送付済','b-blue'];
+ if(s==='ドラフト') return ['ドラフト','b-gray'];
+ return [s||'—','b-amber'];}
+function stB(s){return s==='入金済'?[s,'b-green']:s==='請求済'?[s,'b-blue']:(s==='下書き作成済'||s==='下書き済')?[s,'b-amber']:s==='未請求'?[s,'b-red']:[s||'—','b-gray']}
+function stP(s){return s==='支払済'?[s,'b-green']:s==='請求書受領済'?[s,'b-amber']:s==='未払予定'?[s,'b-red']:[s||'—','b-gray']}
+
+function contractTable(kind){
+ const list=contracts.filter(c=>dirOf(c)===kind);
+ if(!list.length) return '<div class="loading">契約がありません</div>';
+ let rows=list.map(c=>{
+  const [sl,sc]=stC(c);const src=c['出所']||'—';
+  const acts=[];
+  if(SET.esign){
+   if(!c['契約書ファイル']) acts.push(`<button class="btn sm" onclick="copyPrompt('契約書を作成して起票してください。既存契約 ${c['契約ID']}（${c['取引先']}・${c['契約内容']}）の契約書ドラフトを雛形から生成し、契約書ファイル列に記録してください。')">📄 契約書を作成</button>`);
+   if(c['ステータス']!=='有効'&&c['ステータス']!=='締結済') acts.push(`<button class="btn sm p" onclick="copyPrompt('契約 ${c['契約ID']}（${c['取引先']}）の契約書を DocuSign で署名依頼として発送し、envelope_id を契約マスタに記録して状態を送付済にしてください。')">✍️ DocuSignで発送</button>`);
+  }
+  if(c['ステータス']==='送付済'||c['ステータス']==='ドラフト') acts.push(`<button class="btn sm g" onclick="signContract('${c['契約ID']}',${c.__row})">締結済みにする</button>`);
+  if((c['ステータス']==='有効'||c['ステータス']==='締結済')&&c['契約書ファイル']) acts.push(`<button class="btn sm ghost" onclick="copyPrompt('この契約（${c['契約ID']}）を雛形として登録してください。固有情報は{{変数}}化し、機微値スキャンをしてから雛形マスタに登録してください。')">☆ 雛形として登録</button>`);
+  const who=[c['作成者']?`作成: ${c['作成者']} ${c['作成日時']||''}`:'',c['更新者']?`更新: ${c['更新者']} ${c['更新日時']||''}`:''].filter(Boolean).join(' ／ ')||'作成者・更新者の記録なし';
+  return `<tr title="${who}"><td><b>${c['契約ID']}</b></td><td>${c['取引先']}</td><td>${c['契約内容']||''}</td>
+   <td>${yen(c['月額(税込)']||c['一括額(税込)'])}</td><td>${c['契約開始']||''}</td><td>${c['契約終了']||''}</td>
+   <td><span class="badge ${sc}">${sl}</span></td><td><span class="badge ${src==='Gmail取込'?'b-amber':'b-purple'}">${src}</span></td>
+   <td class="acts">${acts.join('')}</td></tr>`}).join('');
+ return `<table><thead><tr><th>契約ID</th><th>${kind==='ar'?'取引先':'支払先'}</th><th>内容</th><th>月額/一括</th><th>開始日</th><th>終了日</th><th>状態</th><th>出所</th><th>操作</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+function render(){
+ const ar=contracts.filter(c=>dirOf(c)==='ar'),ap=contracts.filter(c=>dirOf(c)==='ap');
+ document.getElementById('arBox').innerHTML=contractTable('ar');
+ document.getElementById('apBox').innerHTML=contractTable('ap');
+ document.getElementById('arCount').textContent=ar.length+'件';
+ document.getElementById('apCount').textContent=ap.length+'件';
+ // 請求
+ const months=[...new Set(billing.map(b=>b['対象月']))].filter(Boolean).sort();
+ const selB=document.getElementById('mSelB');
+ if(selB._n!==months.length){const v=selB.value||CUR;selB.innerHTML=months.map(m=>`<option ${m===v?'selected':''}>${m}</option>`).join('');selB._n=months.length}
+ const moB=selB.value||CUR;
+ const rowsB=billing.filter(b=>b['対象月']===moB);
+ document.getElementById('bBox').innerHTML=rowsB.length?`<table><thead><tr><th>請求書番号</th><th>取引先</th><th>対象月</th><th>請求日</th><th>請求額(税込)</th><th>請求状態</th><th>操作</th></tr></thead><tbody>`+
+  rowsB.map(b=>{const s=b['請求ステータス'];const [sl,sc]=stB(s);const inv=b['請求書番号'];const acts=[];
+   if(s==='未請求'){acts.push(`<button class="btn sm p" onclick="copyPrompt('INV採番前の請求（${b['契約ID']}・${b['取引先']}・${moB}分）の請求書を単票発行して、Gmail下書きを作ってください。')">📧 Gmail下書き</button>`);}
+   if((s==='下書き作成済'||s==='下書き済')&&inv){acts.push(`<button class="btn sm g" onclick="updBilling('${inv}','請求済')">請求済みにする</button>`);acts.push(`<button class="btn sm" onclick="updBilling('${inv}','未請求')">未請求に戻す</button>`);}
+   if(s==='請求済'&&inv){acts.push(`<button class="btn sm g" onclick="updBilling('${inv}','入金済',true)">入金済みにする</button>`);acts.push(`<button class="btn sm" onclick="updBilling('${inv}','未請求')">未請求に戻す</button>`);}
+   const whoB=[b['作成者']?`作成: ${b['作成者']} ${b['作成日時']||''}`:'',b['更新者']?`更新: ${b['更新者']} ${b['更新日時']||''}`:''].filter(Boolean).join(' ／ ')||'作成者・更新者の記録なし';
+   return `<tr title="${whoB}"><td>${inv||'—'}</td><td>${b['取引先']}</td><td>${b['対象月']}</td><td>${b['請求日']||''}</td><td>${yen(b['請求額(税込)'])}</td><td><span class="badge ${sc}">${sl}</span></td><td class="acts">${acts.join('')}</td></tr>`}).join('')+'</tbody></table>'
+  :'<div class="loading">この月の請求はありません</div>';
+ document.getElementById('bCount').textContent=rowsB.length+'件';
+ // 支払
+ const monthsP=[...new Set(payments.map(p=>p['対象月']))].filter(Boolean).sort();
+ const selP=document.getElementById('mSelP');
+ if(selP._n!==monthsP.length){const v=selP.value||CUR;selP.innerHTML=(monthsP.length?monthsP:[CUR]).map(m=>`<option ${m===v?'selected':''}>${m}</option>`).join('');selP._n=monthsP.length}
+ const moP=selP.value||CUR;
+ const rowsP=payments.filter(p=>p['対象月']===moP);
+ document.getElementById('pBox').innerHTML=rowsP.length?`<table><thead><tr><th>予定ID</th><th>支払先</th><th>対象月</th><th>支払予定日</th><th>予定額(税込)</th><th>支払状態</th><th>操作</th></tr></thead><tbody>`+
+  rowsP.map(p=>{const s=p['状態'];const [sl,sc]=stP(s);const acts=[];
+   if(s==='未払予定')acts.push(`<button class="btn sm" onclick="updPayment(${p.__row},'請求書受領済')">請求書受領を記録</button>`);
+   if(s==='請求書受領済'){acts.push(`<button class="btn sm g" onclick="updPayment(${p.__row},'支払済')">支払済みにする</button>`);acts.push(`<button class="btn sm" onclick="updPayment(${p.__row},'未払予定')">未払に戻す</button>`);}
+   const whoP=[p['作成者']?`作成: ${p['作成者']} ${p['作成日時']||''}`:'',p['更新者']?`更新: ${p['更新者']} ${p['更新日時']||''}`:''].filter(Boolean).join(' ／ ')||'作成者・更新者の記録なし';
+   return `<tr title="${whoP}"><td>${p['予定ID']}</td><td>${p['支払先名']}</td><td>${p['対象月']}</td><td>${p['支払予定日']||''}</td><td>${yen(p['予定額(税込)'])}</td><td><span class="badge ${sc}">${sl}</span></td><td class="acts">${acts.join('')}</td></tr>`}).join('')+'</tbody></table>'
+  :'<div class="loading">この月の支払予定はありません（発注契約が締結されると自動導出されます）</div>';
+ document.getElementById('pCount').textContent=rowsP.length+'件';
+ // 突合ボタン
+ const rec=(target)=>{const b=[];
+  if(SET.mf)b.push(`<button class="btn ghost" onclick="copyPrompt('台帳とMFを突合してください（${target==='billing'?'請求(AR)':'支払(AP)'}・対象月 ${target==='billing'?moB:moP}）。結果は台帳の突合結果・突合日時列に書き戻してください。')">🔄 MFと突合</button>`);
+  if(SET.freee)b.push(`<button class="btn ghost" onclick="copyPrompt('freee CSV 突合を実行してください（${target==='billing'?'請求(AR)':'支払(AP)'}・対象月 ${target==='billing'?moB:moP}）。04.連携データ/freee の仕訳CSVと台帳を照合し、突合結果・突合日時・更新者を台帳に書き戻してください。freee への書き込みはしないでください。')">🔄 freeeと突合</button>`);
+  if(SET.bank)b.push(`<button class="btn ghost" onclick="copyPrompt('銀行明細突合を実行してください（${target==='billing'?'入金(AR)':'支払(AP)'}・対象月 ${target==='billing'?moB:moP}）。04.連携データ/銀行 の明細CSVと台帳を照合して${target==='billing'?'入金候補を提示':'支払実績を裏取り'}し、突合結果・突合日時・更新者を書き戻してください。入金済/支払済への遷移はしないでください（人が確定します）。')">🔄 銀行明細と突合</button>`);
+  return b.join(' ')};
+ document.getElementById('reconB').innerHTML=rec('billing');
+ document.getElementById('reconP').innerHTML=rec('payment');
+ // 雛形
+ document.getElementById('tCount').textContent=templates.length+'件';
+ document.getElementById('tplBox').innerHTML=templates.length?'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'+templates.map(t=>`
+  <div class="tgl"><span style="font-size:22px">📑</span><div style="flex:1"><b>${t['雛形名']} <span class="badge ${t['区分']==='受注用'?'b-green':t['区分']==='発注用'?'b-blue':'b-gray'}" style="margin-left:6px">${t['区分']}</span></b>
+  <p style="font-size:12px;color:var(--sub)">${t['用途メモ']||''}</p>
+  <div style="font-size:11px;color:var(--sub);margin-top:4px">${t['雛形ID']} ・ 登録 ${t['登録日']||''} ・ ${t['登録元']||''}${t['登録者']?' ・ 登録者 '+t['登録者']:''} ・ 使用 ${t['使用回数']||0}回</div></div></div>`).join('')+'</div>'
+  :'<div class="loading">雛形マスタが見つかりません（台帳に「雛形マスタ」タブを作成してください）</div>';
+ // KPI
+ const actAR=ar.filter(c=>stC(c)[0]==='締結済').length,actAP=ap.filter(c=>stC(c)[0]==='締結済').length;
+ document.getElementById('k1').innerHTML=`${actAR} <small>件</small> / ${actAP} <small>件</small>`;
+ const curB=billing.filter(b=>b['対象月']===CUR);
+ const un=curB.filter(b=>b['請求ステータス']==='未請求').length;
+ document.getElementById('k2').innerHTML=yen(curB.reduce((s,b)=>s+(Number(String(b['請求額(税込)']).replace(/[^\d.-]/g,''))||0),0))+(un?` <small style="color:var(--red)">未請求${un}件</small>`:' <small>処理済</small>');
+ const curP=payments.filter(p=>p['対象月']===CUR&&p['状態']!=='支払済');
+ document.getElementById('k3').innerHTML=yen(curP.reduce((s,p)=>s+(Number(String(p['予定額(税込)']).replace(/[^\d.-]/g,''))||0),0))+` <small>${curP.length}件</small>`;
+ const wait=billing.filter(b=>b['請求ステータス']==='請求済');
+ document.getElementById('k4').innerHTML=yen(wait.reduce((s,b)=>s+(Number(String(b['請求額(税込)']).replace(/[^\d.-]/g,''))||0),0))+` <small>${wait.length}件</small>`;
+}
+
+// ================= 書き込み（人のボタン＝確定操作） =================
+async function updBilling(inv,status,withPaid){
+ if(!await ensureOperator()){toast('操作者メールが未設定のため中止しました');return;}
+ try{const u={inv,status};if(withPaid){u.paid_date=today();const b0=billing.find(x=>x['請求書番号']===inv);if(b0)u.paid_amount=Number(String(b0['請求額(税込)']).replace(/[^\d.-]/g,''))||undefined;}
+  await fin('sheets_update_status',{spreadsheet_id:BILLING_ID,tab:'月次請求スケジュール',updates:[u]});
+  const b=billing.find(x=>x['請求書番号']===inv);
+  await stampOperator(BILLING_ID,'月次請求スケジュール',hdr.bs,b&&b.__row);
+  log(`請求 ${inv}: → ${status}【${OPERATOR}・手動ボタン】`);toast(`${inv} を「${status}」にしました`);await loadAll();render();
+ }catch(e){toast('更新に失敗: '+e.message);log('請求更新エラー: '+e.message)}}
+async function updPayment(row,status){
+ if(!await ensureOperator()){toast('操作者メールが未設定のため中止しました');return;}
+ try{const col=hdr.ps.indexOf('状態');if(col<0)throw new Error('状態列が見つかりません');
+  await fin('sheets_update_values',{spreadsheet_id:PAYMENT_ID,range:`月次支払スケジュール!${colLetter(col)}${row}`,values:[[status]]});
+  await stampOperator(PAYMENT_ID,'月次支払スケジュール',hdr.ps,row);
+  log(`支払 行${row}: → ${status}【${OPERATOR}・手動ボタン】`);toast(`支払状態を「${status}」にしました`);await loadAll();render();
+ }catch(e){toast('更新に失敗: '+e.message)}}
+async function signContract(cid,row){
+ if(!await ensureOperator()){toast('操作者メールが未設定のため中止しました');return;}
+ try{const col=hdr.cm.indexOf('ステータス');if(col<0)throw new Error('ステータス列なし');
+  await fin('sheets_update_values',{spreadsheet_id:BILLING_ID,range:`契約マスタ!${colLetter(col)}${row}`,values:[['締結済']]});
+  await stampOperator(BILLING_ID,'契約マスタ',hdr.cm,row);
+  log(`契約 ${cid}: → 締結済【${OPERATOR}・手動ボタン】`);
+  toast('締結を記録しました。スケジュール展開はプロンプトをコピーして Cowork で実行してください');
+  const c0=contracts.find(x=>x['契約ID']===cid);const dirLbl=(c0&&dirOf(c0)==='ap')?'発注':'受注';
+  copyPrompt(`契約 ${cid} が締結されました（方向: ${dirLbl}）。契約期間の各月について、受注なら月次請求スケジュール・発注なら月次支払スケジュールに行を展開してください（重複行は作らない。各行に作成者・作成日時を記録）。`);
+  await loadAll();render();
+ }catch(e){toast('更新に失敗: '+e.message)}}
+
+// ================= 連携トグル（ON時に疎通チェック） =================
+function renderToggles(){
+ document.getElementById('toggles').innerHTML=Object.entries(PROBES).map(([k,m])=>`
+ <div class="tgl"><label style="position:relative;width:44px;height:24px;flex-shrink:0;margin-top:2px">
+  <input type="checkbox" data-k="${k}" ${SET[k]?'checked':''} style="opacity:0;width:0;height:0">
+  <span style="position:absolute;inset:0;border-radius:999px;cursor:pointer;background:${SET[k]?'var(--ok)':'var(--line)'}">
+   <i style="position:absolute;left:${SET[k]?23:3}px;top:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)"></i></span></label>
+  <div><b style="display:block;font-size:14px">${m.label}</b>
+  <p style="font-size:12px;color:var(--sub);margin-top:2px" id="tglmsg-${k}">${SET[k]?'接続確認済み':'OFF'}</p></div></div>`).join('');
+ document.querySelectorAll('#toggles input').forEach(i=>i.addEventListener('change',async()=>{
+  const k=i.dataset.k, m=PROBES[k], msg=document.getElementById('tglmsg-'+k);
+  if(!i.checked){SET[k]=false;log(`連携: ${m.label} を OFF`);renderToggles();render();return;}
+  msg.textContent='接続確認中…';
+  let ok=false, lastErr=m.err;
+  if(m.check){ try{ await m.check(); ok=true; }catch(e){ lastErr=e.message||m.err; } }
+  else { for(const t of (m.tools||[])){ try{ await rawCall(t,{}); ok=true; break; }catch(e){ lastErr=m.err; } }
+   if(!m.tools||m.tools.length===0) ok=false; }
+  if(ok){ SET[k]=true; log(`連携: ${m.label} を ON（疎通確認OK）`); toast(`${m.label} を有効にしました`); }
+  else { SET[k]=false; log(`連携エラー: ${m.label} — ${lastErr}`); toast('エラー: '+lastErr); }
+  renderToggles(); render();
+ }));
+}
+
+document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>{
+ document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+ ['ar','ap','billing','payment','tpl','settings'].forEach(t=>document.getElementById('tab-'+t).style.display=b.dataset.t===t?'':'none');
+}));
+dlgOp.addEventListener('close',()=>{ if(opResolve&&!OPERATOR){opResolve(false);opResolve=null;} });
+log('コンソール起動（v0.17 実台帳接続版・操作者トラッキング）');
+boot();
+</script>
+</body>
+</html>
