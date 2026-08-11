@@ -2,7 +2,7 @@
 
 対象プラグイン: osi-creative, osi-docs, osi-deploy, osi-mobile-deploy, osi-knowledge, osi-finance, osi-backoffice
 
-以下の 37 箇所に要注意語が残っています。publish 前に人手で確認してください（自動削除は文書を壊すため行いません）。
+以下の 36 箇所に要注意語が残っています。publish 前に人手で確認してください（自動削除は文書を壊すため行いません）。
 
 | ファイル | 行 | 語 | 抜粋 |
 |---|---|---|---|
@@ -42,4 +42,3 @@
 | plugins/osi-finance/config/osi-finance-settings.example.md | 141 | 共有ドライブ | \| OSI Finance ルートの場所 \| {{DRIVE_ROOT_LOCATION 例: 共有ドライブ「経理」直下／マイドライブ（要・経理チーム共有）}} \| |
 | plugins/osi-finance/docs/導入手順書.md | 22 | 共有ドライブ | \| Google Workspace（**共有ドライブ**推奨） \| 必須 \| 台帳・契約書・証憑の保管 \| 既存契約でも可 \| |
 | plugins/osi-finance/docs/導入手順書.md | 99 | 共有ドライブ | - 台帳を置く場所：**Google Workspace の共有ドライブ**のどこに「OSI Finance」フォルダを |
-| plugins/osi-finance/assets/schema/data-layout.yaml | 18 | 共有ドライブ | # 置き場所は Google Workspace の共有ドライブを推奨（個人依存・退職リスクの回避）。 |

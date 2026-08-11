@@ -1,365 +1,389 @@
-# =============================================================
-# OSI Finance データレイアウト仕様（配布キットの正本）
-# =============================================================
-# このファイルが「フォルダ構成」と「台帳（2冊）のタブ・列」の唯一の正本。
-# - osi-finance-setup: 導入時にこの仕様どおりに Drive フォルダと台帳を生成する
-# - osi-finance-setup(スモーク) / osi-finance-monthly: 台帳ヘルスチェックでこの仕様と照合する
-# - 手書きの解説は skills/osi-finance-mf-sync/references/ledger-schema.md（本ファイルへの補足）
-# 組織固有の「実際の置き場所・ファイル名」は config/osi-finance-settings.md が持つ。
-# ここには汎用の規定値（default）だけを書き、実値は書かない。
+# OSI Finance 台帳データレイアウト
+#
+# layout_version 5 — 2026-08-11。実台帳（06.会計 配下の xlsx）から起こした。
+# v4 までは仕様先行で書かれており、実台帳と乖離していた（経費一覧の列名、月次支払管理の
+# 列構成、請求ステータスの語彙など）。v5 は実データを正とする。
+#
+# 読み書きの原則
+#   * 列は必ずヘッダー名で解決する。列番号を決め打ちしない。
+#   * ヘッダー行は1行目とは限らない（header_row を参照）。検出は server/header.js に集約。
+#   * enum は「読むときは許容表記も受ける／書くときは正規形」で扱う。
+#   * 実データが0行のタブは枠だけ用意されている状態。列は信用してよい。
 
-layout_version: 4
-updated: 2026-08-10
-
-# -------------------------------------------------------------
-# 1. フォルダ構成（ルート1点方式）
-# -------------------------------------------------------------
-# 顧客が決めるのは「ルートをどこに置くか」1点だけ。配下は常にこの規定ツリー。
-# 置き場所は Google Workspace の共有ドライブを推奨（個人依存・退職リスクの回避）。
-# 既存のフォルダ体系がある組織のみ、settings の Drive キーで名前を上書きできる。
-folders:
-  root:
-    default_name: "OSI Finance"
-    settings_key: DRIVE_BILLING_ROOT   # 既存キーを流用（ルート=請求管理ルート）
-    recommended_location: shared_drive # shared_drive | my_drive(共有必須)
-  children:
-    - name: "00.契約書"
-      settings_key: DRIVE_CONTRACTS
-      purpose: 契約PDFの正本（contract-intake / contract-draft が格納）
-      children:
-        - name: "雛形"
-          purpose: "契約書雛形（TPL-xxx.docx）。雛形マスタと対で管理（contract-draft が登録）"
-    - name: "01.受領請求書"
-      settings_key: DRIVE_RECEIVED_INVOICES
-      purpose: 受領請求書PDF（YYYY-MM/ 配下）と支払管理台帳
-      contains_ledger: 支払管理台帳
-    - name: "02.送付請求書"
-      settings_key: DRIVE_SENT_INVOICES
-      purpose: 発行請求書PDF（YYYY-MM/ 配下）と請求管理台帳
-      contains_ledger: 請求管理台帳
-    - name: "03.経費管理"
-      settings_key: DRIVE_EXPENSE_ROOT
-      purpose: 経費まわりの証憑ルート
-      children:
-        - name: "カードSaaS証憑"
-          settings_key: DRIVE_CARD_SAAS_EVIDENCE
-          purpose: カード払い（自動課金SaaS）の証憑。台帳には起票しない
-        - name: "レシート未処理"
-          purpose: "紙レシートの投入口。人単位サブフォルダ {氏名}/（receipt-intake が申請者を特定）"
-    - name: "04.連携データ"
-      settings_key: DRIVE_SYNC_ROOT
-      purpose: 外部サービスとの CSV 受け渡し（v3 新設。連携トグルの freee／銀行が使う）
-      children:
-        - name: "freee"
-          settings_key: DRIVE_SYNC_FREEE
-          purpose: "freee 会計からエクスポートした仕訳CSV。osi-finance-freee-sync が突合に使う"
-        - name: "銀行"
-          settings_key: DRIVE_SYNC_BANK
-          purpose: "ネットバンキングの入出金明細CSV。osi-finance-bank-recon が突合に使う（口座番号を含むため Drive 外へ出さない・チャット出力ではマスク）"
-
-# ルートに共有をかければ配下に継承される（共有はルート1点で管理する）。
-sharing:
-  grants:
-    - subject: 経理担当（人）
-      role: editor
-      required: true
-    - subject: コネクタ実行主体（サービスアカウントのメールアドレス。SA鍵方式のとき）
-      role: editor
-      required: true
-      note: 共有しないと AI OSI URI Finance 拡張が台帳を読み書きできない
-    - subject: 税理士・経営者など閲覧者
-      role: viewer
-      required: false
-  policy: |
-    「組織全体に共有」はしない（支払管理台帳に振込先口座が含まれるため）。
-    共有先は上記ホワイトリストのみ。追加はルートフォルダへの共有で行う。
-
-# -------------------------------------------------------------
-# 1-2. 操作者トラッキング（v3・全書き込み共通）
-# -------------------------------------------------------------
-# 台帳を共有された人が「誰の仕事か」を列だけで読めるようにする。認証ではなく監査用の自己申告メタデータ。
-operator_tracking:
-  applies_to: |
-    行を持つ全タブ。各タブは末尾に 作成者/作成日時/更新者/更新日時 の4列を持つ
-    （雛形マスタのみ 登録日・登録元との対で 登録者/更新者/更新日時）。
-  identity: |
-    Cowork にログインしているユーザーのメールアドレス。スキルはセッションのログインユーザーを自動記録。
-    取得できない場合は settings の OPERATOR_EMAIL、それも無ければ書き込み前に人へ確認する（空のまま書かない）。
-  rules: |
-    - 行の新規作成時：作成者・作成日時（JST YYYY-MM-DD HH:mm）を一度だけ記録し、以後上書きしない。
-      契約書を contract-draft で作った場合はその実行者、Gmail 取込なら取込実行者、コンソールならボタンを押した人。
-    - 既存行の更新時（ステータス変更・突合書き戻し・実績反映・条件修正など、スキル/コンソール経由の全書き込み）：
-      更新者・更新日時を毎回上書きする。
-    - 出所（手動/Gmail取込）は「経路」、作成者/更新者は「人」。2軸で provenance を持つ。
-    - 変更前→変更後の完全履歴が必要な組織のみ、請求管理台帳に「操作ログ」タブを有効化
-      （settings AUDIT_LOG: on|off・既定 off。列: 日時/操作者/対象/操作/変更前/変更後）。
-
-# -------------------------------------------------------------
-# 2. 台帳（形式＝ネイティブ Google スプレッドシート）
-# -------------------------------------------------------------
-# 配布物としては xlsx テンプレ（assets/templates/）を同梱し、setup が配置時に
-# Google スプレッドシート形式へ変換する。変換後のスプレッドシートIDを
-# settings（LEDGER_*_SHEET_ID）に記録して以後の読み書きに使う。
-ledger_format: google_spreadsheet   # xlsx はテンプレ搬送用。運用正本はスプレッドシート
-templates:
-  - assets/templates/請求管理台帳_テンプレート.xlsx
-  - assets/templates/支払管理台帳_テンプレート.xlsx
+layout_version: 5
+surveyed_at: 2026-08-12
+source: 実台帳（Google スプレッドシートから xlsx へ完全同期したもの）
 
 ledgers:
-
-  請求管理台帳:   # AR・もらう側。02.送付請求書/ に置く
-    settings_keys: {file: LEDGER_BILLING_FILE, sheet_id: LEDGER_BILLING_SHEET_ID}
+  請求管理台帳:
     tabs:
-      - name: 発行者設定
-        required: true
-        kind: key_value   # 列: 項目 / 値 / 備考
-        rows: [発行者名義, 登録番号, 郵便番号, 住所, 振込先 銀行, 振込先 支店,
-               預金種別, 口座番号, 口座名義, 消費税率, 採番ルール, 支払サイト, 振込手数料]
-        note: osi-finance-settings の発行者情報と一致させる（請求書PDFに反映）
-      - name: 契約マスタ
-        required: true
-        key: 契約ID
+      発行者設定:
+        header_row: 1
+        data_rows_at_survey: 13
+        key: "項目"
+        note: "key-value 形式。行が固定で列は 項目/値/備考。"
         columns:
-          - {name: 契約ID, required: true, type: id, note: "AR-C-連番（旧 C- は AR とみなす）"}
-          - {name: 取引先, required: true, type: string}
-          - {name: 取引先ID, required: false, type: id, note: "取引先マスタ（3桁）を使う組織のみ"}
-          - {name: 方向, required: true, type: enum, values: [受注, 発注],
-             note: "v2で必須化。受注→月次請求スケジュール／発注→月次支払スケジュールを展開"}
-          - {name: 出所, required: true, type: enum, values: [手動, Gmail取込],
-             note: "どの経路で台帳に入ったか（provenance）。コンソール/スキルが記録"}
-          - {name: 雛形ID, required: false, type: id, note: "契約書生成に使った雛形（TPL-xxx）。contract-draft が記録"}
-          - {name: envelope_id, required: false, type: id, note: "電子署名で発送した場合の封筒ID（DocuSign等）"}
-          - {name: 正式名称, required: true, type: string}
-          - {name: 郵便番号, required: false, type: string}
-          - {name: 住所, required: false, type: string}
-          - {name: 請求先To, required: true, type: string}
-          - {name: Toアドレス, required: true, type: email}
-          - {name: CC, required: false, type: string}
-          - {name: CCアドレス, required: false, type: email}
-          - {name: 契約種別, required: true, type: string}
-          - {name: 契約内容, required: true, type: string}
-          - {name: 金額区分, required: true, type: enum, values: [月額固定, 一括]}
-          - {name: "月額(税込)", required: false, type: number}
-          - {name: "一括額(税込)", required: false, type: number}
-          - {name: 税率, required: true, type: string, note: "例 10%"}
-          - {name: 契約開始, required: true, type: date}
-          - {name: 契約終了, required: false, type: date}
-          - {name: 支払サイト, required: true, type: string}
-          - {name: 契約書ファイル, required: false, type: path, note: 00.契約書/ 配下の相対パス}
-          - {name: ステータス, required: true, type: enum, values: [ドラフト, 送付済, 締結済],
-             note: "締結済のみスケジュール展開。「終了」状態は持たない — 期間終了は契約終了日から導出する（v2）"}
-          - {name: 備考, required: false, type: string}
-          - {name: 作成者, required: false, type: email, note: "操作者トラッキング（v3・operator_tracking 参照）。行を入れた人。以後不変"}
-          - {name: 作成日時, required: false, type: date}
-          - {name: 更新者, required: false, type: email, note: 最後に書き込んだ人。書き込みのたび上書き}
-          - {name: 更新日時, required: false, type: date}
-      - name: 月次請求スケジュール
-        required: true
-        key: 契約ID+対象月
-        columns:
-          - {name: 契約ID, required: true, type: id}
-          - {name: 取引先, required: true, type: string}
-          - {name: 対象月, required: true, type: month, note: "YYYY-MM"}
-          - {name: 件名, required: true, type: string}
-          - {name: "請求額(税込)", required: true, type: number}
-          - {name: 請求書番号, required: false, type: id, note: "INV-YYYY-MM-連番3桁。invoice 発行時に確定"}
-          - {name: 請求日, required: true, type: date, note: "v2で必須化。既定＝対象月翌月1日（AR_PAYMENT_TERMS から導出）"}
-          - {name: 支払期限, required: false, type: date}
-          - {name: 請求ステータス, required: true, type: enum, values: [未請求, 下書き作成済, 請求済, 入金済],
-             note: "invoice が 未請求→下書き作成済 に更新。請求済・入金済は人のボタン/Gmail整合。
-                    差し戻し（→未請求）は人の操作のみ許可（v2）"}
-          - {name: 送付請求書ファイル, required: false, type: path}
-          - {name: 入金日, required: false, type: date}
-          - {name: 入金額, required: false, type: number}
-          - {name: 突合結果, required: false, type: enum, values: [一致, 未計上],
-             note: "会計/銀行との突合結果。mf-sync/ar-sync 等が書き戻し、コンソールは表示のみ（v2）"}
-          - {name: 突合日時, required: false, type: date}
-          - {name: 備考, required: false, type: string}
-          - {name: 作成者, required: false, type: email, note: 操作者トラッキング（v3）}
-          - {name: 作成日時, required: false, type: date}
-          - {name: 更新者, required: false, type: email}
-          - {name: 更新日時, required: false, type: date}
-      - name: 雛形マスタ
-        required: false   # v2 新設。契約書雛形の索引（実体は 00.契約書/雛形/）
-        key: 雛形ID
-        columns:
-          - {name: 雛形ID, required: true, type: id, note: TPL-連番3桁}
-          - {name: 雛形名, required: true, type: string}
-          - {name: 区分, required: true, type: enum, values: [受注用, 発注用, 共通]}
-          - {name: 用途メモ, required: false, type: string}
-          - {name: ファイルパス, required: true, type: path, note: 00.契約書/雛形/TPL-xxx.docx}
-          - {name: 登録日, required: true, type: date}
-          - {name: 登録元, required: true, type: enum, values: [AI生成, 実契約からの雛形化]}
-          - {name: 使用回数, required: false, type: number, note: contract-draft が使用時に+1}
-          - {name: 登録者, required: false, type: email, note: 操作者トラッキング（v3）。登録日・登録元と対}
-          - {name: 更新者, required: false, type: email}
-          - {name: 更新日時, required: false, type: date}
+          - name: "項目"
+          - name: "値"
+          - name: "備考"
+            observed: ["備考欄に明記", "対象月＋月内連番。台帳で一元採番", "標準税率", "請求日=対象月翌月1日／支払期限=翌月末", "請求書ヘッダー", "適格請求書発行事業者番号"]  # 実データの分布（規定値ではない）
 
-  仕訳台帳:   # 会計・v4 新設。ルート直下（請求管理台帳と同じ共有範囲）に置く
-    settings_keys: {file: LEDGER_JOURNAL_FILE, sheet_id: LEDGER_JOURNAL_SHEET_ID}
-    note: |
-      内部仕訳帳。ACCOUNTING_SYNC=none の組織では会計の正本、mf/freee の組織では
-      エクスポート下書き＋突合の物差し。仕訳の生成は osi-finance-journal（人レビュー必須・
-      生成は案→承認で確定）。減価償却・引当等の決算整理は対象外（税理士の領分。手動行の追記は可）。
+      契約マスタ:
+        header_row: 1
+        data_rows_at_survey: 30
+        key: "契約ID"
+        note: "ステータスと状態は別の軸。ステータス=契約が生きているか、状態=署名が済んだか。"
+        columns:
+          - name: "契約ID"
+          - name: "取引先"
+          - name: "正式名称"
+          - name: "郵便番号"
+            observed: ["105-0023", "141-0032", "150-0002", "150-0044", "153-0043", "541-0048", "693-0057", "812-0025"]  # 実データの分布（規定値ではない）
+          - name: "住所"
+          - name: "請求先To"
+          - name: "Toアドレス"
+          - name: "CC"
+            observed: ["中根篤史", "小村淳浩、野本卓弘、今岡明信", "小田悠子", "岸田 果純", "庄司愛美", "松岡 清一", "西谷明久"]  # 実データの分布（規定値ではない）
+          - name: "CCアドレス"
+          - name: "契約種別"
+            observed: ["業務委託", "業務委託(アドバイザリー)", "業務委託(原契約)", "業務委託(準委任)", "業務委託(請負)"]  # 実データの分布（規定値ではない）
+          - name: "契約内容"
+          - name: "金額区分"
+            values: ["月額固定", "一括"]
+          - name: "月額(税込)"
+          - name: "一括額(税込)"
+            observed: ["1716000", "220000", "2750000", "3300000", "4400000", "825000", "990000"]  # 実データの分布（規定値ではない）
+          - name: "税率"
+            observed: ["10%"]  # 実データの分布（規定値ではない）
+          - name: "契約開始"
+          - name: "契約終了"
+          - name: "支払サイト"
+          - name: "契約書ファイル"
+          - name: "ステータス"
+            values: ["有効", "終了"]
+            note: "期間終了は契約終了日から導出してもよいが、実台帳はこの列で管理している。"
+          - name: "旧ID"
+          - name: "備考"
+          - name: "取引先ID"
+          - name: "方向"
+            values: ["受注", "発注"]
+          - name: "状態"
+            values: ["ドラフト", "送付済", "締結済"]
+            note: "実データは締結済のみ。スケジュール展開は締結済の行だけ。"
+          - name: "出所"
+            values: ["手動", "Gmail取込"]
+          - name: "雛形ID"
+          - name: "envelope_id"
+            observed: ["137591ca", "1480e794", "27af26c4", "603fec75", "97ec9ed9", "b390001d"]  # 実データの分布（規定値ではない）
+          - name: "作成者"
+          - name: "作成日時"
+          - name: "更新者"
+          - name: "更新日時"
+
+      シート1:
+        header_row: 1
+        data_rows_at_survey: 18
+        key: "雛形ID"
+        note: "実体は雛形マスタ。タブ名は シート1 のまま（改名すると既存スキルが探せない）。"
+        columns:
+          - name: "雛形ID"
+            observed: ["TPL-001"]  # 実データの分布（規定値ではない）
+          - name: "雛形名"
+          - name: "区分"
+            values: ["受注用", "発注用", "共通"]
+          - name: "用途メモ"
+          - name: "ファイルパス"
+          - name: "登録日"
+            observed: ["2026-08-10"]  # 実データの分布（規定値ではない）
+          - name: "登録元"
+            values: ["AI生成", "実契約からの雛形化"]
+          - name: "使用回数"
+            observed: ["0"]  # 実データの分布（規定値ではない）
+          - name: "登録者"
+          - name: "更新者"
+          - name: "更新日時"
+
+      月次請求スケジュール:
+        header_row: 1
+        data_rows_at_survey: 106
+        key: "契約ID + 対象月"
+        note: "請求の予定と実績。1行=1請求。"
+        columns:
+          - name: "契約ID"
+          - name: "取引先"
+          - name: "対象月"
+          - name: "件名"
+          - name: "請求額(税込)"
+          - name: "請求書番号"
+          - name: "請求日"
+          - name: "支払期限"
+          - name: "請求ステータス"
+            values: ["未請求", "下書き済", "請求済", "入金済", "対象外", "要確認(過去・番号なし)"]
+            accept:
+              "下書き作成済": "下書き済"
+            order: "未請求 → 下書き済 → 請求済 → 入金済"
+            note: "対象外・要確認 は進行順の外。差し戻し（→未請求）は人の操作のみ。スキルは status を下げない。"
+          - name: "送付請求書ファイル"
+          - name: "入金日"
+            observed: ["2026-04-20", "2026-04-30", "2026-05-28", "2026-05-29", "2026-06-01", "2026-06-03", "2026-07-22"]  # 実データの分布（規定値ではない）
+          - name: "入金額"
+          - name: "旧ID"
+          - name: "備考"
+          - name: "突合結果"
+          - name: "突合日時"
+          - name: "作成者"
+          - name: "作成日時"
+          - name: "更新者"
+          - name: "更新日時"
+
+      クレンジング指摘:
+        header_row: 1
+        data_rows_at_survey: 7
+        key: "No"
+        note: "旧台帳から引き継いだ監査メモ。恒久データではなく、片付いたら消してよい。"
+        columns:
+          - name: "No"
+            observed: ["1", "2", "3", "4", "5", "6", "7"]  # 実データの分布（規定値ではない）
+          - name: "区分"
+            observed: ["AR/AP分離", "ID欠番", "ステータス不整合", "件数集計の陳腐化", "採番重複", "日割未調整", "集計バグ"]  # 実データの分布（規定値ではない）
+          - name: "対象"
+          - name: "内容"
+          - name: "あるべき対応"
+          - name: "重要度"
+            values: ["高", "中", "低"]
+
+  支払管理台帳:
     tabs:
-      - name: 仕訳帳
-        required: true
-        key: 仕訳ID
+      支払先マスタ:
+        header_row: 3
+        data_rows_at_survey: 23
+        key: "支払先ID"
+        note: "ヘッダーは3行目（1行目が空、2行目が凡例）。"
         columns:
-          - {name: 仕訳ID, required: true, type: id, note: "J-YYYYMM-連番4桁"}
-          - {name: 日付, required: true, type: date, note: 計上日}
-          - {name: 借方科目, required: true, type: string, note: 勘定科目マスタの科目名}
-          - {name: "借方金額", required: true, type: number}
-          - {name: 貸方科目, required: true, type: string}
-          - {name: "貸方金額", required: true, type: number, note: 借方金額と一致（借貸一致チェック対象）}
-          - {name: "税区分", required: false, type: string}
-          - {name: 摘要, required: true, type: string, note: "参照ID（INV-…/経費ID）を必ず含める＝突合キー"}
-          - {name: 出所, required: true, type: enum, values: [AR請求, AR入金, AP支払, 経費, 手動]}
-          - {name: 参照ID, required: false, type: id, note: "元になった台帳行のキー。同じ 参照ID×出所 は再生成しない（重複防止）"}
-          - {name: 対象月, required: true, type: month}
-          - {name: 状態, required: true, type: enum, values: [案, 確定],
-             note: "journal が生成した直後は案。人レビュー後に確定。月次サマリは確定のみ集計"}
-          - {name: エクスポート済み, required: false, type: enum, values: [mf, freee, none],
-             note: 会計SaaSへ登録/出力済みか（二重計上防止フラグ）}
-          - {name: 作成者, required: false, type: email, note: 操作者トラッキング（v3）}
-          - {name: 作成日時, required: false, type: date}
-          - {name: 更新者, required: false, type: email}
-          - {name: 更新日時, required: false, type: date}
-      - name: 勘定科目マスタ
-        required: true
-        key: 科目コード
-        columns:
-          - {name: 科目コード, required: true, type: id, note: "4桁（1xxx資産/2xxx負債/4xxx収益/5xxx費用）"}
-          - {name: 科目名, required: true, type: string}
-          - {name: 区分, required: true, type: enum, values: [資産, 負債, 純資産, 収益, 費用]}
-          - {name: 税区分既定, required: false, type: string}
-          - {name: MF科目名, required: false, type: string, note: エクスポート時のマッピング}
-          - {name: freee科目名, required: false, type: string}
-          - {name: 作成者, required: false, type: email, note: 操作者トラッキング（v3）}
-          - {name: 作成日時, required: false, type: date}
-          - {name: 更新者, required: false, type: email}
-          - {name: 更新日時, required: false, type: date}
-        note: 標準28科目を初期セットとして同梱（最終的な科目体系は各社の税理士確認前提）
-      - name: 月次サマリ
-        required: true
-        key: 対象月
-        columns:
-          - {name: 対象月, required: true, type: month}
-          - {name: 売上高, required: true, type: number, note: 数式（仕訳帳の確定行を自動集計。手編集しない）}
-          - {name: 費用合計, required: true, type: number, note: 数式}
-          - {name: 営業利益, required: true, type: number, note: 数式}
-          - {name: 未仕訳件数, required: false, type: number, note: journal が検出結果を書き戻す}
-          - {name: クローズ状態, required: true, type: enum, values: [オープン, クローズ済]}
-          - {name: クローズ日, required: false, type: date}
-          - {name: クローズ操作者, required: false, type: email, note: クローズは人のボタンのみ}
+          - name: "支払先ID"
+          - name: "支払先名"
+          - name: "支払先区分"
+            values: ["法人", "個人", "個人事業主", "要確認"]
+          - name: "支払カテゴリ"
+            observed: ["その他", "外注費", "経費", "要確認"]  # 実データの分布（規定値ではない）
+          - name: "主担当者名"
+            observed: ["中井秀行", "井上奈々", "大澤脩輔", "大雲 拓生", "安藤 貴史", "小村淳浩", "洪辰圭", "諫山圭司"]  # 実データの分布（規定値ではない）
+          - name: "メールアドレス"
+          - name: "振込先銀行"
+          - name: "振込先支店"
+          - name: "口座種別"
+            observed: ["―", "普通", "要確認"]  # 実データの分布（規定値ではない）
+          - name: "口座番号"
+          - name: "口座名義"
+          - name: "契約開始日"
+            observed: ["2026/06/24", "2026/07/01"]  # 実データの分布（規定値ではない）
+          - name: "契約終了日"
+          - name: "契約タイプ"
+            values: ["月額固定", "都度"]
+          - name: "月額固定（税抜）"
+            observed: ["30000", "50000"]  # 実データの分布（規定値ではない）
+          - name: "時間単価（税抜）"
+          - name: "消費税率"
+            values: ["10.0%", "0.0%", "非課税", "対象外（不課税）"]
+            note: "実データは 0 / 0.0% / 10.0% / 非課税 / 対象外（不課税） / 要確認 が混在。書くときは正規形に寄せる。"
+          - name: "源泉徴収対象"
+            observed: ["あり", "なし", "要確認", "要確認（士業報酬なら源泉対象）"]  # 実データの分布（規定値ではない）
+          - name: "源泉徴収税率"
+            observed: ["10.2%"]  # 実データの分布（規定値ではない）
+          - name: "支払サイクル"
+            observed: ["月末締め翌月末払い", "月次", "毎月末日引落", "都度"]  # 実データの分布（規定値ではない）
+          - name: "取引先ID"
+            observed: ["072", "901", "902", "903"]  # 実データの分布（規定値ではない）
+          - name: "ステータス"
+            values: ["支払対象", "要確認"]
+          - name: "作成者"
+          - name: "作成日時"
+          - name: "更新者"
+          - name: "更新日時"
 
-  支払管理台帳:   # AP・払う側。01.受領請求書/ に置く
-    settings_keys: {file: LEDGER_PAYMENT_FILE, sheet_id: LEDGER_PAYMENT_SHEET_ID}
+      月次支払管理:
+        header_row: 4
+        data_rows_at_survey: 104
+        key: "支払先ID + 対象月"
+        note: "支払の実績。ヘッダーは4行目。mf-sync が支払額・差額・支払ステータス・遅延日数を書き戻す。"
+        columns:
+          - name: "支払先ID"
+          - name: "支払先名"
+          - name: "支払カテゴリ"
+            values: ["外注費", "経費", "その他"]
+          - name: "対象月"
+            observed: ["2026/03", "2026/04", "2026/05", "2026/06", "2026/07", "2026/08"]  # 実データの分布（規定値ではない）
+          - name: "契約タイプ"
+            observed: ["月額固定", "都度"]  # 実データの分布（規定値ではない）
+          - name: "月額固定（税抜）"
+            observed: ["50000", "770000"]  # 実データの分布（規定値ではない）
+          - name: "稼働時間"
+            observed: ["148.5"]  # 実データの分布（規定値ではない）
+          - name: "時間単価額（税抜）"
+            observed: ["0"]  # 実データの分布（規定値ではない）
+          - name: "実費・その他（税抜）"
+          - name: "支払金額（税抜）"
+          - name: "消費税額"
+          - name: "源泉徴収税額"
+            observed: ["0"]  # 実データの分布（規定値ではない）
+          - name: "支払金額（税込）"
+          - name: "請求書番号"
+          - name: "請求書受領日"
+          - name: "支払予定日"
+          - name: "支払日"
+          - name: "支払額"
+          - name: "差額"
+            observed: ["0", "1"]  # 実データの分布（規定値ではない）
+          - name: "支払ステータス"
+            values: ["未払い", "支払済"]
+            accept:
+              "未払予定": "未払い"
+            order: "未払い → 支払済"
+            note: "支払済への自動更新は mf-sync が銀行明細で裏取りできた行のみ。送金はしない。"
+          - name: "遅延日数"
+          - name: "承認者"
+          - name: "備考"
+          - name: "作成者"
+          - name: "作成日時"
+          - name: "更新者"
+          - name: "更新日時"
+
+      経費一覧:
+        header_row: 3
+        data_rows_at_survey: 0
+        key: "支払先ID + 発生月"
+        note: "実データ0行。列名は 費目/発生月/内容 系（旧スキーマの 勘定科目/発生日 ではない）。"
+        columns:
+          - name: "支払先ID"
+          - name: "費目"
+          - name: "発生月"
+          - name: "内容"
+          - name: "金額（税抜）"
+          - name: "消費税額"
+          - name: "金額（税込）"
+          - name: "備考"
+          - name: "作成者"
+          - name: "作成日時"
+          - name: "更新者"
+          - name: "更新日時"
+
+      源泉徴収管理:
+        header_row: 3
+        data_rows_at_survey: 0
+        key: "支払先ID + 対象月"
+        note: "実データ0行。源泉対象の支払の税額と納付状況を管理する枠。"
+        columns:
+          - name: "支払先ID"
+          - name: "支払先名"
+          - name: "支払先区分"
+          - name: "対象月"
+          - name: "支払金額（税抜）"
+          - name: "源泉徴収税率"
+          - name: "源泉徴収税額"
+          - name: "差引支払額"
+          - name: "納付期限"
+          - name: "納付日"
+          - name: "納付ステータス"
+          - name: "備考"
+
+      月次支払スケジュール:
+        header_row: 1
+        data_rows_at_survey: 0
+        key: "予定ID"
+        note: "契約から展開した支払の予定。実データはまだ0行。"
+        columns:
+          - name: "予定ID"
+          - name: "契約ID"
+          - name: "取引先ID"
+          - name: "支払先ID"
+          - name: "支払先名"
+          - name: "対象月"
+          - name: "予定額(税込)"
+          - name: "支払予定日"
+          - name: "状態"
+            values: ["未払予定", "請求書受領済", "支払済"]
+            order: "未払予定 → 請求書受領済 → 支払済"
+          - name: "受領請求書ID"
+          - name: "突合結果"
+            values: ["一致", "未計上"]
+          - name: "突合日時"
+          - name: "作成者"
+          - name: "作成日時"
+          - name: "更新者"
+          - name: "更新日時"
+
+  仕訳台帳:
     tabs:
-      - name: 支払先マスタ
-        required: true
-        key: 支払先ID
+      仕訳帳:
+        header_row: 1
+        data_rows_at_survey: 15
+        key: "仕訳ID"
+        note: "内部仕訳帳。同じ 参照ID×出所 は再生成しない。"
         columns:
-          - {name: 支払先ID, required: true, type: id, note: V-連番3桁}
-          - {name: 正式名称, required: true, type: string}
-          - {name: 既定支払方法, required: true, type: enum, values: [振込, カード],
-             note: カード＝台帳起票しない（会計のカード連携が自動仕訳）}
-          - {name: 既定勘定科目, required: false, type: string}
-          - {name: "既定税区分(MF)", required: false, type: string, note: MF の実在名に合わせる}
-          - {name: インボイス登録番号, required: false, type: string, note: T+13桁}
-          - {name: 振込先銀行, required: false, type: string}
-          - {name: 支店, required: false, type: string}
-          - {name: 預金種別, required: false, type: string}
-          - {name: 口座番号, required: false, type: string}
-          - {name: 口座名義, required: false, type: string}
-          - {name: 源泉対象, required: true, type: enum, values: [なし, あり]}
-          - {name: 備考, required: false, type: string}
-          - {name: 作成者, required: false, type: email, note: 操作者トラッキング（v3）}
-          - {name: 作成日時, required: false, type: date}
-          - {name: 更新者, required: false, type: email}
-          - {name: 更新日時, required: false, type: date}
-      - name: 月次支払管理
-        required: true
-        key: 請求書ID
-        columns:
-          - {name: 請求書ID, required: true, type: id,
-             note: "支払先ID+対象月(YYYYMM)+請求書番号。仕訳摘要に入れて MF 突合キーにする"}
-          - {name: 支払先ID, required: true, type: id}
-          - {name: 支払先名, required: true, type: string}
-          - {name: 対象月, required: true, type: month}
-          - {name: 勘定科目, required: true, type: string}
-          - {name: "税区分(MF)", required: true, type: string}
-          - {name: "金額(税抜)", required: true, type: number}
-          - {name: 消費税額, required: true, type: number}
-          - {name: "金額(税込)", required: true, type: number}
-          - {name: 源泉徴収税額, required: false, type: number}
-          - {name: 振込額, required: true, type: number}
-          - {name: 支払日, required: false, type: date}
-          - {name: 状態, required: true, type: enum, values: [未払予定, 支払済, 仕訳連携済]}
-          - {name: MF連携状態, required: true, type: enum, values: [未連携, 連携済]}
-          - {name: MF仕訳ID, required: false, type: id, note: mf-sync 成功時に書き戻し}
-          - {name: 請求書ファイル, required: false, type: path}
-          - {name: 作成者, required: false, type: email, note: 操作者トラッキング（v3）}
-          - {name: 作成日時, required: false, type: date}
-          - {name: 更新者, required: false, type: email}
-          - {name: 更新日時, required: false, type: date}
-      - name: 経費一覧
-        required: true
-        key: 経費ID
-        columns:
-          - {name: 経費ID, required: true, type: id}
-          - {name: 支払先ID, required: false, type: id}
-          - {name: 発生日, required: true, type: date}
-          - {name: 勘定科目, required: true, type: string}
-          - {name: "税区分(MF)", required: true, type: string}
-          - {name: "金額(税抜)", required: true, type: number}
-          - {name: 消費税額, required: true, type: number}
-          - {name: "金額(税込)", required: true, type: number}
-          - {name: 状態, required: true, type: enum, values: [未払予定, 支払済, 仕訳連携済]}
-          - {name: MF連携状態, required: true, type: enum, values: [未連携, 連携済]}
-          - {name: MF仕訳ID, required: false, type: id}
-          - {name: 備考, required: false, type: string}
-          - {name: 作成者, required: false, type: email, note: 操作者トラッキング（v3）}
-          - {name: 作成日時, required: false, type: date}
-          - {name: 更新者, required: false, type: email}
-          - {name: 更新日時, required: false, type: date}
-      - name: 月次支払スケジュール
-        required: true    # v2で必須化。発注契約（方向=発注・締結済）から自動導出が標準動作
-        key: 予定ID
-        columns:
-          - {name: 予定ID, required: true, type: id, note: "支払先ID+対象月(YYYYMM)"}
-          - {name: 契約ID, required: true, type: id, note: AP-C-連番}
-          - {name: 取引先ID, required: false, type: id, note: 取引先マスタ（3桁）と対応}
-          - {name: 支払先ID, required: true, type: id}
-          - {name: 支払先名, required: true, type: string}
-          - {name: 対象月, required: true, type: month}
-          - {name: "予定額(税込)", required: true, type: number}
-          - {name: 支払予定日, required: true, type: date}
-          - {name: 状態, required: true, type: enum, values: [未払予定, 請求書受領済, 支払済],
-             note: "支払済は人のボタン操作で記録（送金はツール外）。差し戻しは人の操作のみ"}
-          - {name: 受領請求書ID, required: false, type: id, note: payment-detect が突合で記入}
-          - {name: 突合結果, required: false, type: enum, values: [一致, 未計上],
-             note: "会計/銀行との突合結果。mf-sync 等が書き戻し（v2）"}
-          - {name: 突合日時, required: false, type: date}
-          - {name: 作成者, required: false, type: email, note: 操作者トラッキング（v3）}
-          - {name: 作成日時, required: false, type: date}
-          - {name: 更新者, required: false, type: email}
-          - {name: 更新日時, required: false, type: date}
+          - name: "仕訳ID"
+          - name: "日付"
+            observed: ["2026-07-22", "2026-07-31"]  # 実データの分布（規定値ではない）
+          - name: "借方科目"
+            observed: ["売掛金", "普通預金"]  # 実データの分布（規定値ではない）
+          - name: "借方金額"
+            observed: ["110000", "1375000", "165000", "220000", "2200000"]  # 実データの分布（規定値ではない）
+          - name: "貸方科目"
+            observed: ["売上高", "売掛金"]  # 実データの分布（規定値ではない）
+          - name: "貸方金額"
+            observed: ["110000", "1375000", "165000", "220000", "2200000"]  # 実データの分布（規定値ではない）
+          - name: "税区分"
+            observed: ["対象外", "課税売上10%"]  # 実データの分布（規定値ではない）
+          - name: "摘要"
+          - name: "出所"
+            values: ["AR請求", "AR入金", "AP支払", "経費", "手動"]
+          - name: "参照ID"
+          - name: "対象月"
+            observed: ["2026-07"]  # 実データの分布（規定値ではない）
+          - name: "状態"
+            values: ["案", "確定"]
+            note: "月次サマリは確定行のみ集計。"
+          - name: "エクスポート済み"
+            values: ["mf", "freee", "none"]
+          - name: "作成者"
+          - name: "作成日時"
+            observed: ["2026-08-11 2:35"]  # 実データの分布（規定値ではない）
+          - name: "更新者"
+          - name: "更新日時"
 
-# -------------------------------------------------------------
-# 3. ヘルスチェック（setup スモーク／monthly 冒頭で実施）
-# -------------------------------------------------------------
-health_check:
-  folders: ルート配下に required な子フォルダが存在するか（名前は settings の実値で照合）
-  tabs: 各台帳に required なタブが存在するか
-  header_row: |
-    ヘッダ行は1行目とは限らない（実台帳ではタブにより3〜4行目にある）。各タブの先頭10行のうち
-    既知列名が最も多く一致する行をヘッダとして自動検出する（v3）。
-  columns: |
-    required な列がすべて存在するか（v3で順序不問に緩和）。既知列は名称一致で照合し、
-    未知の列（組織独自の列。例: 旧ID）は情報として報告のみ・エラーにしない。
-    スキル・コンソールは列番号を決め打ちせず、必ずヘッダ名で列を解決する。
-  enums: 状態系の列に values 外の値が無いか（違反はレビュー対象として報告のみ）
-  on_failure: |
-    自動修復しない。差分（欠けたフォルダ/タブ/列・不明な値）を一覧で人に報告し、
-    「テンプレ再配置」「列名の復元」「settings の上書き設定」のいずれかを提案する。
+      勘定科目マスタ:
+        header_row: 1
+        data_rows_at_survey: 28
+        key: "科目コード"
+        note: "1xxx資産 / 2xxx負債 / 4xxx収益 / 5xxx費用。"
+        columns:
+          - name: "科目コード"
+          - name: "科目名"
+          - name: "区分"
+            values: ["資産", "負債", "純資産", "収益", "費用"]
+          - name: "税区分既定"
+            observed: ["対象外", "課税仕入10%", "課税売上10%", "非課税仕入"]  # 実データの分布（規定値ではない）
+          - name: "MF科目名"
+          - name: "freee科目名"
+          - name: "作成者"
+          - name: "作成日時"
+            observed: ["2026-08-11 2:21"]  # 実データの分布（規定値ではない）
+          - name: "更新者"
+          - name: "更新日時"
+
+      月次サマリ:
+        header_row: 1
+        data_rows_at_survey: 12
+        key: "対象月"
+        note: "売上高・費用合計・営業利益・未仕訳件数は SUMIFS で仕訳帳から集計（xlsx 移行時に Excel ネイティブ数式へ書き直し）。"
+        columns:
+          - name: "対象月"
+          - name: "売上高"
+          - name: "費用合計"
+          - name: "営業利益"
+          - name: "未仕訳件数"
+          - name: "クローズ状態"
+            values: ["オープン", "クローズ済"]
+            note: "クローズは人の操作のみ。クローズ済の月には記帳しない。"
+          - name: "クローズ日"
+          - name: "クローズ操作者"
+
