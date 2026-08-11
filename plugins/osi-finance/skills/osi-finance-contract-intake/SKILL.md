@@ -34,7 +34,7 @@ requires_connectors:
 
 ## 前提コネクタ
 
-- Gmail（検索・添付取得）、Google Drive / スプレッドシート（設定の `請求管理ルート`、例: `31.請求管理`）。
+- Gmail（検索・添付取得）、Google Drive / 台帳（設定の `請求管理ルート`、例: `31.請求管理`）。
 - DocuSign（任意・補助）：`getEnvelopes` / `listEnvelopeDocuments` で自社送付契約のメタ・PDFを補完。
   Navigator API（構造化金額・期間）はプラン外なので使わない。
 

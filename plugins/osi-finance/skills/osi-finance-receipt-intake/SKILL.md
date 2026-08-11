@@ -59,7 +59,7 @@ UPSIDER 払いは会計のカード連携が自動仕訳するため**本スキ�
 
 ## 前提コネクタ
 
-- **Google Drive / スプレッドシート**：証憑の格納（正本）・経費レシート台帳（索引簿）の追記。
+- **Google Drive / 台帳**：証憑の格納（正本）・経費レシート台帳（索引簿）の追記。
 - **MoneyForward 会計**：`getJournals`（UPSIDER カード利用明細の突合）。ストリームB の仕訳を出す場合は `getAccounts` / `getTaxes` / `postJournals`。
 - **Superhuman**（任意）：電子レシートのメール添付取得（`get_attachment`）。
 - 読取は Claude の Vision（画像）＋PDF 読取。OCR 専用ツールは不要。

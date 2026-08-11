@@ -160,7 +160,7 @@ references 側には「汎用ロジック・判断基準」だけを残します
 | 仕訳台帳 ファイル名（v4・内部仕訳帳） | {{LEDGER_JOURNAL_FILE 例: 仕訳台帳}} |
 | 仕訳台帳 スプレッドシートID | {{LEDGER_JOURNAL_SHEET_ID 例: 1BIRBN-…}} |
 
-> **台帳を自動追記したい場合**：台帳をネイティブ Google スプレッドシートにし、上記の各 `..._SHEET_ID` を入れる。
+> **gsheet バックエンドで自動追記したい場合**：台帳をネイティブ Google スプレッドシートにし、上記の各 `..._SHEET_ID` を入れる。
 > `AI OSI URI Deploy` 拡張の `sheets_append_row`（要：対象シートをサービスアカウントのメールに「編集者」で共有）で、
 > osi-finance スキルが行を自動追記できる（重複は `sheets_get_values` で事前確認、確定は人）。未設定なら xlsx へ貼り付け運用。
 

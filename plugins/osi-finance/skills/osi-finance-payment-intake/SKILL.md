@@ -51,7 +51,7 @@ requires_connectors:
 
 ## 前提コネクタ
 
-- Google Drive / スプレッドシート（受領請求書の格納・支払管理台帳）。
+- Google Drive / 台帳（受領請求書の格納・支払管理台帳）。
 - Superhuman Mail（`get_attachment` で請求書PDF添付の取得）。
 - MF会計（任意）：`getTradePartners` を支払先マッチングの補助に使う（正本は台帳）。
 
@@ -92,7 +92,7 @@ requires_connectors:
 - 列は `osi-finance-mf-sync/references/ledger-schema.md` の「月次支払管理」に準拠（下記§台帳列）。
 
 **台帳への書き込み方法（台帳の種類で分岐）**
-- **(推奨) ネイティブ Google スプレッドシート台帳**：`AI OSI URI Deploy` 拡張の `sheets_append_row` で自動追記できる。
+- **(gsheet バックエンドの場合) ネイティブ Google スプレッドシート台帳**：`AI OSI URI Deploy` 拡張の `sheets_append_row` で自動追記できる。
   手順：①`sheets_get_values` で対象列（請求書番号・支払先ID）を読み**重複が無いか確認** → ②人が起票案をOK → ③`sheets_append_row`
   で「支払先マスタ（新規時）」「月次支払管理」に行を追記 → ④`sheets_get_values` で入った行を検算。台帳IDは `osi-finance-settings` の
   `LEDGER_PAYMENT_SHEET_ID`。**前提**：対象シートをサービスアカウントのメールに「編集者」で共有済み（README参照）。

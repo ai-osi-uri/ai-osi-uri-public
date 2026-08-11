@@ -34,7 +34,7 @@ requires_connectors:
 
 ## 前提コネクタ
 
-- Google Drive / スプレッドシート（受領請求書フォルダ・支払管理台帳）。
+- Google Drive / 台帳（受領請求書フォルダ・支払管理台帳）。
 - Superhuman Mail（`get_attachment` / スレッド検索で新着の請求書PDF添付を検出）。
 
 ## 共有する判定ロジック（osi-finance-payment-intake と同一）

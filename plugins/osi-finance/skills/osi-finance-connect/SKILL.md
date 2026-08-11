@@ -1,7 +1,7 @@
 ---
 name: osi-finance-connect
 description: >
-  AI OSI URI Finance 拡張（請求管理台帳＝Googleスプレッドシート読み書き＋MoneyForward
+  AI OSI URI Finance 拡張（請求管理台帳の読み書き＋MoneyForward
   クラウド請求書ポーリング）の **OAuth 接続を Claude in Chrome で伴走して通す** 初期セットアップ・
   アトミックスキル。MoneyForward クラウド請求書のアプリ登録（アプリポータル）→OAuth認可→
   refresh_token 取得→コネクタへ貼り付け→疎通確認（health_check / mfi_list_billings）までを、
