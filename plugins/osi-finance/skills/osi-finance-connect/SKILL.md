@@ -3,10 +3,9 @@ name: osi-finance-connect
 description: >
   AI OSI URI Finance 拡張（請求管理台帳の読み書き＋MoneyForward
   クラウド請求書ポーリング）の **OAuth 接続を Claude in Chrome で伴走して通す** 初期セットアップ・
-  アトミックスキル。MoneyForward クラウド請求書のアプリ登録（アプリポータル）→OAuth認可→
+  アトミックスキル。MoneyForward クラウド請求書のアプリ登録（アプリポータル）→OAuth認可（scope は data.write）→
   refresh_token 取得→コネクタへ貼り付け→疎通確認（health_check / mfi_list_billings）までを、
-  ブラウザ画面操作で半自動に進める。Google 側も SA鍵（最短）と OAuth（横展開・社外配布）の
-  両方の接続手順を持つ。「OSI Finance のMF連携をして」「請求書APIをつないで」「AI OSI URI Finance を
+  ブラウザ画面操作で半自動に進める。「OSI Finance のMF連携をして」「請求書APIをつないで」「AI OSI URI Finance を
   接続して」「refresh_token を取って」「MoneyForward 請求書のOAuthを通して」「台帳同期コネクタを
   セットアップして」「Chromeで連携手順をやって」などで発動する。オーケストレータ osi-finance-setup の
   コネクタ接続ステップから呼ばれることも、単体で呼ばれることもある。
@@ -28,7 +27,7 @@ requires_connectors:
 > **前提**
 > - `AI OSI URI Finance` 拡張がインストール＆**有効**になっている（設定→コネクタ→デスクトップ）。
 > - `Claude in Chrome` 拡張が接続済み。
-> - 対象ブラウザに、対象組織の MoneyForward / Google に**ログイン済み**であること。
+> - 対象ブラウザに、対象組織の MoneyForward に**ログイン済み**であること。
 >
 > **安全原則（厳守）**
 > - **利用規約への同意・OAuthの「許可」ボタンは必ずユーザーに確認**してから押す（または本人に押してもらう）。
@@ -45,8 +44,9 @@ requires_connectors:
 ## Part A: MoneyForward クラウド請求書 の OAuth 接続（v0.2 で必要）
 
 > MoneyForward クラウド請求書 API v3 を使う。発行済み請求書を `GET /billings` で取得し、
-> 請求書番号(INV)で台帳と突合してステータスを書き戻す（sync_ledger）。**scope は参照のみ
-> `mfc/invoice/data.read` で十分**（書き込み発行まで自動化する場合のみ `.write`）。
+> 請求書番号(INV)で台帳と突合してステータスを書き戻す（sync_ledger）。請求書の発行
+> （`mfi_create_billing`）も行うため、**scope は `mfc/invoice/data.write` を要求する**。
+> `.read` だけだと発行が 403 で落ちる。
 
 ### A-0. 確認できている確定値（実装と一致）
 - API ベース: `https://invoice.moneyforward.com/api/v3`（コネクタ既定 `MFI_API_BASE`）
@@ -81,10 +81,15 @@ requires_connectors:
    `curl -s -o /dev/null -w "%{http_code}" -X POST https://api.biz.moneyforward.com/token`
    → 401 が返れば到達OK（後段の交換が sandbox bash で可能）。
 2. 認可URLへ `navigate`（CLIENT_ID は実値、scope/redirect_uri はURLエンコード）：
-   `https://api.biz.moneyforward.com/authorize?client_id=<CLIENT_ID>&redirect_uri=http%3A%2F%2Flocalhost%3A8765%2Fcallback&response_type=code&scope=mfc%2Finvoice%2Fdata.read`
+   `https://api.biz.moneyforward.com/authorize?client_id=<CLIENT_ID>&redirect_uri=http%3A%2F%2Flocalhost%3A8765%2Fcallback&response_type=code&scope=mfc%2Finvoice%2Fdata.write`
    - PKCE なしで通る（confidential client + CLIENT_SECRET_POST）。
    - ここでも**アカウント選択→事業者選択→次へ**が挟まる。
-3. 「**アプリとの連携を許可しますか？**」（アプリ名・事業者・権限=クラウド請求書 データ参照）が出る。
+> **scope は必ず `mfc/invoice/data.write` で要求する。** `data.read` で取ったトークンでは
+> `mfi_create_billing` / `mfi_create_partner` が 403 になり、請求書を発行できない。
+> 2026-08 まで手順が `.read` のままで、現場は暫定PDFで回避していた。アプリポータル側に
+> scope の設定項目は無いので、ここで要求する scope がそのまま権限になる。
+
+3. 「**アプリとの連携を許可しますか？**」（アプリ名・事業者・権限=クラウド請求書 データ参照・**書き込み**）が出る。
    → **OAuth許可ゲート。ユーザーに確認**してから「許可」を押す（本人に押してもらってもよい）。
 4. 許可後、ブラウザは `http://localhost:8765/callback?code=...&iss=...` へ遷移（ページは読めなくてOK）。
    `tabs_context_mcp` を呼び、**タブURLから `code` を抜き取る**。
@@ -114,44 +119,6 @@ requires_connectors:
 - `mcp__AI_OSI_URI_Finance__*` ツールを ToolSearch で読み込み、`health_check` →
   `moneyforward_invoice: ok（トークン取得成功）` を確認。
 - `mfi_list_billings` で取得確認（0件でも接続成功）。
-
----
-
-## Part B: Google 側の接続
-
-Google は2方式。**今すぐ動かすなら SA、横展開・社外配布なら OAuth**（拡張は両対応・OAuth優先）。
-
-### B-1. サービスアカウント（SA）方式 ＝ 最短・社内/単体運用
-1. Google Cloud で SA を作成 → **JSON鍵**をダウンロード。
-2. その GCP プロジェクトで **Google Sheets API を有効化**。
-3. 請求管理台帳を **SAメール(client_email) に「編集者」で共有**（※ここだけ人手の初期作業）。
-4. コネクタの `Google サービスアカウント鍵 (JSON)` に貼り付け。
-5. `health_check` → `google_auth_mode: sa` / `ok`、`sheets_list_tabs` で台帳が読めるか確認。
-- 落とし穴：SAのプロジェクトを作り替えたら、**新SAメールへ共有し直す＋新プロジェクトでSheets API有効化**。
-  共有漏れは `sheets_*` が **403 PERMISSION_DENIED**（health_check は ok でも起きる）。
-
-### B-2. OAuth ユーザー認可方式 ＝ 横展開・社外配布（個別共有が不要）
-> 利点：ユーザー本人のGoogleで認可するので、台帳のSA個別共有が要らない。
-> 注意：**社外配布（External）＋Sheetsは機微スコープ → Googleのアプリ審査が必須**。審査通過まで
-> テスト扱いで refresh_token が **7日で失効**。本番公開（審査通過）後は無期限。
-
-1. Google Cloud で **OAuthクライアント（ウェブアプリ）**を作成。refresh_token を OAuth Playground で
-   取るなら、リダイレクトURIに `https://developers.google.com/oauthplayground` を追加。
-2. **OAuth同意画面**：社内のみ=「内部(Internal)」（審査不要・無期限）／社外配布=「外部(External)」
-   （要審査）。スコープに `https://www.googleapis.com/auth/spreadsheets` を追加。
-3. **refresh_token取得**：OAuth Playground →⚙「Use your own OAuth credentials」に CLIENT_ID/SECRET →
-   Sheets スコープを認可 →「Exchange authorization code for tokens」で `refresh_token` をコピー。
-   - （Chrome伴走でやる場合）Part A と同様に、自前 redirect への code を拾って
-     `https://oauth2.googleapis.com/token` で `grant_type=authorization_code` 交換でもよい。
-4. コネクタの OAuth 3項目（`GOOGLE_OAUTH_CLIENT_ID/SECRET/REFRESH_TOKEN`）に貼り付け
-   → 3つ揃うと**OAuthが優先**される。`health_check` → `google_auth_mode: oauth` / `ok`。
-
-### B-3. 社外配布の本番化（Google審査）
-- 必要物：同意画面ブランディング（アプリ名・サポートメール・ホームページURL・**プライバシーポリシーURL**）、
-  **ドメイン所有権の確認**（Search Console）、機微スコープの**利用理由の説明**、**デモ動画**
-  （YouTube限定公開／ユーザーが同意してSheetsを使う様子）。Cloud Console の Verification Center から申請。
-- 実レビューは概ね 2〜3営業日（準備のほうが時間がかかる）。**Claude in Chrome は申請フォーム入力の
-  補助はできるが、合否は出せない**（Google審査チームの人手レビュー）。
 
 ---
 
