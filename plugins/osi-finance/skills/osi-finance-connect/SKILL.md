@@ -76,44 +76,30 @@ requires_connectors:
    - ⚠️ **Secret は UI上で2行に折り返して表示される**ことがある。`zoom` で**全体を読み、改行を除いて
      1本に連結**する（途中で切らないこと）。
 
-### A-3. 認可（refresh_token 取得）
-1. まず **sandbox から token エンドポイントに到達できるか**確認：
-   `curl -s -o /dev/null -w "%{http_code}" -X POST https://api.biz.moneyforward.com/token`
-   → 401 が返れば到達OK（後段の交換が sandbox bash で可能）。
-2. 認可URLへ `navigate`（CLIENT_ID は実値、scope/redirect_uri はURLエンコード）：
-   `https://api.biz.moneyforward.com/authorize?client_id=<CLIENT_ID>&redirect_uri=http%3A%2F%2Flocalhost%3A8765%2Fcallback&response_type=code&scope=mfc%2Finvoice%2Fdata.write`
-   - PKCE なしで通る（confidential client + CLIENT_SECRET_POST）。
-   - ここでも**アカウント選択→事業者選択→次へ**が挟まる。
-> **scope は必ず `mfc/invoice/data.write` で要求する。** `data.read` で取ったトークンでは
-> `mfi_create_billing` / `mfi_create_partner` が 403 になり、請求書を発行できない。
-> 2026-08 まで手順が `.read` のままで、現場は暫定PDFで回避していた。アプリポータル側に
-> scope の設定項目は無いので、ここで要求する scope がそのまま権限になる。
+### A-3. 認可（コネクタが自分でトークンを受け取る）
 
-3. 「**アプリとの連携を許可しますか？**」（アプリ名・事業者・権限=クラウド請求書 データ参照・**書き込み**）が出る。
-   → **OAuth許可ゲート。ユーザーに確認**してから「許可」を押す（本人に押してもらってもよい）。
-4. 許可後、ブラウザは `http://localhost:8765/callback?code=...&iss=...` へ遷移（ページは読めなくてOK）。
-   `tabs_context_mcp` を呼び、**タブURLから `code` を抜き取る**。
-5. **すぐに**トークン交換（code は短命）。sandbox bash で：
-   ```bash
-   curl -s -X POST https://api.biz.moneyforward.com/token \
-     -H "Content-Type: application/x-www-form-urlencoded" \
-     --data-urlencode "grant_type=authorization_code" \
-     --data-urlencode "code=<CODE>" \
-     --data-urlencode "redirect_uri=http://localhost:8765/callback" \
-     --data-urlencode "client_id=<CLIENT_ID>" \
-     --data-urlencode "client_secret=<CLIENT_SECRET>"
-   ```
-   → `access_token` / `refresh_token` / `scope` / `token_type=Bearer` / `expires_in=3600` が返る。
-   `refresh_token` を控える（access_token は使い捨て）。
-6. （任意・確認）取れた access_token で実取得を確認：
-   `curl "https://invoice.moneyforward.com/api/v3/billings?per_page=3" -H "Authorization: Bearer <AT>"`
-   → `{"data":[...],"pagination":{...}}`。**発行済み請求書が無い組織は `data:[]`** になる（正常）。
+**手作業の curl は不要。** 拡張の `mfi_connect` ツールが認可を最後まで面倒を見る。
+
+1. `mfi_connect` を呼ぶ。認可URL（scope は `mfc/invoice/data.write`）が返る。
+2. その URL をユーザーに開いてもらう。アカウント選択→事業者選択→「**アプリとの連携を
+   許可しますか？**」が出る。
+   → **OAuth許可ゲート。ユーザーに確認**してから許可してもらう。
+   **権限に「書き込み」が含まれることをこの画面で必ず確認する。**「データ参照」だけなら
+   scope が効いていないので、そのまま進めても発行はできない。
+3. 許可すると `http://localhost:8765/callback` へ戻り、**拡張が code を受け取ってトークン交換し、
+   refresh_token を自分で保存する**（`~/.ai-osi-uri-finance/` に 0600）。ブラウザには
+   「接続しました」と付与された scope が表示される。
+4. `mfi_connect_status` で結果を確認する。`state: done` かつ scope に `write` が含まれていれば成功。
+   含まれていなければ警告が返るので、やり直す。
+
+> 認可の待ち受けは 300 秒で閉じる。時間切れなら `mfi_connect` からやり直せばよい。
+> ポート 8765 はアプリポータルに登録したリダイレクトURIと一致させている（変更する場合は両方直す）。
 
 ### A-4. コネクタへ貼り付け
-- outputs に「貼付用」一時ファイル（.md）を作り、`present_files` で渡す。中身は3つ：
-  `MFI_CLIENT_ID` / `MFI_CLIENT_SECRET` / `MFI_REFRESH_TOKEN`（`MFI_API_BASE`・`MFI_TOKEN_URL` は既定のまま）。
-- ユーザーがコネクタ「AI OSI URI Finance」設定へ貼り付け → 保存 → **貼付用ファイルを削除**してもらう。
-- こちらの一時トークンJSON等も `rm` する。
+
+`refresh_token` の貼り付けは不要（A-3 で拡張が保存済み）。設定に入れるのは
+**Client ID と Client Secret の2つだけ**で、これはアプリポータルで各組織が自分のアプリを
+登録して得る値。初回に一度きり。
 
 ### A-5. 疎通確認
 - `mcp__AI_OSI_URI_Finance__*` ツールを ToolSearch で読み込み、`health_check` →
