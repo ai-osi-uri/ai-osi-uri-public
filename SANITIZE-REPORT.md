@@ -2,7 +2,7 @@
 
 対象プラグイン: osi-creative, osi-docs, osi-deploy, osi-mobile-deploy, osi-knowledge, osi-finance, osi-backoffice
 
-以下の 37 箇所に要注意語が残っています。publish 前に人手で確認してください（自動削除は文書を壊すため行いません）。
+以下の 36 箇所に要注意語が残っています。publish 前に人手で確認してください（自動削除は文書を壊すため行いません）。
 
 | ファイル | 行 | 語 | 抜粋 |
 |---|---|---|---|
@@ -41,5 +41,4 @@
 | plugins/osi-finance/config/osi-finance-settings.example.md | 136 | 共有ドライブ | 共有ドライブに1つ作り、配下は規定ツリー（00.契約書／01.受領請求書／02.送付請求書／03.経費管理）で固定。 |
 | plugins/osi-finance/config/osi-finance-settings.example.md | 141 | 共有ドライブ | \| OSI Finance ルートの場所 \| {{DRIVE_ROOT_LOCATION 例: 共有ドライブ「経理」直下／マイドライブ（要・経理チーム共有）}} \| |
 | plugins/osi-finance/docs/導入手順書.md | 22 | 共有ドライブ | \| Google Workspace（**共有ドライブ**推奨） \| 必須 \| 台帳・契約書・証憑の保管 \| 既存契約でも可 \| |
-| plugins/osi-finance/docs/導入手順書.md | 99 | 共有ドライブ | - 台帳を置く場所：**Google Workspace の共有ドライブ**のどこに「OSI Finance」フォルダを |
 | plugins/osi-finance/assets/schema/data-layout.yaml | 118 | CAIO | note: "1請求書=1行とは限らない。合算請求（複数明細を1通で発行）のとき、同じ番号が複数行に付く。重複=異常と判定してはいけない。例: INV-2026-07-016 は NITOH の CAIO と準備金2件を1通にまとめたもの" |
