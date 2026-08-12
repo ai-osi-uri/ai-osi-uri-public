@@ -25,14 +25,34 @@ version: 0.3.2
    （社内手順：共有ドライブ「環境構築キット」参照）
 2. Claude デスクトップで `.mcpb` を開く → インストール
 
-## Step 2: トークンの発行と入力
+## Step 2-0: GitHub は「接続して」と言うだけ（トークン不要）
+
+**GitHub は Personal Access Token を作らなくてよい。** チャットで「**GitHub に接続して**」と言うと、
+`github_connect` が OAuth の Device Flow を開始し、URL と8桁のコードを返す。ブラウザで開いてコードを
+入れ、Authorize を押せば完了する。
+
+- **必要なスコープ（`repo` / `workflow` / `read:org`）は自動で付く。** 手で選ばせない。
+  スコープの選び間違いは「push はできるが workflow ファイルだけ 403」のような、後から出る分かりにくい
+  失敗になるため、人に選ばせないことに意味がある。
+- **ユーザー名も自動で取得する。** 設定欄への入力は不要。
+- 認可は `~/.ai-osi-uri-deploy/github.json`（0600）に保存され、次回以降は設定なしで動く。
+- 事前に一度だけ、GitHub の Settings → Developer settings → OAuth Apps でアプリを作り
+  （**Enable Device Flow にチェック**）、その **Client ID** を拡張設定の
+  「GitHub OAuth App の Client ID」に入れる。**Client Secret は不要**（Device Flow は public client）。
+- 状況確認は「GitHub の接続状況は？」（`github_connect_status`）、解除は `github_disconnect`（`confirm:true` 必須）。
+
+> 手動の PAT を使いたい場合は従来どおり設定欄に入れてよい。**入力があればそちらを優先する**ので、
+> 既存利用者の設定は壊れない。
+
+## Step 2: 残りのトークンの発行と入力
 
 拡張の設定欄に以下を入力（必要なものだけでよい）。発行先：
 
 | 欄 | 必須 | 発行先 |
 | --- | --- | --- |
-| GitHub Personal Access Token | ✅ | https://github.com/settings/tokens （`repo`+`workflow`、classic、`ghp_`） |
-| GitHub ユーザー名 | ✅ | 自分の GitHub username |
+| GitHub OAuth App の Client ID | GitHub を使うなら | https://github.com/settings/developers → OAuth Apps（Enable Device Flow にチェック。Secret は不要） |
+| GitHub Personal Access Token | 任意 | 上記 Device Flow を使わない場合のみ。https://github.com/settings/tokens （`repo`+`workflow`、classic、`ghp_`） |
+| GitHub ユーザー名 | 任意 | Device Flow なら自動取得。手動 PAT のときだけ入力 |
 | Vercel API Token | ✅ | https://vercel.com/account/tokens （`vcp_`） |
 | Stripe Secret Key（テスト） | 任意 | https://dashboard.stripe.com/test/apikeys （`sk_test_`） |
 | Stripe Secret Key（本番/Live） | 任意 | https://dashboard.stripe.com/apikeys （`sk_live_`、実課金） |
