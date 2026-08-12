@@ -218,7 +218,6 @@ references 側には「汎用ロジック・判断基準」だけを残します
 |---|---|---|
 | DRIVE_RECEIPT_INBOX      | {{DRIVE_RECEIPT_INBOX 例: 32.経費管理/レシート未処理/{氏名}}} | 入口（人単位フォルダ。氏名=申請者） |
 | DRIVE_RECEIPT_EVIDENCE   | {{DRIVE_RECEIPT_EVIDENCE 例: 32.経費管理/レシート証憑/{YYYY年度}/{氏名}}} | 証憑の正本（年度×人別・7年保存） |
-| LEDGER_RECEIPT_SHEET_ID  | {{LEDGER_RECEIPT_SHEET_ID 例: 1AbC…（経費レシート台帳の /d/<ここ>/edit）}} | 索引簿（自動追記用） |
 | EVIDENCE_PRIMARY_STORE   | Drive | 証憑の正本の置き場（本運用は Drive 固定） |
 
 ### 8-2. メンバーと人↔カード対応（突合を人単位に限定）
