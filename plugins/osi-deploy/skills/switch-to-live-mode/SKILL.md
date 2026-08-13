@@ -94,9 +94,25 @@ Stripe の本番リソース作成は **AI OSI URI Deploy 拡張のツールを 
 - ユーザーから明示的に指定（リポジトリ名 or Vercel プロジェクト名）
 - または、Vercel API でプロジェクト一覧を出して AskUserQuestion で選択
 
+> ⚠️ **チームで運用している場合はチーム修飾が必須。** 付けないと Vercel API は
+> トークン所有者の個人アカウントを見るため、チームのプロジェクトが一覧に出ず、
+> 作ったものも作者がその1人に固定されて他のメンバーが引き継げない。
+> `health_check` の `vercel.team` を見て、チーム運用なら先に以下を定義する。
+
+```bash
+# チーム運用なら Team ID(team_xxx) か slug を入れる。個人運用なら空のまま。
+VERCEL_TEAM=""
+if [ -n "$VERCEL_TEAM" ]; then
+  case "$VERCEL_TEAM" in team_*) K=teamId ;; *) K=slug ;; esac
+  VERCEL_TEAM_Q="?$K=$VERCEL_TEAM"; VERCEL_TEAM_A="&$K=$VERCEL_TEAM"
+else
+  VERCEL_TEAM_Q=""; VERCEL_TEAM_A=""
+fi
+```
+
 ```bash
 curl -s -H "Authorization: Bearer $VERCEL_TOKEN" \
-  https://api.vercel.com/v9/projects | jq '.projects[] | {id, name, link}'
+  https://api.vercel.com/v9/projects$VERCEL_TEAM_Q | jq '.projects[] | {id, name, link}'
 ```
 
 選択結果から `PROJECT_ID`、`REPO_NAME` を保持。
@@ -199,7 +215,7 @@ Vercel の現在の env 変数から既存の test product / price を取得し�
 
 ```bash
 ENV_LIST=$(curl -s -H "Authorization: Bearer $VERCEL_TOKEN" \
-  "https://api.vercel.com/v9/projects/$PROJECT_ID/env?decrypt=true")
+  "https://api.vercel.com/v9/projects/$PROJECT_ID/env?decrypt=true$VERCEL_TEAM_A")
 TEST_PRICE_ID=$(echo "$ENV_LIST" | jq -r '.envs[] | select(.key=="NEXT_PUBLIC_STRIPE_PRICE_ID") | .value' | head -1)
 TEST_SECRET_KEY=$(echo "$ENV_LIST" | jq -r '.envs[] | select(.key=="STRIPE_SECRET_KEY") | .value' | head -1)
 ```
@@ -305,7 +321,7 @@ Vercel 環境変数を 3 つ PATCH（または 2 つ + 1 つ追加）：
 ```bash
 # 既存の env id を取得
 ENV_LIST=$(curl -s -H "Authorization: Bearer $VERCEL_TOKEN" \
-  "https://api.vercel.com/v9/projects/$PROJECT_ID/env")
+  "https://api.vercel.com/v9/projects/$PROJECT_ID/env$VERCEL_TEAM_Q")
 
 update_env() {
   local KEY=$1; local VALUE=$2
@@ -315,7 +331,7 @@ update_env() {
       -H "Authorization: Bearer $VERCEL_TOKEN" \
       -H "Content-Type: application/json" \
       -d "{\"value\":\"$VALUE\"}" \
-      "https://api.vercel.com/v9/projects/$PROJECT_ID/env/$ENV_ID"
+      "https://api.vercel.com/v9/projects/$PROJECT_ID/env/$ENV_ID$VERCEL_TEAM_Q"
   fi
 }
 
@@ -387,7 +403,7 @@ DEPLOYMENT_ID=$(curl -s -X POST \
   -H "Authorization: Bearer $VERCEL_TOKEN" \
   -H "Content-Type: application/json" \
   -d "{\"name\":\"$REPO_NAME\",\"project\":\"$PROJECT_ID\",\"target\":\"production\",\"gitSource\":{\"type\":\"github\",\"repoId\":$REPO_ID,\"ref\":\"main\"}}" \
-  https://api.vercel.com/v13/deployments | jq -r '.id')
+  https://api.vercel.com/v13/deployments$VERCEL_TEAM_Q | jq -r '.id')
 ```
 
 完了まで polling。

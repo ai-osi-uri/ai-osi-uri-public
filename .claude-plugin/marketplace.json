@@ -48,7 +48,7 @@
       "name": "osi-deploy",
       "source": "./plugins/osi-deploy",
       "description": "アプリ作成・公開自動化。Web（Vercel / AWS）・Desktop（Electron）・ローカル出力に対応し、create-app を入口に DNS 設定・事前診断・公開後の更新まで一気通貫で扱う。**モバイル（iOS / Android）は osi-mobile-deploy に全面委譲**する。24 スキル。",
-      "version": "1.4.0",
+      "version": "1.5.0",
       "category": "deploy",
       "tags": [
         "deploy",
