@@ -320,10 +320,28 @@ evidence なしに完了宣言しない。以下を `update-progress.md` に貼�
 | 検証項目 | 方法 | 合格条件 |
 |---|---|---|
 | コミット一致 | `git rev-parse HEAD` ↔ `vercel_get_deployment_status` の `github_commit_sha` | 完全一致 |
+| デプロイが弾かれていない | `vercel_get_deployment_status` の `state` | **`BLOCKED` でない**（下記参照） |
 | 本番反映 | `curl -sf {APP_URL}/{修正ページ}` の中身 grep | 期待文字列が出る |
 | AI 修正の場合 | 実際にリクエスト送信、レスポンス全長計測 | 文末が `。` で終わる／JSON が valid／指定文字数届く |
 | smoke test | `app-smoke-test` skill 呼び出し | 全項目 PASS |
 | Supabase 結合 | `app-smoke-test` の PostgREST probe | `PGRST200` なし |
+
+### `BLOCKED` に注意（Team 配下のとき）
+
+Vercel は Team 配下のデプロイで **commit の作者がそのチームのメンバーか**を検査する。
+外れると `state: BLOCKED` になり、こういうエラーが出る。
+
+```
+Git author <mail> must have access to the team <TEAM> on Vercel to create deployments
+```
+
+**`vercel ls` は BLOCKED を `UNKNOWN` と表示するので気づけない。**
+必ず `vercel_get_deployment_status`（deployments API）か管理画面で `state` を見ること。
+
+初回の `create-app` は API 経由で作るため通り、**2回目以降の
+`github_push` → 自動デプロイだけが止まる**という出方をする。
+出たら、コミットの作者をそのチームのメンバーのアドレスに変える
+（`github_push` の `committer_email` / `committer_name` で明示できる）。
 
 ---
 
