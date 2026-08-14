@@ -43,6 +43,16 @@ requires_connectors:
 - やらない：仕訳の確定・台帳の更新・送金（= 各 osi-finance-* スキルや人の役割）。本スキルは**読み取り表示のみ**。
 
 ## データ源（MF 正本・確実な順）
+
+> **税基準（表示の前提・ここを黙って混ぜない）**
+> MFのレポート系（TrialBalance / Transition の PL・BS）は、経理方式が「税抜(内税)」のとき
+> **既定で税抜**を返す。一方、**請求管理台帳の請求額・BSの売掛金/未払金は税込**。
+> したがって本ダッシュボードは「**PL＝税抜／回収トラッカーと売掛金＝税込**」が混在する。
+> - PLの数字には必ず「税抜」と明示する（既定テンプレは注記済み）。
+> - PLと台帳の請求額を**引き算・突合しない**。比較が必要なら `include_tax: true` で税込に揃えるか、
+>   `osi-finance-mf-sync` に回す。ここで安易に混ぜると1割ずれた比較を人に見せることになる。
+> - `include_tax` が効くのは経理方式が「税抜(内税)」のときだけ。
+
 0. **MoneyForward 事業者・会計期間** `mfc_ca_currentOffice` → `accounting_periods[0]` の `start_date`/`end_date`/`fiscal_year` で当期（期首〜本日、期末を超えない）を決める。会計年度開始月を決め打ちしない（2月期首等にも自動対応）。
 0.5 **推移PL（②月次推移）** `mfc_ca_getReportsTransitionProfitLoss`（`type:"monthly"`）→ `columns` が月、`rows` の売上高合計／販管費合計／当期純利益(損失) の各月 `values[i]`。`settlement_balance`/`total` は除外、期首〜当月で打ち切り。
 0.6 **補助科目（取引先別）** PL/BS を `with_sub_accounts:true` で取得。売掛金 補助科目＝**案件先別売上**（debit=請求/credit=入金/closing=未回収）、未払金 補助科目＝**支払先別**。費用科目には補助が無いため、費用の取引先内訳は**仕訳**(`getJournals` を費用 account_id で)から取る。
