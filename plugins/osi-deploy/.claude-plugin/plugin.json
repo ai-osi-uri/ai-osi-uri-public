@@ -1,10 +1,10 @@
 {
   "name": "osi-deploy",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "requires_connectors": [
     "AI OSI URI Deploy"
   ],
-  "description": "AI OSI URI のアプリ作成・公開自動化。Web（Vercel / AWS）・Desktop（Electron）・ローカル出力に対応し、create-app を入口に DNS 設定・事前診断・公開後の更新まで一気通貫で扱う。**モバイル（iOS / Android）は osi-mobile-deploy に全面委譲**する。24 スキル。",
+  "description": "AI OSI URI のアプリ作成・公開自動化。Web（Vercel / AWS）・Desktop（Electron）・ローカル出力に対応し、create-app を入口に DNS 設定・事前診断・公開後の更新まで一気通貫で扱う。**モバイル（iOS / Android）は osi-mobile-deploy に全面委譲**する。Lovable プロジェクトの決済有効化・本番化は `lovable-payments-golive` が担当（AI OSI URI Deploy 拡張は使わない）。25 スキル。",
   "author": {
     "name": "AI OSI URI",
     "email": "yuhenagisa@ai-osi-uri.com"
@@ -23,6 +23,7 @@
     "gcp",
     "github",
     "ios",
+    "lovable",
     "mobile",
     "saas",
     "stripe",

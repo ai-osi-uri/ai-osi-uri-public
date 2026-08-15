@@ -9,7 +9,7 @@ description: |
   「プリフライト」「apply する前に確認して」「なぜデプロイが失敗するか事前に知りたい」
   で発動。read-only で実際のデプロイはしない。デプロイ後の HTTP 確認は
   `app-smoke-test`。
-version: 0.1.0
+version: 0.2.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
 ---
@@ -37,9 +37,17 @@ requires_connectors:
 
 ---
 
+## 動作要件
+
+必要 mcpb（AI OSI URI Deploy）: >= 1.23.0
+
 ## チェック項目（経路別）
 
 ### 共通
+0. **mcpb バージョン整合** — `health_check` の `server_version` が上の「必要 mcpb」以上か。
+   未満（または `server_version` 欠落＝1.22 以前）は **FAIL** としてポータルからの更新を案内。
+   `update.status: "update_available"` は **WARN**（`update.notice` を表示）、
+   `unreachable` は判定に含めない。設計: docs/mcpb-update-notification-design.md
 1. **AWS 認証とアカウント一致** — AWS 経路または `DOMAIN` 指定時に
    `aws sts get-caller-identity`。`EXPECTED_AWS_ACCOUNT_ID` 指定時は一致も検証する。
 2. **認証情報の保存** — `setup-deploy-environment` の成果（全経路の GitHub PAT /

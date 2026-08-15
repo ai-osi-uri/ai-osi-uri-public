@@ -7,7 +7,7 @@ description: |
   アプリにパッチ当てて」など、**新規作成ではなく既存リポを更新する**依頼で発動する。
   新規作成は `create-app`。**モバイルアプリの更新は
   `mobile-update-deploy`（osi-mobile-deploy）**の担当で、本スキルは扱わない。
-version: 0.5.1
+version: 0.6.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb
@@ -40,10 +40,19 @@ DoD: smoke test の合格 evidence なしに「直りました」と報告しな
 
 ---
 
+## 動作要件
+
+必要 mcpb（AI OSI URI Deploy）: >= 1.23.0
+
 ## Phase 0: 認証情報・接続状況の確認
 
 1. `health_check` を呼び `github.valid: true`、Vercel パスなら `vercel.valid: true`、
    AI 機能修正なら `anthropic.valid: true` を確認。
+   あわせてバージョン整合を見る（設計: docs/mcpb-update-notification-design.md）:
+   - `server_version` が「必要 mcpb」未満（または欠落）→ **中断**して更新を案内
+     （ポータルにログイン → 新しい .mcpb をダウンロード → 開き直し）
+   - `update.status: "update_available"` → 止めずに `update.notice` を一言案内
+   - `update.status: "unreachable"` → 何も言わずに続行
 2. 不足していれば `setup-deploy-environment` を案内して中断。
 3. AWS パスの修正なら `AWS_PROFILE` または `mcp__awslabs_aws-api-mcp-server__call_aws`
    が利用可能かを確認。

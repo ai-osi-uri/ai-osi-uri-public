@@ -7,7 +7,7 @@ description: |
   キーチェーンに保存する方式に統一。「デプロイ環境を整える」「初回セットアップ」
   「自動デプロイを使えるようにしたい」で発動。トークンはチャットに貼らせない。
   毎回のデプロイは `create-app` の役割。
-version: 0.3.2
+version: 0.4.0
 ---
 
 # デプロイ環境構築（拡張インストール方式）
@@ -83,6 +83,13 @@ version: 0.3.2
 
 拡張を有効化後、`health_check` ツールを呼ぶと各トークンの有効性をまとめて確認できる
 （値は末尾4文字のみのマスク表示）。`github.valid` / `vercel.valid` などが true なら準備完了。
+
+> **バージョン確認（v1.23.0+）**: `health_check` は自版数 `server_version` と、配布ポータルの
+> 新版有無 `update` も返す。`update.status: "update_available"` なら `update.notice` を
+> そのままユーザーに案内する（ダウンロードはポータルにログインして行う。契約が有効な
+> アカウントのみダウンロードできる）。`unreachable` は無視して続行してよい。
+> `server_version` が返ってこない場合は mcpb が古い（1.22 以前）ので、この時点で
+> ポータルからの更新を案内する。設計: docs/mcpb-update-notification-design.md
 
 > **iOS の追加検証**: iOS のリリース系（`ios-appstore-release` / Xcode Cloud / TestFlight）を
 > 使うなら、`mobile_health_check`（AI OSI URI Deploy 拡張 v1.15+）を追加で呼ぶ。ASC の

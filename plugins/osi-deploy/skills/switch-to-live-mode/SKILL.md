@@ -6,8 +6,11 @@ description: |
   Payment Link URL）を更新して再デプロイまで行う。「本番化して」「Live
   モードに切り替えて」「実際にお金を受け取れるようにして」「テストモードを終了したい」
   で発動。**実課金が発生する重大操作**なので複数のチェックポイントで明示確認を取り、
-  ロールバック手順も提示する。新規デプロイには使わない（`create-app`）。
-version: 0.1.0
+  ロールバック手順も提示する。新規デプロイには使わない（`create-app`）。**対象が
+  Lovable で作られたプロジェクトの場合は使わない**（Lovable 内蔵 Payments の有効化・
+  本番化は `lovable-payments-golive` の担当。本スキルは Vercel/AWS + AI OSI URI
+  Deploy 拡張の BYOK Stripe 前提）。
+version: 0.1.1
 ---
 
 # Stripe テストモード → 本番モード切替スキル（switch-to-live-mode）
@@ -18,6 +21,12 @@ version: 0.1.0
 
 このスキルは「切替」だけを担当する。新規デプロイは `create-app` を、
 初期環境構築は `setup-deploy-environment` を使う。
+
+> **対象が Lovable プロジェクトかどうかを最初に確認すること。** Lovable の内蔵
+> Payments（seamless）を使っている場合は本スキルではなく `lovable-payments-golive`
+> を使う。本スキルは AI OSI URI Deploy 拡張の Live キーで curl 直叩きする方式が前提で、
+> Lovable の seamless Payments（Lovable 側が Stripe キーを管理する方式）とは仕組みが
+> 異なる。
 
 ---
 

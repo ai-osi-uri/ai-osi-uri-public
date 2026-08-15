@@ -11,8 +11,10 @@ description: |
   `deploy-mobile-app`（osi-mobile-deploy）が直接受ける**ので「iPhone アプリ作って」
   「Android アプリを作って」では発動しない。Web
   前提で進めた結果モバイルと判明したときだけ Phase 4-M で委譲する。既存アプリの修正は
-  `update-deploy`。旧名 deploy-app。
-version: 1.0.0
+  `update-deploy`。**Lovable で作られたアプリの決済実装（Stripe 有効化・本番化）は
+  `lovable-payments-golive` が直接受ける**（本スキルは Lovable プロジェクトの新規作成・
+  改修は扱わない）。旧名 deploy-app。
+version: 1.2.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb
@@ -105,9 +107,21 @@ Phase N:   完了レポート
 
 ---
 
+## 動作要件
+
+必要 mcpb（AI OSI URI Deploy）: >= 1.23.0
+
 ## Phase 0: 認証情報・接続状況の確認
 
 1. `health_check` を呼ぶ
+   - **バージョン整合チェック**（設計: docs/mcpb-update-notification-design.md）:
+     - `server_version` が上の「必要 mcpb」**未満** → **中断**し、更新を案内する
+       （「コネクタが古く、このスキルの新しい手順が動きません。ポータルにログインして
+       新しい .mcpb をダウンロードし、開き直してください」）。旧版のまま進むと後半で
+       分かりにくい失敗になるため、ここで止めるのが正しい
+     - `update.status: "update_available"` → 作業は**止めずに** `update.notice` を一言案内する
+     - `update.status: "unreachable"` → 何も言わずに続行（オフラインで作業を妨げない）
+     - `server_version` が返ってこない（旧 mcpb）→ 「必要 mcpb」未満として扱う
 2. パスごとに必要なトークンを確認:
    - 全パス共通: `github.valid: true`
    - Web-Vercel: `vercel.valid: true`
@@ -297,6 +311,20 @@ scaffold → gh-create-repo-and-push → harness-init
 
 ---
 
+## 決済実装（本番化）が必要になったタイミングの分岐
+
+「決済を実装したい」「本番化したい」「Stripeを有効にしたい」と言われたら、**そのアプリが
+何で作られたか**で使うスキルを切り替える。create-app 自身は Lovable プロジェクトの
+作成・改修は扱わないため、Lovable 案件は最初からこの分岐で委譲する。
+
+| 対象 | 使うスキル |
+|---|---|
+| Lovable で作られたプロジェクト | `lovable-payments-golive`（Lovable 内蔵 Payments。AI OSI URI Deploy 拡張は使わない） |
+| create-app で作った Web（Vercel/AWS）アプリ | `switch-to-live-mode`（AI OSI URI Deploy 拡張 + Live キーで再作成） |
+| どちらか不明 | ユーザーに一言確認してから振り分ける |
+
+---
+
 ## 共通後処理
 
 ### Phase N-1: Drive 記録（必須ゲート）
@@ -363,7 +391,8 @@ scaffold → gh-create-repo-and-push → harness-init
 - `supabase-set-auth-url` / `supabase-multitenant-rls` — Supabase 設定
 - `tf-state-backend` — Terraform state
 - `gcp-ops` — GCP 操作
-- `switch-to-live-mode` — Stripe test→live
+- `switch-to-live-mode` — Stripe test→live（Vercel/AWS + Deploy拡張前提。Lovableは対象外）
+- `lovable-payments-golive` — Lovable 内蔵 Payments の有効化〜Go Live（Lovable プロジェクト専用）
 - `nextjs-pdf-export` / `scroll-3d-website` — テンプレ
 
 **Desktop パス:**
