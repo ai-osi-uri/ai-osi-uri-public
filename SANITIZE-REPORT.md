@@ -2,14 +2,15 @@
 
 対象プラグイン: osi-creative, osi-docs, osi-deploy, osi-mobile-deploy, osi-knowledge, osi-finance, osi-backoffice
 
-以下の 38 箇所に要注意語が残っています。publish 前に人手で確認してください（自動削除は文書を壊すため行いません）。
+以下の 39 箇所に要注意語が残っています。publish 前に人手で確認してください（自動削除は文書を壊すため行いません）。
 
 | ファイル | 行 | 語 | 抜粋 |
 |---|---|---|---|
 | plugins/osi-finance/README.md | 138 | 共有ドライブ | 顧客が決めるのは「OSI Finance ルートをどこに置くか」1問だけ（**共有ドライブ推奨**）、配下は規定ツリーで固定 |
 | plugins/osi-finance/assets/schema/data-layout.yaml | 129 | CAIO | 重複=異常と判定してはいけない。例: INV-2026-07-016 は NITOH の CAIO と準備金2件を1通にまとめたもの。 |
-| plugins/osi-finance/docs/導入手順書.md | 22 | 共有ドライブ | \| Google Workspace（**共有ドライブ**推奨） \| 必須 \| 台帳・契約書・証憑の保管 \| 既存契約でも可 \| |
-| plugins/osi-finance/docs/導入手順書.md | 111 | 共有ドライブ | >   共有ドライブなら `G:\共有ドライブ\AI OSI URI\06.会計` のような形になります |
+| plugins/osi-finance/docs/導入手順書.md | 25 | 共有ドライブ | \| Google Workspace（**共有ドライブ**推奨） \| 必須 \| 台帳・契約書・証憑の保管 \| 既存契約でも可 \| |
+| plugins/osi-finance/docs/導入手順書.md | 114 | 共有ドライブ | >   共有ドライブなら `G:\共有ドライブ\AI OSI URI\06.会計` のような形になります |
+| plugins/osi-finance/docs/導入マニュアル.md | 47 | 共有ドライブ | \| Google Workspace（**共有ドライブ**）＋ デスクトップアプリ \| 必須 \| 台帳・契約書・証憑の保管 \| |
 | plugins/osi-finance/config/osi-finance-settings.example.md | 136 | 共有ドライブ | 共有ドライブに1つ作り、配下は規定ツリー（00.契約書／01.受領請求書／02.送付請求書／03.経費管理）で固定。 |
 | plugins/osi-finance/config/osi-finance-settings.example.md | 141 | 共有ドライブ | \| OSI Finance ルートの場所 \| {{DRIVE_ROOT_LOCATION 例: 共有ドライブ「経理」直下／マイドライブ（要・経理チーム共有）}} \| |
 | plugins/osi-finance/skills/osi-finance-ar-sync/SKILL.md | 78 | CAIO | `INV-2026-07-016` は 対象月 2026-06 の行（CAIO 550,000）と 2026-07 の行（準備金 1,375,000 / 2,200,000）が |
