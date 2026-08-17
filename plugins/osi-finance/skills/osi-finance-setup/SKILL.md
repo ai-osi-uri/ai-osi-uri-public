@@ -170,22 +170,42 @@ OSI Finance/                 ← 顧客が決めるのはこの置き場所だ�
 
 ---
 
-## ステップ 5: スケジュールタスクの登録案内
+## ステップ 5: スケジュールタスクの登録
 
-日次・月次の自動実行を案内する。登録は scheduled-tasks（`create_scheduled_task`）で行うか、
-ユーザーに登録方法を提示する。**登録後は一度「Run now」で実行し、コネクタの接続許可を先取りする**
-（初回はOAuth許可ダイアログが出るため、無人実行の前に通しておく）。
+日次・月次の自動実行を7本登録する。**定義（cron・description・prompt）の正本は
+[`references/scheduled-tasks.md`](./references/scheduled-tasks.md) にある。**
+そこの内容をそのまま `create_scheduled_task` に渡すこと。**プロンプトを自分で書き起こさない。**
 
-| 周期 | タスク | 呼ぶスキル | 目安 |
-|---|---|---|---|
-| 日次 | 契約取込（契約→請求スケジュール化） | osi-finance-contract-intake | 毎朝 |
-| 日次 | 受領請求書の取りこぼし検出 | osi-finance-payment-detect | 毎朝 |
-| 月次 | 当月請求書ドラフト発行 | osi-finance-invoice | 毎月 1 日 |
-| 月次 | 月次クローズ | osi-finance-monthly | 毎月 3 日 |
-| 月次 | 支払予定リスト確認 | osi-finance-payment-intake / osi-finance-payment-detect | 毎月 25 日 |
+| taskId | cron | 呼ぶスキル |
+|---|---|---|
+| `osi-finance-daily-sync` | `0 7 * * *` | （なし・暫定で手順を持つ） |
+| `osi-finance-daily-contract-detect` | `20 8 * * *` | osi-finance-contract-intake |
+| `osi-finance-daily-payment-detect` | `25 8 * * *` | osi-finance-payment-detect |
+| `osi-finance-monthstart-invoice-draft` | `30 9 1 * *` | osi-finance-invoice |
+| `osi-finance-monthly-ar-close` | `0 9 2 * *` | osi-finance-ar-sync |
+| `osi-finance-monthstart-close` | `0 9 3 * *` | osi-finance-monthly |
+| `osi-finance-monthend-payment-list` | `0 9 25 * *` | osi-finance-payment-detect |
 
-- 各タスク登録後に「Run now」を1回実行して、接続許可・初回挙動を確認するよう案内する。
+- **登録後は一度「Run now」で実行し、コネクタの接続許可を先取りする**
+  （初回はOAuth許可ダイアログが出るため、無人実行の前に通しておく）。
 - いずれのタスクも**送金・自動確定はしない**（検出・ドラフト・報告まで）。
+- **taskId は `osi-finance-` で始める。**一括更新・一括削除の対象をこの接頭辞で見分けるため。
+
+### スケジュールはプラグインでは配れない（伝えること）
+
+plugin.json に `schedules` / `cron` の欄は無く、`hooks` にも時刻で発火するイベントは無い。
+スケジュールは**ユーザー単位・マシン単位**の設定なので、**プラグインを入れただけでは
+自動実行は始まらない。**このステップを実行しない限り何も動かないことを、明確に伝える。
+
+`~/Documents/Claude/Scheduled/` にファイルを置く方式は**成立しない**（cron はそのファイルの
+中に無く、アプリ側の管理領域にある）。登録は必ず `create_scheduled_task` を通す。
+
+### プロンプトに手順を書かせない（最重要）
+
+各タスクのプロンプトは「◯◯スキルに従って実行する」＋固有の絞り込みだけにする。
+**手順・フォルダパス・台帳のID・自社情報を書くと、構成が変わったときに
+リポジトリの外で静かに古くなる。**2026-08-12 のフォルダ移行で実際に4本が壊れ、
+5日間気づかれなかった。理由と判定基準は `references/scheduled-tasks.md` に書いてある。
 
 ---
 
