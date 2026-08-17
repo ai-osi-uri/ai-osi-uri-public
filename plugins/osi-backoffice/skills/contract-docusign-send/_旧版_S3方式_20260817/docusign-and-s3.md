@@ -22,7 +22,11 @@ Cowork にアップした任意の契約書を送るには、DocuSign が一度�
 ## ファイルの橋渡し（重要）
 3つのファイルシステムが分かれている：
 - **Cowork bash サンドボックス**：契約書PDFがある／ネットワーク到達可／aws CLI なし・creds なし。
-- **AWS-MCP（call_aws）**：creds を持つが、作業ディレクトリ `/tmp/aws-api-mcp/workdir` 外のファイルを読めない。
+- **`call_aws`（awslabs aws-api-mcp-server）**：creds を持つが、作業ディレクトリ
+  `/tmp/aws-api-mcp/workdir` 外のファイルを読めない。**この橋渡しの制約が、下の federation token 方式の理由。**
+  ※ ツール名は `call_aws`。コネクタ一覧に「AWS MCP」という表示名が無くても、`call_aws` があれば使える。
+  疑わしいときは `aws sts get-caller-identity` を1回叩いて確かめる（2026-08-17 に誤診の実例あり）。
+  bash 側に boto3 が入っていないことがあるので、その場合は `pip install boto3 --break-system-packages`。
 - **file tools（Mac）**：outputs と共有ドライブのみ書ける。
 
 → よって「call_aws で直接 `s3 cp`」はできない（workdir外を拒否される）。

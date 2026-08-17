@@ -19,7 +19,7 @@ requires_connectors:
     provision: user-install
   - server: superhuman
     provision: user-install
-  - server: docusign
+  - server: ai-osi-uri-finance   # DocuSign は自前コネクタの ds_* を使う（公式MCPは remoteUrl しか受けず送付に使えない）
     provision: user-install
 
 ---
