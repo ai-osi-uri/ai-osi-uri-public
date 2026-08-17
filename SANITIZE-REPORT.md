@@ -37,8 +37,8 @@
 | plugins/osi-backoffice/skills/contract-docusign-send/references/storage-and-naming.md | 20 | CAIO | - `{ID}.{企業名}` は営業管理表のZ列（案件ID）＝ `21.PJT資料/01.CAIO事業/` のフォルダ番号に合わせる。該当フォルダが無ければ作成（既存の命名に倣う）。 |
 | plugins/osi-backoffice/skills/contract-docusign-send/references/docusign-and-s3.md | 26 | 共有ドライブ | - **file tools（Mac）**：outputs と共有ドライブのみ書ける。 |
 | plugins/osi-docs/skills/pptx-custom/exec-deck-patterns.md | 11 | CAIO | - ✅「初期費用ゼロのCAIO契約なら、3ヶ月で投資回収できる」 |
-| plugins/osi-docs/skills/deck-composition/SKILL.md | 58 | CAIO | - ❌「コア事業の説明」→ ✅「では本丸の CAIO 事業を——仕組み・価格・現状を見ていく」 |
-| plugins/osi-docs/skills/deck-composition/SKILL.md | 66 | CAIO | 複数スライドで使う用語・略語（CAIO, ARR, NPS 等）は、**初出のスライドで**定義する。5枚後に「Xとは」を置かない。定義はサブタイトルにインラインで入れるか、使い始める前に定義スライドを1枚置く。 |
+| plugins/osi-docs/skills/deck-composition/SKILL.md | 70 | CAIO | - ❌「コア事業の説明」→ ✅「では本丸の CAIO 事業を——仕組み・価格・現状を見ていく」 |
+| plugins/osi-docs/skills/deck-composition/SKILL.md | 78 | CAIO | 複数スライドで使う用語・略語（CAIO, ARR, NPS 等）は、**初出のスライドで**定義する。5枚後に「Xとは」を置かない。定義はサブタイトルにインラインで入れるか、使い始める前に定義スライドを1枚置く。 |
 | plugins/osi-docs/skills/business-flow-asis-tobe/references/data-schema.md | 135 | 共有ドライブ | { "name": "Excel管理簿", "where": "営業共有ドライブ" } |
 | plugins/osi-docs/skills/business-flow-asis-tobe/references/data-schema.md | 167 | Notion | \| `name`    \| yes  \| ドキュメント名（例：「契約書ドラフト Word」「Notion 商談 DB」） \| |
 | plugins/osi-docs/skills/architecture-proposal/SKILL.md | 12 | yourrecord | ※ 自社サービス（CAIO / yourrecord 等）の新規営業・初回提案・見積提案は別スキル |

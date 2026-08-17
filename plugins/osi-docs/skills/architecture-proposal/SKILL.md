@@ -63,6 +63,9 @@ requires_connectors:
   subnet を持ち込まない。GCPは Cloud Run＋Serverless VPC Access＋Cloud NAT＋Google Front End）。
 
 ## pptxの作り方（scripts/deck_helpers.py）
+
+> **提出前に `pptx-custom` の「日本語ビジネス文書の絶対ルール」を通すこと。** 金額は単位まで書く（「億」で終わらせない）／全章に中扉／目次は階層化しページ番号は実測／色は意味に割り当てる／抽象は Appendix。顧客提出物ではさらに `proposal-self-review` の F（機械チェック）を 0 件にしてから出す。
+
 - `from deck_helpers import *` → `prs=new_deck()`、各スライドは `s=slide(prs)` で作り、`head/rect/
   txt/chip/pagenum/add_image` で組む。色は AIOSI/PARTNER/CLIENT（担当）と DARK/RED/LIGHT/LRED 等。
 - アーキ図は `add_image(s, "arch_v1.png")` で各段階スライドに貼る。
