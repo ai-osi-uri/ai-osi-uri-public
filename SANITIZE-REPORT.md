@@ -15,9 +15,9 @@
 | plugins/osi-finance/config/osi-finance-settings.example.md | 141 | 共有ドライブ | \| OSI Finance ルートの場所 \| {{DRIVE_ROOT_LOCATION 例: 共有ドライブ「経理」直下／マイドライブ（要・経理チーム共有）}} \| |
 | plugins/osi-finance/skills/osi-finance-ar-sync/SKILL.md | 78 | CAIO | `INV-2026-07-016` は 対象月 2026-06 の行（CAIO 550,000）と 2026-07 の行（準備金 1,375,000 / 2,200,000）が |
 | plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 47 | Plaud | - 任意：既存下書きへの確実な添付に Claude in Chrome（ブラウザ操作の `file_upload`）、本文パーソナライズに Obsidian（`obsidian-knowledge-consult`）／Plaud／Drive |
-| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 104 | CAIO | - **グループが複数の対象月にまたがる場合は、対象月を摘要・明細名に必ず残す**（例「CAIO業務 2026年4〜6月分」）。 |
-| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 133 | 共有ドライブ | - **マウント済みの Drive 共有ドライブ（ローカル同期フォルダ＝FS）** に base64 をデコードして書き出す： |
-| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 144 | Plaud | - 当月ご一緒した取り組みを **Obsidian（`30_Projects/_Active/{社名}/議事録`、`obsidian-knowledge-consult` 経由）→ Plaud → Drive** の順で拾い、お礼文に1段落 |
+| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 133 | CAIO | - **グループが複数の対象月にまたがる場合は、対象月を摘要・明細名に必ず残す**（例「CAIO業務 2026年4〜6月分」）。 |
+| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 162 | 共有ドライブ | - **マウント済みの Drive 共有ドライブ（ローカル同期フォルダ＝FS）** に base64 をデコードして書き出す： |
+| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 173 | Plaud | - 当月ご一緒した取り組みを **Obsidian（`30_Projects/_Active/{社名}/議事録`、`obsidian-knowledge-consult` 経由）→ Plaud → Drive** の順で拾い、お礼文に1段落 |
 | plugins/osi-finance/skills/osi-finance-setup/SKILL.md | 73 | 共有ドライブ | ルートフォルダ「OSI Finance」を**どこに作るか**だけを聞く。**共有ドライブを第一推奨** |
 | plugins/osi-finance/skills/osi-finance-setup/SKILL.md | 97 | 共有ドライブ | OSI Finance/                 ← 顧客が決めるのはこの置き場所だけ（共有ドライブ推奨） |
 | plugins/osi-deploy/skills/create-app/SKILL.md | 56 | GITHUB_ORG | **重要:** `GITHUB_ORG` が未設定だと、`github_create_repo_and_push` は `owner_override` を |
