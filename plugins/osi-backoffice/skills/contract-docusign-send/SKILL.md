@@ -13,6 +13,10 @@ description: >
   ※ 契約書そのものを新規作成するのは nda-creation 等の役割。受領契約 → 請求スケジュール化は
   osi-finance の osi-finance-contract-intake。本スキルは「手元の契約書をチェックして送る」ことに特化する。
 requires_connectors:
+  # 既定の経路。Claude のコネクタ一覧からボタン1つで接続でき、鍵の登録は要らない
+  - server: docusign
+    provision: user-connect
+  # 台帳の読み書きと、Integration Key がある組織向けの ds_* に使う
   - server: ai-osi-uri-finance
     provision: user-install
 ---
@@ -42,22 +46,64 @@ requires_connectors:
 
 ## 前提コネクタ・環境
 
-- **DocuSign（必須・自前コネクタ `ai-osi-uri-finance`）**：
-  `ds_status` / `ds_consent_url` / `ds_create_envelope` / `ds_get_envelope` / `ds_list_envelopes`。
-  eSignature REST API を直接叩き、**契約書を base64 で添付する**（公開URLは要らない）。
-  認証は **JWT Grant**（初回に1回だけ人が同意URLを踏む。以後失効しない）。
-  設定は拡張の user_config：Integration Key / 送信者 User ID / RSA 秘密鍵 PEM。
-  - 使う前に `ds_status` を1回叩く。`need_consent: true` なら `ds_consent_url` の URL を人に踏んでもらう。
-  - 汎用の DocuSign MCP コネクタ（`createEnvelope` が `remoteUrl` しか受けないもの）は**使わない。**
-- **AWS / S3 / Supabase：不要になった（2026-08-17）。** 一時ファイルも一時公開URLも使わない。
-  ファイルは自前コネクタが読んで base64 で送る。`call_aws` への依存も消えたので、
-  aws-api-mcp-server の提供終了（2026-08-31）に影響されない。
+- **DocuSign（必須・公式 DocuSign MCP コネクタ）**：
+  `createEnvelope` / `createEnvelopeFromTemplate` / `updateEnvelope` /
+  `updateEnvelopeRecipients` / `updateEnvelopeTabs` / `getEnvelope` / `getEnvelopes` /
+  `listEnvelopeDocuments` / `listRecipients` / `sendReminder`。
+  Claude のコネクタ一覧から**ボタン1つで接続**でき、鍵の登録も設定も要らない
+  （DocuSign 自身が公開しているアプリなので、Integration Key は DocuSign 側が持っている）。
+
+  **できないのは1つだけ。手元のファイルを渡せない。**それ以外——受信者・署名順・CC・
+  署名欄（`anchorString` 指定可）・件名・本文・リマインダー・有効期限・案件IDの埋め込み
+  （`customFields`）・下書きで止める・後から受信者やタブを直す・送信・リマインド・取り消し
+  ——は**すべてできる**。
+
+  書類の渡し方は2通りしかない（2026-08-20 実地確認）。
+  1. **`documents[].remoteUrl`**：DocuSign のサーバーが取りに行ける HTTP(S) URL。
+     公開URLでの封筒作成は成功を確認済み。**認証が要る URL は不可**で、非公開の Google Drive
+     ファイルを指すと `NO_DOCUMENT_RECEIVED`（バイトが取れない）になる。
+  2. **既存の DocuSign テンプレート**（`templateId` / `createEnvelopeFromTemplate`）。
+
+- **手元のファイルは人がアップロードする（既定の運用）**：
+  本スキルはもともと「**送信は人が DocuSign の画面で行う**」が絶対原則で、人はどのみち
+  DocuSign を開く。そこでファイルもドラッグしてもらい、**下書き（Drafts）を作ってもらう**。
+  以降は `getEnvelopes` で拾い、`updateEnvelopeRecipients` / `updateEnvelopeTabs` /
+  `updateEnvelope` で受信者・署名欄・件名を整える。
+
+  > **試して駄目だったこと（同じ道を再探索しないために）。**
+  > * Claude in Chrome での代行アップロード → `file_upload` がこの環境で使えない
+  >   （`client converted paths before they reached the host`）。画面遷移とファイル入力欄の
+  >   特定までは通るが、**渡す所だけができない**
+  > * Google Drive を一時置き場にする → Drive コネクタの `share_file` は
+  >   **メールアドレス指定の共有しかできず**、「リンクを知っている全員」を作れない。
+  >   フォルダ側に手作業で公開設定をすれば動くが、初回の手作業が残る
+  > * 本番 DocuSign アカウントで Integration Key を発行 → **画面に「実稼働環境では作成
+  >   できません。開発者アカウントで作成し Go-Live を経て移行」と明記**されている
+
+- **自前コネクタ（`ai-osi-uri-finance` の `ds_*`）＝上級者向け・任意**：
+  `ds_create_envelope` は**台帳フォルダのファイルを base64 で直接送る**ので、URL も置き場所も
+  要らない。ただし **Integration Key が必要**で、そのためには開発者アカウント（無料・即時）を
+  作り、Go-Live を通す必要がある。通せる組織はこちらが最短。
+  接続は `ds_connect`（ブラウザで「許可」を1回）、鍵の保存はコンソールの［DocuSign］画面。
+  **未接続のまま `ds_create_envelope` を呼ぶと、送信せずに `need_connect` と認可URLを返す。**
+
+- **AWS / S3 / Supabase：使わない。** 契約書のための置き場所を新設しない（2026-08-17 の判断を維持）。
 - **Cowork bash**：契約書の PDF 変換や中身の確認に使う（アップロードには使わない）。
 - **Drive（マウント済み共有ドライブ）**：格納先は `references/storage-and-naming.md` の定義に従う。**このスキルにパスを直書きしない**（組織ごとに違い、移行でも動く）。
 
-> **ファイルの受け渡しについて：** ファイルは HTTPS リクエストの本体としてしか外に出ない。
-> どこにも置き場所を作らないので、消し忘れも有効期限切れも起きない。
-> 送れるのは**台帳フォルダの中のファイルだけ**（外を指定すると拒否される）。
+> **ファイルの受け渡しについて：** 既定では**外に出さない**（人が DocuSign に直接アップする）。
+> 自前コネクタを使う場合も、ファイルは HTTPS リクエストの本体としてしか出ず、置き場所を作らない。
+
+### 書類を渡せないときにやってはいけないこと
+
+- **契約書を恒久的な公開URLに置かない。**金額・住所・代表者名が入った文書を、認証なしで
+  誰でも取得できる状態にしない。`remoteUrl` を使うなら、**取得後すぐ消せる一時コピー**に限る
+  （原本の共有設定は絶対に触らない）。
+- **勝手に置き場所（S3・当社サーバー等）を新設しない。**2026-08-17 に S3 方式を捨てたのは、
+  置き場所・有効期限・消し忘れの管理が増えるからで、その判断は生きている。
+  必要だと思ったら、実装せずに人へ選択肢として提示する。
+- **送信まで自動でやらない。**下書きで止めるのは変わらない絶対原則。
+
 
 ## ワークフロー
 
@@ -113,45 +159,69 @@ requires_connectors:
   - 受領後の契約は契約管理フォルダへの格納（または `osi-finance/osi-finance-contract-intake`）で扱う。Step 6（格納）は受領後に実施。
   - この場合は Step 4・5 を**スキップ**して Step 6/7 へ。
 
-### Step 4. 送付用ファイルを確定する（自社送付の場合のみ）
-**アップロードも一時公開URLも要らない。** 送付する PDF（または docx）を
-**台帳フォルダの中**に置くだけでよい。`ds_create_envelope` が同じ PC 上でファイルを読み、
-base64 にして DocuSign へ直接送る。
+### Step 4. 書類を DocuSign に載せる（自社送付の場合のみ）
 
-- 送付用ファイルは `00.契約書/02.取引先別/{取引先}/` に置く（Step 6 の格納先と同じ場所でよい）。
-- 渡すのは**台帳フォルダからの相対パス**。台帳フォルダの外は拒否される（安全のため）。
-- 1ファイル 25MB まで（超えるものは事前に弾かれる）。
+**経路を1つ選ぶ。既定は A。**
 
-> **2026-08-17 に方式を変えた。** 以前は S3 の非公開バケットに一時アップロードし、
-> 署名付きURLを DocuSign に取得させていた。これは汎用 DocuSign MCP コネクタの
-> `createEnvelope` が `remoteUrl` しか受け付けないための回避策で、**DocuSign 本体の制約ではない。**
-> eSignature REST API は `documents[].documentBase64` を受け取る。自前コネクタに移したことで
-> **AWS・S3・一時ファイル・一時公開URL・その有効期限管理・事後削除が全部不要になった。**
+**A. 人がアップロードする（既定・設定不要）**
 
-### Step 5. DocuSign 封筒の作成（ドラフトで止める。送信は人が DocuSign で行う）
-**既定はドラフト（`status=created`）。`send` を渡さなければ送信されない。Claude は送信しない。**
+1. 送付用の PDF（または docx）の場所を人に伝える。Drive の案件フォルダに置いておく。
+2. 「DocuSign を開いて［今すぐ開始］→ このファイルを追加して、**下書きのまま閉じて**ください」と案内する。
+3. 人が下書きを作ったら、`getEnvelopes`（`status=created`）で拾って `envelopeId` を得る。
+4. `updateEnvelopeRecipients` で署名者・CC・署名順を、`updateEnvelopeTabs` で署名欄を、
+   `updateEnvelope` で件名・本文を整える。**送信はしない。**
+
+> 人はどのみち送信ボタンを押すために DocuSign を開く。**増える手間はドラッグ1回**で、
+> 鍵も置き場所も要らない。この経路が壊れることは無い。
+
+**B. `remoteUrl`（DocuSign が取りに行ける URL がすでにある場合のみ）**
+
+`documents[].remoteUrl` に渡す。**認証が要る URL は使えない**（非公開 Drive は
+`NO_DOCUMENT_RECEIVED` になる。2026-08-20 に確認済み）。
+**この経路のために新しく公開の置き場所を作らない。**既に公開されている URL があるときだけ使う。
+
+**C. 自前コネクタ（Integration Key がある組織のみ）**
+
+`ds_create_envelope(documents: ["<台帳フォルダからの相対パス>"], ...)`。
+台帳フォルダの外は拒否される。1ファイル 25MB まで。未接続なら `need_connect` が返る。
+
+### Step 5. 封筒を整える（ドラフトで止める。送信は人が DocuSign で行う）
+
+**既定はドラフト（`status: "created"`）。Claude は送信しない。**
+
+新規に作る場合（経路 B / C）:
 
 ```
-ds_create_envelope(
-  documents:     ["00.契約書/02.取引先別/{取引先}/{契約名}.pdf"],   # 台帳フォルダからの相対パス
-  signers: [
-    { name:"<甲署名者>", email:"<甲メール>", routing_order:"1", anchor:"<甲の会社名or代表者名>" },
-    { name:"<乙署名者>", email:"<乙メール>", routing_order:"2", anchor:"<自社名>" }
-  ],
-  carbon_copies: [{ name:"<自社控え>", email:"<自社の共有アドレス>" }],
-  email_subject: "【<自社名>】<契約名> ご署名のお願い",
-  email_blurb:   "<宛名と依頼文>"
+createEnvelope(
+  accountId: "<getUserInfo で取得>",
+  envelopeDefinition: {
+    status: "created",                                  # 下書き。sent にしない
+    emailSubject: "【<自社名>】<契約名> ご署名のお願い",
+    emailBlurb:   "<宛名と依頼文>",
+    documents: [{ documentId: "1", name: "<表示名>.pdf", remoteUrl: "<URL>" }],
+    recipients: {
+      signers: [
+        { email:"<甲メール>", name:"<甲署名者>", recipientId:"1", routingOrder:"1",
+          tabs: { signHereTabs:[{ anchorString:"<甲の会社名or代表者名>", documentId:"1", recipientId:"1" }],
+                  dateSignedTabs:[{ anchorString:"<同上>", anchorYOffset:"40", documentId:"1", recipientId:"1" }] } },
+        { email:"<乙メール>", name:"<乙署名者>", recipientId:"2", routingOrder:"2", tabs: { ... } }
+      ],
+      carbonCopies: [{ email:"<自社の共有アドレス>", name:"<自社控え>", recipientId:"3" }]
+    },
+    customFields: { textCustomFields: [{ name:"案件ID", value:"<案件ID>" }] }
+  }
 )
 ```
 
 - **件名は必ず自分で書く。** 既定の `Docusignで送信: ファイル名.docx` は相手に届く件名として不適切で、
-  `(1)` や `(2)` のような連番までそのまま出る（実際に出ていた）。
-- 署名欄は `anchor`（目印の文字列）で置く。座標指定は雛形を1文字直すと崩れる。
-- 返ってくる `envelope_id` を Step 6 のメタに記録する。
-- 状態の確認は `ds_get_envelope` / `ds_list_envelopes`。
+  `(1)` `(2)` のような連番までそのまま出る（実際に出ていた）。
+- 署名欄は `anchorString`（目印の文字列）で置く。座標指定は雛形を1文字直すと崩れる。
+- `accountId` は `getUserInfo` の `accounts[].account_id`（GUID）。**画面に出るアカウントIDの数字ではない。**
+- 返ってくる `envelopeId` を Step 6 のメタに記録する。
+- 状態の確認は `getEnvelope` / `getEnvelopes` / `listRecipients`。催促は `sendReminder`。
 
-**送信は人が DocuSign の画面で行う。**どうしてもコネクタから送る場合だけ `send: true` を渡すが、
-**外部への発信は取り消せない**ので、人の明示的な指示があるときに限る。
+**送信は人が DocuSign の画面で行う。**外部への発信は取り消せないので、人の明示的な指示が無い限り
+`status: "sent"` にしない。
 
 ### Step 6. Drive へ格納 ＋ 送付メタ記録
 格納先・命名は `references/storage-and-naming.md` に従う。要点：

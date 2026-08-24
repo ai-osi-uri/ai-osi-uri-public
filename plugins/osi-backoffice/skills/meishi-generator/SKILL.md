@@ -29,15 +29,44 @@ description: >
    - 役職（例: 秘書、執行役員 CIO、エンジニア）※英字混じり可
    - 携帯番号（例: 090-1234-5678）※「Tel. 」は自動付与
    - メールアドレス（任意。あればE-mail行が追加される）
-2. スキルディレクトリの `scripts/` で実行:
+2. **作業コピーを作る（下の「実行環境の準備」を必ず先に実施）**。以後 `/tmp/meishi` で実行:
 
 ```bash
-cd scripts && python3 meishi_gen.py '{"name":"山田 太郎","romaji":"Taro Yamada","title":"エンジニア","tel":"080-1234-5678","email":"yamada@ai-osi-uri.com","out":"meishi_yamada.pdf"}'
+cd /tmp/meishi && python3 meishi_gen.py '{"name":"山田 太郎","romaji":"Taro Yamada","title":"エンジニア","tel":"080-1234-5678","email":"yamada@ai-osi-uri.com","out":"/tmp/meishi_out.pdf"}'
 ```
 
    `email` は省略可（`null` または キー自体を省く）。
+   ローマ字は原本の組み方に合わせて各語の頭文字を大文字にする（`taro yamada` → `Taro Yamada`）。
 3. 生成PDFを `pdftoppm -png -r 150` でレンダリングし、カード部分をクロップして必ずユーザーに目視確認してもらう。
 4. 確認OKなら `名刺_{氏名スペースなし}_表.pdf` にリネームして SendUserFile で納品する。
+
+## 実行環境の準備（Cowork では必須）
+
+Cowork の bash は**独立した Linux サンドボックス**で動くため、このスキルの `scripts/`
+（ホスト側のプラグインキャッシュにある）には**到達できない**。`cd scripts` すると
+`No such file or directory` になる。実行前に、bash から見える場所へ作業コピーを作ること。
+
+**方法A（配布リポの clone が手元にある人／推奨）**
+
+1. `mcp__cowork__request_cowork_directory` で clone を接続する
+   （既定 `~/projects/ai-osi-uri-plugins`。無ければ方法Bへ）
+2. bash で作業コピーを作る（`<VM>` は接続時に案内される `/sessions/.../mnt/...` パス）:
+
+```bash
+cp -R "<VM>/ai-osi-uri-plugins/plugins/osi-backoffice/skills/meishi-generator/scripts" /tmp/meishi
+```
+
+**方法B（clone が無い人。「AI OSI URI Deploy」拡張が必要）**
+
+1. `mcp__AI_OSI_URI_Deploy__github_clone` で
+   `repo_owner: ai-osi-uri` / `repo_name: ai-osi-uri-plugins` / `depth: 1` /
+   `dest_dir: <接続フォルダの絶対パス>/_meishi_tmp` を clone
+2. bash で `cp -R "<VM>/_meishi_tmp/plugins/osi-backoffice/skills/meishi-generator/scripts" /tmp/meishi`
+3. `rm -rf "<VM>/_meishi_tmp"` で片付ける
+   （`Operation not permitted` が出たら `mcp__cowork__allow_cowork_file_delete` で許可を取る）
+
+どちらも使えない場合は、そのメンバーの環境では生成できない。**Deploy 拡張の設定**
+（`setup-deploy-environment`）を案内するか、生成できる人に依頼する。
 
 ## 検証（必ず実施）
 
@@ -58,6 +87,11 @@ cd scripts && python3 meishi_gen.py '{"name":"山田 太郎","romaji":"Taro Yama
 - 原本 .ai はテキストがアウトライン化されており直接編集不可。そのため差し替え方式を採用。
 - 座標パラメータは `meishi_gen.py` の `PARAMS`（300dpi px基準）。松尾・坂口の原本2枚との
   ピクセル比較でキャリブレーション済み（可変部分以外は完全一致）。
-- Noto の CFF→TrueType 変換は `fontprep.py`。システムに
-  `/usr/share/fonts/opentype/noto/NotoSansCJK-*.ttc` が必要（Cowork環境には標準装備）。
+- Noto の CFF→TrueType 変換は `fontprep.py`。**Cowork のサンドボックスには
+  `NotoSansCJK-Medium.ttc` が入っていないことがある**（Regular / Bold のみ）ため、
+  `fontprep.resolve_font()` がローカル候補を順に探し、無ければ notofonts の公式 OTF を
+  `$TMPDIR/meishi-noto-cache/` に取得する（初回のみ約16MB・要ネットワーク）。
+  手元のフォントを使わせたいときは環境変数 `MEISHI_NOTO_MEDIUM` にパスを指定する。
+  太さの自動フォールバック（Medium→Regular 等）はしない。印刷物の見た目が
+  気付かないまま変わる方が事故なので、用意できないときは明示エラーで止める。
 - 依存: reportlab, pypdf, fontTools, pikepdf（いずれもCowork標準）

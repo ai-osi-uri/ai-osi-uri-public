@@ -32,7 +32,7 @@
 | plugins/osi-deploy/skills/aws-static-deploy/SKILL.md | 36 | 共有ドライブ | 共有ドライブの `.deploy-credentials/.env` は **任意フォールバック**としてのみ参照する。 |
 | plugins/osi-deploy/skills/update-deploy/SKILL.md | 68 | GITHUB_ORG | \| `repo_owner` \| `ai-osi-uri` または個人 username \| 既定は GITHUB_ORG / GITHUB_USERNAME \| |
 | plugins/osi-mobile-deploy/skills/deploy-mobile-app/SKILL.md | 165 | GITHUB_ORG | \| GITHUB_ORG \| `ai-osi-uri` / `personal` \| `create-app` の `USE_ORG` 判定に準拠 \| |
-| plugins/osi-backoffice/skills/contract-docusign-send/SKILL.md | 56 | 共有ドライブ | - **Drive（マウント済み共有ドライブ）**：格納先は `references/storage-and-naming.md` の定義に従う。**このスキルにパスを直書きしない**（組織ごとに違い、移行でも動く）。 |
+| plugins/osi-backoffice/skills/contract-docusign-send/SKILL.md | 92 | 共有ドライブ | - **Drive（マウント済み共有ドライブ）**：格納先は `references/storage-and-naming.md` の定義に従う。**このスキルにパスを直書きしない**（組織ごとに違い、移行でも動く）。 |
 | plugins/osi-backoffice/skills/contract-docusign-send/_旧版_S3方式_20260817/docusign-and-s3.md | 30 | 共有ドライブ | - **file tools（Mac）**：outputs と共有ドライブのみ書ける。 |
 | plugins/osi-backoffice/skills/contract-docusign-send/references/storage-and-naming.md | 3 | 共有ドライブ | 契約の正本は Drive の**契約書フォルダ**（`{契約書ルート}`）。マウント済み共有ドライブに書くと Drive に同期される。 |
 | plugins/osi-backoffice/skills/contract-docusign-send/references/storage-and-naming.md | 24 | CAIO | - `{ID}.{企業名}` は営業管理表のZ列（案件ID）＝ `21.PJT資料/01.CAIO事業/` のフォルダ番号に合わせる。該当フォルダが無ければ作成（既存の命名に倣う）。 |

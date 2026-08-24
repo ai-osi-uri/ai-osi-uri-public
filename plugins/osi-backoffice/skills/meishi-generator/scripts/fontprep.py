@@ -1,16 +1,98 @@
-"""Subset Noto Sans CJK JP (CFF .ttc) to needed glyphs and convert to TrueType
-so reportlab can embed it."""
+"""Subset Noto Sans CJK JP (CFF .ttc/.otf) to needed glyphs and convert to TrueType
+so reportlab can embed it.
+
+Font resolution is defensive on purpose: Cowork のサンドボックス実装によっては
+NotoSansCJK-Medium.ttc が入っておらず（Regular / Bold のみ）、以前はここで
+FileNotFoundError になって名刺生成そのものが失敗していた。ローカル候補を順に探し、
+無ければ notofonts の公式 OTF をキャッシュへ取得する。太さを黙って別のものに
+差し替えることはしない（印刷物なので気付かないまま刷られる方が事故）。
+"""
 import os
+import sys
+import tempfile
+import urllib.request
 from fontTools import subset
 from fontTools.ttLib import TTFont, newTable
 from fontTools.pens.cu2quPen import Cu2QuPen
 from fontTools.pens.ttGlyphPen import TTGlyphPen
 
-TTC_PATHS = {
-    "regular": "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
-    "medium": "/usr/share/fonts/opentype/noto/NotoSansCJK-Medium.ttc",
-    "bold": "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
+CACHE_DIR = os.path.join(tempfile.gettempdir(), "meishi-noto-cache")
+
+# 探索順: 環境変数の明示指定 → OS 同梱 → キャッシュ済みDL
+LOCAL_CANDIDATES = {
+    "regular": [
+        "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+        "/usr/share/fonts/opentype/noto/NotoSansCJKjp-Regular.otf",
+        "/System/Library/Fonts/NotoSansCJK-Regular.ttc",
+    ],
+    "medium": [
+        "/usr/share/fonts/opentype/noto/NotoSansCJK-Medium.ttc",
+        "/usr/share/fonts/opentype/noto/NotoSansCJKjp-Medium.otf",
+        "/System/Library/Fonts/NotoSansCJK-Medium.ttc",
+    ],
+    "bold": [
+        "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
+        "/usr/share/fonts/opentype/noto/NotoSansCJKjp-Bold.otf",
+        "/System/Library/Fonts/NotoSansCJK-Bold.ttc",
+    ],
 }
+
+DOWNLOAD_URLS = {
+    "regular": [
+        "https://github.com/notofonts/noto-cjk/raw/main/Sans/OTF/Japanese/NotoSansCJKjp-Regular.otf",
+        "https://cdn.jsdelivr.net/gh/notofonts/noto-cjk@main/Sans/OTF/Japanese/NotoSansCJKjp-Regular.otf",
+    ],
+    "medium": [
+        "https://github.com/notofonts/noto-cjk/raw/main/Sans/OTF/Japanese/NotoSansCJKjp-Medium.otf",
+        "https://cdn.jsdelivr.net/gh/notofonts/noto-cjk@main/Sans/OTF/Japanese/NotoSansCJKjp-Medium.otf",
+    ],
+    "bold": [
+        "https://github.com/notofonts/noto-cjk/raw/main/Sans/OTF/Japanese/NotoSansCJKjp-Bold.otf",
+        "https://cdn.jsdelivr.net/gh/notofonts/noto-cjk@main/Sans/OTF/Japanese/NotoSansCJKjp-Bold.otf",
+    ],
+}
+
+ENV_OVERRIDE = {
+    "regular": "MEISHI_NOTO_REGULAR",
+    "medium": "MEISHI_NOTO_MEDIUM",
+    "bold": "MEISHI_NOTO_BOLD",
+}
+
+
+def resolve_font(weight):
+    """Return a usable Noto Sans CJK JP file for `weight`, downloading it if needed."""
+    override = os.environ.get(ENV_OVERRIDE[weight])
+    if override:
+        if not os.path.exists(override):
+            raise FileNotFoundError(
+                f"{ENV_OVERRIDE[weight]} で指定されたフォントが見つかりません: {override}")
+        return override
+    for path in LOCAL_CANDIDATES[weight]:
+        if os.path.exists(path):
+            return path
+    os.makedirs(CACHE_DIR, exist_ok=True)
+    cached = os.path.join(CACHE_DIR, f"NotoSansCJKjp-{weight.capitalize()}.otf")
+    if os.path.exists(cached) and os.path.getsize(cached) > 1_000_000:
+        return cached
+    errors = []
+    for url in DOWNLOAD_URLS[weight]:
+        try:
+            print(f"[fontprep] Noto Sans CJK JP {weight} が見つからないため取得します: {url}",
+                  file=sys.stderr)
+            tmp = cached + ".part"
+            urllib.request.urlretrieve(url, tmp)
+            if os.path.getsize(tmp) < 1_000_000:
+                raise OSError(f"downloaded file too small ({os.path.getsize(tmp)} bytes)")
+            os.replace(tmp, cached)
+            return cached
+        except Exception as e:  # noqa: BLE001 - 次の候補URLへ
+            errors.append(f"{url}: {e}")
+    raise FileNotFoundError(
+        "Noto Sans CJK JP " + weight + " を用意できませんでした。\n"
+        "  探した場所: " + ", ".join(LOCAL_CANDIDATES[weight]) + "\n"
+        "  ダウンロード失敗: " + " / ".join(errors) + "\n"
+        "  対処: フォントを手元に用意して環境変数 " + ENV_OVERRIDE[weight] + " にパスを指定してください。\n"
+        "  （太さを勝手に別のものへ落とすと印刷物の見た目が変わるため、自動フォールバックはしません）")
 
 
 def _jp_face_index(path):
@@ -25,9 +107,11 @@ def _jp_face_index(path):
 
 def make_ttf(weight, text, out_path):
     """Subset the JP face of the given weight to `text` chars and convert CFF->glyf."""
-    src = TTC_PATHS[weight]
-    idx = _jp_face_index(src)
-    font = TTFont(src, fontNumber=idx)
+    src = resolve_font(weight)
+    if src.lower().endswith(".ttc"):
+        font = TTFont(src, fontNumber=_jp_face_index(src))
+    else:
+        font = TTFont(src)
     # subset
     sub = subset.Subsetter(subset.Options(notdef_outline=True, drop_tables=["GSUB", "GPOS", "vhea", "vmtx", "VORG"]))
     sub.populate(text=text + " 　")

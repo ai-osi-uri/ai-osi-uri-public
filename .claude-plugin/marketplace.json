@@ -48,7 +48,7 @@
       "name": "osi-deploy",
       "source": "./plugins/osi-deploy",
       "description": "アプリ作成・公開自動化。Web（Vercel / AWS）・Desktop（Electron）・ローカル出力に対応し、create-app を入口に DNS 設定・事前診断・公開後の更新まで一気通貫で扱う。**モバイル（iOS / Android）は osi-mobile-deploy に全面委譲**する。Lovable プロジェクトの決済有効化・本番化は `lovable-payments-golive` が担当（AI OSI URI Deploy 拡張は使わない）。オンプレ App Builder への受け渡しは `app-builder-export`（kind: app-builder-app-spec）に一本化。24 スキル。",
-      "version": "1.8.0",
+      "version": "1.9.0",
       "category": "deploy",
       "tags": [
         "deploy",
@@ -131,7 +131,7 @@
       "name": "osi-backoffice",
       "source": "./plugins/osi-backoffice",
       "description": "バックオフィス業務自動化。契約書の内容チェック→DocuSign 署名依頼（contract-docusign-send）と、名刺のラクスル入稿用PDF自動生成（meishi-generator：氏名・役職等を伝えるだけで原本.aiテンプレの可変部分を差し替えた入稿PDFを生成、CMYK・トンボ維持）。送付・発注は人が行う安全設計（自動送付・自動発注しない）。",
-      "version": "0.2.0",
+      "version": "0.4.1",
       "category": "backoffice",
       "tags": [
         "backoffice",
