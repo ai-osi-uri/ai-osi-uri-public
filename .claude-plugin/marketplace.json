@@ -7,7 +7,7 @@
   },
   "metadata": {
     "description": "AI OSI URI 公開プラグイン（外部配布用サブセット）。",
-    "version": "0.9.3"
+    "version": "0.9.4"
   },
   "plugins": [
     {
@@ -29,8 +29,8 @@
     {
       "name": "osi-docs",
       "source": "./plugins/osi-docs",
-      "description": "文書・契約・業務フロー・事業計画・構成図作成。財務モデル、企業分析、提案資料に加え、手描き配線図から物理・論理構成図とBOMを生成。",
-      "version": "0.4.5",
+      "description": "文書・契約・業務フロー・事業計画・構成図作成。財務モデル、企業分析、提案資料に加え、手描き配線図から物理・論理構成図とBOMを生成。 financial-model-3statement は config の開始年月から月次三表に「年月」行を出し、暦月の実績と並べられる。",
+      "version": "0.4.6",
       "category": "docs",
       "tags": [
         "docs",
@@ -111,8 +111,8 @@
     {
       "name": "osi-finance",
       "source": "./plugins/osi-finance",
-      "description": "OSI Finance — 日本の中小企業向け 経理（請求AR・支払AP）自動化プロダクト。初回セットアップ（osi-finance-setup）・コネクタOAuth接続伴走（osi-finance-connect）・契約書作成と雛形管理（osi-finance-contract-draft）・契約取込→請求スケジュール化・月次請求書発行（単票モードあり）・受領請求書の支払予定起票/取りこぼし検出・会計SaaS（v1=マネーフォワード）との突合（AP=osi-finance-mf-sync／AR=osi-finance-ar-sync で売上計上・入金消込）・月次クローズ・会計ダッシュボード（osi-finance-dashboard・MF正本）・紙レシートの証憑化＋UPSIDER明細突合と証憑添付漏れ検出（osi-finance-receipt-intake）を収録。MFを請求(AR)・支払(AP)双方の単一会計正本に。台帳テンプレ同梱、組織固有値は osi-finance-settings に外出しで非開発者でも導入可。運用モード（編集可／参照専用）と連携トグル（Gmail取込／会計 mf|freee|none／銀行明細／電子署名）で書き込み可否と外部サービスを組織ごとに制御。操作者トラッキング（v3・全台帳行に作成者/更新者をログインユーザーのメールで記録）と freee/銀行明細のCSV突合（osi-finance-freee-sync／osi-finance-bank-recon）、内部仕訳帳「仕訳台帳」＋ローカル仕訳生成（osi-finance-journal・v4、会計SaaSなしでも経理が成立）を収録。発火evalデータセット＋runner・導入完了レポート・エラー処理ガイド・顧客向け導入手順書同梱。起票確認方式（WRITE_CONFIRMATION: 事前確認／事後確認）で新規起票を人が確認してから台帳へ反映するか先に反映してから見るかを選べる。送金・請求書の発行/送信・会計SaaSへの計上確定はしない（常に人が実行）。",
-      "version": "0.44.0",
+      "description": "OSI Finance — 日本の中小企業向け 経理（請求AR・支払AP）自動化プロダクト。初回セットアップ（osi-finance-setup）・コネクタOAuth接続伴走（osi-finance-connect）・契約書作成と雛形管理（osi-finance-contract-draft）・契約取込→請求スケジュール化・月次請求書発行（単票モードあり）・受領請求書の支払予定起票/取りこぼし検出・会計SaaS（v1=マネーフォワード）との突合（AP=osi-finance-mf-sync／AR=osi-finance-ar-sync で売上計上・入金消込）・月次クローズ・会計ダッシュボード（osi-finance-dashboard・MF正本）・紙レシートの証憑化＋UPSIDER明細突合と証憑添付漏れ検出（osi-finance-receipt-intake）を収録。MFを請求(AR)・支払(AP)双方の単一会計正本に。台帳テンプレ同梱、組織固有値は osi-finance-settings に外出しで非開発者でも導入可。運用モード（編集可／参照専用）と連携トグル（Gmail取込／会計 mf|freee|none／銀行明細／電子署名）で書き込み可否と外部サービスを組織ごとに制御。操作者トラッキング（v3・全台帳行に作成者/更新者をログインユーザーのメールで記録）と freee/銀行明細のCSV突合（osi-finance-freee-sync／osi-finance-bank-recon）、内部仕訳帳「仕訳台帳」＋ローカル仕訳生成（osi-finance-journal・v4、会計SaaSなしでも経理が成立）を収録。発火evalデータセット＋runner・導入完了レポート・エラー処理ガイド・顧客向け導入手順書同梱。起票確認方式（WRITE_CONFIRMATION: 事前確認／事後確認）で新規起票を人が確認してから台帳へ反映するか先に反映してから見るかを選べる。送金・請求書の発行/送信・会計SaaSへの計上確定はしない（常に人が実行）。ローカルコンソールに財務三表タブ（実績／計画／仕訳）を新設：勘定科目マスタの「三表区分」で月次PLを組み金額から仕訳へドリル、計画は台帳フォルダの事業計画Excelを読んで表示するだけ（書き換えない・予実対比は作らず画面ごと分離）。計画を読み解く osi-finance-plan を追加。",
+      "version": "0.45.0",
       "category": "finance",
       "tags": [
         "finance",

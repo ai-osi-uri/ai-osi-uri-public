@@ -1,8 +1,8 @@
 {
   "name": "osi-docs",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "requires_connectors": [],
-  "description": "AI OSI URI の文書・契約・業務フロー・事業計画・構成図作成。財務モデル、企業分析、提案資料に加え、手描き配線図から物理・論理構成図とBOMを生成する。",
+  "description": "AI OSI URI の文書・契約・業務フロー・事業計画・構成図作成。財務モデル、企業分析、提案資料に加え、手描き配線図から物理・論理構成図とBOMを生成する。 financial-model-3statement は config の開始年月から月次三表に「年月」行を出し、暦月の実績と並べられる。",
   "author": {
     "name": "AI OSI URI",
     "email": "yuhenagisa@ai-osi-uri.com"
