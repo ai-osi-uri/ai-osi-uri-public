@@ -115,3 +115,13 @@ skills:
     no_fire:
       - { phrase: "今月の請求書を作って", target: osi-finance-invoice }
       - { phrase: "契約を取り込んで", target: osi-finance-contract-intake }
+
+  osi-finance-plan:
+    fire:
+      - "計画ではこの月いくら？"
+      - "FY26 の営業利益計画は？"
+      - "計画の前提を教えて"
+      - "事業計画のこの数字はどこから来てる？"
+      - "実績と計画のズレを説明して"
+    no_fire:
+      - { phrase: "会計ダッシュボードを作って", target: osi-finance-dashboard }

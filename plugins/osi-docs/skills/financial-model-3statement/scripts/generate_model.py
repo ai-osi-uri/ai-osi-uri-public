@@ -25,7 +25,7 @@ financial-model-3statement | generate_model.py
 PL のドライバー行ブロックだけ差し替える。BS/CF の連動機構は業種非依存でそのまま使える。
 references/method.md を参照。
 """
-import argparse, json, sys
+import argparse, json, re, sys
 from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Font, PatternFill, Alignment
 from openpyxl.utils import get_column_letter as GL
@@ -180,6 +180,11 @@ def build(cfg, out_path):
             for c in [1,2]+[3+i for i in range(NM)]: m.cell(row=rr2,column=c).fill=fill
         rr2+=1
     row('mnum','月番号',bold=True,fill=SEC); row('fy','年度(FY)',bold=True)
+    # 暦の年月。**月番号だけでは実績の隣に置けない。**
+    # このモデルを「見込み」として使うとき、相手は暦月で記録された実績なので、
+    # 1〜60 が何年何月かが行として無いと突き合わせられない（OSI Finance のコンソールもここを見る）。
+    # config に 開始年月 が無ければ出さない（勝手な月を書かない）。
+    row('ym','年月',bold=True)
     row('is','■ 損益計算書（PL）',bold=True,fill=SEC)
     row('sales','売上高',bold=True)
     row('rev_ref','紹介売上',1); row('deals','成約数（件）',2); row('sokyaku','送客数（人）',3)
@@ -224,6 +229,17 @@ def build(cfg, out_path):
 
     setv('mnum',lambda i:i+1,NUM1,BOLD)
     setv('fy',lambda i:f"=INT(({C(i,'mnum')}-1)/12)+1",NUM1)
+    # 開始年月（"YYYY-MM"）があれば、月番号を暦月に変換して1行出す。
+    _st=str(cfg.get('開始年月') or cfg.get('start_ym') or '').strip()
+    _mm=re.match(r'^(\d{4})[-/](\d{1,2})$',_st) if _st else None
+    if _mm:
+        _y0,_m0=int(_mm.group(1)),int(_mm.group(2))
+        for i in range(NM):
+            _t=(_y0*12+(_m0-1))+i
+            c=m.cell(row=R['ym'],column=3+i,value=f"{_t//12}-{_t%12+1:02d}")
+            c.font=BLACK
+    else:
+        m.cell(row=R['ym'],column=1,value='年月（config に 開始年月:"YYYY-MM" を入れると出ます）')
     lag=pc('採用→稼働 成熟ラグ（月）'); rate=pc('成熟稼働率')
     setv('act',lambda i:f"=IF({C(i,'mnum')}>{lag},INDEX({HCR},1,{C(i,'mnum')}-{lag})*{rate},0)",NUM1,GREEN)
     setv('sokyaku',lambda i:f"={C(i,'act')}*{pc('月間送客数 / CA（人）')}",NUM1,GREEN)

@@ -2,7 +2,7 @@
 
 対象プラグイン: osi-creative, osi-docs, osi-deploy, osi-mobile-deploy, osi-knowledge, osi-finance, osi-backoffice
 
-以下の 39 箇所に要注意語が残っています。publish 前に人手で確認してください（自動削除は文書を壊すため行いません）。
+以下の 40 箇所に要注意語が残っています。publish 前に人手で確認してください（自動削除は文書を壊すため行いません）。
 
 | ファイル | 行 | 語 | 抜粋 |
 |---|---|---|---|
@@ -11,15 +11,16 @@
 | plugins/osi-finance/docs/導入手順書.md | 25 | 共有ドライブ | \| Google Workspace（**共有ドライブ**推奨） \| 必須 \| 台帳・契約書・証憑の保管 \| 既存契約でも可 \| |
 | plugins/osi-finance/docs/導入手順書.md | 114 | 共有ドライブ | >   共有ドライブなら `G:\共有ドライブ\AI OSI URI\06.会計` のような形になります |
 | plugins/osi-finance/docs/導入マニュアル.md | 47 | 共有ドライブ | \| Google Workspace（**共有ドライブ**）＋ デスクトップアプリ \| 必須 \| 台帳・契約書・証憑の保管 \| |
-| plugins/osi-finance/config/osi-finance-settings.example.md | 136 | 共有ドライブ | 共有ドライブに1つ作り、配下は規定ツリー（00.契約書／01.受領請求書／02.送付請求書／03.経費管理）で固定。 |
-| plugins/osi-finance/config/osi-finance-settings.example.md | 141 | 共有ドライブ | \| OSI Finance ルートの場所 \| {{DRIVE_ROOT_LOCATION 例: 共有ドライブ「経理」直下／マイドライブ（要・経理チーム共有）}} \| |
+| plugins/osi-finance/config/osi-finance-settings.example.md | 157 | 共有ドライブ | 共有ドライブに1つ作り、配下は規定ツリー（00.契約書／01.受領請求書／02.送付請求書／03.経費管理）で固定。 |
+| plugins/osi-finance/config/osi-finance-settings.example.md | 162 | 共有ドライブ | \| OSI Finance ルートの場所 \| {{DRIVE_ROOT_LOCATION 例: 共有ドライブ「経理」直下／マイドライブ（要・経理チーム共有）}} \| |
 | plugins/osi-finance/skills/osi-finance-ar-sync/SKILL.md | 78 | CAIO | `INV-2026-07-016` は 対象月 2026-06 の行（CAIO 550,000）と 2026-07 の行（準備金 1,375,000 / 2,200,000）が |
+| plugins/osi-finance/skills/osi-finance-plan/SKILL.md | 37 | CAIO | 実績は勘定科目、計画は計画自身の切り方（CAIO契約売上、コンサル外注、通信費の内訳…）で、 |
 | plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 47 | Plaud | - 任意：既存下書きへの確実な添付に Claude in Chrome（ブラウザ操作の `file_upload`）、本文パーソナライズに Obsidian（`obsidian-knowledge-consult`）／Plaud／Drive |
 | plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 133 | CAIO | - **グループが複数の対象月にまたがる場合は、対象月を摘要・明細名に必ず残す**（例「CAIO業務 2026年4〜6月分」）。 |
 | plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 162 | 共有ドライブ | - **マウント済みの Drive 共有ドライブ（ローカル同期フォルダ＝FS）** に base64 をデコードして書き出す： |
 | plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 173 | Plaud | - 当月ご一緒した取り組みを **Obsidian（`30_Projects/_Active/{社名}/議事録`、`obsidian-knowledge-consult` 経由）→ Plaud → Drive** の順で拾い、お礼文に1段落 |
-| plugins/osi-finance/skills/osi-finance-setup/SKILL.md | 73 | 共有ドライブ | ルートフォルダ「OSI Finance」を**どこに作るか**だけを聞く。**共有ドライブを第一推奨** |
-| plugins/osi-finance/skills/osi-finance-setup/SKILL.md | 97 | 共有ドライブ | OSI Finance/                 ← 顧客が決めるのはこの置き場所だけ（共有ドライブ推奨） |
+| plugins/osi-finance/skills/osi-finance-setup/SKILL.md | 77 | 共有ドライブ | ルートフォルダ「OSI Finance」を**どこに作るか**だけを聞く。**共有ドライブを第一推奨** |
+| plugins/osi-finance/skills/osi-finance-setup/SKILL.md | 101 | 共有ドライブ | OSI Finance/                 ← 顧客が決めるのはこの置き場所だけ（共有ドライブ推奨） |
 | plugins/osi-deploy/skills/create-app/SKILL.md | 56 | GITHUB_ORG | **重要:** `GITHUB_ORG` が未設定だと、`github_create_repo_and_push` は `owner_override` を |
 | plugins/osi-deploy/skills/create-app/references/aws-app-gotchas.md | 54 | 共有ドライブ | 初回 apply 前に **`tf-state-backend` スキル**を呼ぶ（state基盤の作成＋backend.tf差し込み）。既存のローカルstateアプリは同スキルの migrate-existing（`aws_terrafo |
 | plugins/osi-deploy/skills/create-app/references/drive-record.md | 21 | Notion | Notion のリード一覧に案件が登録されていれば、対応する Drive 案件フォルダが存在する。 |
