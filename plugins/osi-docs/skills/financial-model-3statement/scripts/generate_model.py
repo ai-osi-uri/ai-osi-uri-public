@@ -100,9 +100,23 @@ def put(ws,r,c,v,font=BLACK,fmt=None,fill=None,al=None):
 
 
 def build(cfg, out_path):
-    ue=cfg["unit_economics"]; rmp=cfg["ramp"]; cost=cfg["cost"]; wtc=cfg["wc_tax_cap"]
-    sga_fy=cfg["sga_fy"]; taxable=cfg["taxable_sga"]; hc=cfg["headcount"]; raise_=cfg["raise"]
+    # 明細モード: 売上・原価・販管費の「行」を config から受け取る（型を持たず会話で作る）。
+    # 骨格（売上高／売上原価／売上総利益／販管費／営業利益と BS・CF）と検算はコード側に残す。
+    # 未指定なら従来どおり（人材紹介×スクール型のハードコード）で動く＝既存 config を壊さない。
+    DET=cfg.get("明細") or cfg.get("detail")
+    ue=cfg.get("unit_economics") or {}; rmp=cfg.get("ramp") or {}; cost=cfg.get("cost") or {}
+    wtc=cfg["wc_tax_cap"]
+    sga_fy=cfg.get("sga_fy") or {}; taxable=cfg.get("taxable_sga") or []
+    hc=cfg.get("headcount") or [0]*NM; raise_=cfg["raise"]
     assert len(hc)==NM and len(raise_)==NM, "headcount / raise は60要素必要"
+
+    def _expand(v):
+        """値を60ヶ月に伸ばす。単一値なら全月同じ、配列なら足りない分は最後の値で埋める。
+        **足りない分を0で埋めない**——単価の配列を12ヶ月しか書かなかったときに、
+        13ヶ月目から売上が消えて「計画が尻すぼみ」に見える事故を避けるため。"""
+        if isinstance(v,(int,float)): return [v]*NM
+        xs=list(v)[:NM]
+        return xs+[xs[-1] if xs else 0]*(NM-len(xs))
     wb=Workbook()
 
     # ===== 前提・KPI =====
@@ -118,15 +132,16 @@ def build(cfg, out_path):
     def kpi(label,val,fmt=NUM1):
         nonlocal rr
         put(a,rr,1,label); put(a,rr,2,val,BLUE,fmt); PR[label]=rr; rr+=1
-    sec('■ 売上ファネル（稼働CA起点）')
-    for k in ["月間送客数 / CA（人）","送客→成約 成約率","平均紹介料（円/件）","クロスセル受講率（成約比）","受講料（円/人）"]:
-        kpi(k,ue[k], PCT if ('率' in k) else (YEN if '円' in k else NUM1))
-    sec('■ 立ち上がり（コンサバ）')
-    kpi('採用→稼働 成熟ラグ（月）',rmp['採用→稼働 成熟ラグ（月）'])
-    kpi('成熟稼働率',rmp['成熟稼働率'],PCT)
-    sec('■ コスト単価')
-    for k in ["FCロイヤリティ（円/月/CA）","CA人件費（円/年/CA）","スクール運営費（円/受講者）","FC加盟金（初期一括, 円）"]:
-        kpi(k,cost[k],YEN)
+    if not DET:
+        sec('■ 売上ファネル（稼働CA起点）')
+        for k in ["月間送客数 / CA（人）","送客→成約 成約率","平均紹介料（円/件）","クロスセル受講率（成約比）","受講料（円/人）"]:
+            kpi(k,ue[k], PCT if ('率' in k) else (YEN if '円' in k else NUM1))
+        sec('■ 立ち上がり（コンサバ）')
+        kpi('採用→稼働 成熟ラグ（月）',rmp['採用→稼働 成熟ラグ（月）'])
+        kpi('成熟稼働率',rmp['成熟稼働率'],PCT)
+        sec('■ コスト単価')
+        for k in ["FCロイヤリティ（円/月/CA）","CA人件費（円/年/CA）","スクール運営費（円/受講者）","FC加盟金（初期一括, 円）"]:
+            kpi(k,cost[k],YEN)
     sec('■ 運転資本・税・資本')
     kpi('売上回収サイト（月）',wtc['売上回収サイト（月）'])
     kpi('法人実効税率',wtc['法人実効税率'],PCT)
@@ -134,7 +149,8 @@ def build(cfg, out_path):
     kpi('創業時資本金（円）',wtc['創業時資本金（円）'],YEN)
     kpi('増資のうち資本金比率',wtc['増資のうち資本金比率'],PCT)
     rr+=1
-    put(a,rr,1,'■ 販管費 内訳（円, FY別）',BOLDW,fill=HDR)
+    if DET: put(a,rr,1,'■ 販管費の内訳は「月次三表」側に明細行として置いています',Font(name='Arial',italic=True,size=9))
+    put(a,rr,1,'■ 販管費 内訳（円, FY別）',BOLDW,fill=HDR) if not DET else None
     for c in range(2,7): a.cell(row=rr,column=c).fill=HDR
     rr+=1
     put(a,rr,1,'年度',BOLD)
@@ -186,19 +202,40 @@ def build(cfg, out_path):
     # config に 開始年月 が無ければ出さない（勝手な月を書かない）。
     row('ym','年月',bold=True)
     row('is','■ 損益計算書（PL）',bold=True,fill=SEC)
+    # 明細（DET）は [{名前, 月額 or 掛け算:[{名前,値,単位}], 課税, 買掛}] の配列。
+    # 行の名前も階層も config が決める。コードが決めるのは合計と検算だけ。
+    DETK={'売上':[],'売上原価':[],'販管費':[]}
+    def det_rows(section):
+        for idx,it in enumerate(DET.get(section) or []):
+            k=f"d{section}{idx}"; row(k,it['名前'],1)
+            dks=[]
+            for j,f in enumerate(it.get('掛け算') or []):
+                kk=f"{k}_{j}"; u=f.get('単位') or ''
+                row(kk,f['名前']+(f'（{u}）' if u else ''),2); dks.append((kk,f))
+            DETK[section].append((k,it,dks))
     row('sales','売上高',bold=True)
-    row('rev_ref','紹介売上',1); row('deals','成約数（件）',2); row('sokyaku','送客数（人）',3)
-    row('act','稼働CA換算',4); row('rate','成約率',3); row('fee','平均紹介料（円/件）',2)
-    row('rev_sch','受講料売上',1); row('stu','受講者数（人）',2); row('fees','受講料（円/人）',2)
+    if DET:
+        det_rows('売上')
+    else:
+        row('rev_ref','紹介売上',1); row('deals','成約数（件）',2); row('sokyaku','送客数（人）',3)
+        row('act','稼働CA換算',4); row('rate','成約率',3); row('fee','平均紹介料（円/件）',2)
+        row('rev_sch','受講料売上',1); row('stu','受講者数（人）',2); row('fees','受講料（円/人）',2)
     row('cogs','売上原価',bold=True)
-    row('c_roy','FCロイヤリティ',1); row('hc','CA人数（月末）',2)
-    row('c_ca','CA人件費',1); row('c_sch','スクール運営費',1)
+    if DET:
+        det_rows('売上原価')
+    else:
+        row('c_roy','FCロイヤリティ',1); row('hc','CA人数（月末）',2)
+        row('c_ca','CA人件費',1); row('c_sch','スクール運営費',1)
     row('gp','売上総利益',bold=True)
     row('sga','販管費',bold=True)
     SGA_KEYS=[]
-    for k in SGA:
-        kk='s_'+str(SGA[k]); row(kk,k,1); SGA_KEYS.append((kk,k))
-    row('kamei','FC加盟金',1); row('taxbuy','（補助）課税仕入額',1)
+    if DET:
+        det_rows('販管費')
+    else:
+        for k in SGA:
+            kk='s_'+str(SGA[k]); row(kk,k,1); SGA_KEYS.append((kk,k))
+        row('kamei','FC加盟金',1)
+    row('taxbuy','（補助）課税仕入額',1)
     row('op','営業利益',bold=True); row('noi','営業外損益',1); row('ord','経常利益',bold=True)
     row('pbt','税引前当期純利益',bold=True); row('tax','法人税等',1); row('ni','当期純利益',bold=True)
     row('bs','■ 貸借対照表（BS）',bold=True,fill=SEC)
@@ -240,29 +277,61 @@ def build(cfg, out_path):
             c.font=BLACK
     else:
         m.cell(row=R['ym'],column=1,value='年月（config に 開始年月:"YYYY-MM" を入れると出ます）')
-    lag=pc('採用→稼働 成熟ラグ（月）'); rate=pc('成熟稼働率')
-    setv('act',lambda i:f"=IF({C(i,'mnum')}>{lag},INDEX({HCR},1,{C(i,'mnum')}-{lag})*{rate},0)",NUM1,GREEN)
-    setv('sokyaku',lambda i:f"={C(i,'act')}*{pc('月間送客数 / CA（人）')}",NUM1,GREEN)
-    setv('rate',lambda i:f"={pc('送客→成約 成約率')}",PCT,GREEN)
-    setv('deals',lambda i:f"={C(i,'sokyaku')}*{C(i,'rate')}",NUM1)
-    setv('fee',lambda i:f"={pc('平均紹介料（円/件）')}",YEN,GREEN)
-    setv('rev_ref',lambda i:f"={C(i,'deals')}*{C(i,'fee')}")
-    setv('stu',lambda i:f"={C(i,'deals')}*{pc('クロスセル受講率（成約比）')}",NUM1,GREEN)
-    setv('fees',lambda i:f"={pc('受講料（円/人）')}",YEN,GREEN)
-    setv('rev_sch',lambda i:f"={C(i,'stu')}*{C(i,'fees')}")
-    setv('sales',lambda i:f"={C(i,'rev_ref')}+{C(i,'rev_sch')}",font=BOLD)
-    setv('hc',lambda i:f"=INDEX({HCR},1,{C(i,'mnum')})",NUM1,GREEN)
-    setv('c_roy',lambda i:f"={C(i,'hc')}*{pc('FCロイヤリティ（円/月/CA）')}")
-    setv('c_ca',lambda i:f"={C(i,'hc')}*{pc('CA人件費（円/年/CA）')}/12")
-    setv('c_sch',lambda i:f"={C(i,'stu')}*{pc('スクール運営費（円/受講者）')}")
-    setv('cogs',lambda i:f"={C(i,'c_roy')}+{C(i,'c_ca')}+{C(i,'c_sch')}",font=BOLD)
-    setv('gp',lambda i:f"={C(i,'sales')}-{C(i,'cogs')}",font=BOLD)
-    for kk,label in SGA_KEYS:
-        setv(kk,(lambda lab:(lambda i:f"=INDEX({sgaFY(lab)},1,{C(i,'fy')})/12"))(label),YEN,GREEN)
-    setv('kamei',lambda i:(f"={pc('FC加盟金（初期一括, 円）')}" if i==0 else "0"))
-    setv('sga',lambda i:"="+"+".join(C(i,kk) for kk,_ in SGA_KEYS)+f"+{C(i,'kamei')}",font=BOLD)
-    tax_keys=[('s_'+str(SGA[k])) for k in taxable if k in SGA]
-    setv('taxbuy',lambda i:f"={C(i,'c_roy')}+{C(i,'c_sch')}"+("".join('+'+C(i,kk) for kk in tax_keys)))
+    if DET:
+        def _fmt(u):
+            u=u or ''
+            return PCT if '率' in u else (YEN if '円' in u else NUM1)
+        def _lit(key,vals,fmt):
+            r=R[key]
+            for i in range(NM):
+                c=m.cell(row=r,column=3+i,value=vals[i]); c.number_format=fmt; c.font=BLUE
+        def emit(section):
+            keys=[]
+            for k,it,dks in DETK[section]:
+                if dks:
+                    for kk,f in dks: _lit(kk,_expand(f.get('値',0)),_fmt(f.get('単位')))
+                    setv(k,(lambda ks:(lambda i:"="+"*".join(C(i,x) for x,_ in ks)))(dks))
+                else:
+                    _lit(k,_expand(it.get('月額',it.get('金額',0))),YEN)
+                keys.append(k)
+            return keys
+        rev=emit('売上'); cog=emit('売上原価'); sgk=emit('販管費')
+        z=lambda ks,i:("="+"+".join(C(i,x) for x in ks)) if ks else "0"
+        setv('sales',lambda i:z(rev,i),font=BOLD)
+        setv('cogs', lambda i:z(cog,i),font=BOLD)
+        setv('gp',   lambda i:f"={C(i,'sales')}-{C(i,'cogs')}",font=BOLD)
+        setv('sga',  lambda i:z(sgk,i),font=BOLD)
+        # 課税仕入: 原価は既定で課税、販管費は "課税":true を書いた行だけ（給与・法定福利費は対象外なので）
+        tk=[k for (k,it,_) in DETK['売上原価'] if it.get('課税',True)]+\
+           [k for (k,it,_) in DETK['販管費'] if it.get('課税',False)]
+        setv('taxbuy',lambda i:z(tk,i))
+        # 買掛金: 原価のうち "買掛" が false でない行（人件費のように即時払いのものは false にする）
+        AP_KEYS=[k for (k,it,_) in DETK['売上原価'] if it.get('買掛',True)]
+    else:
+        lag=pc('採用→稼働 成熟ラグ（月）'); rate=pc('成熟稼働率')
+        setv('act',lambda i:f"=IF({C(i,'mnum')}>{lag},INDEX({HCR},1,{C(i,'mnum')}-{lag})*{rate},0)",NUM1,GREEN)
+        setv('sokyaku',lambda i:f"={C(i,'act')}*{pc('月間送客数 / CA（人）')}",NUM1,GREEN)
+        setv('rate',lambda i:f"={pc('送客→成約 成約率')}",PCT,GREEN)
+        setv('deals',lambda i:f"={C(i,'sokyaku')}*{C(i,'rate')}",NUM1)
+        setv('fee',lambda i:f"={pc('平均紹介料（円/件）')}",YEN,GREEN)
+        setv('rev_ref',lambda i:f"={C(i,'deals')}*{C(i,'fee')}")
+        setv('stu',lambda i:f"={C(i,'deals')}*{pc('クロスセル受講率（成約比）')}",NUM1,GREEN)
+        setv('fees',lambda i:f"={pc('受講料（円/人）')}",YEN,GREEN)
+        setv('rev_sch',lambda i:f"={C(i,'stu')}*{C(i,'fees')}")
+        setv('sales',lambda i:f"={C(i,'rev_ref')}+{C(i,'rev_sch')}",font=BOLD)
+        setv('hc',lambda i:f"=INDEX({HCR},1,{C(i,'mnum')})",NUM1,GREEN)
+        setv('c_roy',lambda i:f"={C(i,'hc')}*{pc('FCロイヤリティ（円/月/CA）')}")
+        setv('c_ca',lambda i:f"={C(i,'hc')}*{pc('CA人件費（円/年/CA）')}/12")
+        setv('c_sch',lambda i:f"={C(i,'stu')}*{pc('スクール運営費（円/受講者）')}")
+        setv('cogs',lambda i:f"={C(i,'c_roy')}+{C(i,'c_ca')}+{C(i,'c_sch')}",font=BOLD)
+        setv('gp',lambda i:f"={C(i,'sales')}-{C(i,'cogs')}",font=BOLD)
+        for kk,label in SGA_KEYS:
+            setv(kk,(lambda lab:(lambda i:f"=INDEX({sgaFY(lab)},1,{C(i,'fy')})/12"))(label),YEN,GREEN)
+        setv('kamei',lambda i:(f"={pc('FC加盟金（初期一括, 円）')}" if i==0 else "0"))
+        setv('sga',lambda i:"="+"+".join(C(i,kk) for kk,_ in SGA_KEYS)+f"+{C(i,'kamei')}",font=BOLD)
+        tax_keys=[('s_'+str(SGA[k])) for k in taxable if k in SGA]
+        setv('taxbuy',lambda i:f"={C(i,'c_roy')}+{C(i,'c_sch')}"+("".join('+'+C(i,kk) for kk in tax_keys)))
+        AP_KEYS=['c_roy','c_sch']
     setv('op',lambda i:f"={C(i,'gp')}-{C(i,'sga')}",font=BOLD)
     setv('noi',lambda i:"0"); setv('ord',lambda i:f"={C(i,'op')}+{C(i,'noi')}",font=BOLD)
     setv('pbt',lambda i:f"={C(i,'ord')}",font=BOLD)
@@ -276,7 +345,7 @@ def build(cfg, out_path):
     vr=pc('消費税率')
     setv('vin',lambda i:f"=IF({FYstart(i)},{C(i,'taxbuy')}*{vr},{Cp(i,'vin')}+{C(i,'taxbuy')}*{vr})",base=0)
     setv('vout',lambda i:f"=IF({FYstart(i)},{C(i,'sales')}*{vr},{Cp(i,'vout')}+{C(i,'sales')}*{vr})",base=0)
-    setv('ap',lambda i:f"={C(i,'c_roy')}+{C(i,'c_sch')}")
+    setv('ap',lambda i:("="+"+".join(C(i,x) for x in AP_KEYS)) if AP_KEYS else "0")
     setv('taxp',lambda i:f"=IF({FYstart(i)},{C(i,'tax')},{Cp(i,'taxp')}+{C(i,'tax')})",base=0)
     setv('cap',lambda i:f"={Cp(i,'cap')}+{RAISEc(i)}*{pc('増資のうち資本金比率')}",base=wtc['創業時資本金（円）'])
     setv('capr',lambda i:f"={Cp(i,'capr')}+{RAISEc(i)}*(1-{pc('増資のうち資本金比率')})",base=0)
@@ -344,8 +413,10 @@ def build(cfg, out_path):
         for fy in range(5):
             c=y.cell(row=r,column=2+fy,value=fn(fy,GL(2+fy))); c.number_format=fmt; c.font=BOLD if bold else BLACK
     L('is','■ 損益計算書（PL）',bold=True,fill=SEC)
-    L('ca','CA人数（年平均）',fmt=NUM1,ind=1)
-    L('sales','売上高',bold=True); L('rev_ref','紹介売上',ind=1); L('rev_sch','受講料売上',ind=1)
+    # 明細モードでは業態固有の内訳行を年次に持ち込まない（内訳は月次側で config が決めている）。
+    if not DET: L('ca','CA人数（年平均）',fmt=NUM1,ind=1)
+    L('sales','売上高',bold=True)
+    if not DET: L('rev_ref','紹介売上',ind=1); L('rev_sch','受講料売上',ind=1)
     L('cogs','売上原価',bold=True); L('gp','売上総利益',bold=True,fill=TOT); L('sga','販管費',ind=1)
     L('op','営業利益',bold=True,fill=TOT); L('opm','営業利益率',fmt=PCT,ind=1)
     L('tax','法人税等',ind=1); L('ni','当期純利益',bold=True,fill=TOT)
@@ -356,9 +427,11 @@ def build(cfg, out_path):
     L('cf','■ キャッシュフロー（CF）',bold=True,fill=SEC)
     L('ocf','営業CF',bold=True); L('icf','投資CF',ind=1); L('fcf','財務CF（増資）',ind=1)
     L('chg','キャッシュ増減',bold=True); L('endc','現金期末残高',bold=True,fill=TOT)
-    fc('ca',lambda fy,c:f"=AVERAGE('前提・KPI'!{GL(3+fy*12)}{HC_ROW}:{GL(3+fy*12+11)}{HC_ROW})",NUM1)
-    for fyc in range(5): y.cell(row=YR['ca'],column=2+fyc).font=GREEN
-    fl('sales','sales',True); fl('rev_ref','rev_ref'); fl('rev_sch','rev_sch')
+    if not DET:
+        fc('ca',lambda fy,c:f"=AVERAGE('前提・KPI'!{GL(3+fy*12)}{HC_ROW}:{GL(3+fy*12+11)}{HC_ROW})",NUM1)
+        for fyc in range(5): y.cell(row=YR['ca'],column=2+fyc).font=GREEN
+    fl('sales','sales',True)
+    if not DET: fl('rev_ref','rev_ref'); fl('rev_sch','rev_sch')
     fl('cogs','cogs',True); fl('gp','gp',True); fl('sga','sga'); fl('op','op',True)
     fc('opm',lambda fy,c:f"=IF({c}{YR['sales']}=0,0,{c}{YR['op']}/{c}{YR['sales']})",PCT)
     fl('tax','tax'); fl('ni','ni',True)
@@ -377,7 +450,7 @@ def build(cfg, out_path):
     put(s,2,1,'単位:円。月次60ヶ月でPL→BS→CFを連動（BSで現金自閉＋CF reconcile）。',Font(name='Arial',italic=True,size=9))
     for i in range(5): put(s,4,2+i,f'FY{i+1}',BOLDW,al='center',fill=HDR)
     s.cell(row=4,column=1).fill=HDR
-    rows=[('CA人数（年平均）','ca',NUM1),('売上高','sales',YEN),('売上総利益','gp',YEN),
+    rows=([] if DET else [('CA人数（年平均）','ca',NUM1)])+[('売上高','sales',YEN),('売上総利益','gp',YEN),
           ('営業利益','op',YEN),('営業利益率','opm',PCT),('当期純利益','ni',YEN),('現金期末残高','endc',YEN)]
     r=5
     for disp,key,fmt in rows:

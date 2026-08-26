@@ -2,7 +2,7 @@
 
 対象プラグイン: osi-creative, osi-docs, osi-deploy, osi-mobile-deploy, osi-knowledge, osi-finance, osi-backoffice
 
-以下の 40 箇所に要注意語が残っています。publish 前に人手で確認してください（自動削除は文書を壊すため行いません）。
+以下の 41 箇所に要注意語が残っています。publish 前に人手で確認してください（自動削除は文書を壊すため行いません）。
 
 | ファイル | 行 | 語 | 抜粋 |
 |---|---|---|---|
@@ -38,6 +38,7 @@
 | plugins/osi-backoffice/skills/contract-docusign-send/references/storage-and-naming.md | 3 | 共有ドライブ | 契約の正本は Drive の**契約書フォルダ**（`{契約書ルート}`）。マウント済み共有ドライブに書くと Drive に同期される。 |
 | plugins/osi-backoffice/skills/contract-docusign-send/references/storage-and-naming.md | 24 | CAIO | - `{ID}.{企業名}` は営業管理表のZ列（案件ID）＝ `21.PJT資料/01.CAIO事業/` のフォルダ番号に合わせる。該当フォルダが無ければ作成（既存の命名に倣う）。 |
 | plugins/osi-docs/skills/pptx-custom/exec-deck-patterns.md | 11 | CAIO | - ✅「初期費用ゼロのCAIO契約なら、3ヶ月で投資回収できる」 |
+| plugins/osi-docs/skills/financial-model-3statement/SKILL.md | 44 | CAIO | {"名前":"CAIO ベーシック","掛け算":[ |
 | plugins/osi-docs/skills/deck-composition/SKILL.md | 106 | CAIO | - ❌「コア事業の説明」→ ✅「では本丸の CAIO 事業を——仕組み・価格・現状を見ていく」 |
 | plugins/osi-docs/skills/deck-composition/SKILL.md | 114 | CAIO | 複数スライドで使う用語・略語（CAIO, ARR, NPS 等）は、**初出のスライドで**定義する。5枚後に「Xとは」を置かない。定義はサブタイトルにインラインで入れるか、使い始める前に定義スライドを1枚置く。 |
 | plugins/osi-docs/skills/business-flow-asis-tobe/references/data-schema.md | 135 | 共有ドライブ | { "name": "Excel管理簿", "where": "営業共有ドライブ" } |
