@@ -343,6 +343,23 @@ scaffold → gh-create-repo-and-push → harness-init
 
 **DoD**: この記録なしに完了レポートを出さない。
 
+### Phase N-0.5: 使い方マニュアル（必須ゲート）
+
+> 実行: `app-manual` スキル（`REPO_DIR` / `APP_URL` / `APP_NAME` を渡す）
+
+**人が使うアプリを作ったなら、手順書までが納品。** 動くものだけ渡しても、
+現場は最初のログインで止まる。
+
+1. 実装（ルート・画面のラベル・サーバーアクション・メール文面・認証方式）から起こす
+   — 記憶や会話履歴から書かない
+2. 運営・現場向けの pptx を作る。会員・顧客が触る画面があるなら利用者向けも別ファイルで
+3. 画像にして全ページ目視（はみ出しが必ず出る）
+4. Drive の同じ案件フォルダに格納。旧版は `_旧版/` へ
+
+**DoD**: マニュアルを格納するまで完了レポートを出さない。
+社内の管理ツール等で明らかに読み手がいない場合のみ省略でき、その場合は
+完了レポートに「マニュアル: 不要（理由）」と明記する。
+
 ### Phase N: 完了レポート
 
 検証チェックリストの全項目に evidence を貼れたときだけ完了。
@@ -389,6 +406,7 @@ scaffold → gh-create-repo-and-push → harness-init
 - `gh-create-repo-and-push` — GitHub push
 - `harness-init` — エージェント足場
 - `app-smoke-test` — HTTP 検証
+- `app-manual` — 使い方マニュアル（実装から起こす。Phase N-0.5）
 - `setup-deploy-environment` — 初期設定
 
 **Web パス:**

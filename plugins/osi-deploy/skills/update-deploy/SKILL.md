@@ -354,6 +354,27 @@ Git author <mail> must have access to the team <TEAM> on Vercel to create deploy
 
 ---
 
+## Phase 5.5: マニュアルの追随（条件付き）
+
+> 実行: `app-manual` スキル
+
+**毎回は作らない。** 以下のどれかに触れた修正のときだけ、マニュアルを作り直す。
+
+- 画面の追加・削除・移動（ルートが変わった）
+- ナビ・ボタン・ラベルの変更
+- ログイン方式・権限の変更
+- メール文面の追加・削除
+- 課金の条件・金額の変更
+
+文言の微修正・スタイル調整・内部リファクタでは動かさない。
+迷ったら「既存のマニュアルの記述と食い違うか」で判断する。
+
+該当するのに直さないと、**配った手順書が現物と違う**状態が残る。これはアプリの
+バグより厄介で、現場は「書いてある画面が無い」で止まり、こちらには報告が来ない。
+該当しなかった場合は、完了報告に「マニュアル: 変更なし」と1行入れる。
+
+---
+
 ## Phase 6: 完了報告
 
 ```
@@ -370,6 +391,8 @@ Git author <mail> must have access to the team <TEAM> on Vercel to create deploy
   - コミット一致: ✓ ({sha} = vercel github_commit_sha)
   - 本番反映: ✓ (期待文字列「{string}」検出)
   - smoke test: ✓ ({checks_passed}/{total})
+
+マニュアル: {変更なし / v{n} に更新（{変わった点}）}
 
 ロールバック:
   git -C <dir> revert {sha} && github_push でもう一度
@@ -416,5 +439,6 @@ Git author <mail> must have access to the team <TEAM> on Vercel to create deploy
 - `gh-create-repo-and-push` — 新規リポ作成 atomic
 - `vercel-connect-and-deploy` — 新規 Vercel プロジェクト atomic（本スキルは既存プロジェクトの再デプロイのみ）
 - `app-smoke-test` — Phase 5 の検証で呼ばれる
+- `app-manual` — 導線が変わったとき Phase 5.5 で呼ばれる（使い方マニュアルの追随）
 - `switch-to-live-mode` — Stripe を本番化したいときの専用スキル（本スキルは扱わない）
 - `setup-deploy-environment` — 前提となる初期設定
