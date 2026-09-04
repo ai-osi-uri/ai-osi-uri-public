@@ -175,6 +175,11 @@ Phase N:   完了レポート
 | 機密性レベル | 公開可 / 個人情報あり / 機微情報あり |
 | 想定規模 | ~50 / ~500 / 5000+ 人 |
 | 課金 | 無料 / 月額 / 一回購入 / 内部利用のみ |
+| **管理画面** | **要 / 不要**（ユーザー種別に「運営・管理者」があれば要） |
+
+**管理画面が「要」なら [references/admin-console.md](references/admin-console.md) を必ず読んでから実装する。**
+利用者画面と管理画面はルートグループで最初から分ける。後から分けるのは面倒で、
+1ページに全機能を積んだ管理画面は必ず作り直しになる。
 
 ---
 
@@ -226,6 +231,7 @@ Phase N:   完了レポート
 
 > 詳細: [references/web-vercel-path.md](references/web-vercel-path.md)
 > 落とし穴集: [references/gotchas.md](references/gotchas.md)
+> **管理画面を含むなら: [references/admin-console.md](references/admin-console.md)（必読）**
 
 ```
 scaffold → gh-create-repo-and-push → harness-init
