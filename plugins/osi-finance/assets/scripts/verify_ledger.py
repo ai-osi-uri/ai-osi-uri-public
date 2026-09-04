@@ -131,8 +131,28 @@ def check_ref_dup(rows, rep):
                str(r.get("出所") or "").strip(),
                str(r.get("対象月") or "").strip())
         if key[0]:
-            seen[key].append(r["__row"])
-    dup = {k: v for k, v in seen.items() if len(v) > 1}
+            seen[key].append(r)
+    # 取消仕訳（借貸を反転させた行）とその元仕訳の組は重複ではない。
+    # 借方科目・貸方科目の組が互いに逆で金額が一致する行を打ち消し合わせ、残りが2件以上なら重複。
+    dup = {}
+    for k, rs in seen.items():
+        if len(rs) < 2:
+            continue
+        remaining = list(rs)
+        i = 0
+        while i < len(remaining):
+            a = remaining[i]
+            partner = next((b for b in remaining[i + 1:]
+                            if b.get("借方科目") == a.get("貸方科目")
+                            and b.get("貸方科目") == a.get("借方科目")
+                            and num(b.get("借方金額")) == num(a.get("借方金額"))), None)
+            if partner is not None:
+                remaining.remove(partner)
+                remaining.remove(a)
+            else:
+                i += 1
+        if len(remaining) > 1:
+            dup[k] = [r["__row"] for r in rs]
     if dup:
         rep.error("参照ID×出所×対象月 重複", f"{len(dup)}組が重複",
                   [f"{k[0]} / {k[1]} / {k[2]} → 行 {', '.join(map(str, v))}"
@@ -231,10 +251,17 @@ def check_invoice_overbooking(jrows, arrows, rep):
         if not inv.startswith("INV-"):
             continue
         src = str(r.get("出所") or "").strip()
+        # 取消仕訳（借方=売上高／借方=売掛金 の反転行）は差し引く
         if src == "AR請求":
-            booked_sales[inv] += num(r.get("借方金額"))
+            if str(r.get("借方科目") or "").strip() == "売掛金":
+                booked_sales[inv] += num(r.get("借方金額"))
+            else:
+                booked_sales[inv] -= num(r.get("借方金額"))
         elif src == "AR入金":
-            booked_cash[inv] += num(r.get("借方金額"))
+            if str(r.get("借方科目") or "").strip() == "普通預金":
+                booked_cash[inv] += num(r.get("借方金額"))
+            else:
+                booked_cash[inv] -= num(r.get("借方金額"))
 
     over_s, over_c = [], []
     for inv, amt in sorted(booked_sales.items()):
