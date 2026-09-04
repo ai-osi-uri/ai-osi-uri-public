@@ -21,6 +21,8 @@ requires_connectors:
   - server: drive-fs
     provision: fs
 
+connector_prose_ok:  # DocuSign 送付は contract-docusign-send の担当。本スキルは呼ばない
+  - docusign
 ---
 
 # osi-finance-contract-draft（契約書作成・雛形管理）

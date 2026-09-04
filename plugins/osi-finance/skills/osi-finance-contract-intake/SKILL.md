@@ -16,6 +16,8 @@ requires_connectors:
   - server: ai-osi-uri-finance   # DocuSign は自前コネクタの ds_* を使う（公式MCPは remoteUrl しか受けず送付に使えない）
     provision: user-install
 
+connector_prose_ok:  # DocuSign は ai-osi-uri-finance の ds_* 経由。docusign コネクタ自体は要らない
+  - docusign
 ---
 
 # osi-finance-contract-intake（契約取込 → 請求スケジュール展開）

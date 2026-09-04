@@ -8,6 +8,11 @@ description: >
   そのまま維持し、人ごとに変わる部分（役職・氏名・ローマ字・携帯番号・メール）だけを差し替える。
   出力はラクスル「名刺 通常サイズ_横（仕上がり91×55mm）」テンプレ準拠・CMYK（スミ100／ブランド赤
   C17 M98 Y90 K0）の入稿用PDF。発注そのものは人がラクスルで行う（本スキルはデータ生成まで）。
+requires_connectors:
+  - server: cowork
+    provision: builtin
+  - server: AI_OSI_URI_Deploy
+    provision: mcpb
 ---
 
 # 名刺入稿PDFジェネレーター（AI OSI URI）

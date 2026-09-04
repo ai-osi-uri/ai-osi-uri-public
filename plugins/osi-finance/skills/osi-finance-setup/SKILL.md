@@ -22,6 +22,8 @@ requires_connectors:
   - server: ai-osi-uri-finance   # DocuSign は自前コネクタの ds_* を使う（公式MCPは remoteUrl しか受けず送付に使えない）
     provision: user-install
 
+connector_prose_ok:  # DocuSign は任意の補助。無くても運用は成立する
+  - docusign
 ---
 
 # osi-finance-setup（OSI Finance 初回セットアップ・オーケストレータ）

@@ -9,6 +9,8 @@ description: >-
   ※ 請求書の発行は osi-finance-invoice、支払起票は osi-finance-payment-intake、
   突合は osi-finance-mf-sync / ar-sync、契約の DocuSign 送付は contract-docusign-send の担当。
   本スキルは「コンソールへの入口」に特化し、実処理そのものは各担当スキルに委ねる。
+connector_prose_ok:  # DocuSign 送付は contract-docusign-send の担当。本スキルは呼ばない
+  - docusign
 ---
 
 # OSI Finance ローカルコンソール

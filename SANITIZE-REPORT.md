@@ -10,8 +10,8 @@
 | plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 47 | Plaud | - 任意：既存下書きへの確実な添付に Claude in Chrome（ブラウザ操作の `file_upload`）、本文パーソナライズに Obsidian（`obsidian-knowledge-consult`）／Plaud／Drive |
 | plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 133 | CAIO | - **グループが複数の対象月にまたがる場合は、対象月を摘要・明細名に必ず残す**（例「CAIO業務 2026年4〜6月分」）。 |
 | plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 190 | Plaud | - 当月ご一緒した取り組みを **Obsidian（`30_Projects/_Active/{社名}/議事録`、`obsidian-knowledge-consult` 経由）→ Plaud → Drive** の順で拾い、お礼文に1段落 |
-| plugins/osi-finance/skills/osi-finance-setup/SKILL.md | 77 | 共有ドライブ | ルートフォルダ「OSI Finance」を**どこに作るか**だけを聞く。**共有ドライブを第一推奨** |
-| plugins/osi-finance/skills/osi-finance-setup/SKILL.md | 101 | 共有ドライブ | OSI Finance/                 ← 顧客が決めるのはこの置き場所だけ（共有ドライブ推奨） |
+| plugins/osi-finance/skills/osi-finance-setup/SKILL.md | 79 | 共有ドライブ | ルートフォルダ「OSI Finance」を**どこに作るか**だけを聞く。**共有ドライブを第一推奨** |
+| plugins/osi-finance/skills/osi-finance-setup/SKILL.md | 103 | 共有ドライブ | OSI Finance/                 ← 顧客が決めるのはこの置き場所だけ（共有ドライブ推奨） |
 | plugins/osi-finance/skills/osi-finance-ar-sync/SKILL.md | 78 | CAIO | `INV-2026-07-016` は 対象月 2026-06 の行（CAIO 550,000）と 2026-07 の行（準備金 1,375,000 / 2,200,000）が |
 | plugins/osi-finance/skills/osi-finance-plan/SKILL.md | 37 | CAIO | 実績は勘定科目、計画は計画自身の切り方（CAIO契約売上、コンサル外注、通信費の内訳…）で、 |
 | plugins/osi-finance/config/osi-finance-settings.example.md | 157 | 共有ドライブ | 共有ドライブに1つ作り、配下は規定ツリー（00.契約書／01.受領請求書／02.送付請求書／03.経費管理）で固定。 |
