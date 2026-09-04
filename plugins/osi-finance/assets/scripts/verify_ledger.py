@@ -151,7 +151,16 @@ def check_ref_dup(rows, rep):
                 remaining.remove(a)
             else:
                 i += 1
-        if len(remaining) > 1:
+        # 1本の取引を複数行に割るのは正常。手数料差引の入金
+        # (借)普通預金/(貸)売掛金 ＋ (借)支払手数料/(貸)売掛金 がその典型で、
+        # 行数だけを見ると重複に見える。同じ借方科目×貸方科目が2本あるときだけ疑う
+        # （同じ元データを2回起こせば科目の組も同じになる）。科目を変えて起こし直した
+        # 二重計上は、額面と突き合わせる check_invoice_overbooking が受け止める。
+        combos = defaultdict(int)
+        for r in remaining:
+            combos[(str(r.get("借方科目") or "").strip(),
+                    str(r.get("貸方科目") or "").strip())] += 1
+        if any(c > 1 for c in combos.values()):
             dup[k] = [r["__row"] for r in rs]
     if dup:
         rep.error("参照ID×出所×対象月 重複", f"{len(dup)}組が重複",
@@ -251,17 +260,21 @@ def check_invoice_overbooking(jrows, arrows, rep):
         if not inv.startswith("INV-"):
             continue
         src = str(r.get("出所") or "").strip()
-        # 取消仕訳（借方=売上高／借方=売掛金 の反転行）は差し引く
+        # 向きは「売掛金がどちら側にあるか」で決める。相手科目では決めない。
+        #   請求 (借)売掛金/(貸)売上高・仮受消費税   → 売掛金が借方なら +
+        #   入金 (借)普通預金/(貸)売掛金             → 売掛金が貸方なら +
+        # 取消仕訳は売掛金が反対側に来るので自然に − になる。相手科目を見る書き方だと、
+        # 手数料差引の入金 (借)普通預金＋(借)支払手数料/(貸)売掛金 の手数料行を
+        # 取消と誤読して消込額が過少になる。売掛金に触れない行は数えない。
+        dr_ar = str(r.get("借方科目") or "").strip() == "売掛金"
+        cr_ar = str(r.get("貸方科目") or "").strip() == "売掛金"
+        if not (dr_ar or cr_ar):
+            continue
+        amt = num(r.get("借方金額"))
         if src == "AR請求":
-            if str(r.get("借方科目") or "").strip() == "売掛金":
-                booked_sales[inv] += num(r.get("借方金額"))
-            else:
-                booked_sales[inv] -= num(r.get("借方金額"))
+            booked_sales[inv] += amt if dr_ar else -amt
         elif src == "AR入金":
-            if str(r.get("借方科目") or "").strip() == "普通預金":
-                booked_cash[inv] += num(r.get("借方金額"))
-            else:
-                booked_cash[inv] -= num(r.get("借方金額"))
+            booked_cash[inv] += amt if cr_ar else -amt
 
     over_s, over_c = [], []
     for inv, amt in sorted(booked_sales.items()):
