@@ -27,7 +27,14 @@ ledgers:
         header_row: 1
         data_rows_at_survey: 13
         key: "項目"
-        note: "key-value 形式。行が固定で列は 項目/値/備考。"
+        note: |
+          key-value 形式。行が固定で列は 項目/値/備考。
+          **連携トグル（INTEGRATIONS）の写しをここに置く。** 正本は settings（osi-finance-settings.md §0-2）
+          だが、コンソールは台帳しか読めないため、画面の出し分けはこの3行を見る。setup が書く。
+            電子署名     : docusign / なし（既定）      … なしなら DocuSign タブを出さない
+            会計SaaS     : mf / freee / なし（既定）    … 請求・支払一覧の突合ボタンを切り替える
+            銀行明細突合 : ON / OFF（既定）             … ON のときだけ「銀行明細と突合」を出す
+          行が無いときは「使っていない」として扱う（押しても動かないボタンを出さないため）。
         columns:
           - name: "項目"
           - name: "値"
