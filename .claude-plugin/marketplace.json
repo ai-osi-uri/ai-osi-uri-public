@@ -14,7 +14,7 @@
       "name": "osi-creative",
       "source": "./plugins/osi-creative",
       "description": "AI 動画制作・日本語音声ナレーション（narration）と出資お礼メッセージ生成。汎用クリエイティブスキル集。",
-      "version": "0.8.1",
+      "version": "0.8.2",
       "category": "creative",
       "tags": [
         "ai-video",
@@ -30,7 +30,7 @@
       "name": "osi-docs",
       "source": "./plugins/osi-docs",
       "description": "文書・契約・業務フロー・事業計画・構成図作成。財務モデル、企業分析、提案資料に加え、手描き配線図から物理・論理構成図とBOMを生成。 financial-model-3statement は config の開始年月から月次三表に「年月」行を出し、暦月の実績と並べられる。 明細（売上・原価・販管費の行）は業態別テンプレを持たず config の 明細 から生やす。合計と検算はコード側。",
-      "version": "0.7.0",
+      "version": "0.7.1",
       "category": "docs",
       "tags": [
         "docs",
