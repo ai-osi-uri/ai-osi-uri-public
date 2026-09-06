@@ -110,6 +110,37 @@ python scripts/office/unpack.py presentation.pptx unpacked/
 
 **表を含むスライドは、必ず画像に変換して最終行が見えているか目視する。** 数値計算だけで通したと思わない。
 
+**6. 箇条書きが折り返して、末尾の数文字だけが次行の左端に落ちる。**
+「・3ヶ月区切りの更新制。撤退も継続も軽くす／**る**」のように、送り仮名1〜2文字が単独行になる。
+1箇所なら軽微だが、3列×3項目のカードだと6箇所同時に出て、**一目で「作りかけ」に見える**。
+
+原因は2つあり、両方潰す：
+
+**(a) ぶら下げインデントが無い** — 折り返し行が行頭「・」の下に潜り込む。段落に marL/indent を入れて頭を揃える。
+
+```python
+from pptx.oxml.ns import qn
+from pptx.util import Emu, Inches
+
+def hang(p, inch=0.155):
+    """折り返し行を1文字分ぶら下げる（python-pptx に API が無いので pPr を直接触る）"""
+    pPr = p._p.get_or_add_pPr()
+    pPr.set("marL", str(int(Emu(Inches(inch)))))
+    pPr.set("indent", str(-int(Emu(Inches(inch)))))
+```
+
+**(b) 1項目が列幅に対して長い** — 折り返す前提でも、末尾が孤立しない長さに削る。
+
+```
+1行に入る全角字数 ≒ テキスト幅inch × 72 ÷ フォントpt × 0.92
+```
+
+3列レイアウト（10"スライド）の実測値：**列幅2.8" → テキスト幅2.5" → 10.5ptで約16字**。
+つまり **1項目16字以内なら1行、32字以内なら2行**。20字前後で書くと「16字＋4字」になり最悪。
+**16の倍数付近を避けて書く**（12字前後 or 28字前後）のが実務的な逃げ方。
+
+同じ理屈で、**カード内の見出し＋説明を1セット2行に収める**設計が安全。狭い列に3行以上を入れない。
+
 ### Consistent Spacing System
 
 間隔の単位（例0.25"）を1つ決め、全箇所でその倍数を使う。16:9（10"×5.625"）の推奨：
@@ -200,6 +231,41 @@ async function cropImgForCover(imagePath, targetW, targetH) {
 | Two-thirds | 6.67" × 5.625" | ~1.19:1 |
 
 **`sizing: { type: "cover" }` を使わない理由：** LibreOffice（QAのPDF変換で使用）が正しく描画せず、画像が伸びる/ずれる。常に事前クロップする。python-pptx は Pillow で同等のクロップを行う（[python-pptx.md](python-pptx.md)）。
+
+### 人物写真は「顔で切って円形」にする
+
+メンバー紹介・体制ページで受け取る顔写真は、たいてい**引きの縦長**で、そのまま置くと背景ばかりになる。
+顔の位置を指定して正方形に切り、円形アルファのPNGにしてから貼る（PowerPointの図形トリミングに頼らない。
+LibreOffice でのQA描画がずれる）。
+
+```python
+from PIL import Image, ImageDraw
+
+def round_avatar(src, out, cx=0.45, cy=0.26, side=0.42, px=300):
+    """cx,cy=顔の中心（画像比）／side=切り出す正方形の一辺（短辺比）"""
+    im = Image.open(src).convert("RGB"); W, H = im.size
+    sd = int(min(W, H) * side)
+    l = max(0, min(W - sd, int(W * cx - sd / 2)))
+    t = max(0, min(H - sd, int(H * cy - sd / 2)))
+    im = im.crop((l, t, l + sd, t + sd)).resize((px, px), Image.LANCZOS)
+    mask = Image.new("L", (px, px), 0)
+    ImageDraw.Draw(mask).ellipse((0, 0, px - 1, px - 1), fill=255)
+    im.putalpha(mask); im.save(out, optimize=True)
+```
+
+`cx, cy` は**人ごとに変える**（既定 0.45/0.26 は立ち姿の一般値）。1枚ずつ画像化して顔が中心に来ているか見る。
+
+**px は貼るサイズ × 300 で足りる。** 1.0インチの円なら300px。それ以上は容量だけ増える。
+
+### 写真入り pptx はファイルサイズを見る
+
+画像1枚を無加工で入れると簡単に数百KBになり、**Drive等のコネクタに base64 で渡せなくなる**
+（1ファイル=1回の呼び出しで全体を渡す方式のため、数百KBで上限に当たる）。
+
+- 貼るサイズから逆算した px に落とす（上記）
+- 写真が多いなら `im.quantize(colors=192).convert("RGB")` を挟む（顔写真は192色でほぼ劣化が分からない）
+- それでも通らないときは**画質を落として通すより、ローカルのDriveミラーに `cp` する**（`proposal-package` 参照）。
+  納品物の画質を運搬経路の都合で下げない。
 
 ---
 
@@ -337,8 +403,30 @@ for i,s in enumerate(prs.slides):                      # 表紙が index 0 → �
        c[(r//8*8,g//8*8,b//8*8)]+=1
    for (r,g,b),n in c.most_common(10): print(f"#{r:02X}{g:02X}{b:02X} {n}")
    ```
-2. コーポレートサイト（Chrome MCP で `getComputedStyle` を集計）
-3. ロゴ画像のピクセルサンプリング
+2. **コーポレートサイトのロゴ画像を canvas で集計**（IR PDF が手に入らないときの本命。数十秒で終わる）
+   サイトを開き、ロゴ画像を canvas に描いてピクセルを数える。`getComputedStyle` の集計より確実で、
+   **マークが多色の会社では色数そのものが分かる**（＝相手が何色で運用しているかが取れる）。
+   ```javascript
+   // ブラウザツールの javascript_exec で実行。ロゴのパスはページのDOMから拾う
+   await (async () => {
+     const img = new Image(); img.crossOrigin = "anonymous";
+     img.src = "/cmn/img/logo.png";                    // ← 実際のロゴパス
+     await new Promise((ok, ng) => { img.onload = ok; img.onerror = ng; });
+     const c = document.createElement("canvas");
+     c.width = img.width; c.height = img.height;
+     c.getContext("2d").drawImage(img, 0, 0);
+     const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data, cnt = {};
+     for (let i = 0; i < d.length; i += 4) {
+       if (d[i+3] < 200) continue;                     // 透明を除外
+       const k = "#" + [d[i], d[i+1], d[i+2]].map(v => (v>>3<<3).toString(16).padStart(2,"0")).join("");
+       cnt[k] = (cnt[k]||0) + 1;
+     }
+     return Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,8);
+   })()
+   ```
+   **ロゴ候補は複数試す。** ヘッダー用（白抜き）は白1色しか返らないことがあり、`/cmn/img/logo.png` のような
+   マーク版に本来の色が入っている。返り値が白/黒だけなら別パスを当たる。
+3. ロゴ画像のピクセルサンプリング（画像を手元に落とせる場合）
 
 **取れた色を、相手の使い方どおりに使う。** ブランド色が1色しかない会社に無理やり4色の意味割り当てをしない。
 「メイン1色＋サブ1色＋グレー」で運用している相手なら、こちらも3色で組む。**色数は相手のIR資料に合わせる。**
@@ -397,7 +485,10 @@ python -m markitdown output.pptx | grep -iE "\bx{3,}\b|lorem|ipsum|\bTODO|\[inse
 
 ### Visual QA
 
-**サブエージェントを使う**（2–3枚でも）。自分はコードを見続けて「期待」を見てしまう。サブエージェントは新鮮な目。**サブエージェント禁止の環境では、自分で全ページを画像化して1枚ずつ見る。省略しない。** スライドを画像化（下記）し、次の観点で点検：重なり／溢れ・切れ／**表の最終行がカードに隠れていないか**／1行用の装飾線にタイトルが2行化／脚注の衝突／要素が近すぎ(<0.3")／不揃いな余白／端からの余白不足(<0.5")／列の不揃い／低コントラスト文字・アイコン／狭すぎるテキストボックス／プレースホルダ残り／バッジのラベル重なり／画像の歪み／AI画像の文字アーティファクト。各スライドごとに、軽微でも全て報告させる。
+**サブエージェントを使う**（2–3枚でも）。自分はコードを見続けて「期待」を見てしまう。サブエージェントは新鮮な目。**サブエージェント禁止の環境では、自分で全ページを画像化して1枚ずつ見る。省略しない。** スライドを画像化（下記）し、次の観点で点検：重なり／溢れ・切れ／**表の最終行がカードに隠れていないか**／1行用の装飾線にタイトルが2行化／脚注の衝突／要素が近すぎ(<0.3")／不揃いな余白／端からの余白不足(<0.5")／列の不揃い／低コントラスト文字・アイコン／狭すぎるテキストボックス／プレースホルダ残り／バッジのラベル重なり／画像の歪み／AI画像の文字アーティファクト／**折り返しで末尾数文字だけが次行に落ちていないか**（Collision Prevention 6）／**枠線に文字が接触していないか**（下端1〜2pxは「切れている」ように見える）。各スライドごとに、軽微でも全て報告させる。
+
+> サブエージェントに渡すときは「**軽微でも全て報告。問題なしと書くな**」と明示する。曖昧に頼むと「概ね良好です」で返ってきて、
+> 孤立行や枠線接触のような**単体では軽微だが枚数分累積して"雑に見える"欠陥**が素通りする。
 
 **表と目次は特に重点的に見る。** この2つが実運用での事故の大半：
 - 表 → 折り返しで行が伸び、最終行が下の要素に食われる（Collision Prevention 5）
