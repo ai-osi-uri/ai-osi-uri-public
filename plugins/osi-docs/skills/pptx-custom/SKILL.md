@@ -22,6 +22,10 @@ storyline-gate → deck-composition → ★pptx-custom（ここ）
 
 > 既存 pptx の整形・体裁直しなど、構成が既に存在する作業では deck-composition を経由しなくてよい（入力＝既存の .pptx）。
 
+**このファイルの読み方。** 本文には「**守る制約**」と「**計算して自分で決めるための式・自問**」だけを置いている。
+一回の実測値（字数・px・KB）は [measurements.md](measurements.md) に分けてあり、**そちらは参考で、上書きしてよい**。
+本文の数値は式から導いたもので、**条件が変われば計算し直す**。数値をそのまま次の案件に持ち込まない。
+
 ## Quick Reference
 
 | Task | Guide |
@@ -31,6 +35,7 @@ storyline-gate → deck-composition → ★pptx-custom（ここ）
 | Create from scratch (JS) | Read [pptxgenjs.md](pptxgenjs.md) |
 | Create from scratch (Python) | Read [python-pptx.md](python-pptx.md) |
 | 構成の原則・コード（前工程） | deck-composition スキル ＋ [exec-deck-patterns.md](exec-deck-patterns.md) / [exec-deck-code.md](exec-deck-code.md) |
+| 寸法・容量の実測値（**参考。条件を確認して使う**） | [measurements.md](measurements.md) |
 
 **Which creation tool?** Try pptxgenjs first (`npm install -g pptxgenjs`). If npm fails (403/network), fall back to python-pptx (`pip install python-pptx`). Both produce valid .pptx; the guides contain equivalent design patterns.
 
@@ -91,7 +96,7 @@ python scripts/office/unpack.py presentation.pptx unpacked/
 
 ### Collision Prevention
 
-頻出レイアウトバグ4種（苦情の多い順）：
+頻出レイアウトバグ7種（苦情の多い順）：
 
 **1. バッジ/ラベルがタイトル文字に重なる。** タイトルの x はバッジの終端の後から始める：`title_x = badge_x + badge_width + gap`。同じ x に置かない。プログラム生成スライドの視覚バグNo.1。
 
@@ -134,12 +139,12 @@ python scripts/office/unpack.py presentation.pptx unpacked/
 
 `N`＝1行に入る全角字数（「寸法の基準定数」の式で計算する）。
 
-一般則：**N を先に計算し、N をわずかに超える長さで書かない。**
+**原則：N を先に計算し、N をわずかに超える長さで書かない。**
 狙うのは **N×0.75 前後**（1行に収まる）か **N×1.75 前後**（2行が均等に埋まる）。
 **N+1〜N+4字が最悪**で、末尾の数文字だけが2行目に落ちる。
 
-> 実測例：3列レイアウト（10"スライド・列幅2.8"・テキスト幅2.5"・10.5pt）で N≒16。
-> このとき安全圏は12字前後 or 28字前後。**列幅かフォントを変えたら N を計算し直す。**
+> 観測例は [measurements.md](measurements.md) に。**そこの数値を条件を確認せずに持ち込まない。**
+> 列幅・フォントが違えば N は変わる。必ず上の式で計算し直す。
 
 **(b) ぶら下げインデントで折り返し行の頭を揃える**
 
@@ -285,15 +290,21 @@ def round_avatar(src, out, cx=0.45, cy=0.26, side=0.42, px=300):
     im.putalpha(mask); im.save(out, optimize=True)
 ```
 
-`cx, cy` は**人ごとに変える**（既定 0.45/0.26 は立ち姿の一般値）。1枚ずつ画像化して顔が中心に来ているか見る。
+**原則：`cx, cy` は人ごとに変える。1枚ずつ画像化して顔が中心に来ているか目で見る。**
+支給素材は「こちらが使う枠」を想定して撮られていない。**枠の比率で切り直すのが前提**で、
+これは顔写真に限らず、ロゴ・商品写真・スクリーンショットでも同じ。
 
-**px は貼るサイズ × 300 で足りる。** 1.0インチの円なら300px。それ以上は容量だけ増える。
+**目安：px は貼るサイズ × 300。** 1.0インチの円なら300px。それ以上は容量だけ増える。
+
+> 初期値の観測例は [measurements.md](measurements.md)。素材の撮られ方で変わる。
 
 ### 写真入り pptx はファイルサイズを見る
 
-**なぜ効くか：** コネクタ経由のアップロードには、**ファイル全体を base64 にして1回のツール呼び出しに載せる**方式がある。
-この場合、通るかどうかは画質ではなく**バイト数**で決まる（上限は公表されておらず環境依存）。
-実測では**約290KBの pptx が通らなかった**。数百KB級になったら base64 経路は当てにしない、と考える。
+**メカニズム：** コネクタ経由のアップロードには、**ファイル全体を base64 にして1回のツール呼び出しに載せる**方式がある。
+この場合、通るかどうかは画質ではなく**バイト数**で決まる。**上限は公表されておらず環境依存**なので、
+「◯KBまでなら通る」という閾値を覚えない。**大きくなったら経路を疑う**、が判断の型。
+
+> 実測は [measurements.md](measurements.md)。1点しか測っていないので、閾値としては使えない。
 
 - 貼るサイズから逆算した px に落とす（上記）。**大半はこれで済む**
 - それでも大きいなら減色する。**ただしアルファを付けた後に減色しない。**
