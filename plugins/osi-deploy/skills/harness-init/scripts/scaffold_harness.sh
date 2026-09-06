@@ -125,6 +125,7 @@ place "AGENTS.md"          "$AGENT_FILE"
 place "init.sh"            "init.sh"
 place "claude-progress.md" "claude-progress.md"
 place "feature_list.json"  "feature_list.json"
+place "nonfunctional.yaml" "nonfunctional.yaml"
 
 # feature_list.json は置換不要なのでそのままコピー（既に render 済みだが {{}} を含まないので無害）
 chmod +x "$TARGET/init.sh" 2>/dev/null || true
@@ -141,6 +142,7 @@ echo "スキップ : ${skipped[*]:-（なし）}"
 echo "埋めた値 : INSTALL=[$INSTALL_CMD] VERIFY=[$VERIFY_CMD] START=[$START_CMD]"
 echo "残TODO   : $AGENT_FILE 内に ${todo_count} 箇所"
 echo "次の一手 : feature_list.json に最初の機能を1件書き、./init.sh でベースライン検証を通す"
+echo "           nonfunctional.yaml の【TODO】を埋める（空欄は deploy-preflight で FAIL）"
 
 if [ "$RUN_VERIFY" = "1" ]; then
   echo ""

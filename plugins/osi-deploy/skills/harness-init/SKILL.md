@@ -7,7 +7,7 @@ description: |
   検証なしに完了宣言しないようにする。`create-app` の scaffold 直後から呼ばれる。
   単体では「ハーネスを入れて」「AGENTS.md を作って」
   「エージェントが迷子にならないようにして」で発動。デプロイ・インフラ構築はしない。
-version: 0.2.0
+version: 0.3.0
 ---
 
 # harness-init — リポジトリにハーネスエンジニアリングの足場を仕込む（atomic）
@@ -32,6 +32,7 @@ harnesses for long-running agents"。
 | `init.sh` | 環境 | 依存インストール→検証→起動を一発。失敗したらベースライン修復を促す |
 | `claude-progress.md` | 状態 | セッションをまたぐ進捗ログ。終了前に更新、開始時に最初に読む |
 | `feature_list.json` | フィードバック/制御 | 機械可読の機能トラッカー。in_progress は常に1件、証拠ありで passing |
+| `nonfunctional.yaml` | 非機能の決定 | 不変条件7行（冒頭コメント）と、案件ごとの決定・検証。空欄は `deploy-preflight` で FAIL |
 
 > 5つ目の「ツール」サブシステムはスキルでファイル配置しない（最小権限でシェル等を
 > 与える運用判断のため）。AGENTS.md にツール方針を1行書くに留める。
@@ -108,6 +109,7 @@ bash scripts/scaffold_harness.sh \
 - `claude-progress.md` … `Current Verified State` の起動/検証パスに実コマンドを反映
 - `feature_list.json` … example-001/002 のひな形をそのまま配置（中身は呼び出し側 or 人が埋める）。
   example-001 の `verification` は「正常系／境界／整合」の3行を型として持つ
+- `nonfunctional.yaml` … 置換なし。7項目の `decided` を `create-app` Phase 1-C で埋める
 
 ### 判定基準（不変条件5行）について
 
@@ -118,6 +120,11 @@ AGENTS.md §5-1 に **不変条件だけ** を置く。手順・ケース一覧�
 実証: carry-next で行2だけを既存 passing 機能に当て直したら、正常系1本で passing だった
 機能から境界欠陥5件（ピッチ0→Infinity本 等）が出た（2026-09-06）。
 
+非機能も同じ作法で `nonfunctional.yaml` に置く。違いは「答えが案件ごとに変わる」こと。
+だから不変条件は「決まっていて・手段が実在し・確かめてある」という状態だけを書き、
+値（許容できる被害・想定負荷・保持期間…）は yaml 側に持つ。次元名（RTO/RPO・同時接続数）
+も列挙しない。列挙するとエージェントはその次元だけ見に行く。
+
 > **冪等性**: 既存ファイルがあり `OVERWRITE!=1` なら触らずスキップ。誤って既存の
 > AGENTS.md を上書きしないこと。スキップした旨はサマリに必ず出す。
 
@@ -126,7 +133,7 @@ AGENTS.md §5-1 に **不変条件だけ** を置く。手順・ケース一覧�
 ```
 === harness-init 完了 ===
 TARGET: <dir>
-配置: AGENTS.md(新規) / init.sh(新規,+x) / claude-progress.md(新規) / feature_list.json(新規)
+配置: AGENTS.md(新規) / init.sh(新規,+x) / claude-progress.md(新規) / feature_list.json(新規) / nonfunctional.yaml(新規)
 スキップ: （なし or 既存ファイル名）
 埋めた値: INSTALL=<...> VERIFY=<...> START=<...>
 残TODO: AGENTS.md 内の【TODO】が N 箇所（hard constraints / docs リンク等）
@@ -142,10 +149,11 @@ TARGET: <dir>
 
 ## 完了の定義
 
-- 4ファイル（または CLAUDE.md 版）が TARGET_DIR に存在する
+- 5ファイル（または CLAUDE.md 版）が TARGET_DIR に存在する
 - init.sh が実行可能（+x）になっている
 - AGENTS.md の検証コマンド欄に、判定 or 指定したコマンドが入っている
 - AGENTS.md §5-1 の不変条件5行が入っている（テンプレを削らない）
+- `nonfunctional.yaml` が置かれている（埋めるのは create-app / 人）
 - 配置サマリ（置いた/スキップ/残TODO）を返した
 
 ---

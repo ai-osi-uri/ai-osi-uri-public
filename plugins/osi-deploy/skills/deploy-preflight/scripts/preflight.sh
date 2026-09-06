@@ -83,6 +83,56 @@ if git -C "$DIR" rev-parse --git-dir >/dev/null 2>&1; then
   else add git-pushed WARN "未コミットの変更あり"; fi
 else add git-pushed WARN "git リポジトリ外"; fi
 
+# ---- 非機能の決定（nonfunctional.yaml）: 空欄=決めていない → FAIL / 未検証 → WARN ----
+# yaml パーサに依存しない（PyYAML 不在でも動く）ため、トップレベルキーと decided/verified を行単位で読む。
+if [ -f "$DIR/nonfunctional.yaml" ]; then
+  nf_out=$(python3 - "$DIR/nonfunctional.yaml" <<'PY'
+import re, sys
+keys = ["recovery","load","observability","access","change","outside"]
+lines = open(sys.argv[1], encoding="utf-8").read().splitlines()
+sec = None; decided = {}; verified = {}; defaults = []
+for raw in lines:
+    line = raw.split("#",1)[0].rstrip() if not raw.lstrip().startswith("#") else ""
+    if not line.strip(): continue
+    m = re.match(r"^([A-Za-z_]+):\s*(.*)$", line)
+    if m:
+        sec = m.group(1); continue
+    if sec in keys:
+        m = re.match(r"^\s+(decided|verified):\s*(.*)$", line)
+        if m:
+            (decided if m.group(1)=="decided" else verified)[sec] = m.group(2).strip()
+        elif sec in decided and decided[sec] in ("", "|", ">", "|-", ">-"):
+            decided[sec] = line.strip()  # 複数行の先頭
+    elif sec == "accepted_defaults":
+        m = re.match(r"^\s*-\s*(.*)$", line)
+        if m: defaults.append(m.group(1).strip())
+undecided = [k for k in keys if not decided.get(k) or "TODO" in decided.get(k,"") or decided.get(k) in ("null","~")]
+unverified = [k for k in keys if k not in undecided and (not verified.get(k) or verified.get(k) in ("null","~") or "TODO" in verified.get(k,""))]
+bad_defaults = [d for d in defaults if not d or "TODO" in d]
+print("UNDECIDED=" + ",".join(undecided))
+print("UNVERIFIED=" + ",".join(unverified))
+print("BADDEFAULTS=" + str(len(bad_defaults)))
+PY
+)
+  nf_undecided=$(printf '%s\n' "$nf_out" | sed -n 's/^UNDECIDED=//p')
+  nf_unverified=$(printf '%s\n' "$nf_out" | sed -n 's/^UNVERIFIED=//p')
+  nf_baddef=$(printf '%s\n' "$nf_out" | sed -n 's/^BADDEFAULTS=//p')
+  if [ -n "$nf_undecided" ]; then
+    add nonfunctional-decided FAIL "決めていない項目: ${nf_undecided} → nonfunctional.yaml の decided を埋める（「不要」も決定）"
+  elif [ "${nf_baddef:-0}" != "0" ]; then
+    add nonfunctional-decided FAIL "accepted_defaults に【TODO】が残っている（黙って選ばれた既定値を決定として書くか、項目ごと消す）"
+  else
+    add nonfunctional-decided PASS
+  fi
+  if [ -n "$nf_unverified" ]; then
+    add nonfunctional-verified WARN "未検証: ${nf_unverified}（公開後に実際に確かめて verified を埋める。recovery/change は「戻す」を一度やる）"
+  else
+    add nonfunctional-verified PASS
+  fi
+else
+  add nonfunctional-decided FAIL "nonfunctional.yaml が無い → harness-init で配置して埋める"
+fi
+
 case "$TARGET" in
   aws-static|aws-ecs)
     if ls "$DIR"/*.tf >/dev/null 2>&1; then

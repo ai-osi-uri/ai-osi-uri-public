@@ -54,6 +54,11 @@ requires_connectors:
    GitHub username、Vercel 経路の Vercel Token）が指定ファイルまたは環境変数にあるか。
 3. **git 状態** — ブランチがクリーンで、`origin` に push 済みか（未push は
    `gh-create-repo-and-push` へ誘導）。
+4. **非機能の決定** — `nonfunctional.yaml`（harness-init が配置）の 6 項目の `decided` が
+   すべて埋まっているか。空欄・`【TODO】`・`null` は「決めていない」＝ **FAIL**
+   （`nonfunctional-decided`）。`accepted_defaults` に `【TODO】` が残っていても FAIL。
+   `verified` が `null` の項目は **WARN**（`nonfunctional-verified`）。初回公開前は WARN で
+   よいが、公開後に実際に確かめて埋める。recovery / change は「戻す」を一度やるまで PASS にならない。
 
 ### `aws-static`（S3 + CloudFront）
 4. `terraform validate` が通る／または静的ビルド成果物が存在する。

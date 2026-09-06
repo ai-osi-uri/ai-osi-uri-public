@@ -176,6 +176,15 @@ Phase N:   完了レポート
 | 想定規模 | ~50 / ~500 / 5000+ 人 |
 | 課金 | 無料 / 月額 / 一回購入 / 内部利用のみ |
 | **管理画面** | **要 / 不要**（ユーザー種別に「運営・管理者」があれば要） |
+| **非機能** | `nonfunctional.yaml` の 7 項目（下記） |
+
+**非機能は「決めていない」を既定値にしない。** harness-init が置く `nonfunctional.yaml` の
+冒頭に不変条件 7 行がある。機密性レベル・想定規模・課金から、この案件で決めるべきことを
+自分で洗い出し、`decided` を埋める（「不要」「許容する」も決定）。プラットフォームが黙って
+選ぶ値（プラン・リージョン・バックアップの有無など、自分で見つけたもの）は
+`accepted_defaults` に決定として書く。**人に聞くのは、機密性レベルと復旧の許容範囲の 2 点**
+まで。ここで決めた内容は、Phase 4 で harness-init がファイルを置いた直後に書き込む。
+空欄が残ると `deploy-preflight` が FAIL で止める。
 
 **管理画面が「要」なら [references/admin-console.md](references/admin-console.md) を必ず読んでから実装する。**
 利用者画面と管理画面はルートグループで最初から分ける。後から分けるのは面倒で、
@@ -216,6 +225,7 @@ Phase N:   完了レポート
 【構成】Vercel + Supabase / Electron + SQLite / React Native 等
 【作成先】ai-osi-uri org 配下 / 個人アカウント配下（health_check の repo_target）
 【配布方法】Vercel URL / GitHub Releases / TestFlight 等
+【非機能】復旧の許容範囲 / 想定負荷 / 受け入れた既定値（nonfunctional.yaml の要約 3 行）
 
 このプランで進めますか？
 ```
