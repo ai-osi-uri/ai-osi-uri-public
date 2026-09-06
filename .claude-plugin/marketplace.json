@@ -48,7 +48,7 @@
       "name": "osi-deploy",
       "source": "./plugins/osi-deploy",
       "description": "アプリ作成・公開自動化。Web（Vercel / AWS）・Desktop（Electron）・ローカル出力に対応し、create-app を入口に DNS 設定・事前診断・公開後の更新まで一気通貫で扱う。**モバイル（iOS / Android）は osi-mobile-deploy に全面委譲**する。Lovable プロジェクトの決済有効化・本番化は `lovable-payments-golive` が担当（AI OSI URI Deploy 拡張は使わない）。オンプレ App Builder への受け渡しは `app-builder-export`（kind: app-builder-app-spec）に一本化。24 スキル。",
-      "version": "1.12.0",
+      "version": "1.13.0",
       "category": "deploy",
       "tags": [
         "deploy",

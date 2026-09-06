@@ -15,9 +15,9 @@
       "user_visible_behavior": "【TODO: 動いたときユーザーに何が見えるか】",
       "status": "not_started",
       "verification": [
-        "【TODO: 動作確認の手順1。例: ./init.sh で起動】",
-        "【TODO: 手順2】",
-        "【TODO: 手順3。例: 期待する画面/レスポンスが出る】"
+        "【TODO: 正常系。例: ./init.sh で起動し、期待する画面/レスポンスが出る】",
+        "【TODO: 境界。仕様から洗い出した入力・状態の境界の両側（AGENTS.md 5-1 の 2）】",
+        "【TODO: 整合。操作の前後でデータに矛盾が残らない（AGENTS.md 5-1 の 3）】"
       ],
       "evidence": "",
       "notes": "【TODO: 補足コンテキストがあれば】"

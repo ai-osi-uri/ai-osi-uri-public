@@ -7,7 +7,7 @@ description: |
   検証なしに完了宣言しないようにする。`create-app` の scaffold 直後から呼ばれる。
   単体では「ハーネスを入れて」「AGENTS.md を作って」
   「エージェントが迷子にならないようにして」で発動。デプロイ・インフラ構築はしない。
-version: 0.1.0
+version: 0.2.0
 ---
 
 # harness-init — リポジトリにハーネスエンジニアリングの足場を仕込む（atomic）
@@ -28,7 +28,7 @@ harnesses for long-running agents"。
 
 | ファイル | サブシステム | 役割 |
 |---|---|---|
-| `AGENTS.md`（Claude Code 中心なら `CLAUDE.md`） | 指示 | 最初に読む「地図」。約100行。技術スタック・検証コマンド・完了の定義・hard constraints |
+| `AGENTS.md`（Claude Code 中心なら `CLAUDE.md`） | 指示 | 最初に読む「地図」。約100行。技術スタック・検証コマンド・完了の定義・**判定基準（不変条件5行）**・hard constraints |
 | `init.sh` | 環境 | 依存インストール→検証→起動を一発。失敗したらベースライン修復を促す |
 | `claude-progress.md` | 状態 | セッションをまたぐ進捗ログ。終了前に更新、開始時に最初に読む |
 | `feature_list.json` | フィードバック/制御 | 機械可読の機能トラッカー。in_progress は常に1件、証拠ありで passing |
@@ -106,7 +106,17 @@ bash scripts/scaffold_harness.sh \
   未指定の項目は `【TODO: ...】` のまま残す（埋め漏れを可視化するため）
 - `init.sh` … `INSTALL_CMD` / `VERIFY_CMD` / `START_CMD` の3変数を置換。`chmod +x`
 - `claude-progress.md` … `Current Verified State` の起動/検証パスに実コマンドを反映
-- `feature_list.json` … example-001/002 のひな形をそのまま配置（中身は呼び出し側 or 人が埋める）
+- `feature_list.json` … example-001/002 のひな形をそのまま配置（中身は呼び出し側 or 人が埋める）。
+  example-001 の `verification` は「正常系／境界／整合」の3行を型として持つ
+
+### 判定基準（不変条件5行）について
+
+AGENTS.md §5-1 に **不変条件だけ** を置く。手順・ケース一覧・実装詳細（画面ツール名・入力
+形式の規則・件数）は書かない。書くとエージェントは列挙を埋める作業者になり、列挙にない穴を
+探さなくなる。各行は「消したら何を見落とすか」が言えるものだけ：
+1=仕様との一致と余計な挙動 / 2=境界 / 3=データ整合 / 4=商用障害からの学習 / 5=規模（任意）。
+実証: carry-next で行2だけを既存 passing 機能に当て直したら、正常系1本で passing だった
+機能から境界欠陥5件（ピッチ0→Infinity本 等）が出た（2026-09-06）。
 
 > **冪等性**: 既存ファイルがあり `OVERWRITE!=1` なら触らずスキップ。誤って既存の
 > AGENTS.md を上書きしないこと。スキップした旨はサマリに必ず出す。
@@ -135,6 +145,7 @@ TARGET: <dir>
 - 4ファイル（または CLAUDE.md 版）が TARGET_DIR に存在する
 - init.sh が実行可能（+x）になっている
 - AGENTS.md の検証コマンド欄に、判定 or 指定したコマンドが入っている
+- AGENTS.md §5-1 の不変条件5行が入っている（テンプレを削らない）
 - 配置サマリ（置いた/スキップ/残TODO）を返した
 
 ---
