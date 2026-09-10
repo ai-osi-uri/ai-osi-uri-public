@@ -73,6 +73,7 @@ requires_connectors:
 その月の仕訳として **(借)前受金／(貸)売上高＋仮受消費税**（数量×単価(税込)、参照ID=記録ID）を起こす。
 消化記録の `仕訳ID` 列に書き戻し、書かれている行は再生成しない（重複防止は 参照ID×出所 と同じ）。
 残前受額は `ledger_maintain action=prepaid_balance` で契約ごとに出る。仕訳帳の前受金残高と一致すること。
+有効期限切れは消化記録の「摘要=失効」行として現れる。これは売上ではなく **(借)前受金／(貸)雑収入〔不課税〕**（monthly-rules §前受）。
 判断辞書は `osi-finance-monthly/references/monthly-rules.md` §10 を正本とする。
 
 ### 仕訳IDの採番（衝突する構造なので厳守）
