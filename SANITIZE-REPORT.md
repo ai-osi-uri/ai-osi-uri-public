@@ -6,7 +6,7 @@
 
 | ファイル | 行 | 語 | 抜粋 |
 |---|---|---|---|
-| plugins/osi-finance/README.md | 154 | 共有ドライブ | 顧客が決めるのは「OSI Finance ルートをどこに置くか」1問だけ（**共有ドライブ推奨**）、配下は規定ツリーで固定 |
+| plugins/osi-finance/README.md | 157 | 共有ドライブ | 顧客が決めるのは「OSI Finance ルートをどこに置くか」1問だけ（**共有ドライブ推奨**）、配下は規定ツリーで固定 |
 | plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 50 | Plaud | - 任意：既存下書きへの確実な添付に Claude in Chrome（ブラウザ操作の `file_upload`）、本文パーソナライズに Obsidian（`obsidian-knowledge-consult`）／Plaud／Drive |
 | plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 161 | CAIO | - **グループが複数の対象月にまたがる場合は、対象月を摘要・明細名に必ず残す**（例「CAIO業務 2026年4〜6月分」）。 |
 | plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 246 | Plaud | - 当月ご一緒した取り組みを **Obsidian（`30_Projects/_Active/{社名}/議事録`、`obsidian-knowledge-consult` 経由）→ Plaud → Drive** の順で拾い、お礼文に1段落 |
