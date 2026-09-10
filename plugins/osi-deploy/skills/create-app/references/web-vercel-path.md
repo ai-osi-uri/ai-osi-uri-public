@@ -16,6 +16,11 @@
 
 - scaffold 後、ユーザー要件に応じてページ・コンポーネントを実装する。
 - `package.json` の `name` はリポジトリ名と一致させる。
+- **Next.js の版は記憶で書かず、着手時に `npm view next@15 version` で最新パッチを取って pin する。**
+  Vercel は CVE 対象の版を**ビルド成功後に**「Vulnerable version of Next.js detected」で拒否する。
+  ローカルの `next build` は通るので、Vercel のログを見るまで気づけない（gotchas §11）。
+- **push 前にサンドボックスで `next build` を1回通す。** route.ts の余分な export・型エラーは Vercel より手元で早く分かる。
+  `/sessions` 側は満杯になりやすいので `npm_config_cache=/tmp/npmcache HOME=/tmp/h` を付けて `/tmp` 配下で実行する。
 
 ### Step 2: GitHub リポジトリ作成 & push
 
@@ -138,6 +143,10 @@ Deploy 拡張の Stripe ツールを使用する（詳細は後述）。
 ```
 
 > **注意**: `NEXT_PUBLIC_` プレフィックスの変数はクライアントに露出する。シークレットキーには絶対に付けない。
+
+> **`vercel_create_project_and_deploy` に渡すときの形**: `env_vars` は `[{key, value, target, type}]` の配列。
+> **`type` は必須**（公開値は `"plain"`、秘密は `"encrypted"`）。無いと HTTP 400 `A type for "..." is required`。
+> `repo_owner` も必須（省略すると個人アカウントを探しに行き repo_not_found）。
 
 ---
 

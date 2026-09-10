@@ -181,6 +181,52 @@ curl -s https://your-app.vercel.app | head -20
 - TypeScript の型エラー（ローカルでは warning だが Vercel では error）
 - 環境変数の未設定（Vercel の Environment Variables に入れ忘れ）
 - Node.js バージョンの不一致
+- **脆弱版の Next.js**（§11。ビルドは通るのに `readyState: ERROR` になる）
+
+---
+
+## 11. Vercel は CVE 対象の Next.js を「ビルド成功後に」拒否する
+
+**問題**: `package.json` に古い Next.js（例 `15.3.3`）を書くと、Vercel はビルドを最後まで通したうえで
+`Vulnerable version of Next.js detected, please update immediately.` を出して `readyState: ERROR` にする。
+ローカルの `next build` は成功するので、原因がログの最終行にしか出ない。
+
+**ルール**:
+- 版は記憶で書かない。着手時に `npm view next@15 version` で**最新パッチ**を取り、それを pin する（メジャーは 15 系を既定。16 にするのは意図があるときだけ）
+- Vercel のビルドログで `Vulnerable` の文字を見たら、他を疑う前に Next.js を上げる
+- 直すときは `package.json` だけ `github_put_file` で上書きすればよい（lockfile は同梱していない前提）
+
+**観測（2026-09-10・carp-post）**: 15.3.3 → ERROR、15.5.25 に上げて READY。CVE-2025-66478。
+
+---
+
+## 12. `vercel_create_project_and_deploy` の env_vars は `type` 必須
+
+**問題**: `env_vars: [{key, value, target}]` だけ渡すと HTTP 400
+`A type for "NEXT_PUBLIC_APP_URL" is required, such as type=encrypted.` で止まる。
+
+**ルール**: 各要素に `type` を付ける。公開値（`NEXT_PUBLIC_*`）は `"plain"`、秘密は `"encrypted"`。
+`repo_owner` も必ず渡す（Org 配下のリポは省略すると repo_not_found）。
+
+```json
+[{ "key": "NEXT_PUBLIC_APP_URL", "value": "https://app.vercel.app", "target": ["production", "preview"], "type": "plain" }]
+```
+
+**観測（2026-09-10・carp-post）**: type 無しで 400 → `"plain"` を足して作成成功。
+
+---
+
+## 13. push 前にサンドボックスで `next build` を通す（ディスクは /tmp を使う）
+
+**問題**: Vercel で初めて型エラーに気づくと、修正→put_file→再デプロイで 1 回あたり 2〜3 分失う。
+また `npm install` を `/sessions` 配下で走らせると `ENOSPC: no space left on device` で落ちることがある。
+
+**ルール**:
+- push 前にソースを `/tmp` にコピーし、`npm_config_cache=/tmp/npmcache HOME=/tmp/h NEXT_TELEMETRY_DISABLED=1` を付けて
+  `npm install` → `node node_modules/next/dist/bin/next build` を1回通す（`npx tsc` は別パッケージを引くので使わない）
+- App Router の `route.ts` から型や定数を export しない（`x is not a valid Route export` で落ちる）。`lib/` に出す
+
+**観測（2026-09-10・carp-post）**: `/sessions` は 100% 使用で ENOSPC。`/tmp` は 3.3GB 空きで install 10 秒・build 25 秒。
 
 ---
 

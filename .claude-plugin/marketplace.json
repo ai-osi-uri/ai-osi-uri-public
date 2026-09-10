@@ -48,7 +48,7 @@
       "name": "osi-deploy",
       "source": "./plugins/osi-deploy",
       "description": "アプリ作成・公開自動化。Web（Vercel / AWS）・Desktop（Electron）・ローカル出力に対応し、create-app を入口に DNS 設定・事前診断・公開後の更新まで一気通貫で扱う。**モバイル（iOS / Android）は osi-mobile-deploy に全面委譲**する。Lovable プロジェクトの決済有効化・本番化は `lovable-payments-golive` が担当（AI OSI URI Deploy 拡張は使わない）。オンプレ App Builder への受け渡しは `app-builder-export`（kind: app-builder-app-spec）に一本化。24 スキル。",
-      "version": "1.14.0",
+      "version": "1.14.1",
       "category": "deploy",
       "tags": [
         "deploy",
@@ -112,7 +112,7 @@
       "name": "osi-finance",
       "source": "./plugins/osi-finance",
       "description": "OSI Finance — 日本の中小企業向け経理（請求AR・支払AP）自動化プラグイン。台帳（Google Sheets）と内部仕訳帳を正本に、初回セットアップ、契約取込→請求スケジュール化、請求書発行、受領請求書の支払起票・取りこぼし検出、MF/freee/銀行明細との突合、仕訳生成、経費レシート証憑化、月次クローズ、会計ダッシュボード、ローカルコンソール（台帳ビュー・財務三表）までを収録。送金・請求書の発行送信・会計計上の確定は常に人が実行。運用モード・連携トグル・起票確認方式で書き込み可否を組織ごとに統制できる。詳細は各スキルの説明を参照。",
-      "version": "0.47.4",
+      "version": "0.48.0",
       "category": "finance",
       "tags": [
         "finance",
