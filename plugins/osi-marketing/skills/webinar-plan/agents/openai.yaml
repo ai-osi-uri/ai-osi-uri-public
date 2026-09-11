@@ -1,0 +1,4 @@
+interface:
+  display_name: "Webinar Plan"
+  short_description: "Plan webinars from audience promise through follow-up"
+  default_prompt: "ウェビナーの企画、台本、集客、フォローを設計してください。"

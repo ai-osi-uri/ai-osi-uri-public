@@ -11,6 +11,9 @@ description: |
   本番化は `lovable-payments-golive` の担当。本スキルは Vercel/AWS + AI OSI URI Deploy 拡張
   の BYOK Stripe 前提）。
 version: 0.1.1
+requires_connectors:
+  - server: AI_OSI_URI_Deploy
+    provision: mcpb
 ---
 
 # Stripe テストモード → 本番モード切替スキル（switch-to-live-mode）

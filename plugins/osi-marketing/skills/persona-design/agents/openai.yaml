@@ -1,0 +1,4 @@
+interface:
+  display_name: "Persona Design"
+  short_description: "Design evidence-based personas and customer journeys"
+  default_prompt: "根拠付きの顧客ペルソナとジャーニーを設計してください。"

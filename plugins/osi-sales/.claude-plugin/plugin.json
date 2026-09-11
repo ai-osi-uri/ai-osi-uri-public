@@ -1,0 +1,25 @@
+{
+  "name": "osi-sales",
+  "version": "0.6.0",
+  "requires_connectors": [
+    "Google Drive"
+  ],
+  "description": "営業ワークフロー。商談準備、提案、見積もり、案件管理に加え、企業調査、決裁構造、社内推進戦略、決裁者向け説得パッケージまで一気通貫で扱う。",
+  "author": {
+    "name": "AI OSI URI",
+    "email": "yuhenagisa@ai-osi-uri.com"
+  },
+  "homepage": "https://github.com/ai-osi-uri/ai-osi-uri-plugins",
+  "license": "UNLICENSED",
+  "keywords": [
+    "proposal",
+    "sales",
+    "drive",
+    "lead",
+    "meeting",
+    "prep",
+    "pr",
+    "decision-maker",
+    "persuasion"
+  ]
+}

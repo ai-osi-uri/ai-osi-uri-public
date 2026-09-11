@@ -1,0 +1,4 @@
+interface:
+  display_name: "Champion Strategy"
+  short_description: "Design internal champion and consensus strategy"
+  default_prompt: "社内推進者を中心とした合意形成戦略を設計してください。"

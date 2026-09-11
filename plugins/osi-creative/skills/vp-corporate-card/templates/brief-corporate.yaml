@@ -1,0 +1,42 @@
+# 企業の動画名刺ブリーフ（vp-corporate-card）
+# 3つの入力経路（A.音声1本 / B.既存素材 / C.対話5問）すべてがこの形に落ちる。
+# 埋まらない項目は空のままでよい（proof が空なら B3 を映像に置換する）。
+
+kind: corporate
+
+subject:
+  name: 株式会社◯◯
+  one_liner: "◯◯を、◯◯にする会社"        # B2。20〜25字
+
+audience: 顧客 | 採用候補 | 投資家 | 初対面全般
+
+# ── B1（フック）はここを掘ってから書く。手順は references/hook-insight.md ──
+# ①現状 → ②まとめ → ③WHY → ④WHYのまとめ（種）→ ⑤一言。
+# offer（何ができるか）は「現状の層」。そこにインサイトは無いので、必ず WHY まで降りる。
+insight_ladder:
+  現状: []                                   # 顧客が口に出して言うこと・機能
+  why: []                                    # なぜそれを求めるのか（尽きるまで）
+  種: ""                                     # WHYのまとめ＝インサイトの種
+hook_candidates: []                          # 3案以上。書いた本人以外が選ぶ
+hook: ""                                     # B1 確定分（15〜20字）。自社の話をしない
+
+proof:                                      # B3。最大3点。無ければ空でよい（捏造しない）
+  - "導入120社"
+  - "業界歴15年"
+
+offer: "◯◯を◯日で立ち上げます"             # B4。必ず1つに絞る
+why: "◯◯だったから、これをやっている"       # B5。創業のきっかけ・原体験
+
+cta:
+  text: "詳しくはこちら"
+  url: https://example.com
+
+style:
+  visual: anime                             # 既定 anime。実写は明示指定時のみ
+  brandkit: brandkit/<company>/             # あればここを参照（無ければ1本目で作る）
+
+voice: konoha                               # narration の voice_id
+music: signature_a                          # music スキルのシグネチャー音源ID
+
+lengths: [30s, 15s]                         # 15秒版は30秒版からの派生（B3・B5を抜く）
+aspects: [16:9, 9:16, 1:1]

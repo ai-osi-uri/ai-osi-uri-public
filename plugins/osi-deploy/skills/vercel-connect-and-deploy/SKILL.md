@@ -7,6 +7,9 @@ description: |
   を解除して認証なしで公開する。`create-app` から呼ばれる。単体では「Vercel
   にデプロイして」「Next.js を Vercel に上げて」で発動。
 version: 0.4.0
+requires_connectors:
+  - server: AI_OSI_URI_Deploy
+    provision: mcpb
 ---
 
 # Vercel 接続 + env + 初回デプロイ（atomic / 拡張ツール版）

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Course Outline"
+  short_description: "Design outcome-driven course curricula and lessons"
+  default_prompt: "学習成果を起点に講座カリキュラムを設計してください。"

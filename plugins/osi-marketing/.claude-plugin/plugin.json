@@ -1,0 +1,21 @@
+{
+  "name": "osi-marketing",
+  "version": "0.3.0",
+  "description": "顧客理解、商品コンセプト、ファネル、ウェビナー、講座設計から、ターゲット企業リスト作成とフォームアウトリーチ、さらに掲載先メディアの棚卸しと陣取り調査までを一気通貫で扱うマーケティングプラグイン。",
+  "author": {
+    "name": "AI OSI URI"
+  },
+  "keywords": [
+    "outreach",
+    "marketing",
+    "persona",
+    "funnel",
+    "webinar",
+    "course",
+    "list-build",
+    "sales",
+    "media-placement",
+    "ranking",
+    "competitive-positioning"
+  ]
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Funnel Design"
+  short_description: "Design measurable acquisition and retention funnels"
+  default_prompt: "顧客獲得から継続利用までのファネルを設計してください。"

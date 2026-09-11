@@ -1,0 +1,4 @@
+interface:
+  display_name: "Persuasion Package"
+  short_description: "Build a complete executive persuasion package"
+  default_prompt: "営業説得パッケージを調査から一括で作成してください。"

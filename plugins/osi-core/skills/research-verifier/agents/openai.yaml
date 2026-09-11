@@ -1,0 +1,4 @@
+interface:
+  display_name: "Research Verifier"
+  short_description: "Independently verify claims sources and research freshness"
+  default_prompt: "調査結果の主張と根拠を独立に検証してください。"

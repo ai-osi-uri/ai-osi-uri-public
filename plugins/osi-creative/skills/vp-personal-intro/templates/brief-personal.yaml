@@ -1,0 +1,56 @@
+# 個人の自己紹介動画ブリーフ（vp-personal-intro）
+# 既定の入力経路は「本人が1分喋った音声」。それをこの形に落とす。
+# 埋まらない項目は空のままでよい（proof が空なら B3 を日常・現場の映像に置換する）。
+
+kind: personal
+
+subject:
+  name: 山田太郎
+  title: 株式会社◯◯ 営業部長
+  one_liner: "◯◯の人"                       # B2。20〜25字
+
+audience: 顧客 | 採用候補 | 同業 | 初対面全般
+
+# ── B1（フック）はここを掘ってから書く。手順は references/hook-insight.md ──
+# ①現状 → ②まとめ → ③WHY → ④WHYのまとめ（種）→ ⑤一言。③で止まらないこと。
+insight_ladder:
+  現状:                                      # 相手が口に出して言うこと・できること
+    - "AIを入れたのに使われない"
+    - "使い方が分からない"
+  why:                                       # 「なぜそれを求めるのか」を尽きるまで
+    - "決める人がいない"
+    - "自分の仕事が奪われそう"
+    - "便利になるだけでは動かない"
+  種: "便利にはなった。でも、決める人がいない"  # ④ WHYのまとめ
+hook_candidates:                             # ⑤ 3案以上。本人以外が選ぶ
+  - "道具は来た。決める人が、まだ来ていない。"
+  - "便利にはなった。でも、誰も変わらなかった。"
+  - "足りないのは、性能じゃない。"
+hook: ""                                     # B1 確定分（15〜20字）
+
+proof:                                       # B3。最大3点。無ければ空でよい（盛らない）
+  - "この業界15年"
+  - "担当社数200社"
+
+offer: "◯◯のご相談に乗れます"                # B4。1つに絞る
+why: "◯◯だったから、これをやっている"        # B5。★本人が喋った言葉をそのまま使う
+
+cta:
+  text: "お気軽にご連絡ください"
+  url: https://example.com
+
+persona:
+  level: L1                                  # L1=アニメアバター(既定) / L2=写真+カメラムーブ / L3=実写クリップ
+  source_photo: photos/yamada.jpg            # L1・L2で使う。1枚でよい
+  refs: brandkit/<company>/characters/yamada_refs/   # L1の設定シート（別角度・別表情）
+  approved_by_person: false                  # ★本人がアバターを承認するまで false
+
+style:
+  visual: anime
+  brandkit: brandkit/<company>/
+
+voice: konoha                                # 本人と別の声でよい。人名は発音辞書に必ず登録
+music: signature_b                           # 個人版の標準（疾走・前向き）
+
+lengths: [30s, 15s]
+aspects: [16:9, 9:16, 1:1]

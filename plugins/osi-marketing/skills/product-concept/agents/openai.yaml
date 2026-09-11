@@ -1,0 +1,4 @@
+interface:
+  display_name: "Product Concept"
+  short_description: "Design product concepts from validated customer needs"
+  default_prompt: "顧客課題を起点に商品コンセプトを設計してください。"

@@ -1,0 +1,22 @@
+{
+  "name": "osi-core",
+  "version": "0.2.1",
+  "description": "横断オーケストレーション・品質層。文字起こしや長文を適切な業務スキルへ振り分け、調査・提案・記事の主張を独立ファクトチェックする。",
+  "author": {
+    "name": "AI OSI URI",
+    "email": "yuhenagisa@ai-osi-uri.com"
+  },
+  "homepage": "https://github.com/ai-osi-uri/ai-osi-uri-plugins",
+  "license": "UNLICENSED",
+  "keywords": [
+    "core",
+    "router",
+    "dispatch",
+    "orchestration",
+    "transcript",
+    "entry",
+    "routing",
+    "verification",
+    "fact-check"
+  ]
+}

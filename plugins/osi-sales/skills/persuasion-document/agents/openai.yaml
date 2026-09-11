@@ -1,0 +1,4 @@
+interface:
+  display_name: "Persuasion Document"
+  short_description: "Create evidence-based executive persuasion documents"
+  default_prompt: "調査と戦略を統合した説得文書を作成してください。"

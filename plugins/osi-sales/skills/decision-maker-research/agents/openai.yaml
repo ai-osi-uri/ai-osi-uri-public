@@ -1,0 +1,4 @@
+interface:
+  display_name: "Decision Maker Research"
+  short_description: "Research decision structure and adoption barriers"
+  default_prompt: "対象企業の決裁構造と導入障壁を調査してください。"
