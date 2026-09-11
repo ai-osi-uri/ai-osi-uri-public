@@ -10,7 +10,7 @@
 ## 0. 結論
 
 - 稼働中のAWSアプリは Terraform で管理、**state は共有S3 backend で一元管理**済み（揮発しない）。
-- **state の正本 = S3 `aiosiuri-tfstate-{ACCOUNT_ID}`**（東京 / バージョニング・暗号化・非公開・DynamoDBロック）。
+- **state の正本 = S3 `{{company.slug}}-tfstate-{ACCOUNT_ID}`**（東京 / バージョニング・暗号化・非公開・DynamoDBロック）。
 - セッションの作業フォルダが消えても、**Driveのコード一式 + S3のstate + 拡張のAWS認証があれば完全復旧できる**。
 
 ## 1. 稼働中アプリ
@@ -23,9 +23,9 @@
 
 | 項目 | 値 |
 | --- | --- |
-| stateバケット | `aiosiuri-tfstate-{ACCOUNT_ID}`（ap-northeast-1） |
+| stateバケット | `{{company.slug}}-tfstate-{ACCOUNT_ID}`（ap-northeast-1） |
 | state キー | `{namespace}/{project}/terraform.tfstate` |
-| ロックテーブル | `aiosiuri-tf-lock`（HASHキー `LockID`） |
+| ロックテーブル | `{{company.slug}}-tf-lock`（HASHキー `LockID`） |
 
 各リポの `infra/backend.tf` にS3 backend定義あり。新セッションは `terraform init` でS3 stateを参照。
 

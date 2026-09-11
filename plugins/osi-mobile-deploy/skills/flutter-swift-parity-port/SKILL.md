@@ -22,9 +22,9 @@ version: 0.2.0
 | 新規で「Flutter で作りたい」と要望が来た | ❌ 使わない | ネイティブ既定を説明したうえで、それでも Flutter を選ぶ強い理由があるかを確認する |
 | 既存 SwiftUI アプリの機能追加 | ❌ 使わない | `mobile-update-deploy` |
 
-> **AI OSI URI の方針**：新規モバイルアプリの既定スタックは **iOS = SwiftUI /
+> **自社の方針**：新規モバイルアプリの既定スタックは **iOS = SwiftUI /
 > Android = Kotlin + Jetpack Compose**。Flutter は既存資産の移行時にのみ扱う。
-> 実運用（MustPost の Flutter→SwiftUI 移植）で得た結論：新規で Flutter を選ぶより、
+> 実運用（SampleApp の Flutter→SwiftUI 移植）で得た結論：新規で Flutter を選ぶより、
 > 最初からネイティブで書いた方が総コストが低い。詳細は `mobile-app-scaffold/SKILL.md`
 > の冒頭「方針」参照。
 
@@ -153,7 +153,7 @@ Dart の `Color(0xFF3366CC)` を毎回書き下ろすと保守が破綻するの
 ```
 1. xcode_build_for_sim({ code_signing: "auto" })   # entitlements を保つ
 2. xcode_sim_install_app + xcode_sim_launch_app
-3. xcode_sim_open_url("mustpost://debug/signin?token=...")   # 必要なら Custom Token で入る
+3. xcode_sim_open_url("sampleapp://debug/signin?token=...")   # 必要なら Custom Token で入る
 4. xcode_sim_tap で対象画面に遷移
 5. xcode_sim_screenshot で PNG を取り、Flutter 側の同じ画面と目視で並べる
 ```
@@ -228,7 +228,7 @@ CI (`ios-release-auto.yml`) が回って TestFlight まで届く。Flutter ユ�
 
 ## やってはいけないこと
 
-- **新規プロジェクトを Flutter で起こす**：AI OSI URI の既定はネイティブ 2 本立て。
+- **新規プロジェクトを Flutter で起こす**：自社の既定はネイティブ 2 本立て。
   Flutter を採用したい強い事情があるなら、それを明示的にユーザーと確認したうえで
   本プラグインの対象外として halt する
 - **感覚で「似せる」**：diff を書かずに移植すると必ず後から発覚してリワークになる

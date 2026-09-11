@@ -10,7 +10,7 @@ description: >
   **送金しない**（人が振込口座で振込実行）。
   「この請求書払って」「○○社の請求書を支払予定に」「受領請求書を台帳に起票」「振込で払う請求書を
   起票」「受け取った請求書を支払管理台帳に入れて」「請求書PDFを読み取って支払予定にして」などで発動。
-  月次クローズ・突合は osi-finance-monthly / osi-finance-mf-sync、自社の請求書発行（AR）は osi-finance-invoice、
+  月次クローズ・突合は osi-finance-monthly / osi-finance-mf-sync、請求書発行（AR）は osi-finance-invoice、
   契約取込は osi-finance-contract-intake の役割（本スキルは行わない）。日次の取りこぼし検出は osi-finance-payment-detect。
 requires_connectors:
   - server: superhuman

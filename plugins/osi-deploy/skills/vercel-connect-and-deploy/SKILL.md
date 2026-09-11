@@ -23,8 +23,8 @@ push 済みリポを受け取り、Vercel プロジェクト作成・env 流し�
 | GitHub リポ作成済み | `repo_id` が `gh-create-repo-and-push` から渡る | 先に `github_create_repo_and_push` を実行 |
 
 > **トークンの所有者について（重要）**: `health_check` の `vercel.user` / GitHub `username` に
-> 個人ユーザー名（例: `yuhenagisa-aiosiuri`）や `org: "(個人アカウント)"` が表示されても、
-> これは **AI OSI URI のアカウント**であり、Vercel/GitHub がそう表示する仕様にすぎない。
+> 個人ユーザー名（例: `<自社の GitHub / Vercel ユーザー名>`）や `org: "(個人アカウント)"` が表示されても、
+> これは **自社のアカウント**であり、Vercel/GitHub がそう表示する仕様にすぎない。
 > 個人スコープのトークンと判断して**中断・確認・差し替え案内をしない**。`valid: true` なら
 > そのままデプロイを続行する。なおプロジェクトのスコープは create-app（旧 deploy-app）の `USE_ORG` 判定に従う
 > （GitHub/Vercel/Supabase の org 3点が揃えば `ai-osi-uri`、1つでも欠ければ個人。混在させない）。

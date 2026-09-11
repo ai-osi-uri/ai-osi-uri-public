@@ -104,7 +104,7 @@ auto-fix push で回復する。**新しく踏んだ罠は必ずここに追記�
 ### 7. `Font registration failed for '.otf'` → 起動時クラッシュ
 
 - **症状**: `Info.plist` の `UIAppFonts` に `.otf` を宣言しているが、Resources/Fonts/ にファイルが無い（もしくは Copy Bundle Resources に含まれていない）。
-- **原因**: MustPost で使っていた `NotoSansJP-Regular.otf` などをそのまま Golden Template に残していると再発する。
+- **原因**: SampleApp で使っていた `NotoSansJP-Regular.otf` などをそのまま Golden Template に残していると再発する。
 - **修正**: `UIAppFonts` を Info.plist からコメントアウトする（`<!-- ... -->` で囲む）か、削除する。カスタムフォントを本気で使うなら xcodegen の `resources` に確実にバンドルされていることを確認する。
 - **再発防止**: Golden Template の Info.plist で `UIAppFonts` は最初からコメントアウト状態にする（フォントを入れる時のコメントを添えて）。
 
@@ -156,7 +156,7 @@ auto-fix push で回復する。**新しく踏んだ罠は必ずここに追記�
 - **症状**: `.github/workflows/ios-release-auto.yml` の `Fastlane ios_beta_auto` step で（3060 秒で）失敗し、fastlane のログに次が出る:
 
     ```
-    [!] Could not find App with App Identifier ''com.aiosiuri.mustpost.prod''
+    [!] Could not find App with App Identifier ''{{company.reverse_domain}}.sampleapp.prod''
     You can easily generate a new App ID on the Developer Portal using ''produce''
     fastlane finished with errors
     ```

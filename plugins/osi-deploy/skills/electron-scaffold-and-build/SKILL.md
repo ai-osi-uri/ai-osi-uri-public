@@ -13,6 +13,8 @@ requires_connectors:
 
 # Electron scaffold + electron-builder + GitHub Actions CI（atomic）
 
+> **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` `{{members.*}}` は、連結フォルダ直下の `osi-profile.md`（雛形: `config/osi-profile.example.md`）の値に置き換えて解釈する。無ければ会社名・案件フォルダ・台帳の有無・使うコネクタを質問して先に作る。値をここに直書きしない。
+
 Electron + React の scaffold を生成し、electron-builder 設定と GitHub Actions の
 matrix ビルド workflow を同梱して GitHub に push、タグで CI をトリガーし、
 `desktop-release-monitor` でビルド完了まで監視する。**Windows / Mac / Linux の
@@ -113,9 +115,9 @@ matrix ビルド workflow を同梱して GitHub に push、タグで CI をト�
 ## electron-builder.yml テンプレート
 
 ```yaml
-appId: com.aiosiuri.{PROJECT_NAME_LOWER}
+appId: {{company.reverse_domain}}.{PROJECT_NAME_LOWER}
 productName: "{PROJECT_NAME}"
-copyright: "Copyright (c) AI OSI URI"
+copyright: "Copyright (c) {{company.name_display}}"
 
 directories:
   output: release

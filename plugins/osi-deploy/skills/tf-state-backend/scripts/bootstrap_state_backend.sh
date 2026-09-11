@@ -6,13 +6,13 @@
 #   bash bootstrap_state_backend.sh
 # 環境変数:
 #   AWS_REGION   既定 ap-northeast-1
-#   LOCK_TABLE   既定 aiosiuri-tf-lock
-#   BUCKET_PREFIX 既定 aiosiuri-tfstate-   （末尾に AccountId を付ける）
+#   LOCK_TABLE   既定 {{company.slug}}-tf-lock
+#   BUCKET_PREFIX 既定 {{company.slug}}-tfstate-   （末尾に AccountId を付ける）
 set -euo pipefail
 
 REGION="${AWS_REGION:-ap-northeast-1}"
-LOCK_TABLE="${LOCK_TABLE:-aiosiuri-tf-lock}"
-BUCKET_PREFIX="${BUCKET_PREFIX:-aiosiuri-tfstate-}"
+LOCK_TABLE="${LOCK_TABLE:-{{company.slug}}-tf-lock}"
+BUCKET_PREFIX="${BUCKET_PREFIX:-{{company.slug}}-tfstate-}"
 
 ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
 BUCKET="${BUCKET_PREFIX}${ACCOUNT_ID}"

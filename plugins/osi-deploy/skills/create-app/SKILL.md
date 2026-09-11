@@ -1,7 +1,7 @@
 ---
 name: create-app
 description: |
-  AI OSI URI が Cowork から
+  自社が Cowork から
   **アプリを新規に作って公開する**ための唯一のオーケストレータ。Web（Vercel / AWS）
   ・Desktop（Electron）・ローカル出力（素のプロジェクト / コンテナ）に対応する。
   「アプリ作って」「LP 立ち上げて」「○○屋向けの在庫管理アプリ作って」
@@ -25,6 +25,8 @@ requires_connectors:
 ---
 
 # create-app v1.0 — 汎用アプリ作成エントリポイント
+
+> **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` `{{members.*}}` は、連結フォルダ直下の `osi-profile.md`（雛形: `config/osi-profile.example.md`）の値に置き換えて解釈する。無ければ会社名・案件フォルダ・台帳の有無・使うコネクタを質問して先に作る。値をここに直書きしない。
 
 「アプリ作って」と言われたら、業種・規模・ターゲットに関わらず要件を聞き出して、
 公開・配布するところまで 1 つの対話で完結させる。

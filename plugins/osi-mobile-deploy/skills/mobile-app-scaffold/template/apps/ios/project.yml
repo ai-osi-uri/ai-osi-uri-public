@@ -1,7 +1,7 @@
 # xcodegen spec for MyApp
 # Regenerate .xcodeproj with: xcodegen generate
 #
-# Stack policy (AI OSI URI osi-mobile-deploy 既定):
+# Stack policy (osi-mobile-deploy 既定):
 #   UI:              SwiftUI (@main App)
 #   言語:            Swift 5.10+
 #   最小サポート:    iOS 16.0

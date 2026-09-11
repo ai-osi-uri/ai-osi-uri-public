@@ -3,7 +3,7 @@
   "evals": [
     {
       "id": "ai-output-truncated",
-      "prompt": "ai-catalog-navigator.vercel.app のAIリサーチ提案、アウトプット途中で切れてるから直して",
+      "prompt": "example-app.vercel.app のAIリサーチ提案、アウトプット途中で切れてるから直して",
       "expected_skill": "update-deploy",
       "expected_actions": [
         "health_check",

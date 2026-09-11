@@ -12,6 +12,8 @@ version: 0.1.0
 
 # Terraform state の共有S3 backend 管理（atomic）
 
+> **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` `{{members.*}}` は、連結フォルダ直下の `osi-profile.md`（雛形: `config/osi-profile.example.md`）の値に置き換えて解釈する。無ければ会社名・案件フォルダ・台帳の有無・使うコネクタを質問して先に作る。値をここに直書きしない。
+
 Cowork のセッション作業フォルダ（`.../outputs/...`）は**セッション間でクリアされる揮発領域**。
 ここに `terraform.tfstate` を置いたままにすると、フォルダが消えた時に **AWSリソースは動き続ける
 （課金も続く）のに state が失われ、Terraform できれいに管理・削除できなくなる**（orphan化）。
@@ -25,13 +27,13 @@ Cowork のセッション作業フォルダ（`.../outputs/...`）は**セッシ
 
 ---
 
-## 定数（AI OSI URI 既定）
+## 定数（既定）
 
 | 項目 | 値 |
 | --- | --- |
-| stateバケット | `aiosiuri-tfstate-<ACCOUNT_ID>`（例: `aiosiuri-tfstate-135728714359`） |
+| stateバケット | `{{company.slug}}-tfstate-<ACCOUNT_ID>`（例: `{{company.slug}}-tfstate-<ACCOUNT_ID>`） |
 | リージョン | `ap-northeast-1`（東京・データ所在地を国内に統一） |
-| ロックテーブル(DynamoDB) | `aiosiuri-tf-lock`（HASHキー `LockID`, type S） |
+| ロックテーブル(DynamoDB) | `{{company.slug}}-tf-lock`（HASHキー `LockID`, type S） |
 | state キー命名 | `<namespace>/<project>/terraform.tfstate`（例: `colowide/fair-detector/terraform.tfstate`） |
 | バケット設定 | バージョニング有効・AES256暗号化・パブリックアクセス全ブロック |
 
@@ -76,7 +78,7 @@ bucket/lock の作成は AWS API（`call_aws` 等）で、移行は拡張の `aw
 ```bash
 # 例：call_aws / aws CLI が使える環境で
 bash scripts/bootstrap_state_backend.sh
-# → ACCOUNT_ID を取得し、aiosiuri-tfstate-<ACCOUNT_ID> と aiosiuri-tf-lock を確認/作成
+# → ACCOUNT_ID を取得し、{{company.slug}}-tfstate-<ACCOUNT_ID> と {{company.slug}}-tf-lock を確認/作成
 ```
 
 Cowork で `call_aws`（aws-api MCP）しか無い場合は、スクリプトの各 `aws` 行を `call_aws` で
@@ -97,10 +99,10 @@ DynamoDB ロックテーブルの順。
 # これによりセッション/フォルダから独立し、別セッションでも同じ state を参照できる。
 terraform {
   backend "s3" {
-    bucket         = "aiosiuri-tfstate-<ACCOUNT_ID>"
+    bucket         = "{{company.slug}}-tfstate-<ACCOUNT_ID>"
     key            = "<NAMESPACE>/<PROJECT>/terraform.tfstate"
     region         = "ap-northeast-1"
-    dynamodb_table = "aiosiuri-tf-lock"
+    dynamodb_table = "{{company.slug}}-tf-lock"
     encrypt        = true
   }
 }
@@ -139,7 +141,7 @@ aws_terraform_apply(
 ## Step 5: S3 格納の検証
 
 ```bash
-aws s3 ls s3://aiosiuri-tfstate-<ACCOUNT_ID>/<NAMESPACE>/ --recursive
+aws s3 ls s3://{{company.slug}}-tfstate-<ACCOUNT_ID>/<NAMESPACE>/ --recursive
 # → <NAMESPACE>/<PROJECT>/terraform.tfstate が出れば成功
 ```
 
@@ -165,7 +167,7 @@ rsync -a $EXC "$REPO_DIR/" "<Drive案件フォルダ>/aws-repo-<PROJECT>/"
 
 ## ガードレール（絶対厳守）
 
-- state用バケット `aiosiuri-tfstate-*` と DynamoDB `aiosiuri-tf-lock` は **state管理専用**。
+- state用バケット `{{company.slug}}-tfstate-*` と DynamoDB `{{company.slug}}-tf-lock` は **state管理専用**。
   中身を手で消さない（消すと全アプリの state を喪失）。`aws_terraform_destroy` の対象にもしない。
 - アプリを撤去する時は、対象リポで `aws_terraform_destroy`（confirm必須）。**state基盤は残す**。
   全アプリ撤去後に基盤を畳む場合のみ、最後に手動でバケット/テーブルを削除。
@@ -179,9 +181,9 @@ rsync -a $EXC "$REPO_DIR/" "<Drive案件フォルダ>/aws-repo-<PROJECT>/"
 
 ```json
 {
-  "state_bucket": "aiosiuri-tfstate-135728714359",
+  "state_bucket": "{{company.slug}}-tfstate-<ACCOUNT_ID>",
   "state_key": "colowide/fair-detector/terraform.tfstate",
-  "lock_table": "aiosiuri-tf-lock",
+  "lock_table": "{{company.slug}}-tf-lock",
   "region": "ap-northeast-1",
   "mode": "migrate-existing",
   "verified_in_s3": true,

@@ -7,7 +7,7 @@ Cowork にアップした任意の契約書を送るには、DocuSign が一度�
 そこで非公開 S3 に一時的に置き、**短命・推測困難な署名付きURL**で取得させる。
 
 ## 専用バケット
-- 名前：`aiosiuri-contract-staging-135728714359`
+- 名前：`{{company.slug}}-contract-staging-<ACCOUNT_ID>`
 - リージョン：`ap-northeast-1`
 - 設定：**公開アクセス全ブロック**（BlockPublic* 全て true）＋ **ライフサイクルで1日後に自動失効**。
 - アカウント：`135728714359`（IAMユーザー `yuhe.nagisa`）。
@@ -39,7 +39,7 @@ Cowork にアップした任意の契約書を送るには、DocuSign が一度�
 PutObject + GetObject だけに絞り、短命にする。
 ```
 aws sts get-federation-token --name osi-ds-io --duration-seconds 3600 \
-  --policy '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:PutObject","s3:GetObject"],"Resource":"arn:aws:s3:::aiosiuri-contract-staging-135728714359/*"}]}'
+  --policy '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:PutObject","s3:GetObject"],"Resource":"arn:aws:s3:::{{company.slug}}-contract-staging-<ACCOUNT_ID>/*"}]}'
 ```
 返り値の `Credentials.{AccessKeyId,SecretAccessKey,SessionToken}` を使う。
 
@@ -50,7 +50,7 @@ export AWS_SECRET_ACCESS_KEY=<SecretAccessKey>
 export AWS_SESSION_TOKEN=<SessionToken>
 python3 <skill>/scripts/upload_and_presign.py \
   --file "<送付用PDF>" \
-  --bucket aiosiuri-contract-staging-135728714359 \
+  --bucket {{company.slug}}-contract-staging-<ACCOUNT_ID> \
   --key "outbound/$(date +%Y-%m)/<相手先>_<契約名>_<YYYYMMDD>.pdf" \
   --expires 1800
 ```
@@ -74,7 +74,7 @@ updateEnvelope(accountId, envelopeId, { status:"sent" })   # 送信
 
 ## 署名タブ（signHereTabs）の置き方
 - 署名欄の **会社名 or 代表者名を anchorString** にして配置するのが安定。
-  - 乙：`anchorString:"AI OSI URI"`（または "渚 有瓶"）
+  - 乙：`anchorString:"{{company.name_display}}"`（または "{{company.representative}}"）
   - 甲：相手先の会社名 or 代表者名
 - `anchorYOffset`（pixels）で署名線の位置を微調整。実物のドラフトを `getEnvelope` で確認して調整する。
 - 自動配置に不安があれば、ドラフトのまま DocuSign Web で目視確認 → 送信、も可（誤配置の保険）。

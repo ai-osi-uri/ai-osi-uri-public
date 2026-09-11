@@ -1,6 +1,6 @@
 ---
 name: pptx-custom
-description: "AI OSI URI の社内体裁（ブランド配色・レイアウト規約）で .pptx を描画/整形する**描画エンジン**スキル。構成（どのスライドが何を言い、どう並ぶか）は deck-composition が決めた slide-plan.md を受け取る前提で、本スキルはそれをレイアウト・配色・図形・画像として綺麗に刷ることに専念する。社内テンプレで提案資料やピッチを刷る、既存 pptx を社内体裁に整える、business-plan-builder / architecture-proposal / proposal 系のオーケストレータから「pptx に刷る部品」として呼ばれる、といった場合に発動する。体裁不問の汎用的な .pptx の読み取り・抽出・変換は基盤 `pptx` スキルの担当。※ スライドの構成・順序・タイトルの言い切り（Action title）・章立ては deck-composition の責任で、本スキルは行わない。"
+description: "社内体裁（ブランド配色・レイアウト規約）で .pptx を描画/整形する**描画エンジン**スキル。構成（どのスライドが何を言い、どう並ぶか）は deck-composition が決めた slide-plan.md を受け取る前提で、本スキルはそれをレイアウト・配色・図形・画像として綺麗に刷ることに専念する。社内テンプレで提案資料やピッチを刷る、既存 pptx を社内体裁に整える、business-plan-builder / architecture-proposal / proposal 系のオーケストレータから「pptx に刷る部品」として呼ばれる、といった場合に発動する。体裁不問の汎用的な .pptx の読み取り・抽出・変換は基盤 `pptx` スキルの担当。※ スライドの構成・順序・タイトルの言い切り（Action title）・章立ては deck-composition の責任で、本スキルは行わない。"
 license: Proprietary. LICENSE.txt has complete terms
 requires_connectors:
   - server: ai-osi-uri-creative

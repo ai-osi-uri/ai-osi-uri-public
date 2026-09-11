@@ -1,6 +1,6 @@
 # MyApp — Native mobile app (iOS + Android)
 
-Scaffolded by AI OSI URI **osi-mobile-deploy** plugin. Native stack from day one:
+Scaffolded by **osi-mobile-deploy** plugin. Native stack from day one:
 
 - **iOS**: SwiftUI (`@main App`), Swift 5.10+, deployment target **iOS 16.0**
 - **Android**: Jetpack Compose (`@Composable`), Kotlin 1.9+, **minSdk 26** (Android 8.0)
@@ -73,8 +73,8 @@ The plugin rewrites these before `git push`:
 | Placeholder | Replaced with | Example |
 |---|---|---|
 | `MyApp` | `<APP_NAME>` | `Foo` |
-| `com.example.myapp` | `<BUNDLE_ID>` / `<PACKAGE_NAME>` | `com.aiosiuri.foo` |
-| `com/example/myapp` | `<PACKAGE_PATH>` | `com/aiosiuri/foo` |
+| `com.example.myapp` | `<BUNDLE_ID>` / `<PACKAGE_NAME>` | `{{company.reverse_domain}}.foo` |
+| `com/example/myapp` | `<PACKAGE_PATH>` | `{{company.reverse_domain_path}}/foo` |
 | `MY_APP_TEAM_ID` | `<APPLE_TEAM_ID>` | `24X327Z9SJ` |
 | `MY_APP_DISPLAY_NAME` | `<DISPLAY_NAME>` | `Foo` |
 

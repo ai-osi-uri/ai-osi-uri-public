@@ -62,7 +62,7 @@ requires_connectors:
 |---|---|
 | `GOOGLE_SERVICE_INFO_PLIST_DEV_B64`  | `mobile-firebase-setup` が既に投入済み or 案件フォルダから取得 — dev flavor iOS 必須 |
 | `GOOGLE_SERVICE_INFO_PLIST_STG_B64`  | 同上 — stg flavor を使う案件のみ |
-| `GOOGLE_SERVICE_INFO_PLIST_PROD_B64` | 同上 — **prod flavor 必須**（MustPost 2026-08 で追加忘れてブロックされた） |
+| `GOOGLE_SERVICE_INFO_PLIST_PROD_B64` | 同上 — **prod flavor 必須**（SampleApp 2026-08 で追加忘れてブロックされた） |
 | `GOOGLE_SERVICES_JSON_DEV_B64`       | 同上 — dev flavor Android 必須 |
 | `GOOGLE_SERVICES_JSON_STG_B64`       | 同上 — stg flavor を使う案件のみ |
 | `GOOGLE_SERVICES_JSON_PROD_B64`      | 同上 — **prod flavor 必須** |

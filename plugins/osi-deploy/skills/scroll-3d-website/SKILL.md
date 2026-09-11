@@ -218,7 +218,7 @@ You've got this. Build something that makes people stop scrolling.
 
 ---
 
-## AI OSI URI 連携メモ（osi-deploy）
+## osi-deploy 連携メモ（osi-deploy）
 
 このスキルは「プレミアムなスクロール演出のフロントをゼロから作る」工程を担う。作り終えたら、
 公開は `osi-deploy` の他スキルに引き継ぐ:

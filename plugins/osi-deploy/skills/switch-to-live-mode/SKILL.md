@@ -8,8 +8,8 @@ description: |
   で発動。**実課金が発生する重大操作**なので複数のチェックポイントで明示確認を取り、
   ロールバック手順も提示する。新規デプロイには使わない（`create-app`）。**対象が
   Lovable で作られたプロジェクトの場合は使わない**（Lovable 内蔵 Payments の有効化・
-  本番化は `lovable-payments-golive` の担当。本スキルは Vercel/AWS + AI OSI URI
-  Deploy 拡張の BYOK Stripe 前提）。
+  本番化は `lovable-payments-golive` の担当。本スキルは Vercel/AWS + AI OSI URI Deploy 拡張
+  の BYOK Stripe 前提）。
 version: 0.1.1
 ---
 

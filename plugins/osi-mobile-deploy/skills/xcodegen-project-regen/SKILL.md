@@ -56,15 +56,15 @@ CI では通っているのに、ローカルだけ落ちる。あるいは他�
 ## 対処（30 秒）
 
 ```bash
-cd /Users/…/mustpost-native
+cd /Users/…/sampleapp-native
 xcodegen generate --spec apps/ios/project.yml
 ```
 
-これで `apps/ios/MustPost.xcodeproj/project.pbxproj` が最新化される。
+これで `apps/ios/SampleApp.xcodeproj/project.pbxproj` が最新化される。
 
 その後 Xcode 側:
 
-1. Xcode を開く: `open apps/ios/MustPost.xcodeproj`
+1. Xcode を開く: `open apps/ios/SampleApp.xcodeproj`
 2. **File → Packages → Reset Package Caches**（`~/Library/Caches/org.swift.swiftpm/` をクリア）
 3. **File → Packages → Resolve Package Versions**（`Package.resolved` を再生成）
 4. Cmd+B でビルド
@@ -73,12 +73,12 @@ MCP から:
 
 ```
 mcp__AI_OSI_URI_Deploy__xcode_regenerate_project({
-  project_dir: "/Users/…/mustpost-native/apps/ios"
+  project_dir: "/Users/…/sampleapp-native/apps/ios"
 })
 
 mcp__AI_OSI_URI_Deploy__xcode_resolve_packages({
-  project: "/Users/…/mustpost-native/apps/ios/MustPost.xcodeproj",
-  scheme: "MustPost-Dev"
+  project: "/Users/…/sampleapp-native/apps/ios/SampleApp.xcodeproj",
+  scheme: "SampleApp-Dev"
 })
 ```
 
@@ -91,7 +91,7 @@ xcodegen が `configurations: [Debug, Release] × configVariants: [Dev, Stg, Pro
 生成する。scheme の buildConfiguration もこの合成名を指す:
 
 ```bash
-grep buildConfiguration apps/ios/MustPost.xcodeproj/xcshareddata/xcschemes/*.xcscheme
+grep buildConfiguration apps/ios/SampleApp.xcodeproj/xcshareddata/xcschemes/*.xcscheme
 # → buildConfiguration = "Debug-Dev"
 ```
 
@@ -107,7 +107,7 @@ grep buildConfiguration apps/ios/MustPost.xcodeproj/xcshareddata/xcschemes/*.xcs
 
 ```
 mcp__AI_OSI_URI_Deploy__xcode_build_for_sim({
-  scheme: "MustPost-Dev",
+  scheme: "SampleApp-Dev",
   configuration: "Debug-Dev"      # ← "Debug" ではなく必ずこれ
 })
 ```
@@ -115,10 +115,10 @@ mcp__AI_OSI_URI_Deploy__xcode_build_for_sim({
 ### 破損したビルドの検出
 
 ```bash
-APP=$(find ~/Library/Developer/Xcode/DerivedData -name 'MustPost.app' -path '*Debug-Dev-iphonesimulator*' | head -1)
+APP=$(find ~/Library/Developer/Xcode/DerivedData -name 'SampleApp.app' -path '*Debug-Dev-iphonesimulator*' | head -1)
 ls -la "$APP"
-# 期待: MustPost (executable) + Frameworks/ 配下に .framework 多数 + Info.plist + PkgInfo
-# 破損: plist しか無い / Frameworks/ が空 / MustPost binary が無い → configuration 名を疑う
+# 期待: SampleApp (executable) + Frameworks/ 配下に .framework 多数 + Info.plist + PkgInfo
+# 破損: plist しか無い / Frameworks/ が空 / SampleApp binary が無い → configuration 名を疑う
 ```
 
 ---
@@ -129,14 +129,14 @@ APFS の `Index.noindex/DataStore/v5/records/` は `rm -rf` で **ENOTEMPTY** �
 （プレフィックス衝突する tmp file を APFS が clone している影響）。
 
 ```bash
-rm -rf ~/Library/Developer/Xcode/DerivedData/MustPost-abc123
+rm -rf ~/Library/Developer/Xcode/DerivedData/SampleApp-abc123
 # → rm: /.../Index.noindex/DataStore/v5/records: Directory not empty
 ```
 
 **対処**: `find -delete` を使う（bottom-up で削除するので tmp との衝突が起きない）:
 
 ```bash
-find ~/Library/Developer/Xcode/DerivedData/MustPost-abc123 -delete
+find ~/Library/Developer/Xcode/DerivedData/SampleApp-abc123 -delete
 ```
 
 MCP の `xcode_wipe_derived_data` も内部で ENOTEMPTY を返すことがある。fallback:
@@ -144,7 +144,7 @@ MCP の `xcode_wipe_derived_data` も内部で ENOTEMPTY を返すことがあ�
 ```
 mcp__AI_OSI_URI_Deploy__mac_shell({
   cmd: "find",
-  args: ["/Users/…/Library/Developer/Xcode/DerivedData/MustPost-abc123", "-delete"]
+  args: ["/Users/…/Library/Developer/Xcode/DerivedData/SampleApp-abc123", "-delete"]
 })
 ```
 
@@ -184,7 +184,7 @@ mcp__AI_OSI_URI_Deploy__xcode_resolve_packages({...})
 
 ```bash
 rm -rf ~/Library/Caches/org.swift.swiftpm/
-find ~/Library/Developer/Xcode/DerivedData/MustPost-* -delete
+find ~/Library/Developer/Xcode/DerivedData/SampleApp-* -delete
 xcodegen generate --spec apps/ios/project.yml
 ```
 
@@ -198,8 +198,8 @@ xcodegen generate --spec apps/ios/project.yml
 
 ```gitignore
 # apps/ios/.gitignore
-MustPost.xcodeproj/         # 完全に derived。全部 ignore
-!MustPost.xcodeproj/xcshareddata/xcschemes/*.xcscheme  # scheme だけは保持 (fastlane 用)
+SampleApp.xcodeproj/         # 完全に derived。全部 ignore
+!SampleApp.xcodeproj/xcshareddata/xcschemes/*.xcscheme  # scheme だけは保持 (fastlane 用)
 
 *.xcworkspace/xcuserdata/
 xcuserdata/
@@ -241,7 +241,7 @@ GitHub Actions workflow でも:
 ```markdown
 1. `brew install xcodegen`
 2. `cd apps/ios && xcodegen generate`
-3. `open MustPost.xcodeproj`
+3. `open SampleApp.xcodeproj`
 4. File → Packages → Resolve Package Versions
 5. Cmd+B (configuration は Debug-Dev / Debug-Stg / Debug-Prod のいずれかを選ぶ、
    単純 Debug は選べない)
@@ -262,20 +262,20 @@ Golden Template から新規リポを起こす scaffold は既に `xcodegen gene
 
 ```bash
 # 消して再解決
-rm -rf apps/ios/MustPost.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
-find ~/Library/Developer/Xcode/DerivedData/MustPost-* -delete
+rm -rf apps/ios/SampleApp.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+find ~/Library/Developer/Xcode/DerivedData/SampleApp-* -delete
 rm -rf ~/Library/Caches/org.swift.swiftpm/
 
 xcodegen generate --spec apps/ios/project.yml
 
 # Xcode で再解決させる（2 回）
 xcodebuild -resolvePackageDependencies \
-  -project apps/ios/MustPost.xcodeproj \
-  -scheme MustPost-Dev
+  -project apps/ios/SampleApp.xcodeproj \
+  -scheme SampleApp-Dev
 # → 1回目失敗しても
 xcodebuild -resolvePackageDependencies \
-  -project apps/ios/MustPost.xcodeproj \
-  -scheme MustPost-Dev
+  -project apps/ios/SampleApp.xcodeproj \
+  -scheme SampleApp-Dev
 # → 2回目で通る
 ```
 
@@ -289,18 +289,18 @@ xcodegen generate --spec apps/ios/project.yml
 # → "Warning: Regenerating..." が出なければ既に同期済み。
 
 # 2. scheme が指す configuration 名を確認
-grep buildConfiguration apps/ios/MustPost.xcodeproj/xcshareddata/xcschemes/*.xcscheme
+grep buildConfiguration apps/ios/SampleApp.xcodeproj/xcshareddata/xcschemes/*.xcscheme
 # → "Debug-Dev" / "Release-Dev" 等が並ぶ
 
 # 3. build settings を確認（Package products が解決されているか）
-xcodebuild -project apps/ios/MustPost.xcodeproj \
-  -scheme MustPost-Dev \
+xcodebuild -project apps/ios/SampleApp.xcodeproj \
+  -scheme SampleApp-Dev \
   -configuration Debug-Dev \
   -showBuildSettings 2>&1 | grep -i firebase | head -5
 # → FirebaseCore などの参照が出れば OK
 
 # 4. 実ビルドで .app が中身付きで生成されるか
-APP=$(find ~/Library/Developer/Xcode/DerivedData -name 'MustPost.app' -path '*Debug-Dev-iphonesimulator*' | head -1)
+APP=$(find ~/Library/Developer/Xcode/DerivedData -name 'SampleApp.app' -path '*Debug-Dev-iphonesimulator*' | head -1)
 ls -la "$APP" | wc -l
 # → 20+ (executable, Frameworks/, plist, PkgInfo 等が揃う) なら OK
 # → 5-6 (plist だけ) なら configuration 名間違いを疑う
@@ -318,8 +318,8 @@ ls -la "$APP" | wc -l
 | CI で失敗するがローカルは OK | CI の xcodegen version と macOS runner の Xcode version を確認。特に Xcode 16→26 移行時 |
 | `xcodegen generate` は成功するが Missing package product が消えない | `Package.resolved` を削除して Xcode 再起動 → Resolve Packages |
 | Xcode 側で「Package.resolved is out of date」 | 上と同じ。resolved を削除 |
-| CocoaPods と SPM 混在で衝突 | `Podfile` を消して SPM 一本化。MustPost は SPM 専用 |
-| `rm -rf DerivedData/MustPost-*` で ENOTEMPTY | `find <path> -delete` に切り替え |
+| CocoaPods と SPM 混在で衝突 | `Podfile` を消して SPM 一本化。SampleApp は SPM 専用 |
+| `rm -rf DerivedData/SampleApp-*` で ENOTEMPTY | `find <path> -delete` に切り替え |
 | `resolvePackageDependencies` が "Package.swift was modified during the build" | もう一度そのまま実行（2 回目で通る） |
 | .app は生成されるが Frameworks/ が空 | `configuration: "Debug"` を渡している。`"Debug-Dev"` に変更 |
 | `Unable to find module dependency: FirebaseFunctions` | DerivedData wipe + xcodegen regen + resolvePackages 2 回、config 名も確認 |

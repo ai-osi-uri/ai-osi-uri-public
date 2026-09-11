@@ -1,6 +1,6 @@
 // Android app module for MyApp
 //
-// Stack policy (AI OSI URI osi-mobile-deploy 既定):
+// Stack policy (osi-mobile-deploy 既定):
 //   UI:            Jetpack Compose (@Composable)
 //   言語:          Kotlin 1.9+
 //   最小サポート:  minSdk 26 (Android 8.0)

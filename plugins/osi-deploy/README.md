@@ -1,6 +1,6 @@
 # osi-deploy
 
-AI OSI URI のアプリ作成・公開自動化。Web、Desktop、Mobile、ローカル出力に対応し、DNS設定・事前診断・公開後の更新まで扱う。
+自社のアプリ作成・公開自動化。Web、Desktop、Mobile、ローカル出力に対応し、DNS設定・事前診断・公開後の更新まで扱う。
 
 ## スキル一覧
 

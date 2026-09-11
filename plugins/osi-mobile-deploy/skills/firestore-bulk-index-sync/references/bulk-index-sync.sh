@@ -2,7 +2,7 @@
 # bulk-index-sync.sh — Firestore composite index を REST で冪等に貼るスタンドアロン版。
 #
 # 使い方:
-#   PROJECT=mustpost-dev ./bulk-index-sync.sh path/to/firestore.indexes.json
+#   PROJECT=sampleapp-dev ./bulk-index-sync.sh path/to/firestore.indexes.json
 #
 # 前提:
 #   - gcloud auth 済み（Application Default Credentials または gcloud auth login）
@@ -18,7 +18,7 @@
 
 set -euo pipefail
 
-PROJECT="${PROJECT:?PROJECT env var required (e.g. PROJECT=mustpost-dev)}"
+PROJECT="${PROJECT:?PROJECT env var required (e.g. PROJECT=sampleapp-dev)}"
 INDEXES_JSON="${1:?usage: $0 <firestore.indexes.json>}"
 
 if ! command -v jq >/dev/null; then

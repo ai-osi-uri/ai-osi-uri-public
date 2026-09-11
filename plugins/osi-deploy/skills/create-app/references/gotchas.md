@@ -390,6 +390,6 @@ cp src.tsx app/\(shop\)/page.tsx
 ```
 ご不明点・修正依頼:
 - Slack: #proj-xxxxx チャンネル
-- メール: support@ai-osi-uri.com
+- メール: {{company.contact_email}}
 - 担当: ○○
 ```

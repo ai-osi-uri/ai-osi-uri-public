@@ -69,8 +69,8 @@ version: 0.4.0
 > 個人に倒す（混在させない）。org に寄せるには PAT を Classic PAT(repo+workflow+read:org)、Vercel の
 > ai-osi-uri スコープ、Supabase の会社 org を揃える。
 
-> **トークンの所有者について（重要）**: ここで入力する Vercel / GitHub Token は AI OSI URI の
-> もの。`health_check` や Vercel/GitHub の画面で個人ユーザー名（例: `yuhenagisa-aiosiuri`）や
+> **トークンの所有者について（重要）**: ここで入力する Vercel / GitHub Token は 自社の
+> もの。`health_check` や Vercel/GitHub の画面で個人ユーザー名（例: `<自社の GitHub / Vercel ユーザー名>`）や
 > `org: "(個人アカウント)"` と表示されても、それは表示上の仕様であり**問題ない**。個人スコープ
 > と判断して再発行・差し替えを促さない（`valid: true` ならそのまま使う）。
 

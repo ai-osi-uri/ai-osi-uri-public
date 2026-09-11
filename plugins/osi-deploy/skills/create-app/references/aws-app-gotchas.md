@@ -1,6 +1,6 @@
 # AWS サーバレスアプリ — 最小構成と既知のハマりどころ
 
-AI OSI URI のAWSアカウント（ap-northeast-1 / 東京）で、Cowork から Terraform（拡張の `aws_terraform_apply/status/destroy/output`）でWebアプリを公開する時の定番構成と、毎回詰まるポイント。**新規アプリのAWSパスでは着手前にこれを読む。** コロワイドの2アプリ（在庫早期警戒・競合インテリジェンス）で確立。
+自社のAWSアカウント（ap-northeast-1 / 東京）で、Cowork から Terraform（拡張の `aws_terraform_apply/status/destroy/output`）でWebアプリを公開する時の定番構成と、毎回詰まるポイント。**新規アプリのAWSパスでは着手前にこれを読む。** 実案件の2アプリ（在庫早期警戒・競合インテリジェンス）で確立。
 
 ## 最小構成（このまま流用できる）
 
@@ -43,15 +43,15 @@ AI OSI URI のAWSアカウント（ap-northeast-1 / 東京）で、Cowork から
    ```hcl
    terraform {
      backend "s3" {
-       bucket         = "aiosiuri-tfstate-<ACCOUNT_ID>"   # 無ければ tf-state-backend スキルが作成
+       bucket         = "{{company.slug}}-tfstate-<ACCOUNT_ID>"   # 無ければ tf-state-backend スキルが作成
        key            = "<namespace>/<project>/terraform.tfstate"
        region         = "ap-northeast-1"
-       dynamodb_table = "aiosiuri-tf-lock"
+       dynamodb_table = "{{company.slug}}-tf-lock"
        encrypt        = true
      }
    }
    ```
-   初回 apply 前に **`tf-state-backend` スキル**を呼ぶ（state基盤の作成＋backend.tf差し込み）。既存のローカルstateアプリは同スキルの migrate-existing（`aws_terraform_apply` の prebuild で `terraform init -migrate-state -force-copy`）でS3へ移行。**mcpb の `terraform init` は `-migrate-state` を付けない**ので移行は必ず prebuild 側で。state用バケット/ロック（`aiosiuri-tf-lock`）は**手で消さない・destroy対象にしない**。コードとHANDOFFは共有ドライブへ退避（揮発対策）。詳細は `tf-state-backend` スキル参照。
+   初回 apply 前に **`tf-state-backend` スキル**を呼ぶ（state基盤の作成＋backend.tf差し込み）。既存のローカルstateアプリは同スキルの migrate-existing（`aws_terraform_apply` の prebuild で `terraform init -migrate-state -force-copy`）でS3へ移行。**mcpb の `terraform init` は `-migrate-state` を付けない**ので移行は必ず prebuild 側で。state用バケット/ロック（`{{company.slug}}-tf-lock`）は**手で消さない・destroy対象にしない**。コードとHANDOFFは共有ドライブへ退避（揮発対策）。詳細は `tf-state-backend` スキル参照。
 
 8. **`aws_s3_object` に `server_side_encryption="AES256"` を明示しない**（S3+CloudFront静的配信時）。既存オブジェクトのstateに古いKMS属性が残っていると、in-place更新が `400 InvalidArgument: ...requires aws:kms` で延々落ちる。**バケット既定の SSE-S3(AES256) に委ねる**のが正解（CloudFront/OACで配信できる）。詰まったら対象オブジェクトを一度 `aws s3api delete-object` → 次の apply でクリーンに新規作成され解消（stateの古い属性が消える）。
 

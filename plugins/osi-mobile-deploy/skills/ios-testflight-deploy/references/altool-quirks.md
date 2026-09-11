@@ -187,7 +187,7 @@ esac
 
 **原因**: Apple は `com.example.*` 系を予約 / disallowed としている。
 
-**対策**: 必ず `com.{org}.{app_name}` 形式。AI OSI URI 案件は `com.aiosiuri.{app}` を推奨。
+**対策**: 必ず `com.{org}.{app_name}` 形式。自社案件は `{{company.reverse_domain}}.{app}` を推奨。
 
 ---
 

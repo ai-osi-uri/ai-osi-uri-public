@@ -1,19 +1,19 @@
 # osi-mobile-deploy
 
-AI OSI URI のネイティブモバイルアプリ（iOS / Android）作成〜配信自動化。「モバイルアプリ作って」の一言で、SwiftUI + Jetpack Compose の Golden Template から新規リポを起こし、Firebase プロビジョニング・アイコン生成・GitHub Secrets 投入・CI 自動修正ループを回し、TestFlight / Google Play Internal Track まで到達させる。
+自社のネイティブモバイルアプリ（iOS / Android）作成〜配信自動化。「モバイルアプリ作って」の一言で、SwiftUI + Jetpack Compose の Golden Template から新規リポを起こし、Firebase プロビジョニング・アイコン生成・GitHub Secrets 投入・CI 自動修正ループを回し、TestFlight / Google Play Internal Track まで到達させる。
 
 `osi-deploy`（Web / SaaS デプロイ）と対を成す、モバイル配信専用プラグイン。
 
 ## スタック方針（重要）
 
-**AI OSI URI 新規モバイルアプリの既定スタック**:
+**新規モバイルアプリの既定スタック**:
 
 | プラットフォーム | UI | 言語 | 最小サポート |
 |---|---|---|---|
 | **iOS** | **SwiftUI** (`@main App`) | Swift 5.10+ | **iOS 16.0** |
 | **Android** | **Jetpack Compose** (`@Composable`) | Kotlin 1.9+ | **minSdk 26**（Android 8.0） |
 
-**Flutter は原則使用しない**（既存 Flutter アプリの移行時のみ `flutter-swift-parity-port` で例外的に扱う）。実運用（MustPost の Flutter→SwiftUI 移植）で得た結論として、新規で単一コードベース（Flutter / React Native）を採用するより、最初からネイティブで書いた方が総コストが低い。OS 標準のアクセシビリティ・ハプティクス・写真ピッカー・通知権限フローに素直に乗れる／iOS 26 / Android 15 の新機能に bridge 遅延なく追える／クラッシュログが 1 発で読める／Firebase iOS/Android SDK は SwiftUI / Compose 公式対応。
+**Flutter は原則使用しない**（既存 Flutter アプリの移行時のみ `flutter-swift-parity-port` で例外的に扱う）。実運用（SampleApp の Flutter→SwiftUI 移植）で得た結論として、新規で単一コードベース（Flutter / React Native）を採用するより、最初からネイティブで書いた方が総コストが低い。OS 標準のアクセシビリティ・ハプティクス・写真ピッカー・通知権限フローに素直に乗れる／iOS 26 / Android 15 の新機能に bridge 遅延なく追える／クラッシュログが 1 発で読める／Firebase iOS/Android SDK は SwiftUI / Compose 公式対応。
 
 新規で「Flutter で作りたい」という要望が来たら、既定がネイティブである旨と、既存資産の移行が必要かを確認する。単なる好みではネイティブで進めるのが本プラグインの方針。
 
@@ -21,11 +21,11 @@ AI OSI URI のネイティブモバイルアプリ（iOS / Android）作成〜�
 
 ### v0.6.0 — ASC App 記録の Phase 0 事前登録（2026-08）
 
-MustPost の prod 初回 TestFlight 配信が 37 秒で失敗した実例（`Could not find App with App Identifier com.aiosiuri.mustpost.prod`）を教訓としてプラグインに定着させる。
+SampleApp の prod 初回 TestFlight 配信が 37 秒で失敗した実例（`Could not find App with App Identifier {{company.reverse_domain}}.sampleapp.prod`）を教訓としてプラグインに定着させる。
 
 - **`deploy-mobile-app` v0.3.0** — Phase 0 に step 4 を追加：**flavor ごとの Apple Developer Portal Bundle ID + App Store Connect App 記録の存在確認を必須化**。`references/create-asc-app-record.rb` ヘルパーと `references/asc-app-record-setup.md` 詳細手順を同梱。Bundle ID は API で作成されるが、App 記録は Admin role 必須なので Web UI に誘導するフォールバック付き
 - **`ios-testflight-deploy` v0.3.0** — Pre-flight セクションを追加し、CI を回す前に ASC 登録の確認ヘルパーに飛ばせる。`ensure_assets_car_in_payload!` の actool `--minimum-deployment-target` を 17.0 → 16.0 に修正（Golden Template の project.yml と一致）
-- **`mobile-secrets-sync` v0.3.0** — Firebase 周りの Secrets を dev/stg/prod の 3 flavor に拡張し、MustPost で実際に必要だった `FIREBASE_ANDROID_APP_ID`（Android Crashlytics 用）と `GCP_SA_KEY_JSON`（`firebase deploy --only functions` 用）を一覧とバッチ例に追加
+- **`mobile-secrets-sync` v0.3.0** — Firebase 周りの Secrets を dev/stg/prod の 3 flavor に拡張し、SampleApp で実際に必要だった `FIREBASE_ANDROID_APP_ID`（Android Crashlytics 用）と `GCP_SA_KEY_JSON`（`firebase deploy --only functions` 用）を一覧とバッチ例に追加
 - **`ci-failure-patterns.md`** — pattern #16 「Could not find App with App Identifier」を追加。症状（fastlane 37 秒失敗）・原因 (Bundle ID / App 記録 未登録)・修正（Phase 0 に戻って `create-asc-app-record.rb`）・再発防止（Phase 0 必須化）の 4 行完備
 
 ### v0.4.0 — 新規はネイティブ既定を明文化（2026-07）
@@ -39,16 +39,16 @@ Flutter→SwiftUI ポートが実運用でほぼ稀（既存の移行案件だ�
 - **template/apps/ios/project.yml** — スタックポリシーコメント追加、iOS deployment target を 16.0 に
 - **template/apps/android/app/build.gradle.kts** — スタックポリシーコメント追加、minSdk を 26 に
 
-### v0.3.0 — MustPost SwiftUI 移植のノウハウ追加（2026-07）
+### v0.3.0 — SampleApp SwiftUI 移植のノウハウ追加（2026-07）
 
-MustPost（Flutter → SwiftUI ネイティブ化）で獲得した実運用ノウハウを 5 スキルで追加。既存スキルとの重複は避け、実際にハマった問題単位で切り出している。
+SampleApp（Flutter → SwiftUI ネイティブ化）で獲得した実運用ノウハウを 5 スキルで追加。既存スキルとの重複は避け、実際にハマった問題単位で切り出している。
 
-- **`ios-sim-auth-backdoor`** — iOS Simulator で Firebase Auth の keychain 永続化を成立させる proper signing 既定（拡張 v1.18.5+ で `xcode_build_for_sim({code_signing: "auto"})` が既定に）と、`mustpost://debug/signin?token=XXX` の Custom Token deep link バックドア（AppDelegate と SwiftUI 側 DeepLinkHandler の両方に置くのがミソ）
+- **`ios-sim-auth-backdoor`** — iOS Simulator で Firebase Auth の keychain 永続化を成立させる proper signing 既定（拡張 v1.18.5+ で `xcode_build_for_sim({code_signing: "auto"})` が既定に）と、`sampleapp://debug/signin?token=XXX` の Custom Token deep link バックドア（AppDelegate と SwiftUI 側 DeepLinkHandler の両方に置くのがミソ）
 - **`flutter-swift-parity-port`** — Flutter → SwiftUI 移植を「感覚で似せる」ではなく inventory → diff → 優先度バッチ → build + 目視 → コミット の 5 フェーズで systematic に回す。日本語ラベル逐語コピー、iOS ネイティブに寄せてよい逸脱ポリシー、Dart→SwiftUI 写像早見表を同梱（v0.4.0 で移行専用として再フレーミング）
 - **`apiv2-callable-iam-gotchas`** — Cloud Functions v2（Cloud Run 実装）の apiv2-* が client から `UNAUTHENTICATED` / `communication error` になる 2 大原因（allUsers → roles/run.invoker の一括付与忘れ + JSONEncoder の snake_case 変換）を潰す
 - **`firestore-bulk-index-sync`** — `firebase deploy --only firestore:indexes` が 50+ index で詰まる問題を、Admin REST 直叩き（`collectionGroups/{cg}/indexes` POST）+ 409 と 400「not necessary」を成功に丸めて冪等化
 - **`xcodegen-project-regen`** — `git pull` 後の「Missing package product 'FirebaseCore'」× 14 個症状を `xcodegen generate --spec apps/ios/project.yml` + Reset/Resolve Packages で 30 秒修復
-- **`ios-testflight-deploy` v0.2.0** — MustPost 実運用中の `.github/workflows/ios-release-auto.yml` 完全版を `references/ios-release-auto.yml.example` に同梱（macos-15 + Xcode 26.x + P12 一時 keychain + auto-signing + flavor 3 種）
+- **`ios-testflight-deploy` v0.2.0** — SampleApp 実運用中の `.github/workflows/ios-release-auto.yml` 完全版を `references/ios-release-auto.yml.example` に同梱（macos-15 + Xcode 26.x + P12 一時 keychain + auto-signing + flavor 3 種）
 
 ### v0.2.0 — 初版（10 スキル）
 
@@ -75,7 +75,7 @@ deploy-mobile-app オーケストレータ + 9 atomic を用意。
 - `android-play-deploy` — Gradle + bundletool + Play Publisher API で Internal Track にアップロード。track: internal → 昇格は `android_promote` MCP で。
 - `ios-appstore-release` — **TestFlight より先**（ビルド昇格・App Store 申請・審査追跡）と Xcode バージョンの N-1 ピン運用（週次カナリア）。2026-08 に osi-deploy から移設。ビルド〜TestFlight の正本 CI は GitHub Actions（`ios-testflight-deploy`）で、本スキルの Xcode Cloud 操作は代替経路。**internal 扱い**（外部配布には含めない）。
 
-**atomic（v0.3.0 追加：MustPost 移植ノウハウ）**:
+**atomic（v0.3.0 追加：SampleApp 移植ノウハウ）**:
 - `ios-sim-auth-backdoor` — Simulator 上で Firebase Auth の keychain と Custom Token deep link を両立させる 2 本立て（keychain + IME 罠を同時に潰す）。
 - **`flutter-swift-parity-port`** — **既存 Flutter アプリ → SwiftUI 移行専用**（v0.4.0 で新規開発では使わないことを明示）。5 フェーズ workflow + 逸脱ポリシー + 写像表。
 - `apiv2-callable-iam-gotchas` — Cloud Functions v2 apiv2-* の allUsers invoker 一括付与 + camelCase encoder pin。

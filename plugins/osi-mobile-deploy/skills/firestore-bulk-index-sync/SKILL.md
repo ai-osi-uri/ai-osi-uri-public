@@ -21,7 +21,7 @@ requires_connectors:
 - 既存 index と衝突する（409 conflict）と処理全体が止まる
 - 「index 作成が進行中」状態で追加 create を出すとエラーで CI が真っ赤に
 
-50 以上の composite index を持つ MustPost 級のプロジェクトでは、これで deploy が
+50 以上の composite index を持つ SampleApp 級のプロジェクトでは、これで deploy が
 毎回不安定になる。
 
 ## 解決
@@ -41,7 +41,7 @@ Firestore Admin REST API を直叩きし、`firestore.indexes.json` を 1 行ず
   run: |
     set -e
     TOKEN=$(gcloud auth print-access-token)
-    PROJECT="mustpost-dev"
+    PROJECT="sampleapp-dev"
     COUNT=$(jq '.indexes | length' firestore.indexes.json)
     echo "→ syncing ${COUNT} composite indexes"
     OK=0; SKIP=0; FAIL=0
@@ -89,7 +89,7 @@ Firestore Admin REST API を直叩きし、`firestore.indexes.json` を 1 行ず
 mcp__AI_OSI_URI_Deploy__mac_shell({
   cmd: "gcloud",
   args: ["auth", "print-access-token"],
-  cwd: "/Users/…/mustpost-native/backend"
+  cwd: "/Users/…/sampleapp-native/backend"
 })
 → TOKEN
 ```
@@ -99,7 +99,7 @@ mcp__AI_OSI_URI_Deploy__mac_shell({
 ```python
 import json, subprocess, urllib.request
 
-project = "mustpost-dev"
+project = "sampleapp-dev"
 token = subprocess.check_output(["gcloud", "auth", "print-access-token"]).decode().strip()
 indexes = json.load(open("backend/firestore.indexes.json"))["indexes"]
 

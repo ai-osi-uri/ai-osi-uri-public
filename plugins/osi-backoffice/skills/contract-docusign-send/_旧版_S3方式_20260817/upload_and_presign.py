@@ -15,7 +15,7 @@ Cowork 側にある契約書ファイル（PDF/DOCX）を、DocuSign が remoteU
 使い方:
   python3 upload_and_presign.py \
       --file "/path/to/契約書.pdf" \
-      --bucket aiosiuri-contract-staging-135728714359 \
+      --bucket {{company.slug}}-contract-staging-<ACCOUNT_ID> \
       --key "outbound/2026-06/Every-WiLL_NDA_20260624.pdf" \
       --region ap-northeast-1 \
       --expires 1800

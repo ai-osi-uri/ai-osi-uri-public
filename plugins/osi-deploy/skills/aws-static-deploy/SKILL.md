@@ -12,6 +12,8 @@ version: 0.1.0
 
 # AWS 静的サイトデプロイ（atomic）
 
+> **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` `{{members.*}}` は、連結フォルダ直下の `osi-profile.md`（雛形: `config/osi-profile.example.md`）の値に置き換えて解釈する。無ければ会社名・案件フォルダ・台帳の有無・使うコネクタを質問して先に作る。値をここに直書きしない。
+
 `gh-create-repo-and-push` で push 済みの GitHub リポジトリ（または直接アップロードされた
 ビルド成果物フォルダ）を受け取り、S3 + CloudFront + ACM + Route 53 で公開する。
 **「Vercel の代わりに AWS で静的サイトをホスト」**するための atomic スキル。
@@ -71,7 +73,7 @@ version: 0.1.0
 ```bash
 # AWS 認証は .mcpb 拡張の対象外。AWS_PROFILE 等は環境変数を優先し、無ければ共有 .env を任意フォールバック
 if [ -z "${AWS_PROFILE:-}" ]; then
-  ENV_PATH="/sessions/<session-id>/mnt/AI OSI URI/.deploy-credentials/.env"
+  ENV_PATH="/sessions/<session-id>/mnt/<連結フォルダ>/.deploy-credentials/.env"
   [ -f "$ENV_PATH" ] && { set -a; source "$ENV_PATH"; set +a; }
 fi
 : "${AWS_PROFILE:?AWS_PROFILE 未設定。環境変数 AWS_PROFILE を設定するか ~/.aws を構成してください}"
@@ -220,7 +222,7 @@ fi
 cat > /tmp/cf_config.json <<EOF
 {
   "CallerReference": "$(date +%s)-$BUCKET_NAME",
-  "Comment": "AI OSI URI $PROJECT_NAME static site",
+  "Comment": "{{company.slug}} $PROJECT_NAME static site",
   "Enabled": true,
   "DefaultRootObject": "index.html",
   $ALIASES_BLOCK,

@@ -5,7 +5,7 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
     <!--
-        AI OSI URI scaffold のプレースホルダロゴ。"M" 一文字をベクターで描く。
+        osi-mobile-deploy scaffold のプレースホルダロゴ。"M" 一文字をベクターで描く。
         adaptive icon の 108x108 キャンバスに、内側 72dp のセーフゾーンで収まる大きさ。
     -->
     <path

@@ -220,7 +220,7 @@ Profile tap(356, 813)
 Post + ボタンは Sim ではカメラが動かないため tap しないでスキップする（実機
 TestFlight でのみ検証）。
 
-保存先は `/tmp/mustpost_<screen>.png` にしておくと Claude が視認可能で
+保存先は `/tmp/sampleapp_<screen>.png` にしておくと Claude が視認可能で
 UI parity 判定に使いやすい。
 
 ---

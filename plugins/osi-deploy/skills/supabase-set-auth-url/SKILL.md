@@ -11,8 +11,7 @@ version: 0.2.1
 
 # Supabase Auth URL 更新（atomic / 拡張ツール版）
 
-本番デプロイ後の URL に `Site URL` と `uri_allow_list` を更新する。**認証情報は AI OSI URI
-Deploy 拡張**が保持する Supabase PAT を使う。`.env` は読まず、拡張の MCP ツール
+本番デプロイ後の URL に `Site URL` と `uri_allow_list` を更新する。**認証情報は AI OSI URI Deploy 拡張**が保持する Supabase PAT を使う。`.env` は読まず、拡張の MCP ツール
 `supabase_set_auth_url` を呼ぶ。
 
 ## 前提条件

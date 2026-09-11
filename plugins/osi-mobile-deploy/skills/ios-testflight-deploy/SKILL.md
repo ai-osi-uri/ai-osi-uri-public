@@ -14,6 +14,8 @@ requires_connectors:
 
 # ios-testflight-deploy — iOS TestFlight 配信の詳細ノウハウ
 
+> **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` `{{members.*}}` は、連結フォルダ直下の `osi-profile.md`（雛形: `config/osi-profile.example.md`）の値に置き換えて解釈する。無ければ会社名・案件フォルダ・台帳の有無・使うコネクタを質問して先に作る。値をここに直書きしない。
+
 Golden Template には既に「動く形」で焼き込み済み。本スキルは:
 
 1. 実行の入り口（fastlane lane を叩く）
@@ -21,7 +23,7 @@ Golden Template には既に「動く形」で焼き込み済み。本スキル�
 
 の 2 つを担う。**同じ罠で二度時間を溶かさない**ためのナレッジ層。
 
-> **v0.2.0 追記**: MustPost SwiftUI 移植で実運用中の `.github/workflows/ios-release-auto.yml`
+> **v0.2.0 追記**: SampleApp SwiftUI 移植で実運用中の `.github/workflows/ios-release-auto.yml`
 > の完全版を `references/ios-release-auto.yml.example` に同梱。必須 GitHub Secrets（7個）と
 > flavor ごとの plist secret 名も冒頭にコメントで明記。Golden Template から生成される
 > workflow はこれと 1:1 で対応する。追加獲得したノウハウ:
@@ -75,7 +77,7 @@ bundle exec fastlane ios ios_beta_auto flavor:"${FLAVOR:-dev}" notes:"${NOTES:-}
 flavor を新規に配信する場合、**CI を回す前に** Apple Developer Portal の Bundle ID と
 App Store Connect の App 記録の両方が存在することを確認する。片方でも欠けると
 fastlane `get_provisioning_profile` / `pilot` が 「Could not find App with App Identifier」
-で 37 秒で失敗する（MustPost 2026-08-05 の prod 初回配信で実際に踏んだ）。
+で 37 秒で失敗する（SampleApp 2026-08-05 の prod 初回配信で実際に踏んだ）。
 
 確認・自動化は `deploy-mobile-app/references/create-asc-app-record.rb` のヘルパーを使う。
 Bundle ID は API で作れるが、App 記録の作成は Admin role 必須なのでキーの role が

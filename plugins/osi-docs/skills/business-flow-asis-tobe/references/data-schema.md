@@ -26,7 +26,7 @@
 {
   "title": "業務 AS-IS / TO-BE",
   "subtitle": "4ツールを人間が繋ぐ運用から、AIが一次処理し人間が承認する運用へ",
-  "client": "AI OSI URI",
+  "client": "サンプル株式会社",
   "audience": "NEXT ONE 営業部 / 代理店事業部 / 代理店窓口担当 / 経営",
   "date": "2026-04-29",
   "eyebrow": "ENEROPS PLATFORM"   // 表紙左上の小さなラベル（任意）

@@ -79,7 +79,7 @@ deploy の**後に**、apiv2-* / content-* の全サービスへ `roles/run.invo
 
 ```
 mcp__AI_OSI_URI_Deploy__gcp_iam_add_roles_batch({
-  project_id: "mustpost-dev",
+  project_id: "sampleapp-dev",
   resources: [
     { type: "cloud-run", location: "asia-northeast1", name: "apiv2-account" },
     { type: "cloud-run", location: "asia-northeast1", name: "apiv2-posts" },

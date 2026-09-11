@@ -22,6 +22,8 @@ requires_connectors:
 
 # deploy-mobile-app — モバイルアプリ新規作成オーケストレータ
 
+> **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` `{{members.*}}` は、連結フォルダ直下の `osi-profile.md`（雛形: `config/osi-profile.example.md`）の値に置き換えて解釈する。無ければ会社名・案件フォルダ・台帳の有無・使うコネクタを質問して先に作る。値をここに直書きしない。
+
 「モバイルアプリ作って」と言われたら、業種・機能・iOS/Android の希望を聞き出して、
 Golden Template（SwiftUI + Jetpack Compose のネイティブ 2 本立て）から新規リポを起こし、
 Firebase プロビジョニング・Secrets 投入・CI 監視・TestFlight / Play Internal Track 到達
@@ -31,7 +33,7 @@ Firebase プロビジョニング・Secrets 投入・CI 監視・TestFlight / Pl
 > scaffold / Firebase / Secrets / icon / deploy は atomic スキル（`mobile-*` / `ios-*` /
 > `android-*`）に委譲する。単一責任を守ることで、途中失敗しても再開できる。
 
-> **スタック方針**：AI OSI URI の新規モバイルアプリは **iOS = SwiftUI / Android =
+> **スタック方針**：自社の新規モバイルアプリは **iOS = SwiftUI / Android =
 > Kotlin + Jetpack Compose** を既定とする。Flutter / React Native は greenfield では
 > 選ばない。ユーザーが明示的に「Flutter で作って」と要望した場合は、既定がネイティブで
 > ある旨と（採用したい強い事情があるかを）確認し、既存 Flutter アプリからの移行なら
@@ -54,7 +56,7 @@ Firebase プロビジョニング・Secrets 投入・CI 監視・TestFlight / Pl
 - Bundle ID (iOS): {BUNDLE_ID}
 - Package Name (Android): {PACKAGE_NAME}
 - Targets: {iOS / Android / both}
-- Stack: SwiftUI + Jetpack Compose (AI OSI URI 既定 — Flutter は不使用)
+- Stack: SwiftUI + Jetpack Compose (既定 — Flutter は不使用)
 - GitHub Org: {ai-osi-uri | personal}
 - Firebase Project: {project_id}
 
@@ -131,7 +133,7 @@ Firebase プロビジョニング・Secrets 投入・CI 監視・TestFlight / Pl
    export ASC_ISSUER_ID="$(security find-generic-password -s APP_STORE_CONNECT_API_KEY_ISSUER_ID -a $USER -w)"
    export ASC_P8_B64="$(security find-generic-password -s APP_STORE_CONNECT_API_KEY_B64 -a $USER -w)"
    for FLAVOR in dev stg prod; do
-     export TARGET_BUNDLE_ID="com.aiosiuri.{app_lower}.$FLAVOR"
+     export TARGET_BUNDLE_ID="{{company.reverse_domain}}.{app_lower}.$FLAVOR"
      export TARGET_BUNDLE_NAME="{APP_NAME} $(echo $FLAVOR | tr a-z A-Z)"
      export TARGET_APP_NAME="{APP_NAME}"
      export TARGET_SKU="{app_lower}-$FLAVOR-$(date +%Y)"
@@ -141,7 +143,7 @@ Firebase プロビジョニング・Secrets 投入・CI 監視・TestFlight / Pl
 
    Bundle ID 作成は API で自動化される（App Manager role で足りる）。App 記録の作成は
    Admin role 必須なので、失敗した flavor はスクリプトの案内どおり Web UI で作成する。
-   詳細と背景は `references/asc-app-record-setup.md` 参照（MustPost で実際に踏んだ罠つき）。
+   詳細と背景は `references/asc-app-record-setup.md` 参照（SampleApp で実際に踏んだ罠つき）。
 
    **どれか 1 flavor でも App 記録が無ければ、その flavor は Phase 6-7 で必ず失敗する**。
    halt して人にお願いする（勝手に "あとで" と流さない）。
@@ -154,19 +156,19 @@ Firebase プロビジョニング・Secrets 投入・CI 監視・TestFlight / Pl
 
 | 項目 | 例 | デフォルト |
 |---|---|---|
-| APP_NAME | `Foo` / `MustPost` | 必須（推測しない） |
+| APP_NAME | `Foo` / `SampleApp` | 必須（推測しない） |
 | APP_DESCRIPTION | `メモを記録するアプリ` | 「Hello World デモ」 |
 | CORE_FEATURES | `写真を投稿できる / 位置情報を保存` | `Hello World`（空） |
 | TARGETS | `iOS only` / `Android only` / `both` | `both` |
 | STACK | 既定は **iOS = SwiftUI / Android = Kotlin + Jetpack Compose**。Flutter は聞かない | ネイティブ 2 本立て |
-| BUNDLE_ID | `com.aiosiuri.foo` | `com.aiosiuri.{app_name_lower}` |
-| PACKAGE_NAME | `com.aiosiuri.foo` | Bundle ID と同じ |
+| BUNDLE_ID | `{{company.reverse_domain}}.foo` | `{{company.reverse_domain}}.{app_name_lower}` |
+| PACKAGE_NAME | `{{company.reverse_domain}}.foo` | Bundle ID と同じ |
 | DISPLAY_NAME | `Foo` | APP_NAME をそのまま |
 | GITHUB_ORG | `ai-osi-uri` / `personal` | `create-app` の `USE_ORG` 判定に準拠 |
 | ICON_SOURCE | 1024x1024 PNG / 画像URL / なし（nano-banana で生成） | なし |
 
 **「Flutter で作って」と要望が来たとき**:
-1. AI OSI URI の既定スタックがネイティブ 2 本立てで、実運用（MustPost 移植）で
+1. 自社の既定スタックがネイティブ 2 本立てで、実運用（SampleApp 移植）で
    得た結論に基づくものであることを説明
 2. 既存 Flutter アプリからの移行なら `flutter-swift-parity-port` を案内
 3. 新規で Flutter を採用したい強い理由（例：既存の Flutter プラグイン資産、チームの
@@ -180,9 +182,9 @@ Firebase プロビジョニング・Secrets 投入・CI 監視・TestFlight / Pl
 以下でよろしいですか？
 
   アプリ名: Foo
-  スタック: SwiftUI (iOS) + Jetpack Compose (Android)   ← AI OSI URI 既定のネイティブ 2 本立て
-  Bundle ID: com.aiosiuri.foo
-  Package Name: com.aiosiuri.foo
+  スタック: SwiftUI (iOS) + Jetpack Compose (Android)   ← 既定のネイティブ 2 本立て
+  Bundle ID: {{company.reverse_domain}}.foo
+  Package Name: {{company.reverse_domain}}.foo
   ターゲット: iOS + Android
   リポ配置先: github.com/ai-osi-uri/foo
   アイコン: 仮ロゴ（nano-banana 自動生成）→ 後で差し替え可能

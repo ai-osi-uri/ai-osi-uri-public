@@ -48,9 +48,9 @@
 - ステータス：created（ドラフト）/ sent / completed / voided
 - 署名者：
   - 甲：{氏名}（{会社名} / {肩書}）<{email}> routingOrder=1
-  - 乙：渚 有瓶（AI OSI URI 株式会社 / 代表取締役）<{email}> routingOrder=2
+  - 乙：{{company.representative}}（{{company.name}}）<{email}> routingOrder=2
 - CC：{あれば}
-- S3キー：outbound/{YYYY-MM}/{相手先}_{契約名}_{YYYYMMDD}.pdf（バケット aiosiuri-contract-staging-…、1日で自動失効）
+- S3キー：outbound/{YYYY-MM}/{相手先}_{契約名}_{YYYYMMDD}.pdf（バケット {{company.slug}}-contract-staging-…、1日で自動失効）
 - チェック結果：問題なし {n} / 要確認 {n} / 要修正 {n}（主な論点：…）
 - 備考：
 ```

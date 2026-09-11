@@ -23,18 +23,18 @@
 | plugins/osi-deploy/skills/setup-deploy-environment/SKILL.md | 4 | 共有ドライブ | デプロイを使えるようにする初回セットアップ。**共有ドライブの .env は使わず**、 |
 | plugins/osi-deploy/skills/setup-deploy-environment/SKILL.md | 19 | 共有ドライブ | > 旧版は `.deploy-credentials/.env` にトークンを書き込んでいたが、平文・共有ドライブ同期・ |
 | plugins/osi-deploy/skills/setup-deploy-environment/SKILL.md | 25 | 共有ドライブ | （社内手順：共有ドライブ「環境構築キット」参照） |
-| plugins/osi-deploy/skills/aws-static-deploy/SKILL.md | 36 | 共有ドライブ | 共有ドライブの `.deploy-credentials/.env` は **任意フォールバック**としてのみ参照する。 |
+| plugins/osi-deploy/skills/aws-static-deploy/SKILL.md | 38 | 共有ドライブ | 共有ドライブの `.deploy-credentials/.env` は **任意フォールバック**としてのみ参照する。 |
 | plugins/osi-deploy/skills/update-deploy/SKILL.md | 68 | GITHUB_ORG | \| `repo_owner` \| `ai-osi-uri` または個人 username \| 既定は GITHUB_ORG / GITHUB_USERNAME \| |
-| plugins/osi-deploy/skills/create-app/SKILL.md | 56 | GITHUB_ORG | **重要:** `GITHUB_ORG` が未設定だと、`github_create_repo_and_push` は `owner_override` を |
+| plugins/osi-deploy/skills/create-app/SKILL.md | 58 | GITHUB_ORG | **重要:** `GITHUB_ORG` が未設定だと、`github_create_repo_and_push` は `owner_override` を |
 | plugins/osi-deploy/skills/create-app/references/drive-record.md | 21 | Notion | Notion のリード一覧に案件が登録されていれば、対応する Drive 案件フォルダが存在する。 |
 | plugins/osi-deploy/skills/create-app/references/drive-record.md | 66 | Notion | \| 案件 \| （Notion リード ID / 案件名 / なし） \| |
 | plugins/osi-deploy/skills/create-app/references/aws-app-gotchas.md | 54 | 共有ドライブ | 初回 apply 前に **`tf-state-backend` スキル**を呼ぶ（state基盤の作成＋backend.tf差し込み）。既存のローカルstateアプリは同スキルの migrate-existing（`aws_terrafo |
-| plugins/osi-deploy/skills/tf-state-backend/SKILL.md | 66 | 共有ドライブ | 6. コード一式＋HANDOFF を共有ドライブへ退避（揮発対策） |
-| plugins/osi-deploy/skills/tf-state-backend/SKILL.md | 151 | 共有ドライブ | 復旧時にバケット/キーが分からなくなる**。コード一式を共有ドライブの案件フォルダへ退避する。 |
-| plugins/osi-backoffice/skills/contract-docusign-send/SKILL.md | 92 | 共有ドライブ | - **Drive（マウント済み共有ドライブ）**：格納先は `references/storage-and-naming.md` の定義に従う。**このスキルにパスを直書きしない**（組織ごとに違い、移行でも動く）。 |
+| plugins/osi-deploy/skills/tf-state-backend/SKILL.md | 68 | 共有ドライブ | 6. コード一式＋HANDOFF を共有ドライブへ退避（揮発対策） |
+| plugins/osi-deploy/skills/tf-state-backend/SKILL.md | 153 | 共有ドライブ | 復旧時にバケット/キーが分からなくなる**。コード一式を共有ドライブの案件フォルダへ退避する。 |
+| plugins/osi-backoffice/skills/contract-docusign-send/SKILL.md | 94 | 共有ドライブ | - **Drive（マウント済み共有ドライブ）**：格納先は `references/storage-and-naming.md` の定義に従う。**このスキルにパスを直書きしない**（組織ごとに違い、移行でも動く）。 |
 | plugins/osi-backoffice/skills/contract-docusign-send/_旧版_S3方式_20260817/docusign-and-s3.md | 30 | 共有ドライブ | - **file tools（Mac）**：outputs と共有ドライブのみ書ける。 |
 | plugins/osi-backoffice/skills/contract-docusign-send/references/storage-and-naming.md | 3 | 共有ドライブ | 契約の正本は Drive の**契約書フォルダ**（`{契約書ルート}`）。マウント済み共有ドライブに書くと Drive に同期される。 |
-| plugins/osi-mobile-deploy/skills/deploy-mobile-app/SKILL.md | 165 | GITHUB_ORG | \| GITHUB_ORG \| `ai-osi-uri` / `personal` \| `create-app` の `USE_ORG` 判定に準拠 \| |
+| plugins/osi-mobile-deploy/skills/deploy-mobile-app/SKILL.md | 167 | GITHUB_ORG | \| GITHUB_ORG \| `ai-osi-uri` / `personal` \| `create-app` の `USE_ORG` 判定に準拠 \| |
 | plugins/osi-creative/skills/ai-video-production/references/hook-insight.md | 57 | CAIO | この一言だと、B4（会社にひとりAIの意思決定者を置く＝CAIO）がそのまま答えになる。 |
 | plugins/osi-docs/skills/business-flow-asis-tobe/references/data-schema.md | 135 | 共有ドライブ | { "name": "Excel管理簿", "where": "営業共有ドライブ" } |
 | plugins/osi-docs/skills/business-flow-asis-tobe/references/data-schema.md | 167 | Notion | \| `name`    \| yes  \| ドキュメント名（例：「契約書ドラフト Word」「Notion 商談 DB」） \| |

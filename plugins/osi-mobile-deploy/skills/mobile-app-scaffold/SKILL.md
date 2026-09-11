@@ -13,7 +13,9 @@ requires_connectors:
 
 # mobile-app-scaffold — Golden Template（SwiftUI + Compose）から新規モバイルリポを起こす
 
-**方針**：AI OSI URI の新規モバイルアプリは **ネイティブ 2 本立て**（iOS = SwiftUI、
+> **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` `{{members.*}}` は、連結フォルダ直下の `osi-profile.md`（雛形: `config/osi-profile.example.md`）の値に置き換えて解釈する。無ければ会社名・案件フォルダ・台帳の有無・使うコネクタを質問して先に作る。値をここに直書きしない。
+
+**方針**：自社の新規モバイルアプリは **ネイティブ 2 本立て**（iOS = SwiftUI、
 Android = Kotlin + Jetpack Compose）を **既定**とする。単一コードベースの誘惑（Flutter /
 React Native）は greenfield では **選ばない**。理由は次の通り:
 
@@ -21,7 +23,7 @@ React Native）は greenfield では **選ばない**。理由は次の通り:
 - iOS 26 / Android 15 の新機能（Live Activities, Predictive Back, Widget, etc.）に **その日から**追えて、bridge の遅延を待たなくてよい
 - クラッシュログが `symbolicate` / `mapping.txt` で 1 発で読める（Flutter engine の thunk を辿らなくてよい）
 - Firebase iOS SDK / Firebase Android SDK は SwiftUI / Compose 対応が公式でドキュメント化されている
-- AI OSI URI の実運用（MustPost の Flutter→SwiftUI 移植）で「結局ネイティブに寄せる」という結論に至った
+- 自社の実運用（SampleApp の Flutter→SwiftUI 移植）で「結局ネイティブに寄せる」という結論に至った
 
 **Flutter を選ぶのは、既存の Flutter アプリの改修が必要な場合だけ**（そのときは
 `flutter-swift-parity-port` の 5 フェーズ移植ワークフローに乗る）。**新規で Flutter を
@@ -59,8 +61,8 @@ plist / json 未配置でも起動時に crash しない guard 済み。
 | 項目 | 必須 | 説明 | 例 |
 |---|---|---|---|
 | `app_name` | ✅ | PascalCase | `Foo` |
-| `bundle_id` | ✅ | iOS Bundle ID | `com.aiosiuri.foo` |
-| `package_name` | ✅ | Android Package Name（= applicationId） | `com.aiosiuri.foo` |
+| `bundle_id` | ✅ | iOS Bundle ID | `{{company.reverse_domain}}.foo` |
+| `package_name` | ✅ | Android Package Name（= applicationId） | `{{company.reverse_domain}}.foo` |
 | `display_name` | 任意 | 画面表示名（既定: `app_name`） | `Foo` |
 | `team_id` | 任意 | Apple Developer Team ID（既定: Keychain の `APPLE_TEAM_ID`） | `24X327Z9SJ` |
 | `targets` | 任意 | `ios` / `android` / `both`（既定: `both`） | `both` |
@@ -173,7 +175,7 @@ mcp__AI_OSI_URI_Deploy__github_create_repo_and_push:
   repo_name: {app_name_lower}
   owner_override: {ai-osi-uri or personal}
   private: true
-  description: "{app_name} — created by AI OSI URI osi-mobile-deploy (SwiftUI + Compose)"
+  description: "{app_name} — created by osi-mobile-deploy (SwiftUI + Compose)"
 ```
 
 ## 生成される Golden Template のプロジェクトレイアウト
@@ -259,7 +261,7 @@ README.md
 ## 注意事項
 
 - **既定はネイティブ 2 本立て**：iOS = SwiftUI, Android = Kotlin + Jetpack Compose。Flutter / React Native は greenfield では選ばない
-- **Bundle ID / Package Name は同じ値で OK**（`com.aiosiuri.foo` 統一）。iOS と Android で分けたい特別な理由がある時だけ変える
+- **Bundle ID / Package Name は同じ値で OK**（`{{company.reverse_domain}}.foo` 統一）。iOS と Android で分けたい特別な理由がある時だけ変える
 - **Team ID が Keychain に無い** → Phase 0 でチェック済み前提。抜けていれば halt
 - Golden Template 側にある `.github/workflows/*.yml` は既に「今日の罠回避全部入り」。scaffold 時に workflow は書き換えない（Bundle ID / Package Name の env だけ差し替える）
 - `Podfile` は入っていない（SPM のみで組む前提）。Firebase iOS SDK も SPM から入れる

@@ -54,7 +54,7 @@ Web 版 `update-deploy` と同じ:
 | 項目 | 抽出例 |
 |---|---|
 | `repo_owner` | `ai-osi-uri` |
-| `repo_name` | `mustpost-native` |
+| `repo_name` | `sampleapp-native` |
 | `platform` | iOS / Android / both |
 | `bundle_id` / `package_name` | ローカル repo の `project.yml` / `build.gradle.kts` から抽出 |
 

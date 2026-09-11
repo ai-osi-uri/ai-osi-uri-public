@@ -1,7 +1,7 @@
 ---
 name: meishi-generator
 description: >
-  AI OSI URI の名刺（表面）のラクスル入稿用PDFを自動生成するスキル。
+  名刺（表面）のラクスル入稿用PDFを自動生成するスキル。
   「○○さんの名刺を作って」「新しいメンバーの名刺データを作成」「名刺を発注したい」
   「入稿データを作って」「名刺PDFを生成」など、名刺の作成・発注準備に関わるリクエストで発動する。
   会社共通デザイン（ロゴ・社名・住所・URL・トンボ）は原本の .ai（PDF互換）のベクターデータを
@@ -15,11 +15,11 @@ requires_connectors:
     provision: mcpb
 ---
 
-# 名刺入稿PDFジェネレーター（AI OSI URI）
+# 名刺入稿PDFジェネレーター
 
 ## 概要
 
-原本テンプレ（`scripts/template_noemail.pdf` = 松尾さん版ベース / `scripts/template_email.pdf` = 坂口さん版ベース）の可変部分を白マスクで消し、キャリブレーション済みの座標・サイズ・字間で新しい人のテキストを重ねる方式。固定要素は原本ベクターがそのまま残るため、印刷品質は原本と同一。
+原本テンプレ（`scripts/template_noemail.pdf` = テンプレ A ベース / `scripts/template_email.pdf` = テンプレ B ベース）の可変部分を白マスクで消し、キャリブレーション済みの座標・サイズ・字間で新しい人のテキストを重ねる方式。固定要素は原本ベクターがそのまま残るため、印刷品質は原本と同一。
 
 - 漢字・かな: Noto Sans CJK JP Medium（サブセット化→TrueType変換して埋め込み）
 - 英字・数字: Montserrat 500（原本の欧文デザインとほぼ一致することを確認済み）
@@ -37,7 +37,7 @@ requires_connectors:
 2. **作業コピーを作る（下の「実行環境の準備」を必ず先に実施）**。以後 `/tmp/meishi` で実行:
 
 ```bash
-cd /tmp/meishi && python3 meishi_gen.py '{"name":"山田 太郎","romaji":"Taro Yamada","title":"エンジニア","tel":"080-1234-5678","email":"yamada@ai-osi-uri.com","out":"/tmp/meishi_out.pdf"}'
+cd /tmp/meishi && python3 meishi_gen.py '{"name":"山田 太郎","romaji":"Taro Yamada","title":"エンジニア","tel":"080-1234-5678","email":"yamada@example.com","out":"/tmp/meishi_out.pdf"}'
 ```
 
    `email` は省略可（`null` または キー自体を省く）。
