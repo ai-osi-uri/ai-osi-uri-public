@@ -1,6 +1,6 @@
 {
   "name": "osi-core",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "横断オーケストレーション・品質層・入口。はじめて（getting-started）で会社プロファイルと初期環境を整え、文字起こしや長文を適切な業務スキルへ振り分け、調査・提案・記事の主張を独立ファクトチェックする。",
   "author": {
     "name": "AI OSI URI",
