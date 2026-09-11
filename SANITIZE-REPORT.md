@@ -2,7 +2,7 @@
 
 対象プラグイン: osi-creative, osi-sales, osi-docs, osi-deploy, osi-mobile-deploy, osi-knowledge, osi-finance, osi-core, osi-backoffice, osi-marketing
 
-以下の 130 箇所に要注意語が残っています。publish 前に人手で確認してください（自動削除は文書を壊すため行いません）。
+以下の 134 箇所に要注意語が残っています。publish 前に人手で確認してください（自動削除は文書を壊すため行いません）。
 
 | ファイル | 行 | 語 | 抜粋 |
 |---|---|---|---|
@@ -25,6 +25,10 @@
 | plugins/osi-core/skills/transcript-router/SKILL.md | 37 | Plaud | ## Plaud MCP からの取得（貼り付け不要の入口） |
 | plugins/osi-core/skills/transcript-router/SKILL.md | 38 | Plaud | Plaud MCP コネクタ（`list_files` / `get_transcript` 等）が利用可能なら、文字起こしの |
 | plugins/osi-core/skills/transcript-router/references/skill-customization.md | 35 | CAIO | - サービス = CAIO |
+| plugins/osi-core/skills/getting-started/SKILL.md | 40 | Plaud | 3. 見えているツール名から、繋がっているコネクタを列挙する（AI OSI URI Deploy / AI OSI URI Finance / AI OSI URI Creative / Gmail / Slack / Google Dri |
+| plugins/osi-core/skills/getting-started/SKILL.md | 88 | Plaud | \| MoneyForward / DocuSign / Plaud / Obsidian \| 軽い読み取り 1 回 \| 同上 \| |
+| plugins/osi-core/skills/getting-started/references/tiers.md | 68 | Plaud | \| osi-sales \| `meeting-minutes` \| slack, box, plaud \| ○ \| 商談議事録を Plaud の文字起こしから自動生成し、Drive の `03_制作・成果物/` に docx として格納した |
+| plugins/osi-core/skills/getting-started/scripts/init_kit.py | 31 | CAIO | "CAIO担当", "サポート", "アサイン状態", "次アクション", "次アクション期日", "最終接触日", |
 | plugins/osi-deploy/skills/setup-deploy-environment/SKILL.md | 4 | 共有ドライブ | デプロイを使えるようにする初回セットアップ。**共有ドライブの .env は使わず**、 |
 | plugins/osi-deploy/skills/setup-deploy-environment/SKILL.md | 19 | 共有ドライブ | > 旧版は `.deploy-credentials/.env` にトークンを書き込んでいたが、平文・共有ドライブ同期・ |
 | plugins/osi-deploy/skills/setup-deploy-environment/SKILL.md | 25 | 共有ドライブ | （社内手順：共有ドライブ「環境構築キット」参照） |

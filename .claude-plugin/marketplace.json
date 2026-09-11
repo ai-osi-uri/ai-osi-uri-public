@@ -151,8 +151,8 @@
     {
       "name": "osi-core",
       "source": "./plugins/osi-core",
-      "description": "横断オーケストレーションと品質ゲート。入力振り分けと独立ファクトチェックを提供。",
-      "version": "0.2.1",
+      "description": "横断オーケストレーション・品質層・入口。はじめて（getting-started）で会社プロファイルと初期環境を整え、入力振り分けと独立ファクトチェックを行う。",
+      "version": "0.3.0",
       "category": "core",
       "tags": [
         "core",
