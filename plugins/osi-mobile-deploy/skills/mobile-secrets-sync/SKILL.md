@@ -15,6 +15,8 @@ requires_connectors:
 
 # mobile-secrets-sync — GitHub Secrets への全自動投入
 
+> **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` `{{members.*}}` は、連結フォルダ直下の `osi-profile.md`（雛形: `config/osi-profile.example.md`）の値に置き換えて解釈する。無ければ会社名・案件フォルダ・台帳の有無・使うコネクタを質問して先に作る。値をここに直書きしない。
+
 **手動 curl / bash / libsodium install はもう不要**。v0.2.0 から MCP ツール
 `github_set_secrets_batch` + `mobile_generate_keystore` に完全委譲する。
 
@@ -27,7 +29,7 @@ requires_connectors:
 | `targets` | 任意 | `ios` / `android` / `both`（既定: `both`） |
 | `include_firebase` | 任意 | GoogleService-Info.plist / google-services.json も投入（既定: true） |
 | `generate_keystore_if_missing` | 任意 | Keychain に Android keystore 無い場合に自動生成（既定: true） |
-| `keystore_backup_dir` | 任意 | keystore バックアップ先 Drive パス（既定: `21.PJT資料/00.共通/mobile-release/keystores/`） |
+| `keystore_backup_dir` | 任意 | keystore バックアップ先 Drive パス（既定: `{{paths.shared}}/mobile-release/keystores/`） |
 | `dry_run` | 任意 | true なら「何を投入するか」だけ表示して PUT はしない |
 
 ## 投入する Secrets（12〜13個）
@@ -229,7 +231,7 @@ github_list_secrets({repo_owner, repo_name}) を再度叩いて、
   "succeeded": 13,
   "failed": 0,
   "generated_keystore": true,
-  "keystore_backup_path": "21.PJT資料/00.共通/mobile-release/keystores/{repo_name}-release.jks",
+  "keystore_backup_path": "{{paths.shared}}/mobile-release/keystores/{repo_name}-release.jks",
   "method": "github_set_secrets_batch (MCP v1.17.3+)"
 }
 ```

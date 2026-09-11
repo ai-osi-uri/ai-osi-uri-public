@@ -22,6 +22,8 @@ requires_connectors:
 
 # osi-finance-payment-intake（受領請求書 → 支払予定 起票）
 
+> **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` `{{members.*}}` は、連結フォルダ直下の `osi-profile.md`（雛形: `config/osi-profile.example.md`）の値に置き換えて解釈する。無ければ会社名・案件フォルダ・台帳の有無・使うコネクタを質問して先に作る。値をここに直書きしない。
+
 > **組織固有値（社名・登録番号・振込先・税率・採番ルール・Drive ルート／フォルダ名・台帳ファイル名・
 > 支払先→科目マッピング等）は `config/osi-finance-settings.md`（テンプレ：`config/osi-finance-settings.example.md`）
 > を参照する。** 実値版が無ければユーザーに作成を案内する。
@@ -61,7 +63,7 @@ requires_connectors:
 ## 手順
 
 ### 1. 受領・格納
-入口に応じて PDF を取得し、`{請求管理ルート}/{受領請求書}/YYYY-MM/`（既定: `31.請求管理/01.受領請求書/YYYY-MM/`）に格納する。
+入口に応じて PDF を取得し、`{請求管理ルート}/{受領請求書}/YYYY-MM/`（既定: `{{paths.finance}}/01.受領請求書/YYYY-MM/`）に格納する。
 - (a) **Cowork 直接アップロード**：ユーザーがドロップした PDF をそのまま読み、上記フォルダにコピーして格納する
   （bash で Drive のローカル同期パスへ `cp`。クラウドのみで `cp` が失敗する場合は Read で一度ダウンロードしてから格納）。
 - (b) Drive 手置き：当該フォルダの新規 PDF を対象にする。

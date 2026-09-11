@@ -2,7 +2,7 @@
 name: osi-finance-contract-intake
 description: >
   OSI Finance の請求業務の起点。Gmail（＋手動投入）から契約書PDFを収集して Drive の
-  契約書フォルダ（設定の `請求管理ルート/契約書`、例: `31.請求管理/00.契約書/`）に格納し、請求管理台帳の「契約マスタ」に起票したうえで、契約期間
+  契約書フォルダ（設定の `請求管理ルート/契約書`、例: `{{paths.contracts}}/`）に格納し、請求管理台帳の「契約マスタ」に起票したうえで、契約期間
   （開始〜終了）の各月に「月次請求スケジュール」の請求予定行を自動展開する。DocuSignは「自社が
   送った契約」のメタ補完にのみ使う任意の補助。金額・期間は契約PDFの読み取りを中心に取得する。
   台帳へ反映するタイミングは設定の `WRITE_CONFIRMATION`（事前確認=人が確認してから反映／
@@ -22,9 +22,11 @@ connector_prose_ok:  # DocuSign は ai-osi-uri-finance の ds_* 経由。docusig
 
 # osi-finance-contract-intake（契約取込 → 請求スケジュール展開）
 
+> **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` `{{members.*}}` は、連結フォルダ直下の `osi-profile.md`（雛形: `config/osi-profile.example.md`）の値に置き換えて解釈する。無ければ会社名・案件フォルダ・台帳の有無・使うコネクタを質問して先に作る。値をここに直書きしない。
+
 > **組織固有値（Drive ルート／フォルダ名・台帳ファイル名・採番ルール・税率・支払サイト等）は
 > `config/osi-finance-settings.md`（テンプレ：`config/osi-finance-settings.example.md`）を参照する。**
-> 本文中の `31.請求管理/00.契約書/` 等のパスは `osi-finance-settings` の `請求管理ルート/契約書` を指す例示。
+> 本文中の `{{paths.contracts}}/` 等のパスは `osi-finance-settings` の `請求管理ルート/契約書` を指す例示。
 
 契約書を正本に請求を回すための入口。**収集の正本は Gmail。** 自社送付・先方送付・他社サイン
 （クラウドサイン等）・紙スキャンは、いずれも最終的にメールで届くため、Gmail を一次収集点にする。
@@ -37,7 +39,7 @@ connector_prose_ok:  # DocuSign は ai-osi-uri-finance の ds_* 経由。docusig
 
 ## 前提コネクタ
 
-- Gmail（検索・添付取得）、Google Drive / 台帳（設定の `請求管理ルート`、例: `31.請求管理`）。
+- Gmail（検索・添付取得）、Google Drive / 台帳（設定の `請求管理ルート`、例: `{{paths.finance}}`）。
 - DocuSign（任意・補助）：`getEnvelopes` / `listEnvelopeDocuments` で自社送付契約のメタ・PDFを補完。
   Navigator API（構造化金額・期間）はプラン外なので使わない。
 
@@ -52,7 +54,7 @@ connector_prose_ok:  # DocuSign は ai-osi-uri-finance の ds_* 経由。docusig
 
 ### 2. 契約PDFの格納（契約書フォルダ）
 - 添付契約PDFを **取引先ID×方向のフォルダ**（`{契約書ルート}/02.取引先別/{取引先ID}.{企業名}/{受注（AR）｜発注（AP）｜NDA・覚書}/`）に保存。命名：`【状態】{契約種別}_{件名}_{締結日}.pdf`（状態=素案/締結済）。※契約原本の正本は `{契約書ルート}/02.取引先別/`。
-> **フォルダのパスをここに直書きしないこと。**2026-08-12 の移行で `30.契約管理/` `31.請求管理/` は
+> **フォルダのパスをここに直書きしないこと。**2026-08-12 の移行で旧フォルダ（契約管理・請求管理）は
 > 消えたが、このスキルは 2026-08-18 に発見されるまで消えたパスを指したままだった。
 > 実値は設定（`osi-finance-settings`）から解決する。構造は
 > `osi-finance-setup/references/ledger-structure.md` を参照。

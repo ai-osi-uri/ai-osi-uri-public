@@ -348,7 +348,7 @@ scaffold → gh-create-repo-and-push → harness-init
 > 詳細: [references/drive-record.md](references/drive-record.md)
 
 1. `アプリ情報_README.md` を生成（公開URL / リポ / 構成 / 更新手順）
-2. `_アプリ台帳.md` に 1 行追記
+2. アプリ台帳（`{{ledgers.apps}}`）に 1 行追記
 3. evidence を `deploy-progress.md` に貼る
 
 **DoD**: この記録なしに完了レポートを出さない。

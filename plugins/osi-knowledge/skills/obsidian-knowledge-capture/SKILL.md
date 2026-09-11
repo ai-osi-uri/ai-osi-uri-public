@@ -1,6 +1,6 @@
 ---
 name: obsidian-knowledge-capture
-description: "Obsidian vault（~/ObsidianVault）に会話・思考・気づき・調査結果を自律的に保存・整理するスキル。「知識化して」「Obsidianに保存」「vaultにまとめて」「Conceptに切り出して」「Resourceとして保存」「Inboxに入れて」「ノートにして」「永続化して」「これ残しておいて」など、会話や思考を永続的な知識として vault に蓄積したいときに発動する。obsidian MCPサーバ（mcp__obsidian__*）が利用可能な環境で使う。フォルダ・タイトル・frontmatter・リンクは Claude が自律判断し、細かく聞き返さない（判断つかない場合のみ最大1問）。判断ルールは vault 内の 90_Meta/ を毎回参照する単一情報源原則。完了後は透明性レポート（新規N件・更新M件・リンクK本）を返す。※「議事録にして」は本スキルの担当外：商談議事録は meeting-minutes、文字起こしの振り分けは transcript-router を使う。本スキルは vault への知識保存専用で、議事録そのものの作成は行わない。"
+description: "Obsidian vault（{{paths.vault}}）に会話・思考・気づき・調査結果を自律的に保存・整理するスキル。「知識化して」「Obsidianに保存」「vaultにまとめて」「Conceptに切り出して」「Resourceとして保存」「Inboxに入れて」「ノートにして」「永続化して」「これ残しておいて」など、会話や思考を永続的な知識として vault に蓄積したいときに発動する。obsidian MCPサーバ（mcp__obsidian__*）が利用可能な環境で使う。フォルダ・タイトル・frontmatter・リンクは Claude が自律判断し、細かく聞き返さない（判断つかない場合のみ最大1問）。判断ルールは vault 内の 90_Meta/ を毎回参照する単一情報源原則。完了後は透明性レポート（新規N件・更新M件・リンクK本）を返す。※「議事録にして」は本スキルの担当外：商談議事録は meeting-minutes、文字起こしの振り分けは transcript-router を使う。本スキルは vault への知識保存専用で、議事録そのものの作成は行わない。"
 version: 0.2.1
 requires_connectors:
   - server: obsidian
@@ -9,6 +9,8 @@ requires_connectors:
 ---
 
 # Obsidian Knowledge Capture
+
+> **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` `{{members.*}}` は、連結フォルダ直下の `osi-profile.md`（雛形: `config/osi-profile.example.md`）の値に置き換えて解釈する。無ければ会社名・案件フォルダ・台帳の有無・使うコネクタを質問して先に作る。値をここに直書きしない。
 
 Obsidian vault に会話・思考・知見を**自律的に**保存・組織化するスキル。
 
