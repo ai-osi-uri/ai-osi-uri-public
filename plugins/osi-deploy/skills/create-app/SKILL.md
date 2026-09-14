@@ -126,7 +126,7 @@ Phase N:   完了レポート
 
 | 本文の手順・道具 | リモートではこうする |
 |---|---|
-| 「必要 mcpb >= 1.23.0」の版チェック | `tools : Deploy` の道具数が **34 以上**なら続行。少なければ「コネクタを切断→接続し直して」と案内して中断 |
+| 「必要 mcpb >= 1.23.0」の版チェック | `tools : Deploy` の道具数が **33 以上**なら続行。少なければ「コネクタを切断→接続し直して」と案内して中断 |
 | `github.repo_target` / `owner_override` | 読まない・渡さない。作成先は自社の org に固定され、リポ名には会社の接頭辞（`health_check` の `projects : … 名前空間 <slug>-*`）が自動で付く |
 | `gh-create-repo-and-push`（`github_create_repo_and_push`） | `github_create_repo`（`name` = アプリの slug、`project_name` = 表示名）→ `github_put_files`（`files: [{path, content}]` を **1 コミット**で。`node_modules` / `.next` / `.env*` は含めない。合計 200 ファイルや 5 MB を超えそうなら数回に分けて push する） |
 | `github_push`（再 push） | 変更したファイルだけを `github_put_files`（同じブランチ・上書き） |
