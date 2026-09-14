@@ -24,6 +24,8 @@
 
 ### Step 2: GitHub リポジトリ作成 & push
 
+> **リモート経路**: `github_create_repo`（name = slug）→ `github_put_files`（scaffold したファイルを配列で 1 コミット）。以下のスキル呼び出しは読み飛ばす。
+
 `gh-create-repo-and-push` スキルを呼び出す。
 
 - `USE_ORG` 設定に従い `owner_override` を渡す（個人アカウント or 組織）。
@@ -50,6 +52,8 @@ DB・認証が必要なアプリのみ実行する。
 > **注意**: provision 完了前に env を渡して Vercel デプロイすると、初回ビルドで接続エラーになる。必ず完了を待つ。
 
 ### Step 3: Vercel 接続 & デプロイ
+
+> **リモート経路**: `vercel_create_project`（repo_name, env_vars）。clone / push は無い。返ってきた `deployment_id` を `vercel_get_deployment_status` で確認。
 
 `vercel-connect-and-deploy` スキルを呼び出す。
 

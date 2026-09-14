@@ -14,7 +14,7 @@ description: |
   `update-deploy`。**Lovable で作られたアプリの決済実装（Stripe 有効化・本番化）は
   `lovable-payments-golive` が直接受ける**（本スキルは Lovable プロジェクトの新規作成・
   改修は扱わない）。旧名 deploy-app。
-version: 1.2.0
+version: 1.3.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb
@@ -111,7 +111,32 @@ Phase N:   完了レポート
 
 ## 動作要件
 
-必要 mcpb（AI OSI URI Deploy）: >= 1.23.0
+必要 mcpb（AI OSI URI Deploy）: >= 1.23.0（リモート経路は上の読み替え表）
+
+## 経路の判定: ローカル（.mcpb）かリモート（マネージド）か
+
+道具は 2 つの経路のどちらかで来る。**最初の `health_check` の返り方で判定し、以後は読み替え表に従う。**
+
+| 見分け方 | 経路 |
+|---|---|
+| `health_check` が JSON（`server_version` / `github.valid` …）で返る | **ローカル**（.mcpb・自分の鍵）。本文どおりに進める |
+| `health_check` がテキストで返り、`managed :` と `tools : Deploy N 道具` の行がある | **リモート**（マネージド・自社の Machine Account の鍵）。下の読み替え表に従う |
+
+### リモート経路の読み替え表
+
+| 本文の手順・道具 | リモートではこうする |
+|---|---|
+| 「必要 mcpb >= 1.23.0」の版チェック | `tools : Deploy` の道具数が **34 以上**なら続行。少なければ「コネクタを切断→接続し直して」と案内して中断 |
+| `github.repo_target` / `owner_override` | 読まない・渡さない。作成先は自社の org に固定され、リポ名には会社の接頭辞（`health_check` の `projects : … 名前空間 <slug>-*`）が自動で付く |
+| `gh-create-repo-and-push`（`github_create_repo_and_push`） | `github_create_repo`（`name` = アプリの slug、`project_name` = 表示名）→ `github_put_files`（`files: [{path, content}]` を **1 コミット**で。`node_modules` / `.next` / `.env*` は含めない。合計 200 ファイルや 5 MB を超えそうなら数回に分けて push する） |
+| `github_push`（再 push） | 変更したファイルだけを `github_put_files`（同じブランチ・上書き） |
+| `vercel-connect-and-deploy`（`vercel_create_project_and_deploy`） | `vercel_create_project`（`repo_name`, `env_vars`, 必要なら `framework`）→ `vercel_get_deployment_status` で READY を待つ。clone / push は要らない |
+| `supabase_create_project` | `organization_id` と `db_pass` 以外は同じ。`project_slug` は稼働案件が 1 本なら省略可。以後の `supabase_*` は返ってきた `ref` で呼ぶ |
+| `from_extension`（`vercel_set_env`） | 使えない。値は `value` で渡す |
+| 案件台帳への登録 | 不要（`github_create_repo` / `vercel_create_project` / `supabase_create_project` が自動で「公開中のアプリ」に載せる） |
+| `[quota_exceeded:…]` / `[managed_disabled]` が返る | 上限・残高・利用権の停止。作業を止めて理由を伝え、運用者への相談を案内する（`usage_status` で残りが見える） |
+
+リモートで**使えない**道具: `github_create_repo_and_push` / `github_push` / `github_clone` / `aws_terraform_*` / `mobile_*`（ローカル FS が要る）。Web-AWS・Desktop・Mobile パスはローカル経路でのみ実行できる。リモートでそれらを求められたら「この経路では Web-Vercel だけ」と伝える。
 
 ## Phase 0: 認証情報・接続状況の確認
 
@@ -142,8 +167,8 @@ Phase N:   完了レポート
 
 | ツール | 用途 |
 |---|---|
-| `github_create_repo_and_push` / `github_push` | リポ作成+push / 再push |
-| `vercel_create_project_and_deploy` / `vercel_get_deployment_status` / `vercel_get_build_logs` | Vercel |
+| `github_create_repo_and_push` / `github_push`（ローカル）、`github_create_repo` + `github_put_files`（リモート） | リポ作成+push / 再push |
+| `vercel_create_project_and_deploy`（ローカル）、`vercel_create_project`（リモート） / `vercel_get_deployment_status` / `vercel_get_build_logs` | Vercel |
 | `supabase_*` | Supabase 操作一式 |
 | `stripe_*` | Stripe（`mode:"test"` 既定） |
 
