@@ -37,7 +37,7 @@ connector_prose_ok: [AI_OSI_URI_Deploy, AI_OSI_URI_Finance, ai-osi-uri-creative,
 
 1. 連結フォルダを特定する（Cowork の連結フォルダ。複数あれば会社の資料が入っている方）。無ければ「Claude にフォルダを 1 つ連結してください（Drive の共有フォルダ推奨）」で止まる
 2. `python3 scripts/init_kit.py --root <連結フォルダ> --status` で、`osi-profile.md` の有無と直下のフォルダ一覧を取る
-3. 見えているツール名から、繋がっているコネクタを列挙する（AI OSI URI Deploy / AI OSI URI Finance / AI OSI URI Creative / Gmail / Slack / Google Drive / Calendar / MoneyForward / DocuSign / Plaud / Obsidian）。**どれも必須ではない**。このスキル自体はコネクタ無しで動く
+3. 見えているツール名から、繋がっているコネクタを列挙する（AI OSI URI（マネージドのカスタムコネクタ。`health_check` / `whoami` / `list_projects` / `usage_status` と Deploy の道具が見える）/ AI OSI URI Deploy / AI OSI URI Finance / AI OSI URI Creative / Gmail / Slack / Google Drive / Calendar / MoneyForward / DocuSign / Plaud / Obsidian）。**どれも必須ではない**。このスキル自体はコネクタ無しで動く
 
 `osi-profile.md` が**既にある**場合は Step 2〜3 を飛ばし、Step 4（実測）と Step 5（1 本動かす）だけ行う。不足キー（雛形にあってプロファイルに無いキー）があれば追記を提案する。
 
@@ -81,9 +81,10 @@ connector_prose_ok: [AI_OSI_URI_Deploy, AI_OSI_URI_Finance, ai-osi-uri-creative,
 
 | コネクタ | 叩くもの | 判定 |
 |---|---|---|
-| AI OSI URI Deploy | `health_check` | `github.valid` / `vercel.valid` が true → 使える。false → 鍵が要る（Settings → Extensions） |
+| AI OSI URI（マネージド・既定） | `health_check` | `managed : 有効` と `tools : Deploy N 道具` → 使える。`managed : 無効` → 運用者に会社の「マネージド」を有効にしてもらう。ツール自体が無ければ「ポータルの「ツールインストール（URL）」の手順でコネクタを繋ぐ」 |
+| AI OSI URI Deploy（ダウンロード経路） | `health_check` | `github.valid` / `vercel.valid` が true → 使える。false → 鍵が要る（拡張の設定） |
 | AI OSI URI Finance | `health_check` | 台帳フォルダが読めれば使える。MF は `mfi_connect_status` |
-| AI OSI URI Creative | `list_models` | 返れば使える。鍵エラーなら BYOK 鍵が要る |
+| AI OSI URI Creative | `list_models` | 返れば使える。鍵エラーなら自分の鍵が要る（ダウンロード経路） |
 | Gmail / Calendar / Drive / Slack | 読み取り 1 回（ラベル一覧・カレンダー一覧・最近のファイル・チャンネル検索） | 返れば使える。ツール自体が無ければ「Connectors で接続」 |
 | MoneyForward / DocuSign / Plaud / Obsidian | 軽い読み取り 1 回 | 同上 |
 
@@ -91,12 +92,12 @@ connector_prose_ok: [AI_OSI_URI_Deploy, AI_OSI_URI_Finance, ai-osi-uri-creative,
 
 ```
 | 段 | 状態 | 使えるスキル（例） | 次の一手 |
-| 0 段目 | 今使える | 提案書・事業計画・ファクトチェック・ペルソナ … 39 本 | — |
+| 0 段目 | 今使える | 提案書・事業計画・ファクトチェック・ペルソナ … 40 本 | — |
 | 1 段目 | Gmail ○ / Calendar ○ / Slack ✕ | 議事録→台帳、空き時間取得 … | Slack を Connectors で接続 |
-| 2 段目 | Deploy ✕（鍵未設定）/ Finance ○ / Creative ✕ | 請求書発行 … | Deploy 拡張に GitHub PAT と Vercel Token |
+| 2 段目 | AI OSI URI（マネージド）✕ / Finance ○ / Creative ✕ | 請求書発行 … | ポータルの「ツールインストール（URL）」でコネクタを繋ぐ |
 ```
 
-「次の一手」は、`docs/onboarding.md` の該当節（§3 `.mcpb`・§4 Connectors・§6 Deploy）を **1 行で**指す。手順を本文に写さない。
+「次の一手」は、`docs/onboarding.md` の該当節（§3 マネージド（URL）・§4 Connectors・§6 ダウンロード（`.mcpb`））を **1 行で**指す。手順を本文に写さない。マネージドが既定なので、自社 MCP が無い環境ではまず §3 を指す（ダウンロード経路は本人が自分の鍵で動かしたいと言ったときだけ）。
 
 ## Step 5. 動かす（1 本）
 
@@ -107,7 +108,7 @@ Step 2 の質問 5 の答えに合わせて、**今使える段**のスキルを
 | 提案書・営業 | `osi-docs:storyline-gate` → `osi-sales:proposal-package` | `案件/122.サンプル株式会社/05_受領資料/初回ヒアリングメモ.md` |
 | 議事録 | `osi-sales:meeting-minutes`（1 段目。無理なら `osi-core:transcript-router` に短い文字起こしを貼る） | ダミーの文字起こし 10 行 |
 | 請求書・経理 | `osi-finance:osi-finance-setup` に引き継ぐ（経理は専用の初期設定がある） | — |
-| アプリ | `osi-deploy:create-app`（2 段目。Deploy が ✕ なら `osi-deploy:local-project-output`） | 「サンプル株式会社の FAQ ページ」 |
+| アプリ | `osi-deploy:create-app`（2 段目。マネージドも Deploy も ✕ なら `osi-deploy:local-project-output`） | 「サンプル株式会社の FAQ ページ」 |
 | 動画 | `osi-creative:ai-video-production`（2 段目。Creative が ✕ なら見送り、次の一手を案内） | — |
 | 決めていない | `osi-marketing:persona-design` | ヒアリングメモ |
 
@@ -118,6 +119,6 @@ Step 2 の質問 5 の答えに合わせて、**今使える段**のスキルを
 1. 作ったもの／飛ばしたもの（パス）
 2. この環境の段の表（Step 4）
 3. 動かしたスキルと成果物の場所（Step 5）
-4. 本人がやる残り（あれば）：機微値の記入、Connectors の接続、`.mcpb` の鍵。**各 1 行・リンク付き**
+4. 本人がやる残り（あれば）：機微値の記入、Connectors の接続、自社 MCP の接続（マネージドは URL を貼るだけ。ダウンロード経路を選んだ人だけ鍵）。**各 1 行・リンク付き**
 
 所要の目安は 15 分。超えそうなら Step 5 を「次回」に回し、1〜4 で一度返す。

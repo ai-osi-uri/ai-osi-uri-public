@@ -1,7 +1,7 @@
 # 導入の段（tiers）
 
 > `python3 scripts/build_tiers.py` で `requires_connectors` から自動生成。手で編集しない。
-> 段の意味：**0** は Plugins からインストールするだけ／**1** は Claude の Connectors で純正コネクタ（Gmail・Drive・Slack・Calendar・MoneyForward 等）を繋ぐ／**2** は AI OSI URI Deploy・Finance・Creative などの自社 MCP を入れて鍵を設定する。
+> 段の意味：**0** は Plugins からインストールするだけ／**1** は Claude の Connectors で純正コネクタ（Gmail・Drive・Slack・Calendar・MoneyForward 等）を繋ぐ／**2** は AI OSI URI Deploy・Finance・Creative などの自社 MCP を繋ぐ。既定は**マネージド**（ツールポータルにログインし、コネクタの URL を Cowork に貼るだけ。アカウント作成も鍵も要らない）。自分の鍵で動かす人だけ `.mcpb` を入れて鍵を設定する（ダウンロード経路）。
 > 「公開」列は外部版（`build_external.py`）に含まれるか。
 
 ## 0 段目：入れた瞬間に動く（コネクタ不要） — 40 本
@@ -72,7 +72,7 @@
 | osi-sales | `session-review` | plaud | ○ | 「AI伴走（Cowork / AI 導入支援）セッション」の文字起こしから、振り返りレビューを構造化して生成するスキル |
 | osi-sales | `shodan-prep` | box, plaud, web-fetch | ○ | 商談を「準備」と「振り返り」の両面で支援するスキル |
 
-## 2 段目：自社 MCP（Deploy / Finance / Creative 等）と鍵が要る — 55 本
+## 2 段目：自社 MCP（Deploy / Finance / Creative 等）を繋ぐ（既定はマネージド＝URL を貼るだけ） — 55 本
 
 | プラグイン | スキル | 必要なコネクタ | 公開 | 何をする |
 |---|---|---|---|---|
