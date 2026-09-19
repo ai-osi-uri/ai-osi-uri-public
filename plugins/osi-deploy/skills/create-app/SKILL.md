@@ -158,7 +158,9 @@ Phase N:   完了レポート
 3. **`github.repo_target` を読み、リポジトリの作成先を確定する**（[作成先の決定ルール](#作成先の決定ルールorg-or-個人)）。
    `personal:` になっていて Org に置きたい場合は、Phase 3 のプランで作成先を明示して承認を取り、
    `github_create_repo_and_push` に `owner_override: "<org slug>"` を渡す
-4. 不足 → `setup-deploy-environment` を案内して中断
+4. 不足 → `setup-deploy-environment` を案内して中断。**発行そのものが必要なら `credential-handoff` に渡す**
+   （何のため／どこで生まれる／どこで使う／どう確かめる を添える）。「○○で発行して貼ってください」と
+   文章で説明して止まらない。鍵の値は受け取らない
 
 > `health_check` はトークンの**有効性**しか見ない。「リポジトリを作れるか」までは判定できないため、
 > 403 が出たら第一容疑は権限ではなく**作成先の取り違え**。まず `repo_target` を疑うこと。
