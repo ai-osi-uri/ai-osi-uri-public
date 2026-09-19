@@ -464,3 +464,9 @@ Git author <mail> must have access to the team <TEAM> on Vercel to create deploy
 - `app-manual` — 導線が変わったとき Phase 5.5 で呼ばれる（使い方マニュアルの追随）
 - `switch-to-live-mode` — Stripe を本番化したいときの専用スキル（本スキルは扱わない）
 - `setup-deploy-environment` — 前提となる初期設定
+
+## 鍵が要る場面
+
+更新の途中で新しい環境変数・Secrets・API キーが要ると分かったら、自分で手順を書かず
+`credential-handoff` に渡す（何のため／どこで生まれる／どこで使う／どう確かめる を添える）。
+受け皿（Vercel の env 名・GitHub Secrets の項目名）は先に空で作っておき、人は値を運ぶ1往復だけにする。
