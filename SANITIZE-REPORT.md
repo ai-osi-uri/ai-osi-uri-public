@@ -2,7 +2,7 @@
 
 対象プラグイン: osi-creative, osi-sales, osi-docs, osi-deploy, osi-mobile-deploy, osi-knowledge, osi-finance, osi-core, osi-backoffice, osi-marketing
 
-以下の 142 箇所に要注意語が残っています。publish 前に人手で確認してください（自動削除は文書を壊すため行いません）。
+以下の 143 箇所に要注意語が残っています。publish 前に人手で確認してください（自動削除は文書を壊すため行いません）。
 
 | ファイル | 行 | 語 | 抜粋 |
 |---|---|---|---|
@@ -37,6 +37,7 @@
 | plugins/osi-core/skills/getting-started/SKILL.md | 89 | Plaud | \| MoneyForward / DocuSign / Plaud / Obsidian \| 軽い読み取り 1 回 \| 同上 \| |
 | plugins/osi-core/skills/getting-started/references/tiers.md | 68 | Plaud | \| osi-sales \| `meeting-minutes` \| slack, box, plaud \| ○ \| 商談議事録を Plaud の文字起こしから自動生成し、Drive の `03_制作・成果物/` に docx として格納した |
 | plugins/osi-core/skills/getting-started/scripts/init_kit.py | 31 | CAIO | "CAIO担当", "サポート", "アサイン状態", "次アクション", "次アクション期日", "最終接触日", |
+| plugins/osi-deploy/skills/credential-handoff/SKILL.md | 99 | 共有ドライブ | \| Google Cloud サービスアカウント \| 鍵を作っただけでは Drive のファイルを読めない \| 対象ファイル／共有ドライブをサービスアカウントのメールに閲覧共有し、Drive API を有効化する \| |
 | plugins/osi-deploy/skills/setup-deploy-environment/SKILL.md | 4 | 共有ドライブ | デプロイを使えるようにする初回セットアップ。**共有ドライブの .env は使わず**、 |
 | plugins/osi-deploy/skills/setup-deploy-environment/SKILL.md | 19 | 共有ドライブ | > 旧版は `.deploy-credentials/.env` にトークンを書き込んでいたが、平文・共有ドライブ同期・ |
 | plugins/osi-deploy/skills/setup-deploy-environment/SKILL.md | 25 | 共有ドライブ | （社内手順：共有ドライブ「環境構築キット」参照） |
