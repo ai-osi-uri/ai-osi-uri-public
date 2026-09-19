@@ -2,14 +2,20 @@
 
 対象プラグイン: osi-creative, osi-sales, osi-docs, osi-deploy, osi-mobile-deploy, osi-knowledge, osi-finance, osi-core, osi-backoffice, osi-marketing
 
-以下の 136 箇所に要注意語が残っています。publish 前に人手で確認してください（自動削除は文書を壊すため行いません）。
+以下の 142 箇所に要注意語が残っています。publish 前に人手で確認してください（自動削除は文書を壊すため行いません）。
 
 | ファイル | 行 | 語 | 抜粋 |
 |---|---|---|---|
 | plugins/osi-finance/README.md | 160 | 共有ドライブ | 顧客が決めるのは「OSI Finance ルートをどこに置くか」1問だけ（**共有ドライブ推奨**）、配下は規定ツリーで固定 |
 | plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 50 | Plaud | - 任意：既存下書きへの確実な添付に Claude in Chrome（ブラウザ操作の `file_upload`）、本文パーソナライズに Obsidian（`obsidian-knowledge-consult`）／Plaud／Drive |
 | plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 161 | CAIO | - **グループが複数の対象月にまたがる場合は、対象月を摘要・明細名に必ず残す**（例「CAIO業務 2026年4〜6月分」）。 |
-| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 246 | Plaud | - 当月ご一緒した取り組みを **Obsidian（`30_Projects/_Active/{社名}/議事録`、`obsidian-knowledge-consult` 経由）→ Plaud → Drive** の順で拾い、お礼文に1段落 |
+| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 226 | 共有ドライブ | `02.送付請求書/YYYY-MM/` は**台帳フォルダ（ルート）からの相対パス**であって、共有ドライブ直下からの |
+| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 232 | 共有ドライブ | これらのツールは「台帳フォルダ」を知らないので、相対パスのまま渡すと**共有ドライブ直下**に |
+| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 238 | 共有ドライブ | - 保存後に **(a) `{ledger_dir}/02.送付請求書/YYYY-MM/` に実ファイルがあること、(b) 共有ドライブ直下や |
+| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 245 | 共有ドライブ | > 共有ドライブ直下の `02.送付請求書/2026-09/` に置かれた（正しくは `{{paths.finance}}/02.送付請求書/2026-09/`）。 |
+| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 246 | 共有ドライブ | > 相対パス `02.送付請求書/…` を、台帳フォルダではなく共有ドライブのルートを起点に解決したのが原因。 |
+| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 271 | Plaud | - 当月ご一緒した取り組みを **Obsidian（`30_Projects/_Active/{社名}/議事録`、`obsidian-knowledge-consult` 経由）→ Plaud → Drive** の順で拾い、お礼文に1段落 |
+| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 329 | 共有ドライブ | - **共有ドライブ直下に `02.送付請求書` ができている**：保存先を台帳フォルダ起点で解決していない（手順4-2）。中身は `{ledger_dir}/02.送付請求書/_ドライブ直下から移動_YYYYMMDD/` へ退避し、正しい |
 | plugins/osi-finance/skills/osi-finance-setup/SKILL.md | 86 | 共有ドライブ | ルートフォルダ「OSI Finance」を**どこに作るか**だけを聞く。**共有ドライブを第一推奨** |
 | plugins/osi-finance/skills/osi-finance-setup/SKILL.md | 110 | 共有ドライブ | OSI Finance/                 ← 顧客が決めるのはこの置き場所だけ（共有ドライブ推奨） |
 | plugins/osi-finance/skills/osi-finance-ar-sync/SKILL.md | 80 | CAIO | `INV-2026-07-016` は 対象月 2026-06 の行（CAIO 550,000）と 2026-07 の行（準備金 1,375,000 / 2,200,000）が |
@@ -140,5 +146,5 @@
 | plugins/osi-docs/skills/architecture-proposal/SKILL.md | 12 | yourrecord | ※ 自社サービス（CAIO / yourrecord 等）の新規営業・初回提案・見積提案は別スキル |
 | plugins/osi-docs/skills/architecture-proposal/SKILL.md | 12 | CAIO | ※ 自社サービス（CAIO / yourrecord 等）の新規営業・初回提案・見積提案は別スキル |
 | plugins/osi-docs/skills/architecture-proposal/scripts/deck_helpers.py | 11 | CAIO | # ---- ブランド配色（CAIO資料準拠 / EDIT可） ---- |
-| plugins/osi-docs/skills/deck-composition/SKILL.md | 106 | CAIO | - ❌「コア事業の説明」→ ✅「では本丸の CAIO 事業を——仕組み・価格・現状を見ていく」 |
-| plugins/osi-docs/skills/deck-composition/SKILL.md | 114 | CAIO | 複数スライドで使う用語・略語（CAIO, ARR, NPS 等）は、**初出のスライドで**定義する。5枚後に「Xとは」を置かない。定義はサブタイトルにインラインで入れるか、使い始める前に定義スライドを1枚置く。 |
+| plugins/osi-docs/skills/deck-composition/SKILL.md | 108 | CAIO | - ❌「コア事業の説明」→ ✅「では本丸の CAIO 事業を——仕組み・価格・現状を見ていく」 |
+| plugins/osi-docs/skills/deck-composition/SKILL.md | 116 | CAIO | 複数スライドで使う用語・略語（CAIO, ARR, NPS 等）は、**初出のスライドで**定義する。5枚後に「Xとは」を置かない。定義はサブタイトルにインラインで入れるか、使い始める前に定義スライドを1枚置く。 |

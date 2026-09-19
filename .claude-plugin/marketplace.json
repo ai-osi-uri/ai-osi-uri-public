@@ -51,7 +51,7 @@
       "name": "osi-docs",
       "source": "./plugins/osi-docs",
       "description": "文書・契約・業務フロー・事業計画・構成図作成。財務モデル、企業分析、提案資料に加え、手描き配線図から物理・論理構成図とBOMを生成。 financial-model-3statement は config の開始年月から月次三表に「年月」行を出し、暦月の実績と並べられる。 明細（売上・原価・販管費の行）は業態別テンプレを持たず config の 明細 から生やす。合計と検算はコード側。",
-      "version": "0.7.3",
+      "version": "0.7.4",
       "category": "docs",
       "tags": [
         "docs",
@@ -133,7 +133,7 @@
       "name": "osi-finance",
       "source": "./plugins/osi-finance",
       "description": "OSI Finance — 日本の中小企業向け経理（請求AR・支払AP）自動化プラグイン。台帳（Google Sheets）と内部仕訳帳を正本に、初回セットアップ、契約取込→請求スケジュール化、請求書発行、受領請求書の支払起票・取りこぼし検出、MF/freee/銀行明細との突合、仕訳生成、経費レシート証憑化、月次クローズ、会計ダッシュボード、ローカルコンソール（台帳ビュー・財務三表）までを収録。送金・請求書の発行送信・会計計上の確定は常に人が実行。運用モード・連携トグル・起票確認方式で書き込み可否を組織ごとに統制できる。詳細は各スキルの説明を参照。",
-      "version": "0.50.2",
+      "version": "0.50.4",
       "category": "finance",
       "tags": [
         "finance",
