@@ -405,7 +405,7 @@ ledgers:
             observed: ["2026-07"]  # 実データの分布（規定値ではない）
           - name: "状態"
             values: ["案", "確定"]
-            note: "月次サマリは確定行のみ集計。"
+            note: "損益の集計は確定行のみ。突合の月キーは 対象月 ではなく 日付（会計SaaSの推移損益は取引日ベース）。"
           - name: "エクスポート済み"
             values: ["mf", "freee", "none"]
           - name: "作成者"
@@ -447,13 +447,28 @@ ledgers:
         header_row: 1
         data_rows_at_survey: 12
         key: "対象月"
-        note: "売上高・費用合計・営業利益・未仕訳件数は SUMIFS で仕訳帳から集計（xlsx 移行時に Excel ネイティブ数式へ書き直し）。"
+        note: >
+          **会計SaaS の損益の写し**。ローカル仕訳の集計ではない（書くのは osi-finance-mf-sync /
+          osi-finance-freee-sync。osi-finance-journal は書かない）。仕訳帳の集計を書くと、
+          コンソールの「ローカル仕訳 ⇔ 月次サマリ」が自分と自分の比較になり、会計SaaS との
+          ズレに気づけなくなる。ACCOUNTING_SYNC=none の組織では全行空のままでよい。
+          値は税込（include_tax: true）。進行中・データ無しの月は空にする（0 を書かない）。
+          SUMIFS は使わない：Excel で開いたときしか計算されず、プログラムから読むと常に空になる。
+          取込元/取込日時/税基準が無いと、差が出たときに「古い写し」か「本当のズレ」かを判定できない。
         columns:
           - name: "対象月"
           - name: "売上高"
           - name: "費用合計"
           - name: "営業利益"
           - name: "未仕訳件数"
+          - name: "取込元"
+            values: ["mf", "freee"]
+            note: "どの会計SaaS から写したか。"
+          - name: "取込日時"
+            note: "写した日時。これが古い行の差は、記帳ミスではなく鮮度切れとして扱う。"
+          - name: "税基準"
+            values: ["税込", "税抜"]
+            note: "取得時に include_tax を効かせられたか。対象外科目は税基準に関わらず税抜で返る。"
           - name: "クローズ状態"
             values: ["オープン", "クローズ済"]
             note: "クローズは人の操作のみ。クローズ済の月には記帳しない。"
