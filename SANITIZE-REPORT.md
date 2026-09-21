@@ -7,15 +7,15 @@
 | ファイル | 行 | 語 | 抜粋 |
 |---|---|---|---|
 | plugins/osi-finance/README.md | 172 | 共有ドライブ | 顧客が決めるのは「OSI Finance ルートをどこに置くか」1問だけ（**共有ドライブ推奨**）、配下は規定ツリーで固定 |
-| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 50 | Plaud | - 任意：既存下書きへの確実な添付に Claude in Chrome（ブラウザ操作の `file_upload`）、本文パーソナライズに Obsidian（`obsidian-knowledge-consult`）／Plaud／Drive |
-| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 161 | CAIO | - **グループが複数の対象月にまたがる場合は、対象月を摘要・明細名に必ず残す**（例「CAIO業務 2026年4〜6月分」）。 |
-| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 226 | 共有ドライブ | `02.送付請求書/YYYY-MM/` は**台帳フォルダ（ルート）からの相対パス**であって、共有ドライブ直下からの |
-| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 232 | 共有ドライブ | これらのツールは「台帳フォルダ」を知らないので、相対パスのまま渡すと**共有ドライブ直下**に |
-| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 238 | 共有ドライブ | - 保存後に **(a) `{ledger_dir}/02.送付請求書/YYYY-MM/` に実ファイルがあること、(b) 共有ドライブ直下や |
-| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 245 | 共有ドライブ | > 共有ドライブ直下の `02.送付請求書/2026-09/` に置かれた（正しくは `{{paths.finance}}/02.送付請求書/2026-09/`）。 |
-| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 246 | 共有ドライブ | > 相対パス `02.送付請求書/…` を、台帳フォルダではなく共有ドライブのルートを起点に解決したのが原因。 |
-| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 271 | Plaud | - 当月ご一緒した取り組みを **Obsidian（`30_Projects/_Active/{社名}/議事録`、`obsidian-knowledge-consult` 経由）→ Plaud → Drive** の順で拾い、お礼文に1段落 |
-| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 329 | 共有ドライブ | - **共有ドライブ直下に `02.送付請求書` ができている**：保存先を台帳フォルダ起点で解決していない（手順4-2）。中身は `{ledger_dir}/02.送付請求書/_ドライブ直下から移動_YYYYMMDD/` へ退避し、正しい |
+| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 52 | Plaud | - 予備：`mail_*` が使えない環境だけ、既存下書きへの添付に Claude in Chrome（ブラウザ操作の `file_upload`）、本文パーソナライズに Obsidian（`obsidian-knowledge-consu |
+| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 163 | CAIO | - **グループが複数の対象月にまたがる場合は、対象月を摘要・明細名に必ず残す**（例「CAIO業務 2026年4〜6月分」）。 |
+| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 228 | 共有ドライブ | `02.送付請求書/YYYY-MM/` は**台帳フォルダ（ルート）からの相対パス**であって、共有ドライブ直下からの |
+| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 234 | 共有ドライブ | これらのツールは「台帳フォルダ」を知らないので、相対パスのまま渡すと**共有ドライブ直下**に |
+| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 240 | 共有ドライブ | - 保存後に **(a) `{ledger_dir}/02.送付請求書/YYYY-MM/` に実ファイルがあること、(b) 共有ドライブ直下や |
+| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 247 | 共有ドライブ | > 共有ドライブ直下の `02.送付請求書/2026-09/` に置かれた（正しくは `{{paths.finance}}/02.送付請求書/2026-09/`）。 |
+| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 248 | 共有ドライブ | > 相対パス `02.送付請求書/…` を、台帳フォルダではなく共有ドライブのルートを起点に解決したのが原因。 |
+| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 275 | Plaud | - 当月ご一緒した取り組みを **Obsidian（`30_Projects/_Active/{社名}/議事録`、`obsidian-knowledge-consult` 経由）→ Plaud → Drive** の順で拾い、お礼文に1段落 |
+| plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 334 | 共有ドライブ | - **共有ドライブ直下に `02.送付請求書` ができている**：保存先を台帳フォルダ起点で解決していない（手順4-2）。中身は `{ledger_dir}/02.送付請求書/_ドライブ直下から移動_YYYYMMDD/` へ退避し、正しい |
 | plugins/osi-finance/skills/osi-finance-setup/SKILL.md | 86 | 共有ドライブ | ルートフォルダ「OSI Finance」を**どこに作るか**だけを聞く。**共有ドライブを第一推奨** |
 | plugins/osi-finance/skills/osi-finance-setup/SKILL.md | 110 | 共有ドライブ | OSI Finance/                 ← 顧客が決めるのはこの置き場所だけ（共有ドライブ推奨） |
 | plugins/osi-finance/skills/osi-finance-ar-sync/SKILL.md | 80 | CAIO | `INV-2026-07-016` は 対象月 2026-06 の行（CAIO 550,000）と 2026-07 の行（準備金 1,375,000 / 2,200,000）が |

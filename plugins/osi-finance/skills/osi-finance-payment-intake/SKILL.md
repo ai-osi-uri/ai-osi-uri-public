@@ -43,7 +43,7 @@ requires_connectors:
   - (a) **Cowork 直接アップロード（推奨・サミダレ運用の主役）** … ユーザーが請求書PDFを Cowork にドロップして
     「この請求書を支払予定に起票して」と言う。アップロードされた PDF をその場で読み、Drive の受領請求書フォルダに格納してから処理する。
   - (b) **Drive 手置き** … `osi-finance-settings` の `受領請求書` フォルダに置かれた PDF。
-  - (c) **メール添付** … Superhuman `get_attachment` で取引先からの請求書PDF添付を取得（完了メール等に添付）。
+  - (c) **メール添付** … 拡張の `mail_save_attachments` で取引先からの請求書PDF添付を受領請求書フォルダへ直接保存する（完了メール等に添付）。メールの特定は純正のメールコネクタの検索で行い、その ID をそのまま渡す。
 
 ## 役割と非役割
 
@@ -57,7 +57,7 @@ requires_connectors:
 ## 前提コネクタ
 
 - Google Drive / 台帳（受領請求書の格納・支払管理台帳）。
-- Superhuman Mail（`get_attachment` で請求書PDF添付の取得）。
+- AI OSI URI Finance 拡張の `mail_list_attachments` / `mail_save_attachments`（v1.44.0〜。Gmail／Outlook 両対応）で請求書PDF添付を取得。予備として Superhuman Mail の `get_attachment`。
 - MF会計（任意）：`getTradePartners` を支払先マッチングの補助に使う（正本は台帳）。
 
 ## 手順
@@ -67,7 +67,7 @@ requires_connectors:
 - (a) **Cowork 直接アップロード**：ユーザーがドロップした PDF をそのまま読み、上記フォルダにコピーして格納する
   （bash で Drive のローカル同期パスへ `cp`。クラウドのみで `cp` が失敗する場合は Read で一度ダウンロードしてから格納）。
 - (b) Drive 手置き：当該フォルダの新規 PDF を対象にする。
-- (c) メール添付：Superhuman `get_attachment` で請求書PDF添付を取得して格納する。
+- (c) メール添付：`mail_list_attachments` で添付を確かめ、`mail_save_attachments(message_id, dest_dir=受領請求書/YYYY-MM, only_pdf=true)` で格納する。保存名は元のファイル名になるので、そのあと下の命名規則に合わせて名前を変える。同名があれば拡張が `_2` を付けて上書きしない。
 - 命名：`支払先_請求書番号_受領日.pdf`。**同名・同一請求書（支払先＋請求書番号）が既にあればスキップ**（重複防止）。
 
 ### 2. 読取
@@ -160,6 +160,6 @@ requires_connectors:
 
 詳細は **[`docs/エラー処理ガイド.md`](../../docs/エラー処理ガイド.md)** を正本とする。本スキルで詰まりやすい点：
 
-- **メール添付（受領請求書PDF）が取得できない**：標準 Gmail では不可。**Superhuman の `get_attachment`** で取得する。Superhuman 未接続なら、接続するか **Drive手置き**（受領請求書フォルダ）を案内して止める。
+- **メール添付（受領請求書PDF）が取得できない**：純正のメールコネクタでは不可。拡張の `mail_save_attachments` を使う（未接続なら「メールにつないで」）。拡張が使えない環境だけ Superhuman の `get_attachment`、それも無ければ **Drive手置き**（受領請求書フォルダ）を案内して止める。
 - **大容量の請求書PDF**は Drive の**ローカル同期フォルダにコピー**して格納（直アップロードは不安定）。
 - 読めない値は**推測せず「要確認」**。新規・不明な支払先はその場で確認。**送金しない**。台帳へ書くタイミングは `WRITE_CONFIRMATION` に従う。

@@ -39,7 +39,7 @@ connector_prose_ok:  # DocuSign は ai-osi-uri-finance の ds_* 経由。docusig
 
 ## 前提コネクタ
 
-- Gmail（検索・添付取得）、Google Drive / 台帳（設定の `請求管理ルート`、例: `{{paths.finance}}`）。
+- メール：検索は純正のメールコネクタ（Gmail／Microsoft 365）、**添付の取り出しは AI OSI URI Finance 拡張の `mail_save_attachments`**（v1.44.0〜。契約書フォルダを `mail_set_file_roots` で登録しておく）、Google Drive / 台帳（設定の `請求管理ルート`、例: `{{paths.finance}}`）。
 - DocuSign（任意・補助）：`getEnvelopes` / `listEnvelopeDocuments` で自社送付契約のメタ・PDFを補完。
   Navigator API（構造化金額・期間）はプラン外なので使わない。
 
@@ -53,6 +53,7 @@ connector_prose_ok:  # DocuSign は ai-osi-uri-finance の ds_* 経由。docusig
 - 添付があり、本文が契約締結・署名完了を示すものを対象にする。
 
 ### 2. 契約PDFの格納（契約書フォルダ）
+- **保存は `mail_save_attachments(message_id, dest_dir=<下のフォルダのフルパス>, only_pdf=true)`**。保存名は元のファイル名なので、そのあと下の命名規則に合わせて名前を変える。
 - 添付契約PDFを **取引先ID×方向のフォルダ**（`{契約書ルート}/02.取引先別/{取引先ID}.{企業名}/{受注（AR）｜発注（AP）｜NDA・覚書}/`）に保存。命名：`【状態】{契約種別}_{件名}_{締結日}.pdf`（状態=素案/締結済）。※契約原本の正本は `{契約書ルート}/02.取引先別/`。
 > **フォルダのパスをここに直書きしないこと。**2026-08-12 の移行で旧フォルダ（契約管理・請求管理）は
 > 消えたが、このスキルは 2026-08-18 に発見されるまで消えたパスを指したままだった。
@@ -146,6 +147,6 @@ connector_prose_ok:  # DocuSign は ai-osi-uri-finance の ds_* 経由。docusig
 詳細は **[`docs/エラー処理ガイド.md`](../../docs/エラー処理ガイド.md)** を正本とする。本スキルで詰まりやすい点：
 
 - **大容量の契約PDF**は Drive 直アップロードが不安定。Google Drive の**ローカル同期フォルダにコピー**して格納する（配置後に開けるか確認）。
-- **メール添付が取得できない**場合：標準 Gmail では添付取得不可。**Superhuman** で取得するか、契約PDFを**Drive手置き**してもらう。
+- **メール添付が取得できない**場合：純正のメールコネクタでは添付を取り出せない。拡張の `mail_save_attachments` を使う。「書類フォルダの中だけです」で止まったら、契約書フォルダを `mail_set_file_roots` で登録する。拡張が使えない環境だけ **Superhuman**、それも無ければ契約PDFを**Drive手置き**してもらう。
 - 金額・期間が読めない／`osi-finance-settings.md` 未整備のときは、**推測せず「要確認」**として残す（`WRITE_CONFIRMATION=事前確認` なら止めて人に確認、`事後確認` なら備考欄に残して書き込みは続行）。
 - **台帳xlsxへの書き込みが「Excelで開かれています」で失敗する**場合：多くは同フォルダに残る `~$台帳名.xlsx` という残骸ロックファイルが原因（Excelの異常終了などで消えずに残る）。bashサンドボックスからは権限上削除できないことがあるため、その場合はユーザーに「実際にExcelで開いていないか」確認のうえ Finder での削除を依頼し、削除後に書き込みをリトライする。
