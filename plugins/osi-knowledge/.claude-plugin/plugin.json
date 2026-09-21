@@ -1,11 +1,11 @@
 {
   "name": "osi-knowledge",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "requires_connectors": [
     "Obsidian",
     "Google カレンダー"
   ],
-  "description": "知識管理。Obsidian vault への自律キャプチャと過去ノートからの参照引き出し、Google Calendar の空き時間取得。",
+  "description": "知識管理。会話や会議の記録を「考えて答えるための知識」に育てる一式（整える・集める・束ねる・答える・確かめて直す）と、Google Calendar の空き時間取得。",
   "author": {
     "name": "AI OSI URI",
     "email": "yuhenagisa@ai-osi-uri.com"
