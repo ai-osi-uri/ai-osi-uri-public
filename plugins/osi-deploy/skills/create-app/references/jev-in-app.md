@@ -9,6 +9,19 @@
 - 同じ入力には毎回同じ答えが返る（Claude に判定させると回ごとにぶれる）。
 - 答えに「どれくらい自信があるか」が付くので、自信が低いものだけ人に確認させる画面が作れる。
 
+## 使うかどうか（オプション）
+
+**Jev は鍵があるときだけ使う。無ければ使わない（組み込まない）。** 判定の箇所は従来どおり作り（決め打ちのルール、または Claude）、
+代わりに次の「推奨オプション」カードを完了レポートと提案資料に添える。お客様が鍵を用意したら、判定の部分だけを差し替える。
+
+> **推奨オプション：判定の部分を専用の AI に置き換える**
+> このアプリの「（例：問い合わせの振り分け）」は、判定専用の AI（TypeSafe の Jev）に置き換えられます。
+> - 利用者が増えても毎月の費用がほとんど増えません（100 万文字あたり約 6 円）。
+> - 同じ内容には毎回同じ答えを返し、自信の低いものだけを担当者の確認に回せます。
+> - 必要なのは御社名義の TypeSafe のアカウントと鍵だけです（発行の手順はこちらでご案内します）。
+
+カードの「（例：…）」は、そのアプリで実際に置き換えられる判定の箇所に書き換える。置き換えられる箇所が無いアプリには付けない。
+
 ## 鍵（誰の鍵を入れるか）
 
 - **お客様に納めるアプリは、お客様自身の TypeSafe の鍵を使う。** 当社の鍵（拡張設定・共用の鍵）はアプリに入れない。
@@ -16,7 +29,7 @@
   - お客様に TypeSafe の順番待ち登録 → アカウント作成 → 鍵の発行をしてもらい、`credential-handoff` で
     Vercel（または AWS）の環境変数 `TYPESAFE_API_KEY` に直接貼ってもらう（値は Claude を通さない）。
 - **当社内のデモ・見本**は当社の鍵でよい。本番へ移すときにお客様の鍵へ差し替える（差し替えを完了レポートの「次にやること」に書く）。
-- 鍵がまだ無い間も**アプリは動くようにする**: `TYPESAFE_API_KEY` が空なら判定をせず「確認待ち」に回す（下の部品がそうなっている）。
+- Jev を組み込んだアプリで鍵が切れた・消えたときも**止まらないようにする**: `TYPESAFE_API_KEY` が空なら判定をせず「確認待ち」に回す（下の部品がそうなっている）。
 
 ## 設計のきまり
 
@@ -73,3 +86,31 @@ export async function judge(state: string, questions: Record<string, Question>, 
 
 - `status: "unavailable"`（鍵が無い・API が落ちている）のときも処理を止めず、「確認待ち」に回す。
 - 使う側の例: 問い合わせフォームの送信時に `judge(本文, { kind: {type:"choice", …}, urgent: {type:"noul", …} })` → `decided` なら担当へ自動で振り分け、それ以外は確認待ち一覧へ。
+
+## 結合試験（ブラウザ操作）で使う
+
+Playwright などで画面を操作する試験の中で、**「今どの画面か」「エラーが出ていないか」を Jev に聞いて次の操作を決める。**
+決め打ちの目印（ボタンの文字・要素の ID）は画面の文言が変わるたびに壊れるが、意味で判定すれば変更に強く、
+1 回の判定が速く安いので、操作のたびに聞いてよい。自信が低いときだけ試験を止めて、画面の写しを残して人（または Claude）が見る。
+鍵が無いときは使わず、従来どおり目印で判定する（上と同じくオプション）。
+
+```ts
+// tests/helpers/screen.ts（試験専用。TYPESAFE_API_KEY は試験を回す環境だけに置く）
+import type { Page } from "@playwright/test";
+import { judge } from "../../lib/jev";
+
+/** 今の画面が states のどれかを判定する。鍵が無い・自信が低いときは null（呼び出し側で目印の判定に落とす／止める） */
+export async function whichScreen(page: Page, states: Record<string, string>): Promise<{ state: string; error: boolean } | null> {
+  if (!process.env.TYPESAFE_API_KEY) return null;
+  const text = (await page.locator("body").innerText()).slice(0, 20000);
+  const v = await judge(`URL: ${page.url()}\n${text}`, {
+    state: { type: "choice", instructions: "この画面はどれですか？", criteria: states },
+    error: { type: "noul", instructions: "この画面にエラー・失敗・権限なし・ログイン切れの表示が出ていますか？" },
+  }, 0.8);
+  if (v.status !== "decided") return null;
+  return { state: String(v.answers.state.value), error: Boolean(v.answers.error.value) };
+}
+```
+
+使い方の例: `whichScreen(page, { login: "ログイン画面", list: "一覧画面", detail: "詳細画面", done: "送信完了の画面" })`
+→ 期待した画面でなければ、その場で試験を失敗にし、画面の写しと判定結果を残す。

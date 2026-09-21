@@ -103,6 +103,11 @@ CHECKS="${CHECKS_JSON:-$DEFAULT_CHECKS}"
 | Next.js + Auth | 上に加え、`/api/<protected>` 401 |
 | Next.js + Supabase（joined select あり） | 上に加え、**PostgREST relationship probe** を joined select で使うリレーション 1 つにつき 1 件追加（後述） |
 
+**画面の中身チェック（オプション・鍵があるときだけ）**: ログイン不要のページは、HTTP 200 でも中身がエラー表示・空・準備中の
+ことがある。判定の道具 `jev_judge`（`osi-core:jev-judge`）が使えるときは、確認するページの URL を `urls` にまとめて渡し、
+noul「このページは、エラー・準備中・中身が空ではなく、本来の内容が表示されている正常な画面ですか？」をかける。
+`yes < 0.2` → FAIL、`unsure` → 要確認として報告。道具が無ければ（鍵が無ければ）このチェックは飛ばす。
+
 ---
 
 ## Step 2: 各チェックの実行
