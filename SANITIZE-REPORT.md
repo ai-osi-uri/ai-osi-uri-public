@@ -57,23 +57,23 @@
 | plugins/osi-sales/skills/meeting-minutes/SKILL.md | 35 | Plaud | このスキルなら「今日の○○社の録音を議事録にして」の一言で、Plaud MCP から |
 | plugins/osi-sales/skills/meeting-minutes/SKILL.md | 80 | Plaud | - Plaud MCP から取得した（または貼り付けられた）文字起こしを読み、 |
 | plugins/osi-sales/skills/meeting-minutes/SKILL.md | 91 | Plaud | 2. 文字起こしを取得（Plaud MCP で直接取得が基本／貼り付け・Gmail転送・Drive はフォールバック） |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 131 | Plaud | ### 2-A: Plaud MCP で直接取得（プライマリ） |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 133 | Plaud | Plaud MCP コネクタ（ツール名に `plaud` を含む `list_files` / `get_file` / |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 143 | Plaud | 3. `get_note`（Plaud の AI 要約）は **参考情報に留める**。サマリ・次アクションの構造化は |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 144 | Plaud | Step 3 で Claude 自身が全文から行う（Plaud 要約の転記で済ませない）。 |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 150 | Plaud | 1. **チャットへの貼り付け**：従来どおり Plaud アプリからのコピペを受け付ける |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 151 | Plaud | 2. **Gmail 転送メール**：Plaud から Gmail に自動転送されている場合、Gmail 検索 |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 155 | Plaud | どれも無ければ `AskUserQuestion` で「Plaud の文字起こしを貼り付けてください |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 183 | yourrecord | "todo": "見積もり提案書（yourrecord + CAIO Advanced）を作成", |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 183 | CAIO | "todo": "見積もり提案書（yourrecord + CAIO Advanced）を作成", |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 261 | yourrecord | 例：`2026-07-21 議事録: 見積もり提案書（yourrecord + CAIO Advanced）を自社担当が7/24までに作成` |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 261 | CAIO | 例：`2026-07-21 議事録: 見積もり提案書（yourrecord + CAIO Advanced）を自社担当が7/24までに作成` |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 367 | Plaud | ### Plaud の文字起こしの特徴と対処 |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 416 | Plaud | - **Plaud MCP が 401 / 未認証** → `login` ツールでサインインを促して再試行。直らなければ 2-B へフォールバック |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 417 | Plaud | - **Plaud に該当録音が無い** → 条件を緩めて再検索 → 無ければ貼り付け / Gmail / Drive へフォールバック |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 426 | Plaud | - `references/transcript-parsing.md` — 【共通・正本】Plaud 文字起こしの取得（MCP/フォールバック）・特徴対処・話者推定（session-review / shodan-prep と共有） |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 438 | Plaud | - 「今日の○○社の録音を議事録にして」（← Plaud MCP で直接取得） |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 439 | Plaud | - 「Plaud の文字起こしを議事録にして」 |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 134 | Plaud | ### 2-A: Plaud MCP で直接取得（プライマリ） |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 136 | Plaud | Plaud MCP コネクタ（ツール名に `plaud` を含む `list_files` / `get_file` / |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 146 | Plaud | 3. `get_note`（Plaud の AI 要約）は **参考情報に留める**。サマリ・次アクションの構造化は |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 147 | Plaud | Step 3 で Claude 自身が全文から行う（Plaud 要約の転記で済ませない）。 |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 153 | Plaud | 1. **チャットへの貼り付け**：従来どおり Plaud アプリからのコピペを受け付ける |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 154 | Plaud | 2. **Gmail 転送メール**：Plaud から Gmail に自動転送されている場合、Gmail 検索 |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 158 | Plaud | どれも無ければ `AskUserQuestion` で「Plaud の文字起こしを貼り付けてください |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 186 | yourrecord | "todo": "見積もり提案書（yourrecord + CAIO Advanced）を作成", |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 186 | CAIO | "todo": "見積もり提案書（yourrecord + CAIO Advanced）を作成", |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 264 | yourrecord | 例：`2026-07-21 議事録: 見積もり提案書（yourrecord + CAIO Advanced）を自社担当が7/24までに作成` |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 264 | CAIO | 例：`2026-07-21 議事録: 見積もり提案書（yourrecord + CAIO Advanced）を自社担当が7/24までに作成` |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 370 | Plaud | ### Plaud の文字起こしの特徴と対処 |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 419 | Plaud | - **Plaud MCP が 401 / 未認証** → `login` ツールでサインインを促して再試行。直らなければ 2-B へフォールバック |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 420 | Plaud | - **Plaud に該当録音が無い** → 条件を緩めて再検索 → 無ければ貼り付け / Gmail / Drive へフォールバック |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 429 | Plaud | - `references/transcript-parsing.md` — 【共通・正本】Plaud 文字起こしの取得（MCP/フォールバック）・特徴対処・話者推定（session-review / shodan-prep と共有） |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 441 | Plaud | - 「今日の○○社の録音を議事録にして」（← Plaud MCP で直接取得） |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 442 | Plaud | - 「Plaud の文字起こしを議事録にして」 |
 | plugins/osi-sales/skills/meeting-minutes/references/data-schema.md | 42 | yourrecord | "yourrecord 導入には強い興味", |
 | plugins/osi-sales/skills/meeting-minutes/references/data-schema.md | 132 | CAIO | セクションヘッダは赤色（CAIO アクセントレッド）。 |
 | plugins/osi-sales/skills/meeting-minutes/references/transcript-parsing.md | 1 | Plaud | # Plaud 文字起こしの取得・取り込み（共通・正本） |

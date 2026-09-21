@@ -7,7 +7,7 @@
   },
   "metadata": {
     "description": "公開プラグイン（外部配布用サブセット）。",
-    "version": "0.9.8"
+    "version": "0.9.9"
   },
   "plugins": [
     {
@@ -30,7 +30,7 @@
       "name": "osi-sales",
       "source": "./plugins/osi-sales",
       "description": "営業ワークフロー。商談準備、提案、見積もり、案件管理、企業調査、決裁構造、社内推進戦略、決裁者向け説得パッケージまで一気通貫で扱う。",
-      "version": "0.6.0",
+      "version": "0.6.1",
       "category": "sales",
       "tags": [
         "proposal",
@@ -133,7 +133,7 @@
       "name": "osi-finance",
       "source": "./plugins/osi-finance",
       "description": "OSI Finance — 日本の中小企業向け経理（請求AR・支払AP）自動化プラグイン。台帳（ローカル xlsx）と内部仕訳帳を正本に、「OSI Finance を入れたい」の一言で導入を伴走する onboarding、初回セットアップ、契約取込→請求スケジュール化、請求書発行、受領請求書の支払起票・取りこぼし検出、MF/freee/銀行明細との突合、仕訳生成、経費レシート証憑化、月次クローズ、会計ダッシュボード、ローカルコンソール（台帳ビュー・財務三表）までを収録。送金・請求書の発行送信・会計計上の確定は常に人が実行。運用モード・連携トグル・起票確認方式で書き込み可否を組織ごとに統制できる。詳細は各スキルの説明を参照。",
-      "version": "0.53.0",
+      "version": "0.53.1",
       "category": "finance",
       "tags": [
         "finance",
@@ -153,7 +153,7 @@
       "name": "osi-core",
       "source": "./plugins/osi-core",
       "description": "横断オーケストレーション・品質層・入口。はじめて（getting-started）で会社プロファイルと初期環境を整え、入力振り分けと独立ファクトチェックを行う。",
-      "version": "0.3.5",
+      "version": "0.3.6",
       "category": "core",
       "tags": [
         "core",
@@ -188,7 +188,7 @@
       "name": "osi-marketing",
       "source": "./plugins/osi-marketing",
       "description": "顧客理解、商品コンセプト、ファネル、ウェビナー、講座、アウトリーチ、掲載先の陣取り調査を一気通貫で設計・実行。",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "category": "marketing",
       "tags": [
         "outreach",
