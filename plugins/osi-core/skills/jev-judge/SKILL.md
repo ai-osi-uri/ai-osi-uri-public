@@ -20,13 +20,22 @@ description: >
 
 ## 呼び方
 
-1. リモートMCP（`/mcp`）の道具 `jev_judge` を使う。
-   - `items`: `[{id, text}]`（最大 300 件／回、1 件 3 万字まで）。id は後で対応付けに使う（URL・ファイル名・行番号）。
+本文をどこから取るかで道具を選ぶ（中身の判定は同じ。本体は共有ライブラリ `packages/deploy-tools` の 1 か所）。
+
+| 判定したいもの | 道具 | Claude が渡すもの |
+|---|---|---|
+| 会話の中の文章（数十件まで） | `jev_judge`（リモートMCP・AI OSI URI Deploy 拡張の両方） | `items: [{id, text}]` |
+| Web ページ（問い合わせページ・公開後の画面） | `jev_judge` | `urls: [...]`（道具がページを取りに行く） |
+| 手元のファイル・フォルダ（議事録フォルダ・Drive 同期フォルダ） | `jev_judge_files`（AI OSI URI Deploy 拡張だけ） | `paths: [...]`（道具が自分で読む。本文を会話に通さない） |
+
+件数が多いときは、本文を会話に通さない `urls` / `paths` を優先する（Claude が本文を運ぶ費用の方が Jev より高くつく）。
+
+1. 共通の引数:
+   - `items` は最大 300 件／回、1 件 3 万字まで。id は後で対応付けに使う（URL・ファイル名・行番号）。
    - `questions`: `{問いID: {type, instructions, criteria}}`。1 回に複数の問いを混ぜてよい（安くなる）。
    - `threshold`（既定 0.8）、`noul_margin`（既定 0.2）、件数が多いときは `only_unsure: true`。
-2. 道具が無い（`health_check` の tools 行が「判定 0 道具」）→ 利用者の端末の `~/.deploy-credentials/.env` の
-   `TYPESAFE_API_KEY` で `POST https://api.typesafe.ai/v1/systemone` を直接呼ぶ（端末のシェルから。鍵の値は表示しない）。
-   どちらも無ければ、この工程は Claude が自分で読む（従来どおり）。止めない。
+2. 鍵: リモートMCP は共用の鍵（運営が設定済み）。AI OSI URI Deploy 拡張は設定の「TypeSafe API Key（任意）」。
+   道具が「鍵が揃っていません」と返す／道具が無い → この工程は Claude が自分で読む（従来どおり）。止めない。
 
 ## 問いの書き方（Jev は書いた言葉どおりに読む）
 
