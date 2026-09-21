@@ -7,7 +7,7 @@
   },
   "metadata": {
     "description": "公開プラグイン（外部配布用サブセット）。",
-    "version": "0.9.10"
+    "version": "0.9.11"
   },
   "plugins": [
     {
@@ -69,7 +69,7 @@
       "name": "osi-deploy",
       "source": "./plugins/osi-deploy",
       "description": "アプリ作成・公開自動化。Web（Vercel / AWS）・Desktop（Electron）・ローカル出力に対応し、create-app を入口に DNS 設定・事前診断・公開後の更新まで一気通貫で扱う。**モバイル（iOS / Android）は osi-mobile-deploy に全面委譲**する。Lovable プロジェクトの決済有効化・本番化は `lovable-payments-golive` が担当（AI OSI URI Deploy 拡張は使わない）。オンプレ App Builder への受け渡しは `app-builder-export`（kind: app-builder-app-spec）に一本化。25 スキル（鍵の受け渡し `credential-handoff` を追加）。",
-      "version": "1.15.0",
+      "version": "1.16.0",
       "category": "deploy",
       "tags": [
         "deploy",
@@ -153,7 +153,7 @@
       "name": "osi-core",
       "source": "./plugins/osi-core",
       "description": "横断オーケストレーション・品質層・入口。はじめて（getting-started）で会社プロファイルと初期環境を整え、入力振り分けと独立ファクトチェックを行う。",
-      "version": "0.3.7",
+      "version": "0.3.8",
       "category": "core",
       "tags": [
         "core",

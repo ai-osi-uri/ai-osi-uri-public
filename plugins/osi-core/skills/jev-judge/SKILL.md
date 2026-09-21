@@ -34,7 +34,11 @@ description: >
    - `items` は最大 300 件／回、1 件 3 万字まで。id は後で対応付けに使う（URL・ファイル名・行番号）。
    - `questions`: `{問いID: {type, instructions, criteria}}`。1 回に複数の問いを混ぜてよい（安くなる）。
    - `threshold`（既定 0.8）、`noul_margin`（既定 0.2）、件数が多いときは `only_unsure: true`。
-2. 鍵: リモートMCP は共用の鍵（運営が設定済み）。AI OSI URI Deploy 拡張は設定の「TypeSafe API Key（任意）」。
+2. 鍵:
+   - リモートMCP: ポータルの「自分の鍵」に TypeSafe の鍵があればそれで動く（クレジットを使わない）。無ければ、マネージドの会社は
+     共用の鍵で動き、10 万トークンごとに 1 クレジット（最低 1）を引く。
+   - AI OSI URI Deploy 拡張（ダウンロード版）: 設定の「TypeSafe API Key（任意）」。
+   - **お客様に納めるアプリ**に判定を入れるときは、お客様自身の鍵を使う（`osi-deploy:create-app` の references/jev-in-app.md）。
    道具が「鍵が揃っていません」と返す／道具が無い → この工程は Claude が自分で読む（従来どおり）。止めない。
 
 ## 問いの書き方（Jev は書いた言葉どおりに読む）
