@@ -1,0 +1,35 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8">
+<title>OSI Finance コンソールを開く</title>
+<style>:root{color-scheme:light}body{font-family:-apple-system,"Hiragino Sans",sans-serif;background:#f7f8fb;color:#1a1f2e;
+display:flex;align-items:center;justify-content:center;height:100vh;margin:0}
+.c{background:#fff;border:1px solid #e4e7ee;border-radius:14px;padding:28px 32px;max-width:460px;line-height:1.7}
+h1{font-size:16px;margin:0 0 10px}p{font-size:13px;color:#5a6172;margin:0}a{color:#0f4c81}</style></head>
+<body><div class="c"><h1 id="t">コンソールを開いています…</h1><p id="m">少しお待ちください。</p></div>
+<script>
+var URL_="http://127.0.0.1:7788/";
+var PORT_=(URL_.match(/:(\d+)\//)||[])[1]||"7788";
+// このファイルは共有フォルダに置かれ、全員が同じ1枚を開く。だから**秘密を持たせない**。
+// 持たせると、最後に起動したPCのトークンで上書きされ、他の人が開けなくなる（2026-08-13 まで
+// 実際にそうなっていた）。ここは「自分のPCで生きているコンソールを探して開く」だけにする。
+// 認証はサーバー側が Host と Sec-Fetch-Site で行う。
+function go(p){ location.replace("http://127.0.0.1:"+p+"/") }
+function probe(p){ return fetch("http://127.0.0.1:"+p+"/healthz",{cache:"no-store"}).then(function(r){return r.ok}).catch(function(){return false}) }
+probe(PORT_).then(function(ok){
+  if(ok) return go(PORT_);
+  var ports=[]; for(var i=7788;i<=7797;i++){ if(String(i)!==PORT_) ports.push(String(i)); }
+  return ports.reduce(function(chain,p){
+    return chain.then(function(f){ return f||probe(p).then(function(o){return o?p:null}) });
+  }, Promise.resolve(null)).then(function(found){
+    if(found) return go(found);
+    document.getElementById("t").textContent="コンソールに接続できません";
+    document.getElementById("m").innerHTML=
+     "コンソールは、この PC に入っている <b>AI OSI URI Finance 拡張</b>が、"+
+     "<b>Claude Desktop の起動中だけ</b>開きます。次の順に確かめてください。<br><br>"+
+     "1. Claude Desktop を起動して、この画面を再読み込みする<br>"+
+     "2. 開かなければ、拡張が入っているか確かめる（Claude Desktop の設定 → 拡張機能）。"+
+     "入っていなければ、ツールポータルから「AI-OSI-URI-Finance.mcpb」を入れる<br>"+
+     "3. 拡張の設定「台帳フォルダ」にこのフォルダを選び、Claude Desktop を完全に終了して開き直す<br><br>"+
+     "分からなければ、Cowork で「<b>コンソールを開きたい</b>」と言ってください。";
+  });
+});
+</script></body></html>
