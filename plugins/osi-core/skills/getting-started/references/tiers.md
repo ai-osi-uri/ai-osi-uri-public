@@ -4,11 +4,12 @@
 > 段の意味：**0** は Plugins からインストールするだけ／**1** は Claude の Connectors で純正コネクタ（Gmail・Drive・Slack・Calendar・MoneyForward 等）を繋ぐ／**2** は AI OSI URI Deploy・Finance・Creative などの自社 MCP を繋ぐ。既定は**マネージド**（ツールポータルにログインし、コネクタの URL を Cowork に貼るだけ。アカウント作成も鍵も要らない）。自分の鍵で動かす人だけ `.mcpb` を入れて鍵を設定する（ダウンロード経路）。
 > 「公開」列は外部版（`build_external.py`）に含まれるか。
 
-## 0 段目：入れた瞬間に動く（コネクタ不要） — 40 本
+## 0 段目：入れた瞬間に動く（コネクタ不要） — 46 本
 
 | プラグイン | スキル | 必要なコネクタ | 公開 | 何をする |
 |---|---|---|---|---|
-| osi-core | `getting-started` | — | ○ | スキルを入れた直後の「はじめて」を、会話 1 回で終わらせる入口スキル |
+| osi-core | `getting-started` | — | ○ | スキルを入れた直後の初回セットアップを、会話 1 回で終わらせる入口スキル |
+| osi-core | `jev-judge` | — | ○ | 大量の文章に同じ判定（はい／いいえ・選択肢から1つ・段階で点数）をかける横断スキル |
 | osi-core | `research-verifier` | — | ○ | 調査結果、営業リスト、提案書、事業計画、記事などに含まれる事実主張を、作成時の推論から独立して主張単位で再検証する横断品質ゲート |
 | osi-deploy | `app-builder-container-export` | — | 内部 | 【コマンド専用・自動発火しない】任意スタックのフルスタックアプリ（フロント +自前バックエンド + DB）を、オンプレ App Builde… |
 | osi-deploy | `app-builder-export` | — | 内部 | 【コマンド専用・自動発火しない】アプリ仕様を、オンプレ AppBuilder（ソブリン推論筐体）が取り込める App Bundle（.app… |
@@ -31,6 +32,11 @@
 | osi-docs | `wiring-diagram-package` | — | ○ | 手描き配線図や現場写真の受領から、画像補正、構造化抽出、段階的なユーザー確認、必要な型番調査、物理・論理ネットワーク構成図、接続表、BOM、… |
 | osi-finance | `osi-finance-console` | — | ○ | OSI Finance のローカルコンソール（ブラウザで開く台帳ビュー）の入口 |
 | osi-finance | `osi-finance-plan` | — | ○ | OSI Finance の「計画（事業計画）」を読み解いて答えるスキル |
+| osi-knowledge | `knowledge-bundle` | — | ○ | 溜まった型を「なぜ」で束ねて本質にするスキル（束ねる） |
+| osi-knowledge | `knowledge-compare` | — | ○ | 読み方・構造・決まりを、頭で決めずに比べて決めるスキル（確かめて直す） |
+| osi-knowledge | `knowledge-setup` | — | ○ | 自分の会話や会議の記録を「人が考えて答えるための知識」に育てる置き場を、何もない状態から整える入口スキル |
+| osi-knowledge | `obsidian-knowledge-capture` | — | ○ | 会話や会議の記録を、ノートの置き場に取り込むスキル（集める） |
+| osi-knowledge | `obsidian-knowledge-consult` | — | ○ | ノートの置き場を読んで相談に答えるスキル（答える） |
 | osi-marketing | `course-outline` | — | ○ | オンライン講座、社内研修、顧客教育プログラムについて、対象者と前提知識、測定可能な学習成果、評価課題から逆算して、モジュール、レクチャー、演… |
 | osi-marketing | `form-outreach-autopilot` | — | ○ | Webフォームへの営業送信を、人の手を最小化して自走させるオーケストレータ・スキル（osi-marketing の送信フロント） |
 | osi-marketing | `funnel-design` | — | ○ | 商品コンセプトとペルソナを基に、認知、関心、比較、商談、購入、導入、継続、推奨までの顧客導線を、オファー、チャネル、コンテンツ、担当、計測イ… |
@@ -49,17 +55,19 @@
 | osi-sales | `proposal-estimate` | — | ○ | 見積もり・スケジュール入り**詳細提案書（pptx）を単発生成する atomic スキル** |
 | osi-sales | `proposal-self-review` | — | ○ | 顧客向けの提案書・デモ・アプリ・資料などの「成果物」をユーザーに見せる前に、必ず通す自己レビューのゲート |
 
-## 1 段目：Claude の純正コネクタを繋げば動く（OAuth でワンクリック） — 18 本
+## 1 段目：Claude の純正コネクタを繋げば動く（OAuth でワンクリック） — 20 本
 
 | プラグイン | スキル | 必要なコネクタ | 公開 | 何をする |
 |---|---|---|---|---|
 | osi-core | `transcript-router` | plaud | ○ | 会議・商談・伴走セッションの文字起こしや長文メモが貼り付けられ、短い指示（「まとめて」「本質とTODOを出して」「議事録にして」「論点を出し… |
+| osi-deploy | `credential-handoff` | claude-in-chrome | ○ | デプロイやセットアップの途中で **鍵（トークン・API キー・秘密鍵・OAuth の認可）が要る**場面の受け渡しを、人の手を「値を運ぶ1… |
 | osi-docs | `architecture-proposal` | box | ○ | クライアントの既存構想（グランドデザイン／ADR／要件資料）を読み込み、自社がデリバリーパートナーとして「クラウド（GCP/AWS）上にどう… |
 | osi-finance | `osi-finance-ar-sync` | money-forward | ○ | OSI Finance の経理で、請求管理台帳の「請求済」「入金済」取引と、会計SaaS（v1=マネーフォワード クラウド会計）の仕訳を突合… |
 | osi-finance | `osi-finance-dashboard` | money-forward, cowork | ○ | OSI Finance の「会計ダッシュボード」を Cowork のライブ・アーティファクトとして生成するスキル |
 | osi-finance | `osi-finance-feed-recon` | money-forward | ○ | OSI Finance の経理で、マネーフォワード クラウド会計の「連携明細（未仕訳）」を棚卸しして整理するスキル（連携明細の入口整理役） |
 | osi-finance | `osi-finance-mf-sync` | money-forward | ○ | OSI Finance の経理で、支払管理台帳の支払済取引と、会計SaaS（v1=マネーフォワード クラウド会計）の仕訳を突合し、計上漏れ・… |
 | osi-finance | `osi-finance-monthly` | money-forward | ○ | OSI Finance の月次経理クローズを進めるオーケストレータ・スキル |
+| osi-finance | `osi-finance-onboarding` | claude-in-chrome | ○ | OSI Finance（請求AR・支払APの経理自動化）を **何も入っていない会社に、話しかけるだけで導入する**伴走スキル |
 | osi-finance | `osi-finance-payment-detect` | superhuman | ○ | 毎朝、受領請求書（AP）の取りこぼしを検出する日次スキル |
 | osi-finance | `osi-finance-payment-intake` | superhuman, money-forward | ○ | 受領請求書（AP）を「①受領・格納 → ②読取・科目/税区分判定 → ③支払管理台帳に支払予定を起票→ ④振込情報の整形提示」まで進めるオン… |
 | osi-finance | `osi-finance-receipt-intake` | money-forward, drive-fs, superhuman | ○ | OSI Finance の経費レシート取込 |
@@ -72,7 +80,7 @@
 | osi-sales | `session-review` | plaud | ○ | 「AI伴走（Cowork / AI 導入支援）セッション」の文字起こしから、振り返りレビューを構造化して生成するスキル |
 | osi-sales | `shodan-prep` | box, plaud, web-fetch | ○ | 商談を「準備」と「振り返り」の両面で支援するスキル |
 
-## 2 段目：自社 MCP（Deploy / Finance / Creative 等）を繋ぐ（既定はマネージド＝URL を貼るだけ） — 55 本
+## 2 段目：自社 MCP（Deploy / Finance / Creative 等）を繋ぐ（既定はマネージド＝URL を貼るだけ） — 54 本
 
 | プラグイン | スキル | 必要なコネクタ | 公開 | 何をする |
 |---|---|---|---|---|
@@ -106,6 +114,7 @@
 | osi-deploy | `vercel-connect-and-deploy` | AI_OSI_URI_Deploy | ○ | GitHub に push 済みのリポを Vercel に接続し、環境変数を設定して初回本番デプロイを実行する |
 | osi-docs | `nda-creation` | slack, ai-osi-uri-sales | 内部 | 機密保持契約書（NDA）を雛形から自動作成するスキル |
 | osi-docs | `pptx-custom` | ai-osi-uri-creative | ○ | 社内体裁（ブランド配色・レイアウト規約）で .pptx を描画/整形する**描画エンジン**スキル |
+| osi-finance | `osi-finance-accrual` | money-forward, AI_OSI_URI_Finance | ○ | OSI Finance の「期ズレ計上」（決算整理のうち、月次に前倒しできる部分）を毎月回すスキル |
 | osi-finance | `osi-finance-bank-recon` | AI_OSI_URI_Finance, drive-fs | ○ | OSI Finance の経理で、ネットバンキングの入出金明細CSVと台帳を突合し、入金（AR）・支払（AP）の実績を裏取りするスキル（BA… |
 | osi-finance | `osi-finance-connect` | claude-in-chrome, AI_OSI_URI_Finance, money-forward | ○ | AI OSI URI Finance 拡張（請求管理台帳の読み書き＋MoneyForwardクラウド請求書ポーリング）の **OAuth 接… |
 | osi-finance | `osi-finance-contract-draft` | AI_OSI_URI_Finance, drive-fs | ○ | OSI Finance の契約書作成・雛形管理スキル（コンソールの中核パートナー） |
@@ -114,8 +123,6 @@
 | osi-finance | `osi-finance-invoice` | AI_OSI_URI_Finance, gmail, claude-in-chrome, plaud | ○ | OSI Finance の月次請求書発行 |
 | osi-finance | `osi-finance-journal` | AI_OSI_URI_Finance | ○ | OSI Finance の内部仕訳帳（仕訳台帳）に、台帳からローカルで仕訳を生成・記帳するスキル（v4 の中核） |
 | osi-finance | `osi-finance-setup` | money-forward, gmail, superhuman, ai-osi-uri-finance | ○ | OSI Finance（請求AR・支払APの経理自動化）を新しい組織・Cowork に初回セットアップするオーケストレータ・スキル |
-| osi-knowledge | `obsidian-knowledge-capture` | obsidian | ○ | Obsidian vault（{{paths.vault}}）に会話・思考・気づき・調査結果を自律的に保存・整理するスキル |
-| osi-knowledge | `obsidian-knowledge-consult` | obsidian | ○ | Obsidian vault（{{paths.vault}}）に蓄積されたユーザー独自の知識を引き出し、回答の文脈に組み込むスキル |
 | osi-mobile-deploy | `android-play-deploy` | AI_OSI_URI_Deploy | ○ | Android AAB を Google Play Internal Track にアップロードする |
 | osi-mobile-deploy | `apiv2-callable-iam-gotchas` | AI_OSI_URI_Deploy | ○ | Firebase Cloud Functions v2 の callable がクライアントから呼べないときの復旧 |
 | osi-mobile-deploy | `deploy-mobile-app` | AI_OSI_URI_Deploy, cowork, computer-use, ai-osi-uri-creative | ○ | ネイティブモバイルアプリ（iOS = SwiftUI / Android = Kotlin + Jetpack Compose）を新規に作っ… |
