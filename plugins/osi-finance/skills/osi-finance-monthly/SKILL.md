@@ -71,7 +71,7 @@ requires_connectors:
 
 > **未仕訳が大量／初回連携／手入力バックフィルとの重複／大型入金が「売上高」に誤推定 等で
 > 棚卸しが要るときは `osi-finance-feed-recon` を呼ぶ**（連携明細を「対象外／登録／要確認」に振り分ける入口役）。
-> 連携明細の対象外/登録はMF画面専用（MCP不可）。**MFのAI推定は鵜呼みにせず「一括登録」は押さない**。
+> 連携明細の対象外/登録はMF画面専用（MCP不可）。**MFのAI推定は鵜吞みにせず「一括登録」は押さない**。
 > 詳細は `references/monthly-rules.md` の §9・§10 と `osi-finance-feed-recon/references/recon-rules.md`。
 
 **登録の作法（今回の教訓・重要）**
