@@ -2,7 +2,7 @@
 
 対象プラグイン: osi-creative, osi-sales, osi-docs, osi-deploy, osi-mobile-deploy, osi-knowledge, osi-finance, osi-core, osi-backoffice, osi-marketing
 
-以下の 142 箇所に要注意語が残っています。publish 前に人手で確認してください（自動削除は文書を壊すため行いません）。
+以下の 143 箇所に要注意語が残っています。publish 前に人手で確認してください（自動削除は文書を壊すため行いません）。
 
 | ファイル | 行 | 語 | 抜粋 |
 |---|---|---|---|
@@ -48,6 +48,7 @@
 | plugins/osi-deploy/skills/create-app/references/aws-app-gotchas.md | 54 | 共有ドライブ | 初回 apply 前に **`tf-state-backend` スキル**を呼ぶ（state基盤の作成＋backend.tf差し込み）。既存のローカルstateアプリは同スキルの migrate-existing（`aws_terrafo |
 | plugins/osi-deploy/skills/tf-state-backend/SKILL.md | 73 | 共有ドライブ | 6. コード一式＋HANDOFF を共有ドライブへ退避（揮発対策） |
 | plugins/osi-deploy/skills/tf-state-backend/SKILL.md | 158 | 共有ドライブ | 復旧時にバケット/キーが分からなくなる**。コード一式を共有ドライブの案件フォルダへ退避する。 |
+| plugins/osi-backoffice/skills/secretary-create/SKILL.md | 90 | Plaud | - 後から（別途設定）：議事録の取り込み（Plaud など）、Google ドライブの台帳、電子署名（DocuSign）、会計ソフト |
 | plugins/osi-backoffice/skills/contract-docusign-send/SKILL.md | 94 | 共有ドライブ | - **Drive（マウント済み共有ドライブ）**：格納先は `references/storage-and-naming.md` の定義に従う。**このスキルにパスを直書きしない**（組織ごとに違い、移行でも動く）。 |
 | plugins/osi-backoffice/skills/contract-docusign-send/_旧版_S3方式_20260817/docusign-and-s3.md | 30 | 共有ドライブ | - **file tools（Mac）**：outputs と共有ドライブのみ書ける。 |
 | plugins/osi-backoffice/skills/contract-docusign-send/references/storage-and-naming.md | 3 | 共有ドライブ | 契約の正本は Drive の**契約書フォルダ**（`{契約書ルート}`）。マウント済み共有ドライブに書くと Drive に同期される。 |
