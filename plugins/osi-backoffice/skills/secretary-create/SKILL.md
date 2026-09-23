@@ -34,10 +34,10 @@ requires_connectors:
 | 段階 | 道具 |
 |---|---|
 | 置き場の作成 | `supabase_list_organizations`（自分の鍵のときだけ）→ `supabase_create_project` → `supabase_list_projects`（ACTIVE_HEALTHY を待つ） |
-| ひな形を入れる | `secretary_install`（DB・初期設定・関数・定時処理。setup_url と webhook_url を返す） |
+| ひな形を入れる | `secretary_install`（DB・初期設定・関数・定時処理。setup_url と webhook_url を返す）。ひな形は GitHub の ai-osi-uri/ai-osi-uri-line-secretary（本番の秘書と同じもの）から、その場で読む |
 | 業務定義を書く | `secretary_write_flow`（版・変更の記録つき。同じ No は上書き） |
-| 状態を見る | `secretary_status`（メンバー数・LINE の鍵が入ったか・業務定義の版・足りない関数） |
-| 関数の入れ直し | `secretary_update` |
+| 状態を見る | `secretary_status`（メンバー数・LINE の鍵が入ったか・業務定義の版・入っているひな形の版と最新・足りない関数） |
+| 関数の入れ直し | `secretary_update`（DB の追加分もあるときは `with_sql: true`） |
 
 **どちらの経路を使うか（会社の設定で決まる）**：本人が「自分の鍵で」「Deploy 拡張で」と言ったときは、会社の設定に関わらず Deploy 拡張（自分の鍵）で進める。それ以外は リモートMCP の `whoami` を呼び、`credential_mode` を見る。
 - `managed`（提供元が用意した置き場で動かす）… リモートMCP の道具を使う。作成先の組織は自動で決まる（引数で変えない）。作ったものは案件台帳に載る。
