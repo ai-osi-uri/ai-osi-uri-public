@@ -39,7 +39,7 @@ requires_connectors:
 | 状態を見る | `secretary_status`（メンバー数・LINE の鍵が入ったか・業務定義の版・足りない関数） |
 | 関数の入れ直し | `secretary_update` |
 
-**どちらの経路を使うか（会社の設定で決まる）**：リモートMCP の `whoami` を呼び、`credential_mode` を見る。
+**どちらの経路を使うか（会社の設定で決まる）**：本人が「自分の鍵で」「Deploy 拡張で」と言ったときは、会社の設定に関わらず Deploy 拡張（自分の鍵）で進める。それ以外は リモートMCP の `whoami` を呼び、`credential_mode` を見る。
 - `managed`（提供元が用意した置き場で動かす）… リモートMCP の道具を使う。作成先の組織は自動で決まる（引数で変えない）。作ったものは案件台帳に載る。
 - `byok`（会社自身の鍵で動かす）… Deploy 拡張（自分の Supabase の鍵）の道具を使う。組織は `supabase_list_organizations` で本人に選んでもらう。
 - リモートMCP がつながっていなければ Deploy 拡張で進める（= 自分の鍵）。
