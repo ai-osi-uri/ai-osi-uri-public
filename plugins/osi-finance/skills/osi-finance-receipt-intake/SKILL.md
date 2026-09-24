@@ -26,7 +26,7 @@ requires_connectors:
 # osi-finance-receipt-intake（紙レシートの証憑化 → UPSIDER明細への突合・添付）
 
 > **組織固有値（社名・Drive ルート／フォルダ名・台帳ファイル・メンバー・人↔カード対応・現金/未払金科目・
-> 少額特例の適用可否・事務処理規程の有無 等）は `config/osi-finance-settings.md`（テンプレ：
+> 少額特例の適用可否・事務処理規程の有無 等）は `{{paths.finance}}/osi-finance-settings.md`（テンプレ：
 > `config/osi-finance-settings.example.md` の「8. 経費（レシート）設定」）を参照する。** 実値版が無ければ作成を案内する。
 
 サミダレで発生する紙・写真・PDF のレシートを、**電子帳簿保存法に適合する証憑として保存**し、
@@ -130,7 +130,7 @@ UPSIDER 払いは会計のカード連携が自動仕訳するため**本スキ�
 
 ## ユーザー設定の反映（skill-customization 規約）
 
-実行の冒頭で必ず `config/osi-finance-settings.md`（実値版）を読み、Drive フォルダ・台帳ID・メンバー・人↔カード対応・
+実行の冒頭で必ず `{{paths.finance}}/osi-finance-settings.md`（実値版）を読み、Drive フォルダ・台帳ID・メンバー・人↔カード対応・
 現金/未払金科目・少額特例の適用・事務処理規程の有無 を反映する。実値版が無ければ
 `config/osi-finance-settings.example.md` の「8. 経費（レシート）設定」を案内して停止する。
 

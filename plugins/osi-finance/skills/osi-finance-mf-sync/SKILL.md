@@ -22,7 +22,7 @@ requires_connectors:
 # 経理：台帳⇔MF 突合スキル（osi-finance-mf-sync）
 
 > **組織固有値（台帳ファイル名・支払先→科目マッピング・採番ルール等）は
-> `config/osi-finance-settings.md`（テンプレ：`config/osi-finance-settings.example.md`）を参照する。**
+> `{{paths.finance}}/osi-finance-settings.md`（テンプレ：`config/osi-finance-settings.example.md`）を参照する。**
 
 支払管理台帳の「支払済」取引が、マネーフォワード クラウド会計に**仕訳として計上されているか**を突合し、
 計上漏れ・不一致を洗い出す。会計仕訳の発生源は原則MFの口座連携明細（銀行・カード）。本スキルは

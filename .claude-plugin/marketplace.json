@@ -30,7 +30,7 @@
       "name": "osi-sales",
       "source": "./plugins/osi-sales",
       "description": "営業ワークフロー。商談準備、提案、見積もり、案件管理、企業調査、決裁構造、社内推進戦略、決裁者向け説得パッケージまで一気通貫で扱う。",
-      "version": "0.6.1",
+      "version": "0.7.0",
       "category": "sales",
       "tags": [
         "proposal",
@@ -51,7 +51,7 @@
       "name": "osi-docs",
       "source": "./plugins/osi-docs",
       "description": "文書・契約・業務フロー・事業計画・構成図作成。財務モデル、企業分析、提案資料に加え、手描き配線図から物理・論理構成図とBOMを生成。 financial-model-3statement は config の開始年月から月次三表に「年月」行を出し、暦月の実績と並べられる。 明細（売上・原価・販管費の行）は業態別テンプレを持たず config の 明細 から生やす。合計と検算はコード側。",
-      "version": "0.7.5",
+      "version": "0.8.0",
       "category": "docs",
       "tags": [
         "docs",
@@ -133,7 +133,7 @@
       "name": "osi-finance",
       "source": "./plugins/osi-finance",
       "description": "OSI Finance — 日本の中小企業向け経理（請求AR・支払AP）自動化プラグイン。台帳（ローカル xlsx）と内部仕訳帳を正本に、「OSI Finance を入れたい」の一言で導入を伴走する onboarding、初回セットアップ、契約取込→請求スケジュール化、請求書発行、受領請求書の支払起票・取りこぼし検出、MF/freee/銀行明細との突合、仕訳生成、経費レシート証憑化、期ズレ計上（前受・前払・未払の月次整理）、月次クローズ、会計ダッシュボード、ローカルコンソール（台帳ビュー・財務三表）までを収録。送金・請求書の発行送信・会計計上の確定は常に人が実行。運用モード・連携トグル・起票確認方式で書き込み可否を組織ごとに統制できる。詳細は各スキルの説明を参照。",
-      "version": "0.57.0",
+      "version": "0.58.0",
       "category": "finance",
       "tags": [
         "finance",
@@ -153,7 +153,7 @@
       "name": "osi-core",
       "source": "./plugins/osi-core",
       "description": "横断オーケストレーション・品質層・入口。初回セットアップ（getting-started）で会社プロファイルと初期環境を整え、入力振り分けと独立ファクトチェックを行う。",
-      "version": "0.3.12",
+      "version": "0.4.0",
       "category": "core",
       "tags": [
         "core",

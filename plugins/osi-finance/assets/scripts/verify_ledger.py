@@ -5,6 +5,11 @@
     python3 verify_ledger.py <台帳フォルダ>
     python3 verify_ledger.py <台帳フォルダ> --months 2026-04 2026-05 2026-06 2026-07
     python3 verify_ledger.py <台帳フォルダ> --json      # 機械可読で出す
+    python3 verify_ledger.py <台帳フォルダ> --settings <osi-finance-settings.md>
+    python3 verify_ledger.py <台帳フォルダ> --journal-file 仕訳台帳.xlsx --ar-file 請求管理台帳.xlsx
+
+台帳のファイル名は 引数 → settings（§6 台帳ファイル）→ 既定（仕訳台帳.xlsx / 請求管理台帳.xlsx）の順で決める。
+settings を指定しなくても、台帳フォルダ直下に osi-finance-settings.md があればそれを読む。
 
 終了コード: 0=ERROR なし / 1=ERROR あり（記帳を止める）
 
@@ -27,8 +32,32 @@ try:
 except ImportError:
     sys.exit("openpyxl が必要です: pip3 install openpyxl")
 
-JOURNAL = "仕訳台帳.xlsx"
-AR = "請求管理台帳.xlsx"
+JOURNAL = "仕訳台帳.xlsx"      # 既定。settings §6 LEDGER_JOURNAL_FILE / --journal-file で上書き
+AR = "請求管理台帳.xlsx"       # 既定。settings §6 LEDGER_BILLING_FILE / --ar-file で上書き
+SETTINGS_NAME = "osi-finance-settings.md"
+
+
+def xlsx_name(v):
+    v = str(v).strip().strip("`").strip()
+    return v if v.lower().endswith(".xlsx") else v + ".xlsx"
+
+
+def ledger_names_from_settings(path):
+    """settings §6 の表から台帳ファイル名を読む。未記入（{{ }} のまま）は無視する。"""
+    names = {}
+    try:
+        text = Path(path).read_text(encoding="utf-8")
+    except OSError:
+        return names
+    for line in text.splitlines():
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        if len(cells) < 2 or not cells[1] or "{{" in cells[1]:
+            continue
+        if cells[0].startswith("仕訳台帳"):
+            names.setdefault("journal", xlsx_name(cells[1]))
+        elif cells[0].startswith("請求管理台帳"):
+            names.setdefault("ar", xlsx_name(cells[1]))
+    return names
 
 
 def num(v):
@@ -177,7 +206,7 @@ def check_ref_branch(rows, rep):
     """参照IDの枝番（INV-xxx/C-029）を禁止する。
 
     枝番を付けると同じ請求書が別の参照IDに化けて、上の「参照ID×出所」重複防止をすり抜ける。
-    NITOH で 3,575,000 を売上・入金とも二重計上した実際の経路がこれ。
+    ある取引先の合算請求で 3,575,000 を売上・入金とも二重計上した実際の経路がこれ。
     """
     bad = []
     for r in rows:
@@ -363,12 +392,22 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("ledger_dir", help="台帳フォルダ（仕訳台帳.xlsx などがある場所）")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--settings", help="osi-finance-settings.md（省略時は台帳フォルダ直下にあれば読む）")
+    ap.add_argument("--journal-file", help=f"仕訳台帳のファイル名（既定 {JOURNAL}）")
+    ap.add_argument("--ar-file", help=f"請求管理台帳のファイル名（既定 {AR}）")
     args = ap.parse_args()
 
     d = Path(args.ledger_dir)
     rep = Report()
 
-    jpath = d / JOURNAL
+    settings = Path(args.settings) if args.settings else d / SETTINGS_NAME
+    if args.settings and not settings.exists():
+        sys.exit(f"{settings} がありません")
+    names = ledger_names_from_settings(settings) if settings.exists() else {}
+    journal_name = xlsx_name(args.journal_file) if args.journal_file else names.get("journal", JOURNAL)
+    ar_name = xlsx_name(args.ar_file) if args.ar_file else names.get("ar", AR)
+
+    jpath = d / journal_name
     if not jpath.exists():
         sys.exit(f"{jpath} がありません")
 
@@ -381,8 +420,8 @@ def main():
         summary = []
 
     arrows = []
-    if (d / AR).exists():
-        _, arrows = read_tab(d / AR, "月次請求スケジュール")
+    if (d / ar_name).exists():
+        _, arrows = read_tab(d / ar_name, "月次請求スケジュール")
 
     check_balance(jrows, rep)
     check_journal_id(jrows, rep)

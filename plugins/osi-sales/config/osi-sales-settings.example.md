@@ -27,9 +27,11 @@ osi-finance の `config/osi-finance-settings.md` と同じ方式です。
 ### 列
 
 `案件ID / 取引先名 / URL / 事業区分 / 紹介元 / 獲得日 / ステータス / 確度 / 営業担当 /
-CAIO担当 / サポート / アサイン状態 / 次アクション / 次アクション期日 / 最終接触日 /
+デリバリー担当 / サポート / アサイン状態 / 次アクション / 次アクション期日 / 最終接触日 /
 想定額(税込) / 課金形態 / 想定開始月 / 想定期間(ヶ月) / 窓口氏名 / 窓口メール /
 議事録 / 提案書 / 失注-保留日 / 失注-保留理由 / 再アプローチ月 / 顧客課題メモ`
+（getting-started が作る営業管理表の列。既存の台帳では担当列の名前が会社ごとに違う
+——例：`担当コンシェルジュ` など自社サービスの担当列。**実際の列名は `ledger.py columns` で確認して、その名前で書く**）
 （＋移行チェック2列・稼働期間2列）
 
 列レターは使わない。列名で指定する（実際の列名は `ledger.py columns` で確認できる）。
@@ -111,14 +113,14 @@ KPI集計が壊れるので**値を勝手に増やさない**。
 ```bash
 L=plugins/osi-sales/skills/new-lead-registration/scripts/ledger.py
 python3 $L columns
-python3 $L find --company "セーフティ&ベル"
+python3 $L find --company "サンプル株式会社"
 python3 $L read --status 商談中 --owner {{members.owner}}
 python3 $L next-id
 python3 $L append --data '{"案件ID":"141","取引先名":"...","ステータス":"リード"}'
 python3 $L update --case-id 139 --data '{"ステータス":"提案中"}' --append-memo "9/15 初回商談"
 ```
 
-場所は **osi-profile.md**（連結フォルダ直下・`config/osi-profile.example.md` が雛形）の `paths` / `ledgers` から読む。
+場所は **osi-profile.md**（連結フォルダ直下・雛形は osi-core の `getting-started/assets/osi-profile.example.md`）の `paths` / `ledgers` から読む。
 一時的に差し替えたいときは環境変数で上書きする。
 
 | 環境変数 | 既定値 |

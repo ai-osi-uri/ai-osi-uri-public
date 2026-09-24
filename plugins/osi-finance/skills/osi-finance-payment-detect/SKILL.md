@@ -21,7 +21,7 @@ requires_connectors:
 # osi-finance-payment-detect（受領請求書 取りこぼし検出 — 日次）
 
 > **組織固有値（Drive ルート／フォルダ名・台帳ファイル名・支払先→科目マッピング・採番ルール等）は
-> `config/osi-finance-settings.md`（テンプレ：`config/osi-finance-settings.example.md`）を参照する。**
+> `{{paths.finance}}/osi-finance-settings.md`（テンプレ：`config/osi-finance-settings.example.md`）を参照する。**
 
 毎朝、入口（Drive 手置き・メール添付）に届いた受領請求書を検出し、支払管理台帳と照合して、
 **未起票のものだけ**を「支払予定 起票案」として報告する。**書き込みも送金もしない**（提案まで）。

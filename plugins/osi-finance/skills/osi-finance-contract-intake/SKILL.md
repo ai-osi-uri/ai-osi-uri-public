@@ -25,7 +25,7 @@ connector_prose_ok:  # DocuSign は ai-osi-uri-finance の ds_* 経由。docusig
 > **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` `{{members.*}}` は、連結フォルダ直下の `osi-profile.md`（雛形: `config/osi-profile.example.md`）の値に置き換えて解釈する。無ければ会社名・案件フォルダ・台帳の有無・使うコネクタを質問して先に作る。値をここに直書きしない。
 
 > **組織固有値（Drive ルート／フォルダ名・台帳ファイル名・採番ルール・税率・支払サイト等）は
-> `config/osi-finance-settings.md`（テンプレ：`config/osi-finance-settings.example.md`）を参照する。**
+> `{{paths.finance}}/osi-finance-settings.md`（テンプレ：`config/osi-finance-settings.example.md`）を参照する。**
 > 本文中の `{{paths.contracts}}/` 等のパスは `osi-finance-settings` の `請求管理ルート/契約書` を指す例示。
 
 契約書を正本に請求を回すための入口。**収集の正本は Gmail。** 自社送付・先方送付・他社サイン
@@ -88,7 +88,7 @@ connector_prose_ok:  # DocuSign は ai-osi-uri-finance の ds_* 経由。docusig
 **① 取引先マスタ（共通マスタ）** — 会社の情報はここ。
 `取引先ID` で既存を探す。**会社名で突き合わせない**（表記ゆれで失敗する）。
 無ければ1行足す：正式名称・郵便番号・住所・請求先To/CC・区分。
-**取引先IDは `P-` ＋案件連番の続き**（2026-08-18 時点の最大は `P-158`）。
+**取引先IDは `P-` ＋案件連番の続き**（現在の最大値は取引先マスタの `取引先ID` 列を読んで確かめる。値を覚えておいて使わない）。
 かつて使っていた `9xx`（発注先）という別系統は廃止した。**同じ会社に受注用と発注用の
 2つのIDを作らない。**受注も発注も同じ1行にぶら下げる。
 

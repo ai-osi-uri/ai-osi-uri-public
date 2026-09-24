@@ -22,7 +22,9 @@
   "date": "2026-05-06",
   "attendees": ["先方：山田部長・佐藤課長", "弊社：自社担当"],
   "location": "オンライン (Google Meet)",
-  "topic": "AI 活用による営業 DX 提案・初回ヒアリング"
+  "topic": "AI 活用による営業 DX 提案・初回ヒアリング",
+  "own_company": "自社表記（osi-profile の company.name_display）",
+  "accent_hex": "1E3A8A"
 }
 ```
 
@@ -33,13 +35,15 @@
 | `attendees` | no | 出席者の配列 |
 | `location` | no | 場所（オンライン/オンサイト等） |
 | `topic` | no | 議題（タイトル直下に表示） |
+| `own_company` | no | 自社名。フッターが「{company_name} × {own_company}」になる。無ければ相手社名だけ。`{{company.name_display}}` を渡す |
+| `accent_hex` | no | 見出し・表ヘッダの色（6桁の16進。# 可）。無ければ既定の濃紺 `1E3A8A`。`{{brand.accent_hex}}` を渡す |
 
 ## summary（必須）
 
 ```json
 "summary": [
   "先方の最大の課題は『営業ノウハウの属人化』",
-  "yourrecord 導入には強い興味",
+  "自社サービス（標準プラン）の導入には強い興味",
   "次回は 2 週間後、見積もりを持参して再訪問"
 ]
 ```
@@ -129,5 +133,6 @@ SKILL.md の Step 8（営業管理表のステータス更新提案）の判断�
 8. **補足メモ** セクション（任意）
 9. フッター
 
-セクションヘッダは赤色（CAIO アクセントレッド）。
+セクションヘッダは強調色（`meta.accent_hex`。既定は落ち着いた濃紺 `1E3A8A`）。
+フッターは「{company_name} × {own_company}　|　生成日時」（`own_company` が無ければ相手社名だけ）。
 本文は游ゴシックで日本語が綺麗に出る。

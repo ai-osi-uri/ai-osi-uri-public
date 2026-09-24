@@ -19,7 +19,7 @@ requires_connectors:
 
 > **組織固有値はプロファイルから読む。** 消費税の計算方法（原則課税／簡易課税／2割特例）、
 > インボイス発行事業者の登録の有無、少額特例（1万円未満）を使えるかは `osi-profile.md` と
-> `config/osi-finance-settings.md`（SMALL_AMOUNT_SPECIAL など）を正とする。
+> `{{paths.finance}}/osi-finance-settings.md`（SMALL_AMOUNT_SPECIAL など）を正とする。
 > 判断ルールの正本は `references/tax-class-rules.md`。制度は改正が多いので、同ファイルの最終確認日から
 > 半年以上たっていたら国税庁のページで確かめ直してから使う。
 

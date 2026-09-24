@@ -1,6 +1,6 @@
 # exec-deck-code — pptxgenjs ready-to-use コードパターン
 
-経営層デッキを刷るための、コピーして使えるヘルパー関数とレイアウト集。**生のシェイプ呼び出しから組まない**——まずヘルパーを定義し、全スライドをそれで組む（`pptx-custom` の SKILL.md「Layout Architecture」の方針）。座標は 16:9 = 10" × 5.625" 前提。python-pptx 版の等価実装は [python-pptx.md](python-pptx.md) を参照。
+経営層デッキを刷るための、コピーして使えるヘルパー関数とレイアウト集。**生のシェイプ呼び出しから組まない**——まずヘルパーを定義し、全スライドをそれで組む（`pptx-custom` の SKILL.md「Layout Architecture」の方針）。座標は 16:9 = 10" × 5.625" 前提。python-pptx 版の等価実装は基盤 `pptx` スキルの `python-pptx.md` を参照（本スキルには同梱していない）。
 
 設計判断（どのスライドに何を、どの順で）は `deck-composition` の `slide-plan.md` に従う。本書は「刷る」実装だけを与える。
 
@@ -11,20 +11,25 @@
 ```javascript
 const PptxGenJS = require("pptxgenjs");
 const pptx = new PptxGenJS();
-pptx.defineLayout({ name: "OSI", width: 10, height: 5.625 });
-pptx.layout = "OSI";
+pptx.defineLayout({ name: "WIDE_16x9", width: 10, height: 5.625 });
+pptx.layout = "WIDE_16x9";
 
 // 色は名前付き定数で（生 hex をインラインに書かない）
+// 自社資料は osi-profile.md の brand.primary_hex / brand.accent_hex を入れる。空なら下の中立色のまま。
+// 相手企業向けは相手の色（SKILL.md「色は毎回、相手から取り直す」）に差し替える。
+const BRAND = { primary: "", accent: "" };   // ← brand.primary_hex / brand.accent_hex（# なし）
 const C = {
-  navy:   "1E2761",  // 支配色
+  navy:   BRAND.primary || "1E2761",  // 支配色
   sky:    "CADCFC",  // 支える色
   ink:    "212121",  // 本文
   muted:  "6B7280",  // キャプション
   white:  "FFFFFF",
-  accent: "F96167",  // 鋭いアクセント
+  accent: BRAND.accent || "F96167",  // 鋭いアクセント
   line:   "E5E7EB",  // 区切り線
 };
-const F = { head: "Montserrat", body: "Noto Sans JP" }; // 見出し/本文の対
+// 日本語が入るので見出しも日本語フォント。brand.font_ja があれば優先（Montserrat 等の欧文専用は日本語が出ない）
+const FONT_JA = "" || "Noto Sans JP";                  // ← "" に brand.font_ja を入れる
+const F = { head: FONT_JA, body: FONT_JA };            // 見出し/本文
 
 // 余白・間隔（1単位の倍数で。SKILL.md「Consistent Spacing System」）
 const M = 0.6;                 // 外余白

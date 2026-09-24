@@ -17,7 +17,10 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 
 # ===== Style helpers =====
-ACCENT_RED = RGBColor(0xB9, 0x1C, 0x1C)
+# 見出し・表ヘッダの強調色。既定は落ち着いた濃紺。
+# minutes.json の meta.accent_hex（例 "1E3A8A"。osi-profile の brand.accent_hex を渡す）で上書きできる。
+DEFAULT_ACCENT_HEX = "1E3A8A"
+ACCENT = RGBColor.from_string(DEFAULT_ACCENT_HEX)
 TEXT_DARK = RGBColor(0x11, 0x18, 0x27)
 TEXT_MED = RGBColor(0x4B, 0x55, 0x63)
 TEXT_LIGHT = RGBColor(0x9C, 0xA3, 0xAF)
@@ -40,7 +43,9 @@ def set_run(run, *, size=11, bold=False, color=None, italic=False, font="游ゴ�
     rFonts.set(qn("w:eastAsia"), font)
 
 
-def add_heading(doc, text, *, size=18, color=ACCENT_RED, space_before=12, space_after=6):
+def add_heading(doc, text, *, size=18, color=None, space_before=12, space_after=6):
+    if color is None:
+        color = ACCENT
     p = doc.add_paragraph()
     p.paragraph_format.space_before = Pt(space_before)
     p.paragraph_format.space_after = Pt(space_after)
@@ -103,7 +108,7 @@ def add_action_table(doc, actions):
     hdr = table.rows[0].cells
     for i, label in enumerate(["TODO", "期限", "担当"]):
         run = hdr[i].paragraphs[0].add_run(label)
-        set_run(run, size=10, bold=True, color=ACCENT_RED)
+        set_run(run, size=10, bold=True, color=ACCENT)
     # Rows
     for a in actions:
         row = table.add_row().cells
@@ -111,6 +116,20 @@ def add_action_table(doc, actions):
             val = a.get(key, "—")
             run = row[col_idx].paragraphs[0].add_run(str(val))
             set_run(run, size=10, color=TEXT_DARK)
+
+
+def _apply_accent(hex_value):
+    """meta.accent_hex があれば強調色を差し替える。不正値は既定色のまま。"""
+    global ACCENT
+    ACCENT = RGBColor.from_string(DEFAULT_ACCENT_HEX)
+    if not hex_value:
+        return
+    h = str(hex_value).strip().lstrip("#")
+    if len(h) == 6:
+        try:
+            ACCENT = RGBColor.from_string(h.upper())
+        except ValueError:
+            print(f"WARN: accent_hex が不正なので既定色を使う: {hex_value}", file=sys.stderr)
 
 
 # ===== Main builder =====
@@ -124,6 +143,7 @@ def build_minutes(cfg, output_path):
         section.right_margin = Cm(2)
 
     meta = cfg.get("meta", {})
+    _apply_accent(meta.get("accent_hex"))
 
     # Title
     title_p = doc.add_paragraph()
@@ -194,10 +214,14 @@ def build_minutes(cfg, output_path):
     run = p.add_run("──")
     set_run(run, size=8, color=TEXT_LIGHT)
     p2 = doc.add_paragraph()
-    run = p2.add_run(
-        f"{meta.get('company_name', '')} × AI OSI URI　"
-        f"|　生成: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
-    )
+    # フッター：相手社名 × 自社名（自社名は meta.own_company。osi-profile の company.name_display を渡す）。
+    # 自社名が無ければ相手社名だけ。スクリプトに特定の社名は持たない。
+    parties = [x for x in (meta.get("company_name", ""), meta.get("own_company", "")) if x]
+    footer_head = " × ".join(parties)
+    footer_text = f"生成: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+    if footer_head:
+        footer_text = f"{footer_head}　|　{footer_text}"
+    run = p2.add_run(footer_text)
     set_run(run, size=8, color=TEXT_LIGHT, italic=True)
 
     doc.save(output_path)

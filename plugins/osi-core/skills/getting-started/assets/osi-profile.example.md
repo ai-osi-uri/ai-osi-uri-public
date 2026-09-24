@@ -38,6 +38,7 @@ paths:
   sales_admin: "営業管理"                        # 営業管理表とそのルール
   sales_materials: "営業資料"
   pr_articles: "広報/案件記事"                   # PR 記事の保存先
+  internal_docs: "共通/社内資料"                 # 社内会議・稟議向けの資料（顧客向けでない自社資料）の保存先
   finance: "経理"                               # OSI Finance のルート（osi-finance-settings.md を置く場所）
   contracts: "契約管理"
   billing: "請求管理"
@@ -50,6 +51,19 @@ ledgers:
   sales_header_row: 5
   sales_rules: "営業管理/営業管理表_運用ルール.md"
   apps: "案件/_アプリ台帳.md"                    # 作ったアプリの一覧
+
+# 自社資料（社内会議・稟議・自社の営業資料）の見た目。空欄なら中立色（濃紺・グレー）と Noto Sans JP で作り、設定を案内する。
+# 相手企業向けの提案資料は、ここではなく相手企業の色（ロゴ・サイト）から取る。
+brand:
+  primary_hex: ""      # 主色（例: 1E3A8A。# は付けない）
+  accent_hex: ""       # 強調色（例: C2410C）
+  font_ja: ""          # 日本語フォント（例: Noto Sans JP / BIZ UDPGothic / 游ゴシック）
+  logo_path: ""        # ロゴ画像（root からの相対。例: 共通/ロゴ/logo.png）
+
+# 自社の営業方針。空欄ならスキルの「既定の型」（初回は次の打ち合わせの約束を取る 等）で動く。
+sales:
+  first_meeting_goal: ""   # 初回提案で取りたいもの（例: 無料ヒアリング60分のアポ／トライアル申込／見積依頼）
+  proposal_policy: ""      # 提案の考え方（例: 効率化より売上側の価値を先に出す／まず小さく試す案を必ず入れる）
 
 # 使うコネクタ（true のものだけスキルが前提にする。false なら該当機能を案内して止まる）
 connectors:
@@ -77,7 +91,7 @@ connectors:
 
 1. 連結フォルダ直下の `osi-profile.md`（このファイルの実値版）
 2. 連結フォルダ直下の `_shared/osi-profile.md`
-3. どちらも無ければ **質問して作る**（`config/osi-profile.example.md` を雛形に、会社名・案件フォルダ・
+3. どちらも無ければ **質問して作る**（osi-core の `getting-started/assets/osi-profile.example.md` を雛形に、会社名・案件フォルダ・
    台帳の有無・使うコネクタの 4〜5 問）。値が埋まるまで、パスや社名に依存する処理へ進まない。
 
 `{{paths.*}}` `{{ledgers.*}}` は root からの相対パス。実体は `{{paths.root}}/<値>`。

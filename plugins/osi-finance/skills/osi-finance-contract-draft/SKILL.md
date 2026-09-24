@@ -28,7 +28,7 @@ connector_prose_ok:  # DocuSign 送付は contract-docusign-send の担当。本
 # osi-finance-contract-draft（契約書作成・雛形管理）
 
 > **組織固有値（発行者情報・Drive ルート・台帳ファイル名・スプレッドシートID）は
-> `config/osi-finance-settings.md` を参照。** データ構造の正本は `assets/schema/data-layout.yaml`
+> `{{paths.finance}}/osi-finance-settings.md` を参照。** データ構造の正本は `assets/schema/data-layout.yaml`
 > （契約マスタ・雛形マスタ・雛形フォルダ `00.契約書/雛形/`）。
 
 > **安全原則**：生成した契約書は必ず**ドラフト**として保存し、人レビューを経ずに送付・締結しない。

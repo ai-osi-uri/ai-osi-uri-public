@@ -20,7 +20,7 @@ requires_connectors:
 # 決算整理と決算書一式（osi-finance-year-end-close）
 
 > **組織固有値はプロファイルから読む。** 会計期間・資本金・株主構成・青色申告の有無・消費税の計算方法
-> （原則／簡易／2割特例）・中間納付の有無は `osi-profile.md` と `config/osi-finance-settings.md` を正とする。
+> （原則／簡易／2割特例）・中間納付の有無は `osi-profile.md` と `{{paths.finance}}/osi-finance-settings.md` を正とする。
 > 手順と判断の正本は `references/close-rules.md`。
 
 ## なぜ順番が大事か

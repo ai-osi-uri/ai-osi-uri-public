@@ -20,7 +20,7 @@ requires_connectors:
 # 固定資産の判定と償却（osi-finance-fixed-assets）
 
 > **組織固有値はプロファイルから読む。** 会計期間・青色申告の承認の有無・資本金の額・従業員数・
-> 資産の所在地（償却資産申告の提出先）は `osi-profile.md` と `config/osi-finance-settings.md` を正とする。
+> 資産の所在地（償却資産申告の提出先）は `osi-profile.md` と `{{paths.finance}}/osi-finance-settings.md` を正とする。
 > 判断ルールの正本は `references/asset-rules.md`。金額基準と期限は税制改正で変わるので、同ファイルの
 > 「最終確認日」から1年以上たっていたら国税庁のページで確かめ直してから使う。
 
@@ -51,7 +51,7 @@ requires_connectors:
 ## 確定する範囲と確認する範囲
 
 判断は人が1回だけ確認し、決まったことの繰り返しはAIが確定する。設定 `AUTO_POST_ROUTINE`
-（`config/osi-finance-settings.md`）が `on` のときだけ、下の「定型」を人の承認なしに登録する（`off` なら全部を確認に回す）。
+（`{{paths.finance}}/osi-finance-settings.md`）が `on` のときだけ、下の「定型」を人の承認なしに登録する（`off` なら全部を確認に回す）。
 
 | 区分 | 中身 | 扱い |
 |---|---|---|

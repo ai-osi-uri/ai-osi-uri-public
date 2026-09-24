@@ -1,7 +1,10 @@
 # osi-finance-settings（組織固有値テンプレート）— EXAMPLE
 
 このファイルは **配布用テンプレート（プレースホルダ）** です。各組織は本ファイルを
-同ディレクトリに `osi-finance-settings.md` としてコピーし、`{{ }}` を自社の実値で埋めて使います。
+**経理フォルダ（`osi-profile.md` の `paths.finance`）直下**に `osi-finance-settings.md` としてコピーし、
+`{{ }}` を自社の実値で埋めて使います（通常は `osi-finance-setup` が対話で作る）。
+経理フォルダは台帳（xlsx）を置くフォルダと同じ。**置き場所はここ1か所が正**です。
+旧版の置き場所（プラグインの `config/`・`skills/config/`、台帳フォルダの `_shared/`）にしか無い場合はそこを読んで動き、`{{paths.finance}}/osi-finance-settings.md` へ移すよう案内します（後方互換）。
 **実値版 `osi-finance-settings.md` はコミットしないこと**（`.gitignore` で除外済み）。
 
 OSI Finance（osi-finance）の各 osi-finance スキル（contract-intake / invoice / payment-intake /
@@ -41,7 +44,7 @@ references 側には「汎用ロジック・判断基準」だけを残します
 | キー | 値 | 意味 |
 |---|---|---|
 | GMAIL_INTAKE | {{選択: ON（既定）/ OFF}} | Gmail からの契約書・受領請求書・送信済み請求の検出と台帳整合 |
-| ACCOUNTING_SYNC | {{選択: mf / freee / none（既定）}} | 会計SaaSへの計上・突合（会計帳簿は会計SaaS側が正本。none=台帳のみ運用） |
+| ACCOUNTING_SYNC | {{選択: mf / freee / none（既定）}} | 会計SaaSへの計上・突合（会計帳簿は会計SaaS側が正本。none=台帳＋内部仕訳帳で運用）。mf を選ぶと MF 系スキル（mf-sync / ar-sync / feed-recon）が動く |
 | BANK_RECON | {{選択: ON / OFF（既定）}} | 銀行明細（CSV/連携）による入金・支払の消込照合（CSV置き場: `04.連携データ/銀行/`＝DRIVE_SYNC_BANK） |
 | ESIGN | {{選択: docusign / none（既定）}} | 電子署名での契約書発送。none でもメール往復＋PDF保管で契約運用は成立 |
 | INVOICE_ENGINE | {{選択: mf / freee / local（既定）}} | 請求書PDFの発行元。優先順位は §0-2-1 |
@@ -372,8 +375,11 @@ OPERATION_MODE が「そもそも書き込むか」を決めるのに対し、�
 
 ## 運用メモ
 
-- 本テンプレ（`.example`）は配布対象。実値版 `osi-finance-settings.md` は各組織がローカルで作成し、
-  Git にはコミットしない（`**/osi-finance-settings.md` を `.gitignore` で除外）。
-- スキルから「組織固有値」を参照する場合は、まず実値版 `osi-finance-settings.md` を読み、
-  無ければユーザーに「osi-finance-settings.md を作成してください」と案内する。
+- 本テンプレ（`.example`）は配布対象。実値版 `osi-finance-settings.md` は各組織が経理フォルダ
+  （`{{paths.finance}}/`）直下に作成し、Git にはコミットしない（`**/osi-finance-settings.md` を `.gitignore` で除外）。
+- スキルから「組織固有値」を参照する場合は、まず `{{paths.finance}}/osi-finance-settings.md` を読み、
+  無ければユーザーに「osi-finance-settings.md を作成してください」（または osi-finance-setup）と案内する。
+  旧版の置き場所（プラグインの `config/`・`skills/config/`、台帳フォルダの `_shared/`）にしか無い場合はそこを読んで動き、`{{paths.finance}}/osi-finance-settings.md` へ移すよう案内する（後方互換）。
+- §1〜§2・§0-2・§4-4 を変えたら、請求管理台帳「発行者設定」タブも埋め直す
+  （`python3 assets/scripts/fill_issuer_settings.py <経理フォルダ>`。コンソールと請求書発行はタブを読む）。
 - 機微値（実口座番号・登録番号・実在支払先名など）は**この `.example` には書かない**。

@@ -23,7 +23,7 @@ requires_connectors:
 # 残高の説明表（osi-finance-balance-schedule）
 
 > **組織固有値はプロファイルから読む。** 会計期間・台帳の場所・支払サイト・資本金の登記内容は
-> `osi-profile.md` と `config/osi-finance-settings.md` を正とする。
+> `osi-profile.md` と `{{paths.finance}}/osi-finance-settings.md` を正とする。
 > 科目ごとの説明のしかたの正本は `references/balance-rules.md`。毎回それに沿って判定し、ブレさせない。
 
 ## なぜ毎月やるのか

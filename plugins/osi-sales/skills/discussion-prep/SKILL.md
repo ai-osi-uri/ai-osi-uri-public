@@ -10,7 +10,7 @@ description: |
   「提案の方向性をまず固めたい」「○○社、どう攻めるか考えたい」「壁打ち資料作って」
   など、提案の"方向性を決める前の準備"に関わるリクエストで発動する。
   これは proposal-package のステップ0として呼ばれることも、単体で呼ばれることもある。
-  ※ 提案書(pptx)の生成は initial-proposal / proposal-estimate、商談(客先)の準備は
+  ※ 提案書(pptx)の生成は proposal-package（初回ルート） / proposal-estimate、商談(客先)の準備は
   shodan-prep、議事録は meeting-minutes の役割。本スキルは「社内で方向を決める前の
   下ごしらえ」専用で、成果物の生成は行わない。
 requires_connectors:
@@ -107,7 +107,7 @@ proposal-package のゲート①に渡す初期推定。確定ではなく "壁�
 ## やらないこと
 
 - 方向性を決める（＝人間の仕事）
-- 提案書(pptx)・見積もりの生成（→ initial-proposal / proposal-estimate）
+- 提案書(pptx)・見積もりの生成（→ proposal-package（初回ルート） / proposal-estimate）
 - 客先商談の準備（→ shodan-prep）
 - 議事録（→ meeting-minutes）
 - 論点を4つ以上出す（発散させない）

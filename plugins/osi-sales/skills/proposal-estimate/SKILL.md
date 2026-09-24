@@ -1,13 +1,13 @@
 ---
 name: proposal-estimate
-description: 見積もり・スケジュール入り**詳細提案書（pptx）を単発生成する atomic スキル**。まず storyline-gate で「この相手が、このスコープ・価格・期間で Yes と言う筋」を骨子1枚にして承認を取り、そのあとで pptx を1ファイル生成する。具体的なサービス内容（CAIO / カスタム開発 等）、初期費用・月額・割引、契約期間、ガント、週次定例を盛り込む。**通常はオーケストレータ `proposal-package` から呼ばれる**設計で、Drive 格納や営業管理表への反映は本スキルでは行わない。「pptx だけ単発で見積もり付き提案書を作って」など pptx 生成だけが目的のとき直接呼ぶ。価格・期間にまだ踏み込まない初回アプローチは proposal-package の初回ルート（storyline-gate→deck-composition→pptx-custom の3層）で組む。
+description: 見積もり・スケジュール入り**詳細提案書（pptx）を単発生成する atomic スキル**。まず storyline-gate で「この相手が、このスコープ・価格・期間で Yes と言う筋」を骨子1枚にして承認を取り、そのあとで pptx を1ファイル生成する。具体的なサービス内容（自社の定型サービス / カスタム開発 等）、初期費用・月額・割引、契約期間、ガント、週次定例を盛り込む。**通常はオーケストレータ `proposal-package` から呼ばれる**設計で、Drive 格納や営業管理表への反映は本スキルでは行わない。「pptx だけ単発で見積もり付き提案書を作って」など pptx 生成だけが目的のとき直接呼ぶ。価格・期間にまだ踏み込まない初回アプローチは proposal-package の初回ルート（storyline-gate→deck-composition→pptx-custom の3層）で組む。
 version: 0.2.0
 
 ---
 
 # 提案見積もり作成スキル（atomic）
 
-> **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` `{{members.*}}` は、連結フォルダ直下の `osi-profile.md`（雛形: `config/osi-profile.example.md`）の値に置き換えて解釈する。無ければ会社名・案件フォルダ・台帳の有無・使うコネクタを質問して先に作る。値をここに直書きしない。
+> **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` `{{members.*}}` は、連結フォルダ直下の `osi-profile.md`（雛形: osi-core の `getting-started/assets/osi-profile.example.md`。getting-started スキルが質問して作る）の値に置き換えて解釈する。無ければ会社名・案件フォルダ・台帳の有無・使うコネクタを質問して先に作る。値をここに直書きしない。
 
 関係構築済みの見込み客や、初回提案後の2回目以降に使う **pptx 単発生成スキル**。初回提案との違いは、**具体的なサービス内容・価格・実行スケジュール**が入ること。相手は「何を・いくらで・いつまでにやってくれるのか」を知りたい段階にいる。
 
@@ -15,7 +15,7 @@ version: 0.2.0
 
 ## いつ使うか
 
-具体的な金額（「初期30万」「月額30万」）／具体的サービス名（CAIO契約・カスタム開発）／スケジュール（「6ヶ月で」「ガント」）／既に面識あり、のいずれかが出ているとき。初回アプローチなら proposal-package の初回ルート（storyline-gate→deck-composition→pptx-custom の3層）。
+具体的な金額（「初期30万」「月額30万」）／具体的サービス名（自社の定型サービスの契約・カスタム開発）／スケジュール（「6ヶ月で」「ガント」）／既に面識あり、のいずれかが出ているとき。初回アプローチなら proposal-package の初回ルート（storyline-gate→deck-composition→pptx-custom の3層）。
 
 ---
 
@@ -48,7 +48,7 @@ version: 0.2.0
 
 ### サービス構成・価格・スケジュールの設計
 
-骨子の③④をもとに提案の骨格を組む。自社でよく使うサービス構成パターン・CAIO の3フェーズモデル・価格帯は `references/service-catalog.md` を参照（「従う型」ではなく、骨子に合わせて選ぶ既存解）。
+骨子の③④をもとに提案の骨格を組む。自社でよく使うサービス構成パターン・3フェーズモデル・価格帯は `references/service-catalog.md` を参照（「従う型」ではなく、骨子に合わせて選ぶ既存解）。
 
 ### ガント／週次ロードマップ
 
@@ -69,17 +69,17 @@ version: 0.2.0
 - **月額と初期を分離**。ランニングとイニシャルを区別。
 - **税別/税込を明記**。
 
-> 例：CAIO契約 20万円/月（6ヶ月契約）／初期費用 0円（オンボーディング含む）
+> 例：自社サービス（標準プラン）契約 月額○○万円・税別（6ヶ月契約）／初期費用 0円（オンボーディング含む）
 
 ---
 
 ## Step 2: 構成する（deck-composition）
 
-骨子と価格・スケジュールの素材が揃ったら、**`deck-composition` スキルを呼んで slide-plan.md（スライド順・各 Action title・1メッセージ・載せる証拠）を作る。** 枚数・順序は骨子から導く。よく使う構成例（表紙／企業理解／課題／提案①〜／CAIO詳細／ロードマップ／週次定例／料金／Next Step）は `references/service-catalog.md` にあるが、**骨子に無い段は作らない・足りない段は足す**。サービス既知の相手には「{{company.name_display}}とは」を省く等、骨子に従って増減する。料金スライドは声出しQAで「いくらで・何が得られるか」が流れることを確認する。
+骨子と価格・スケジュールの素材が揃ったら、**`deck-composition` スキルを呼んで slide-plan.md（スライド順・各 Action title・1メッセージ・載せる証拠）を作る。** 枚数・順序は骨子から導く。よく使う構成例（表紙／企業理解／課題／提案①〜／サービス詳細／ロードマップ／週次定例／料金／Next Step）は `references/service-catalog.md` にあるが、**骨子に無い段は作らない・足りない段は足す**。サービス既知の相手には「{{company.name_display}}とは」を省く等、骨子に従って増減する。料金スライドは声出しQAで「いくらで・何が得られるか」が流れることを確認する。
 
 ## Step 3: 刷る（pptx / pptx-custom）
 
-slide-plan.md ができたら、**`pptx`（または社内体裁の `pptx-custom`）スキルの SKILL.md を先に読み、その指示に従って描画する。** 本スキルはレイアウト・配色・図形の細部を自前で抱えない。ブランド配色・フォント・サンドイッチ構造・3フェーズの色は `references/brand-design.md`、ガント実装は `references/gantt-and-figures.md`。
+slide-plan.md ができたら、**`pptx`（または社内体裁の `pptx-custom`）スキルの SKILL.md を先に読み、その指示に従って描画する。** 本スキルはレイアウト・配色・図形の細部を自前で抱えない。配色・フォント・サンドイッチ構造・3フェーズの色は `references/brand-design.md`（自社の色は `osi-profile.md` の `brand.*`。未設定なら中立色）、ガント実装は `references/gantt-and-figures.md`。
 
 ---
 
@@ -136,6 +136,6 @@ slide-plan.md ができたら、**`pptx`（または社内体裁の `pptx-custom
 - （考える）`storyline-gate` スキル — 骨子の5要素・承認ゲート
 - （構成）`deck-composition` スキル — 骨子→slide-plan.md（スライド順・Action title）
 - （刷る）`pptx` / `pptx-custom` スキル — pptx 描画の作法
-- `references/service-catalog.md` — サービス構成パターン・CAIO 3フェーズ・価格帯・よく使うスライド構成（**外部版には同梱しない。無ければ骨子と過去提案から組む**。自社の商品カタログを連結フォルダの `_shared/service-catalog.md` に置けばそれを読む）（既存解の引き出し）
-- `references/brand-design.md` — ブランド配色・フォント・レイアウト規約
+- `references/service-catalog.md` — サービス構成パターン・3フェーズ・価格帯・よく使うスライド構成（**外部版には同梱しない。無ければ骨子と過去提案から組む**。自社の商品カタログを連結フォルダの `_shared/service-catalog.md` に置けばそれを読む）（既存解の引き出し）
+- `references/brand-design.md` — 配色の決め方（osi-profile の brand.* → 中立色）・フォント・レイアウト規約
 - `references/gantt-and-figures.md` — ガント／SVG図の実装テクニック

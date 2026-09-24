@@ -9,7 +9,7 @@ description: |
   「Plaud文字起こしから握れた/失敗を抽出して」など、商談の事前準備・初回チェックリストの作成や
   更新に関わるリクエストで発動する。日本語の営業ワークフローに特化。
   なお、商談後の「議事録そのものを作る」のは meeting-minutes、「提案書(pptx)を作る」のは
-  initial-proposal / proposal-package の役割。このスキルは"準備"と"チェックリストの抽出・育成"に
+  proposal-package の役割。このスキルは"準備"と"チェックリストの抽出・育成"に
   特化しており、議事録や提案書の生成は行わない（必要なら該当スキルへ案内する）。
 requires_connectors:
   - server: box
@@ -23,11 +23,11 @@ requires_connectors:
 
 # 商談準備Skill（初回チェックリスト連動）
 
-> **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` `{{members.*}}` は、連結フォルダ直下の `osi-profile.md`（雛形: `config/osi-profile.example.md`）の値に置き換えて解釈する。無ければ会社名・案件フォルダ・台帳の有無・使うコネクタを質問して先に作る。値をここに直書きしない。
+> **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` `{{members.*}}` は、連結フォルダ直下の `osi-profile.md`（雛形: osi-core の `getting-started/assets/osi-profile.example.md`。getting-started スキルが質問して作る）の値に置き換えて解釈する。無ければ会社名・案件フォルダ・台帳の有無・使うコネクタを質問して先に作る。値をここに直書きしない。
 
 自社の営業ワークフローで、商談の **質のばらつき** を潰すためのスキル。
 
-期待値ズレ（酔鯨・FRESH ROOM の失敗）やセキュリティ失注（OK 社）の多くは、「初回で握るべき
+期待値ズレ（期待無限型・万能誤解型の失敗）や終盤のセキュリティ失注の多くは、「初回で握るべき
 ことを握れなかった」ことから起きる。このスキルは、その"握るべきこと"を **初回チェックリスト**
 として一元管理し、商談前は準備、商談後は振り返りで使う。両者を 1 つのスキルにすることで、
 回すたびにチェックリストが賢くなる設計になっている。
@@ -48,7 +48,7 @@ requires_connectors:
 ## 重要：このスキルの責任範囲
 
 - **やる**：商談前の準備物（論点・期待値質問・チェックリスト）の生成／商談後のチェックリスト採点・更新。
-- **やらない**：議事録 docx の生成（→ `meeting-minutes`）、提案書 pptx の生成（→ `initial-proposal`
+- **やらない**：議事録 docx の生成（→ `meeting-minutes`）、提案書 pptx の生成（→ `proposal-package` の初回ルート
   / `proposal-package`）、リード起票（→ `new-lead-registration`）。
 - 知識の本体は `references/initial-checklist.md`。**毎回これを読み込んでから**論点生成・採点を行う。
 
@@ -73,7 +73,7 @@ requires_connectors:
 ### Step P1: 対象リードの特定
 
 ユーザーの発話から対象を特定する（meeting-minutes と同じロジック）：
-- 案件ID（「案件ID 122」）／企業名（「セーフティ&ベル」）
+- 案件ID（「案件ID 122」）／企業名（「サンプル株式会社」）
 
 案件情報の正本は **`{{ledgers.sales}}`**（タブ `取引先管理`、ヘッダは5行目）。
 **ディレクトリ経由（openpyxl）で読み書きする。Google Sheets API・GCPサービスアカウントは使わない。**
@@ -114,7 +114,7 @@ python3 $L find --case-id 122           # 案件IDが分かっているならこ
 
 ### Step P2: 顧客リサーチ
 
-`WebSearch` / `mcp__workspace__web_fetch` / `Agent` ツールで企業を調べる。観点は initial-proposal と
+`WebSearch` / `mcp__workspace__web_fetch` / `Agent` ツールで企業を調べる。観点は proposal-package の初回提案レンズと
 共通（事業概要・組織規模・経営理念・最近の動向・業界特性・DX 状況・地域特性）。
 - 採用ページ＝組織課題の宝庫。IR・中期経営計画があれば経営課題が明確。
 - **業種を特定**しておく（後で `initial-checklist.md` 末尾の「業種別の追加論点」を上乗せするため）。
@@ -139,7 +139,7 @@ python3 $L find --case-id 122           # 案件IDが分かっているならこ
 2. **顧客サマリ**（リサーチ要点 3〜5 点）
 3. **この顧客で特に外せない論点**（チェックリストから重要度上位を 3〜5 個、翻訳済みで）
 4. **期待値質問リスト**（そのまま口に出せる質問文。カテゴリ A〜F 順、顧客別に翻訳済み）
-5. **想定される懸念と切り返し**（特にセキュリティ C。OK 社型の失注を先回りで潰す）
+5. **想定される懸念と切り返し**（特にセキュリティ C。終盤セキュリティ失注型を先回りで潰す）
 6. **初回チェックリスト（当日チェック用）**（◎△×－ を付けられる素の一覧）
 
 過去議事録がある再訪商談の場合は、冒頭に「前回の宿題・積み残し」を必ず置く。
@@ -220,7 +220,7 @@ initial-checklist.md` を編集する。更新の型は `extraction-guide.md` �
 ---
 
 ## やってはいけないこと
-- 議事録 docx を作る（→ meeting-minutes）／提案書 pptx を作る（→ initial-proposal）。役割が違う。
+- 議事録 docx を作る（→ meeting-minutes）／提案書 pptx を作る（→ proposal-package の初回ルート）。役割が違う。
 - 文字起こしの裏付けなしに ◎ を付ける（振り返りの価値が消える）。
 - `references/initial-checklist.md` をユーザー確認なしに書き換える。
 - 1 件の商談に引っ張られてチェックリストを過剰に肥大化させる。
@@ -244,4 +244,4 @@ initial-checklist.md` を編集する。更新の型は `extraction-guide.md` �
 
 似ているが別スキル：
 - 「議事録にして」 → `meeting-minutes`
-- 「提案書を作って」 → `initial-proposal` / `proposal-package`
+- 「提案書を作って」 → `proposal-package`

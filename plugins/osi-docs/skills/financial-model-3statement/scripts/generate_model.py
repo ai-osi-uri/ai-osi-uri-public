@@ -4,7 +4,7 @@
 financial-model-3statement | generate_model.py
 
 月次60ヶ月の財務3表（PL/BS/CF）を「フル連動」で生成する。
-連動の作法（AI OSI URI 事業計画モデルに準拠）:
+連動の作法（月次フル連動の3表モデルの定石）:
   - PL は売上・原価を「ファネル / ドライバー階層」で積み上げる
   - BS は各勘定を独立に転がし、現金 =「前月現金 + 他の全BS勘定の増減」で算出
     → 資産 = 負債 + 純資産 が構造上ゼロ差で成立（Balance Check = 0）
@@ -25,7 +25,7 @@ financial-model-3statement | generate_model.py
 PL のドライバー行ブロックだけ差し替える。BS/CF の連動機構は業種非依存でそのまま使える。
 references/method.md を参照。
 """
-import argparse, json, re, sys
+import argparse, copy, json, os, re, sys
 from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Font, PatternFill, Alignment
 from openpyxl.utils import get_column_letter as GL
@@ -496,6 +496,35 @@ def build(cfg, out_path):
     return out_path
 
 
+HERE=os.path.dirname(os.path.abspath(__file__))
+EXAMPLE_CONFIG=os.path.join(HERE,'..','assets','example-config.json')
+
+
+def merge_defaults(cfg):
+    """config に無い項目を既定値で補う（同梱 assets/example-config.json、無ければ DEFAULT_CONFIG）。
+    明細モード（`明細` だけ書いた config）でも wc_tax_cap / raise / title が欠けて KeyError にならないようにする。
+    - 明細モード: 骨格に要る wc_tax_cap（キー単位で補完）・raise・title だけ補う。
+      人材紹介型の unit_economics / sga_fy / headcount は混ぜない（明細と二重に載るため）
+    - 従来モード: 全項目を補い、dict 項目はキー単位で補完する"""
+    try:
+        with open(EXAMPLE_CONFIG,encoding='utf-8') as f: base=json.load(f)
+    except (OSError, ValueError):
+        base=copy.deepcopy(DEFAULT_CONFIG)
+    for k,v in DEFAULT_CONFIG.items():
+        base.setdefault(k,copy.deepcopy(v))
+    out=dict(cfg)
+    det=cfg.get("明細") or cfg.get("detail")
+    keys=("title","wc_tax_cap","raise") if det else tuple(base.keys())
+    for k in keys:
+        if k not in out or out[k] is None:
+            out[k]=copy.deepcopy(base[k])
+        elif isinstance(out[k],dict) and isinstance(base.get(k),dict):
+            merged=copy.deepcopy(base[k]); merged.update(out[k]); out[k]=merged
+    if det and "headcount" not in out:
+        out["headcount"]=[0]*NM
+    return out
+
+
 def main():
     ap=argparse.ArgumentParser()
     ap.add_argument('--config',default=None,help='config.json path (省略時は同梱DEFAULT_CONFIG)')
@@ -504,6 +533,7 @@ def main():
     cfg=DEFAULT_CONFIG
     if args.config:
         with open(args.config,encoding='utf-8') as f: cfg=json.load(f)
+    cfg=merge_defaults(cfg)
     out=build(cfg,args.out)
     print('saved:',out)
     print('NEXT: 1) recalc  2) verify.py  でエラー0・両Check0・必要資金を確認すること')

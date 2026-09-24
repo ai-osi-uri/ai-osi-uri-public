@@ -2,11 +2,11 @@
 name: osi-finance-setup
 description: >
   OSI Finance（請求AR・支払APの経理自動化）を新しい組織・Cowork に初回セットアップする
-  オーケストレータ・スキル。対話で組織の値を集めて `config/osi-finance-settings.md`（実値版・
-  gitignore対象）を生成し、Drive にフォルダ構造を作成、台帳テンプレ（請求管理台帳・支払管理台帳）を
-  配置、必要コネクタ（会計SaaS=MoneyForward／Google Drive＋ローカル同期／メール=Gmailまたは
-  Superhuman／任意:DocuSign）の疎通を確認、日次・月次のスケジュールタスク登録を案内し、最後に
-  スモークテストまで行う。「OSI Finance を導入」「OSI Finance をセットアップ」「経理を初期セットアップ」
+  オーケストレータ・スキル。対話で組織の値を集めて `{{paths.finance}}/osi-finance-settings.md`（実値版・
+  gitignore対象）を生成し、Drive にフォルダ構造を作成、台帳テンプレ（共通マスタ・請求管理台帳・
+  支払管理台帳・仕訳台帳）を配置して「発行者設定」タブを settings の値で埋め、必要コネクタ
+  （Google Drive＋ローカル同期／メール=Gmailまたは Superhuman／任意: 会計SaaS=MoneyForward・freee、
+  DocuSign）の疎通を確認、日次・月次のスケジュールタスク登録を案内し、最後にスモークテストまで行う。「OSI Finance を導入」「OSI Finance をセットアップ」「経理を初期セットアップ」
   「請求支払台帳を立ち上げ」「finance を新しい組織に入れる」「経理の初期設定をして」「請求と支払の
   自動化を導入したい」「osi-finance-settings を作りたい」「台帳をDriveに置いて経理を始めたい」などで発動する。
   機微値（社名・登録番号・口座番号・支払先名）はチャットに貼らせず設定ファイルへ書く。
@@ -51,16 +51,23 @@ connector_prose_ok:  # DocuSign は任意の補助。無くても運用は成立
 最初に次を確認する（未接続でも進めるが、後段の疎通確認で再確認する）。
 
 - 対象は **1 つの組織**であること（1 Cowork = 1 組織）。複数法人を1つの Cowork で混ぜない。
-- 国＝日本（消費税・インボイス・源泉の前提）。会計SaaS は **v1 ではマネーフォワード固定**。
-- このプラグイン（osi-finance）が入っており、`assets/templates/` に台帳テンプレ2ファイルがあること。
+- 国＝日本（消費税・インボイス・源泉の前提）。
+- 会計SaaS は**任意**。settings の `ACCOUNTING_SYNC`（`mf` / `freee` / `none`、**既定 none**）で選ぶ。
+  none でも台帳＋内部仕訳帳（仕訳台帳）で運用できる。MF を使う組織は `mf`、freee は `freee`（CSV 突合のみ）。
+- このプラグイン（osi-finance）が入っており、`assets/templates/` に台帳テンプレ4ファイル
+  （`共通マスタ_テンプレート.xlsx`・`請求管理台帳_テンプレート.xlsx`・`支払管理台帳_テンプレート.xlsx`・`仕訳台帳_テンプレート.xlsx`）
+  と `コンソールを開く.html` があること。
 
 ---
 
 ## ステップ 1: 組織値の収集 → `osi-finance-settings.md` 生成
 
 `config/osi-finance-settings.example.md`（プレースホルダ版）を雛形に、**実値版 `osi-finance-settings.md`** を
-同じ `_shared/` ディレクトリに作成する。**実値版はコミットされない**（`.gitignore` の
+**経理フォルダ直下（`{{paths.finance}}/osi-finance-settings.md`）**に作成する。台帳（xlsx）を置くフォルダと同じ。
+置き場所はここ1か所が正で、全 osi-finance スキルがここを読む。**実値版はコミットされない**（`.gitignore` の
 `**/osi-finance-settings.md` で除外済み）。
+旧版の置き場所（プラグインの `config/`・`skills/config/`、台帳フォルダの `_shared/`）に既存の設定がある組織は、
+内容を引き継いで `{{paths.finance}}/` へ移す（旧い場所のファイルは後方互換で読まれるが、2か所にあると片方だけ直される）。
 
 ### 1-1. 収集する値（example の章立てに対応）
 
@@ -69,6 +76,9 @@ connector_prose_ok:  # DocuSign は任意の補助。無くても運用は成立
 0. **運用モード**：`OPERATION_MODE`（**編集可**＝既定／**参照専用**）。参照専用は「読み取りと報告のみ・
    一切の書き込みなし」で、閲覧中心の導入（経営者・税理士・トライアル期間）向け。参照専用を選んだ場合は
    ステップ2の共有と osi-finance-connect の接続を**閲覧/readスコープ**で行う（権限側でも書き込みを塞ぐ二重防御）。
+0a. **連携トグル（§0-2 INTEGRATIONS）**：`ACCOUNTING_SYNC`（mf / freee / **none＝既定**）・`ESIGN`（docusign / **none**）・
+   `BANK_RECON`（ON / **OFF**）・`GMAIL_INTAKE`・`INVOICE_ENGINE`・`AUTO_SEND`（既定 OFF）。使わない連携は既定のままでよい。
+   ここで選んだ値はステップ3-2で台帳「発行者設定」に写す（コンソールは台帳しか読めない）。
 0b. **起票確認方式**：`WRITE_CONFIRMATION`（**事前確認**＝既定／**事後確認**）。`OPERATION_MODE=編集可` の
    場合に、契約取込・支払起票などの新規起票を「人が確認してから台帳へ反映するか」「先に台帳へ反映してから
    人が見るか」を選ぶ（settings の「0-4. 起票確認方式」）。迷ったら事前確認（安全側）を既定として案内し、
@@ -95,7 +105,7 @@ connector_prose_ok:  # DocuSign は任意の補助。無くても運用は成立
 
 ### 1-2. 生成
 
-- example の `{{ }}` を収集値で置換した `osi-finance-settings.md` を `_shared/` に作成する。
+- example の `{{ }}` を収集値で置換した `osi-finance-settings.md` を `{{paths.finance}}/` 直下に作成する。
 - 7（マッピング）が未確定なら**空行のまま**作り、「運用しながら追記」と案内する。
 - 生成後、機微値以外（フォルダ名・台帳名・税率・採番形式など非機微の構成）を要約提示して確認を取る。
   **口座番号・登録番号などの機微値はチャットにエコーしない**（「設定ファイルに記録済み」とだけ伝える）。
@@ -144,7 +154,10 @@ OSI Finance/                 ← 顧客が決めるのはこの置き場所だ�
 1. 経理用のフォルダを1つ決める（例: `{{paths.finance}}/`）。Drive 等の同期フォルダ配下でよい。
    **ステップ2の書類ツリーと同じ親の下に置くと、台帳と書類が離れない。**
 2. プラグインの `assets/templates/` から、次の2種類をそのフォルダに置く。
-   - `*.xlsx` … 台帳ファイル名にして置く
+   - `*_テンプレート.xlsx` の4本 … `_テンプレート` を外した台帳ファイル名（settings §6 で名前を変えた組織はその名前）にして置く：
+     `共通マスタ.xlsx`・`請求管理台帳.xlsx`・`支払管理台帳.xlsx`・`仕訳台帳.xlsx`。
+     `python3 assets/scripts/build_templates.py --ledger-set <経理フォルダ>` で一度に置ける（既定の名前で置く。既存のファイルは上書きしない。§6 で名前を変えた組織は置いた後に改名する）。
+     テンプレートのデータ行は空（記入例は各ファイルの「00_使い方_◯◯」タブにだけある）。
    - **`コンソールを開く.html` … 名前はそのまま置く。台帳と必ずセットで配る**
      （これが台帳を画面で見る入口。xlsx だけ置いて HTML を忘れると、利用者から見て
      「コンソールが存在しない」状態になる。2026-09-22 に別 PC で実際に起きた）
@@ -182,10 +195,33 @@ OSI Finance/                 ← 顧客が決めるのはこの置き場所だ�
 書き込みが拒否される（ロックファイル検知）。バックアップは既定で同期フォルダの外に置かれる。
 
 
-- 配置後、各台帳が開けること・タブ構成が `assets/schema/data-layout.yaml` の required タブと
-  一致することを確認する（発行者設定／契約マスタ／月次請求スケジュール、支払先マスタ／月次支払管理／経費一覧）。
+- 配置後、各台帳が開けること・タブ構成と見出しが `assets/schema/data-layout.yaml` と一致することを確認する：
+  `python3 assets/scripts/build_templates.py --check --ledgers <経理フォルダ> --allow-data`（ERROR 0 で OK）。
+  タブ：取引先マスタ／発行者設定・契約マスタ・雛形マスタ・月次請求スケジュール／支払先マスタ・月次支払管理・
+  経費一覧・源泉徴収管理・月次支払スケジュール／仕訳帳・勘定科目マスタ・月次サマリ。
 - 既に同名台帳があれば**上書きしない**（既存運用を壊さない）。テンプレ配置をスキップした旨を報告し、
   既存台帳に対してステップ6の台帳ヘルスチェックを実施する。
+
+### 3-2. 「発行者設定」タブを settings の値で埋める（必須）
+
+**osi-finance-invoice は発行者情報を台帳の「発行者設定」タブから最優先で読む。**テンプレートの値は空欄なので、
+ここを埋めないと請求書の社名・口座が空、または旧テンプレートの「（自社名を入力）」のまま出る（別環境で実際に起きた）。
+settings が正本、タブはコンソールと請求書発行のための写し。
+
+```bash
+python3 assets/scripts/fill_issuer_settings.py <経理フォルダ> --dry-run   # 何が入るかを確認
+python3 assets/scripts/fill_issuer_settings.py <経理フォルダ>             # 書く（書く前に _backup/ へ控える）
+```
+
+- 埋める項目：発行者名義・登録番号・郵便番号・住所・振込先（銀行・支店・預金種別・口座番号・口座名義）・
+  振込手数料・消費税率・採番ルール・支払サイト、**連携トグル**（電子署名＝ESIGN／会計SaaS＝ACCOUNTING_SYNC／
+  銀行明細突合＝BANK_RECON）、**金額区分**（BILLING_PATTERNS）、prepaid を使う組織は 前受の有効期限・失効前通知。
+- 終了コード 0＝必須項目がそろった／2＝settings が未記入の必須項目が残った（名前が出るので settings を埋めて再実行）／
+  1＝エラー（登録番号が T＋13桁でない、台帳が Excel で開かれている など。書いていない）。
+- 口座番号・登録番号の値は画面に出ない（出さない）。報告も「記入済み」とだけ書く。
+- 台帳に既に別の値が入っている項目は上書きしない（`--overwrite` で settings に揃える）。連携トグル・金額区分は常に settings に揃える。
+- `OPERATION_MODE=参照専用` の組織では書かずに `--dry-run` の結果だけを示し、管理者に実行を頼む。
+- settings を後で変えたら（口座の変更・連携の追加など）、このコマンドを再実行する。
 
 ---
 
@@ -193,8 +229,9 @@ OSI Finance/                 ← 顧客が決めるのはこの置き場所だ�
 
 各コネクタが接続済みか確認し、未接続のものは導入を案内する。可能なら read 系で軽く疎通する。
 
-- **会計SaaS = MoneyForward（mfc_ca）**：`currentOffice` 等で対象事業者を確認。
-  v1 は MF 固定。**対象事業者の取り違えは事故**なので、必ず社名を声に出して確認する。
+- **会計SaaS（`ACCOUNTING_SYNC` が mf のときだけ）＝ MoneyForward（mfc_ca）**：`currentOffice` 等で対象事業者を確認。
+  **対象事業者の取り違えは事故**なので、必ず社名を声に出して確認する。`freee` は CSV 突合のみなので接続確認は不要
+  （`04.連携データ/freee/` の置き場所だけ確認）。`none` なら会計SaaS の確認は飛ばす。
 - **ストレージ = Google Drive（＋ローカル同期）**：フォルダ作成・ファイル読取ができるか。
   大容量ファイルの格納は**ローカル同期フォルダ経由を推奨**（ステップ3参照）。
 - **メール = Gmail または Superhuman**：
@@ -216,15 +253,15 @@ OSI Finance/                 ← 顧客が決めるのはこの置き場所だ�
 
 ## ステップ 5: スケジュールタスクの登録
 
-日次・月次の自動実行を7本登録する。**定義（cron・description・prompt）の正本は
+日次・月次の自動実行を7本登録する（連携トグルで使わない機能のタスクは登録しなくてよい）。**定義（cron・description・prompt）の正本は
 [`references/scheduled-tasks.md`](./references/scheduled-tasks.md) にある。**
 そこの内容をそのまま `create_scheduled_task` に渡すこと。**プロンプトを自分で書き起こさない。**
 
 | taskId | cron | 呼ぶスキル |
 |---|---|---|
-| `osi-finance-daily-sync` | `0 7 * * *` | （なし・暫定で手順を持つ） |
 | `osi-finance-daily-contract-detect` | `20 8 * * *` | osi-finance-contract-intake |
 | `osi-finance-daily-payment-detect` | `25 8 * * *` | osi-finance-payment-detect |
+| `osi-finance-daily-bank-detect` | `30 8 * * *` | osi-finance-ar-sync ＋ osi-finance-mf-sync（`ACCOUNTING_SYNC=mf` のときだけ） |
 | `osi-finance-monthstart-invoice-draft` | `30 9 1 * *` | osi-finance-invoice |
 | `osi-finance-monthly-ar-close` | `0 9 2 * *` | osi-finance-ar-sync |
 | `osi-finance-monthstart-close` | `0 9 3 * *` | osi-finance-monthly |
@@ -234,6 +271,7 @@ OSI Finance/                 ← 顧客が決めるのはこの置き場所だ�
   （初回はOAuth許可ダイアログが出るため、無人実行の前に通しておく）。
 - いずれのタスクも**送金・自動確定はしない**（検出・ドラフト・報告まで）。
 - **taskId は `osi-finance-` で始める。**一括更新・一括削除の対象をこの接頭辞で見分けるため。
+- **`osi-finance-daily-sync` は 2026-08-18 に廃止済み。登録しない**（既に登録されている組織では削除を案内する。経緯は `references/scheduled-tasks.md` の1番）。
 
 ### スケジュールはプラグインでは配れない（伝えること）
 
@@ -261,11 +299,13 @@ plugin.json に `schedules` / `cron` の欄は無く、`hooks` にも時刻で�
 2. **台帳ヘルスチェック**：`assets/schema/data-layout.yaml` と照合し、①ルート配下に required な
    フォルダが揃っているか、②各台帳に required なタブが揃っているか、③各タブのヘッダー行が
    仕様の列と一致するか（**ヘッダーは1行目とは限らない**。支払先マスタ・経費一覧・源泉徴収管理は3行目、
-   月次支払スケジュールは4行目にある。`sheets_get_values` が返す `header_row` を使うこと）、を検査する。**差分があっても自動修復しない**——欠け・不一致を一覧で報告し、
+   月次支払管理は4行目にある。`sheets_get_values` が返す `header_row` を使うこと）、を検査する。
+   ②③は `python3 assets/scripts/build_templates.py --check --ledgers <経理フォルダ> --allow-data` で機械的に見られる。
+   あわせて「発行者設定」の必須項目が埋まっているか（`fill_issuer_settings.py --dry-run` が exit 0 か）も見る。**差分があっても自動修復しない**——欠け・不一致を一覧で報告し、
    テンプレ再配置／列名の復元／settings の上書き設定のいずれかを提案する。
 3. **当月の請求予定**：請求管理台帳「月次請求スケジュール」から当月の予定行が拾えるか（0件でも可）。
 4. **受領請求書の検出**：受領請求書フォルダ／メール添付に当月分があれば軽く検出できるか（osi-finance-payment-detect の検出のみ）。
-5. **会計SaaS 疎通**：MF の対象事業者・当月明細の取得状況を軽く確認。
+5. **会計SaaS 疎通**（`ACCOUNTING_SYNC=mf` のときだけ。none / freee はスキップ）：MF の対象事業者・当月明細の取得状況を軽く確認。
 
 結果を「OK／要対応」で一覧化し、要対応があれば次アクション（コネクタ追加・テンプレ再配置・
 マッピング追記など）を提示してセットアップを締める。
@@ -283,7 +323,7 @@ plugin.json に `schedules` / `cron` の欄は無く、`hooks` にも時刻で�
    - 設定生成（1）・Drive フォルダ（2）・台帳配置（3）：ステップ1〜3 の結果をそのまま転記。
    - 請求(AR)（4）：osi-finance-invoice を当月で**ドライラン**し、未請求の件数・合計を取る（0件可）。
    - 受領検出(AP)（5）：osi-finance-payment-detect で新着の有無を取る（新着なし可）。
-   - 突合(AP)（6）：osi-finance-mf-sync を**読み取りのみ**で回し、計上漏れ件数を取る。
+   - 突合(AP)（6）：`ACCOUNTING_SYNC=mf` なら osi-finance-mf-sync、`freee` なら osi-finance-freee-sync を**読み取りのみ**で回し、計上漏れ件数を取る（none はスキップ）。
    - ダッシュボード（7）：osi-finance-dashboard で費用構成・純損益・AR数値が描画されるか。
    - コネクタ（8）・スケジュール（9）：ステップ4・5 の結果を転記。
 2. 各項目を **OK／要対応／スキップ** で判定し、件数・要対応内容をメモに書く。

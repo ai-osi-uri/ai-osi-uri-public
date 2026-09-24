@@ -47,12 +47,16 @@
 
 ## 台帳テンプレ（同梱）
 
-`assets/templates/` に2ファイルを同梱。導入時に `osi-finance-setup` が Drive の規定ツリー
+`assets/templates/` に4ファイルを同梱（`assets/scripts/build_templates.py` が data-layout.yaml から生成。`--check` で照合）。導入時に `osi-finance-setup` が Drive の規定ツリー
 （`assets/schema/data-layout.yaml` 正本）を配置します。台帳の実体は**ローカルの Excel ファイル**で、
 拡張設定「台帳フォルダ【必須】」で指定したフォルダに置きます（Drive 等の同期フォルダ配下で構いません）。
 
-- `請求管理台帳_テンプレート.xlsx`：発行者設定／契約マスタ／月次請求スケジュール（記入例つき）
-- `支払管理台帳_テンプレート.xlsx`：支払先マスタ（既定支払方法で振込/カードを振り分け）／月次支払管理／経費一覧（記入例つき）
+- `共通マスタ_テンプレート.xlsx`：取引先マスタ
+- `請求管理台帳_テンプレート.xlsx`：発行者設定／契約マスタ／雛形マスタ／月次請求スケジュール
+- `支払管理台帳_テンプレート.xlsx`：支払先マスタ（既定の支払方法で振込/カードを振り分け）／月次支払管理／経費一覧／源泉徴収管理／月次支払スケジュール
+- `仕訳台帳_テンプレート.xlsx`：仕訳帳／勘定科目マスタ（標準科目入り）／月次サマリ
+- データ行は空（記入例は各ファイルの「00_使い方_◯◯」タブにだけ書いてある）。「発行者設定」は setup が
+  `assets/scripts/fill_issuer_settings.py` で settings の値から埋める。
 
 > **証憑 PDF など大容量ファイルの Drive 格納はローカル同期フォルダにコピーする方式を推奨**
 > （コネクタ直アップロードは大容量で不安定）。
@@ -62,19 +66,20 @@
 社名・登録番号・振込先・税率・採番ルール・Drive ルート／フォルダ名・台帳ファイル名・支払先→科目マッピング
 などの**組織固有値は、各スキルに直書きせず `osi-finance-settings` に集約**しています。
 
-- 配布テンプレート：`skills/config/osi-finance-settings.example.md`（**プレースホルダのみ**。機微値は含まない）。
-- 各組織は同ディレクトリに `osi-finance-settings.md` をコピーし、`{{ }}` を実値で埋めて使う
-  （`osi-finance-setup` が対話生成します）。
+- 配布テンプレート：`config/osi-finance-settings.example.md`（**プレースホルダのみ**。機微値は含まない）。
+- 各組織は経理フォルダ（`osi-profile.md` の `paths.finance`＝台帳フォルダ）直下に `osi-finance-settings.md` を
+  コピーし、`{{ }}` を実値で埋めて使う（`osi-finance-setup` が対話生成します）。置き場所はここ1か所が正。
+  旧版の置き場所（`config/`・`skills/config/`・`_shared/`）にある設定は後方互換で読む。
 - **実値版 `osi-finance-settings.md` はコミットしない**（`.gitignore` の `**/osi-finance-settings.md` で除外）。
 - 各 osi-finance スキルの SKILL.md 冒頭に「組織固有値は osi-finance-settings を参照」の共通注記。
 - スキル本文のプロバイダ名は**役割名＋例示**に統一（振込口座〔例: Trunk〕／法人カード〔例: UPSIDER〕）。
-  会計SaaS は v1=マネーフォワード固定。
+  会計SaaS は settings の `ACCOUNTING_SYNC`（mf / freee / none、既定 none）で選ぶ。
 
 ## 必要コネクタ
 
 | 用途 | サービス | 必須/任意 |
 |---|---|---|
-| 会計SaaS | マネーフォワード クラウド会計（v1固定） | 必須 |
+| 会計SaaS | マネーフォワード クラウド会計（`ACCOUNTING_SYNC=mf` のとき）／freee（CSV 突合のみ） | 任意（既定 none＝台帳＋内部仕訳帳） |
 | ストレージ | Google Drive（＋ローカル同期） | 必須 |
 | メール | Gmail または **Superhuman** | 必須 |
 | 電子契約 | DocuSign（自社送付契約のメタ補完） | 任意 |
@@ -85,14 +90,26 @@
 
 通常は `osi-finance-setup` に任せますが、手動で行う場合は次の通り。
 
-1. `skills/config/osi-finance-settings.example.md` を `skills/config/osi-finance-settings.md` にコピー。
+1. `config/osi-finance-settings.example.md` を `{{paths.finance}}/osi-finance-settings.md` にコピー。
 2. プレースホルダ `{{ }}` を自社の実値で埋める（発行者・振込先・税率・採番・Drive・台帳・支払先マッピング）。
 3. 必要コネクタを接続。
-4. Drive にフォルダ構成を作り、`assets/templates/` の台帳テンプレを配置（ローカル同期推奨）。
-5. 既存台帳の列が `osi-finance-mf-sync/references/ledger-schema.md` に準拠しているか確認。
-6. 日次・月次のスケジュールタスクを登録（`docs/導入ガイド.md` 参照）。
+4. Drive にフォルダ構成を作り、経理フォルダに `assets/templates/` の台帳テンプレ4本（共通マスタ・請求管理台帳・
+   支払管理台帳・仕訳台帳。`_テンプレート` を外した名前にする）と `コンソールを開く.html` を配置
+   （`python3 assets/scripts/build_templates.py --ledger-set <経理フォルダ>` でも置ける。既存は上書きしない）。
+5. 請求管理台帳「発行者設定」を settings の値で埋める：`python3 assets/scripts/fill_issuer_settings.py <経理フォルダ>`。
+6. 既存台帳の列が `assets/schema/data-layout.yaml` に準拠しているか確認
+   （`python3 assets/scripts/build_templates.py --check --ledgers <経理フォルダ> --allow-data`）。
+7. 日次・月次のスケジュールタスクを登録（`skills/osi-finance-setup/references/scheduled-tasks.md` 参照）。
 
 ## バージョン
+
+- v0.58.0：**他社に配っても手順どおり動くように直した。** 台帳テンプレートを data-layout.yaml（layout_version 7）から
+  `assets/scripts/build_templates.py` で生成（4本：共通マスタ・請求管理台帳・支払管理台帳・仕訳台帳。記入例の行を撤去、
+  `--check` で照合）。setup に「発行者設定を settings で埋める」ステップと `fill_issuer_settings.py` を追加し、invoice は
+  未記入・括弧書きの発行者設定を settings で補うか止める。`verify_invoice.py` / `render_invoice.py` が登録番号の形式（T＋13桁）と
+  埋め残しを不合格にする。`verify_ledger.py` の台帳ファイル名を引数／settings で変えられるように。settings の置き場所を
+  `{{paths.finance}}/osi-finance-settings.md` に統一（旧配置は後方互換で読む）。setup の「会計SaaS は MF 固定」と廃止済み
+  daily-sync の記載を訂正。個人宛デザイン報酬の源泉を「対象になりうる（税理士に確認）」に訂正。スキル本文の実在名を除去。
 
 - v0.51.0：**`osi-finance-onboarding` を新設（話しかけるだけで導入する伴走）。** 会社の準備・担当者の PC の準備を
   文章で人に投げず、Claude in Chrome で画面まで連れて行き、人に残すのはログイン・ボタン・鍵の貼り付けだけにする

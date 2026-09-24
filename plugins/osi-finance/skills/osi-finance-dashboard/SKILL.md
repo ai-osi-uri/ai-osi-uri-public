@@ -7,7 +7,7 @@ description: >
   「会計ダッシュボードを作って」「今月の請求状況・支払状況・経費状況を一覧で見たい」「経理の
   ダッシュボードを出して」「請求と支払と経費をまとめて管理したい」「財務の現状を一目で」「損益と
   費用の内訳を見せて」などで発動する。組織固有値（台帳の場所・ファイル名・会計年度開始月）は
-  `config/osi-finance-settings.md` を参照する。データの確定・送金・台帳更新はしない（表示専用）。
+  `{{paths.finance}}/osi-finance-settings.md` を参照する。データの確定・送金・台帳更新はしない（表示専用）。
 requires_connectors:
   - server: money-forward
     provision: user-install
@@ -19,7 +19,7 @@ requires_connectors:
 # osi-finance-dashboard（会計ダッシュボード — ライブ・アーティファクト生成）
 
 > **組織固有値（台帳ルート／ファイル名・会計年度開始月・科目の支払/経費分類）は
-> `config/osi-finance-settings.md`（テンプレ：`config/osi-finance-settings.example.md`）を参照する。**
+> `{{paths.finance}}/osi-finance-settings.md`（テンプレ：`config/osi-finance-settings.example.md`）を参照する。**
 
 請求(AR)・支払(AP)・経費の「今の状況」を1画面で見えるようにする、表示専用のダッシュボード。
 `mcp__cowork__create_artifact` で**ライブ・アーティファクト**として作る（開くたびにコネクタから最新取得・再オープン可）。

@@ -1,10 +1,11 @@
 ---
 name: pptx-custom
-description: "社内体裁（ブランド配色・レイアウト規約）で .pptx を描画/整形する**描画エンジン**スキル。構成（どのスライドが何を言い、どう並ぶか）は deck-composition が決めた slide-plan.md を受け取る前提で、本スキルはそれをレイアウト・配色・図形・画像として綺麗に刷ることに専念する。社内テンプレで提案資料やピッチを刷る、既存 pptx を社内体裁に整える、business-plan-builder / architecture-proposal / proposal 系のオーケストレータから「pptx に刷る部品」として呼ばれる、といった場合に発動する。体裁不問の汎用的な .pptx の読み取り・抽出・変換は基盤 `pptx` スキルの担当。※ スライドの構成・順序・タイトルの言い切り（Action title）・章立ては deck-composition の責任で、本スキルは行わない。"
-license: Proprietary. LICENSE.txt has complete terms
+description: "自社体裁（osi-profile の brand.* の配色・レイアウト規約。未設定なら中立色）または相手企業の色で .pptx を描画/整形する**描画エンジン**スキル。構成（どのスライドが何を言い、どう並ぶか）は deck-composition が決めた slide-plan.md を受け取る前提で、本スキルはそれをレイアウト・配色・図形・画像として綺麗に刷ることに専念する。社内テンプレで提案資料やピッチを刷る、既存 pptx を社内体裁に整える、business-plan-builder / architecture-proposal / proposal 系のオーケストレータから「pptx に刷る部品」として呼ばれる、といった場合に発動する。体裁不問の汎用的な .pptx の読み取り・抽出・変換は基盤 `pptx` スキルの担当。※ スライドの構成・順序・タイトルの言い切り（Action title）・章立ては deck-composition の責任で、本スキルは行わない。"
 requires_connectors:
+  # 任意：画像生成を使うときだけ（無ければ画像なし・図形とテキストで刷る）
   - server: ai-osi-uri-creative
     provision: user-install
+    optional: true
     tools: [generate_image]
 
 ---
@@ -47,11 +48,17 @@ storyline-gate → deck-composition → ★pptx-custom（ここ）
 | Task | Guide |
 |------|-------|
 | Read/analyze content | `python -m markitdown presentation.pptx` |
-| Edit or create from template | Read [editing.md](editing.md) |
-| Create from scratch (JS) | Read [pptxgenjs.md](pptxgenjs.md) |
-| Create from scratch (Python) | Read [python-pptx.md](python-pptx.md) |
+| Edit or create from template | 基盤 `pptx` スキルの `editing.md` |
+| Create from scratch (JS) | 基盤 `pptx` スキルの `pptxgenjs.md` ＋ 本スキルの [exec-deck-code.md](exec-deck-code.md) |
+| Create from scratch (Python) | 基盤 `pptx` スキルの `python-pptx.md`（無ければ python-pptx で直接描く） |
 | 構成の原則・コード（前工程） | deck-composition スキル ＋ [exec-deck-patterns.md](exec-deck-patterns.md) / [exec-deck-code.md](exec-deck-code.md) |
 | 寸法・容量の実測値（**参考。条件を確認して使う**） | [measurements.md](measurements.md) |
+
+> **同梱していないファイルについて。** `editing.md` / `pptxgenjs.md` / `python-pptx.md` / `scripts/thumbnail.py` /
+> `scripts/office/soffice.py` / `scripts/office/unpack.py` は本スキルに**同梱していない**。Anthropic 提供の基盤 `pptx` スキル
+> （`anthropic-skills:pptx` 等）の同名ファイルを参照する（そのスキルのフォルダからの相対パスで実行する）。
+> 基盤 `pptx` スキルが無い環境では：python-pptx で直接描き、`soffice --headless --convert-to pdf` → `pdftoppm` で画像にして目視確認する
+> （→ Converting to Images）。テンプレ編集は python-pptx で既存 .pptx を開いて書き換える。
 
 **Which creation tool?** Try pptxgenjs first (`npm install -g pptxgenjs`). If npm fails (403/network), fall back to python-pptx (`pip install python-pptx`). Both produce valid .pptx; the guides contain equivalent design patterns.
 
@@ -63,27 +70,28 @@ storyline-gate → deck-composition → ★pptx-custom（ここ）
 # Text extraction (.pptx only — for .docx use pandoc, see the docx skill)
 python -m markitdown presentation.pptx
 
-# Visual overview
-python scripts/thumbnail.py presentation.pptx
+# Visual overview（基盤 pptx スキルの scripts/thumbnail.py。無ければ下の Converting to Images で全ページを画像化）
+python <基盤pptxスキル>/scripts/thumbnail.py presentation.pptx
 
-# Raw XML
-python scripts/office/unpack.py presentation.pptx unpacked/
+# Raw XML（基盤 pptx スキルの unpack.py。無ければ unzip で展開）
+python <基盤pptxスキル>/scripts/office/unpack.py presentation.pptx unpacked/
+unzip -o -q presentation.pptx -d unpacked/     # 代替
 ```
 
 ---
 
 ## Editing Workflow
 
-**Read [editing.md](editing.md) for full details.**
+**詳細は基盤 `pptx` スキルの `editing.md`。** 無い環境では python-pptx で既存ファイルを開いて編集する。
 
-1. Analyze template with `thumbnail.py`
-2. Unpack → manipulate slides → edit content → clean → pack
+1. Analyze template（基盤の `thumbnail.py`、無ければ PDF→画像化して目視）
+2. Unpack → manipulate slides → edit content → clean → pack（基盤が無ければ python-pptx で直接編集して保存）
 
 ---
 
 ## Creating from Scratch
 
-新規作成は **slide-plan.md（deck-composition の出力）を入力にする**。各スライドの Action title・1メッセージ・載せる証拠は plan に書かれている。本スキルはそれを下記のレイアウト機構で刷る。実装の詳細は [pptxgenjs.md](pptxgenjs.md) または [python-pptx.md](python-pptx.md)。
+新規作成は **slide-plan.md（deck-composition の出力）を入力にする**。各スライドの Action title・1メッセージ・載せる証拠は plan に書かれている。本スキルはそれを下記のレイアウト機構で刷る。実装の詳細は基盤 `pptx` スキルの `pptxgenjs.md` / `python-pptx.md`（同梱していない）と本スキルの [exec-deck-code.md](exec-deck-code.md)。
 
 > 章扉・目次・パンくず等のナビ部品が必要かは slide-plan.md に記載がある。実装ヘルパーは [exec-deck-code.md](exec-deck-code.md)（`addSectionHeader` / `addPartDivider` / `addTOC`）を使う。
 
@@ -108,7 +116,7 @@ python scripts/office/unpack.py presentation.pptx unpacked/
 
 ### Define Reusable Helper Functions
 
-すべての from-scratch デッキは、生のシェイプ呼び出しではなく**ヘルパー関数**から始める。これがレイアウトバグを防ぐ最も効果的な一手。最低限、長方形・1行テキスト・複数行テキスト・カード（ヘッダーバー＋本文）・バッジ＋タイトル対のヘルパーを定義し、全スライドをこれらから組む。生API呼び出しから組まない。ヘルパーは要素間の空間関係（「タイトルはバッジの右端から始まる」）を一度だけ定義し、全箇所で保証する。実装は [pptxgenjs.md](pptxgenjs.md) / [python-pptx.md](python-pptx.md)。
+すべての from-scratch デッキは、生のシェイプ呼び出しではなく**ヘルパー関数**から始める。これがレイアウトバグを防ぐ最も効果的な一手。最低限、長方形・1行テキスト・複数行テキスト・カード（ヘッダーバー＋本文）・バッジ＋タイトル対のヘルパーを定義し、全スライドをこれらから組む。生API呼び出しから組まない。ヘルパーは要素間の空間関係（「タイトルはバッジの右端から始まる」）を一度だけ定義し、全箇所で保証する。実装は本スキルの [exec-deck-code.md](exec-deck-code.md)（JS）と、基盤 `pptx` スキルの `pptxgenjs.md` / `python-pptx.md`。
 
 ### Collision Prevention
 
@@ -198,7 +206,7 @@ python-pptx / pptxgenjs はテキストフレームの内側余白の既定が�
 `card_grid` のように「列数を指定すると、カードの高さを使用可能高いっぱいに一律で決める」ヘルパーは、
 中身が見出し＋2〜3行しかないスライドに使うと、**カードの下半分が空白になる**。5列の縦長カードで、
 文字が上1/3にしか無い絵は、読み手には「途中で作るのをやめた」ようにしか見えない。
-（2026-09-17 相生会の先生向け資料で発生。「グループがやること五つ」を5列カードにして下半分が空いた。
+（2026-09-17 ある医療系団体の先生向け資料で発生。「グループがやること五つ」を5列カードにして下半分が空いた。
 利用者の評価は「こういうデザインはマジでいけない。上から並べるリストでいい」。）
 
 判断の型：**横並びカードは、各カードの中身が枠の7割以上を埋めるときだけ。** それ以外は縦のリストにする。
@@ -400,7 +408,17 @@ AI画像生成は文字を崩す（特に日本語）。常にテキスト抑制
 - **視覚モチーフを1つに統一**：角丸フレーム／色付き円のアイコン／太い片側ボーダー等を全スライドで繰り返す。
 - **色は名前付き定数でスクリプト冒頭に定義**。生のhexをインラインに書かない。
 
-### Color Palettes（汎用の引き出し。社内案件は brand-design を優先）
+### どの色を使うか（先に決める）
+
+| 資料の種類 | 色の出どころ |
+|---|---|
+| **自社資料**（社内会議・稟議・自社の営業資料・自社名で出す提案書） | `osi-profile.md` の `brand.*`（`primary_hex` 主色・`accent_hex` 強調色・`font_ja` 日本語フォント・`logo_path` ロゴ） |
+| 自社資料で `brand.*` が空 | 中立色（濃紺 `1E3A8A`・グレー `334155`・本文 `111827`）＋ Noto Sans JP で作り、報告の最後に「`osi-profile.md` の `brand:` を埋めると自社の色で作れます」と1行案内する |
+| **相手企業向け**（相手の社内で使われる資料） | 従来どおり相手の色を取る（→「色は毎回、相手から取り直す」） |
+
+特定の会社の配色をこのスキルの既定にしない（配った先の資料に別の会社の色が混ざる）。
+
+### Color Palettes（汎用の引き出し。上の表で色が決まらないときの候補）
 
 | Theme | Primary | Secondary | Accent |
 |-------|---------|-----------|--------|
@@ -413,7 +431,7 @@ AI画像生成は文字を崩す（特に日本語）。常にテキスト抑制
 
 ### Typography
 
-ヘッダーは個性のあるフォント＋クリーンな本文フォントの対で（Arial 既定にしない）。サイズ目安：スライドタイトル 36–44pt bold ／セクションヘッダー 20–24pt bold ／本文 14–16pt ／キャプション 10–12pt muted。
+ヘッダーは個性のあるフォント＋クリーンな本文フォントの対で（Arial 既定にしない）。**日本語が入る見出し・本文は日本語フォント**（`{{brand.font_ja}}`、未設定なら Noto Sans JP / BIZ UDPGothic）にする。Montserrat 等の欧文専用フォントは日本語を持たず、代替フォントに落ちて崩れるので、英字だけの箇所に限る。サイズ目安：スライドタイトル 36–44pt bold ／セクションヘッダー 20–24pt bold ／本文 14–16pt ／キャプション 10–12pt muted。
 
 ### Avoid（頻出ミス）
 
@@ -498,7 +516,7 @@ def toc(active):                         # 章の区切りに挿入。active の
     # 下に「次に話すこと：{AGENDA[active][3]}」の帯
 ```
 
-> 観測（2026-09 / GAYA 事業戦略 23枚・10"×5.63"）：グレーは `B8B8B8`、6章＋小項目15本は2列・行間0.30"で収まった。1列だと下端を超えた。条件が変われば取り直す。
+> 観測（2026-09 / ある事業者向けの事業戦略 23枚・10"×5.63"）：グレーは `B8B8B8`、6章＋小項目15本は2列・行間0.30"で収まった。1列だと下端を超えた。条件が変われば取り直す。
 
 ### 色は毎回、相手から取り直す（前案件のパレットを絶対に流用しない）
 
@@ -713,7 +731,8 @@ python -m markitdown output.pptx | grep -iE "\bx{3,}\b|lorem|ipsum|\bTODO|\[inse
 ## Converting to Images
 
 ```bash
-python scripts/office/soffice.py --headless --convert-to pdf output.pptx
+# 基盤 pptx スキルがあれば: python <基盤pptxスキル>/scripts/office/soffice.py --headless --convert-to pdf output.pptx
+soffice --headless --convert-to pdf output.pptx      # LibreOffice を直接呼ぶ（基盤スキルが無い環境）
 rm -f slide-*.jpg
 pdftoppm -jpeg -r 150 output.pdf slide
 ls -1 "$PWD"/slide-*.jpg
@@ -730,7 +749,8 @@ ls -1 "$PWD"/slide-*.jpg
 - `npm install pptxgenjs` — from scratch（JS）
 - `npm install sharp` — 画像クロップ（JS、非16:9コンテナ）
 - `pip install python-pptx` — from scratch（Python、フォールバック）
-- LibreOffice (`soffice`) — PDF変換（`scripts/office/soffice.py` がサンドボックス向けに自動設定）
+- LibreOffice (`soffice`) — PDF変換（基盤 `pptx` スキルの `scripts/office/soffice.py` があればサンドボックス向けに自動設定。無ければ `soffice --headless` を直接）
+- 日本語フォント（Noto Sans JP 等）— 画像化で日本語が化けるときは `fc-list :lang=ja` で確認し、無ければ入れる
 - Poppler (`pdftoppm`) — PDF→画像
 
 ---
@@ -738,6 +758,6 @@ ls -1 "$PWD"/slide-*.jpg
 ## 参照ドキュメント
 
 - （前工程）`deck-composition` スキル — slide-plan.md（構成）を作る。本スキルはそれを刷る
-- [editing.md](editing.md) — テンプレ編集
-- [pptxgenjs.md](pptxgenjs.md) / [python-pptx.md](python-pptx.md) — from-scratch 実装とヘルパー
+- 基盤 `pptx` スキルの `editing.md` — テンプレ編集（同梱していない）
+- 基盤 `pptx` スキルの `pptxgenjs.md` / `python-pptx.md` — from-scratch 実装とヘルパー（同梱していない）
 - [exec-deck-patterns.md](exec-deck-patterns.md) / [exec-deck-code.md](exec-deck-code.md) — 構成原則とナビ部品の実装（構成判断は deck-composition）

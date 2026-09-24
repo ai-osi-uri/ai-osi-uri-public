@@ -61,7 +61,7 @@ connector_prose_ok:
 | 台帳フォルダが設定されているか | `sheets_list_tabs` が台帳のパスを返すか | 第3部 3-1 |
 | MF 請求書 API がつながっているか | `health_check` の `moneyforward_invoice` | 第2部 2-3 |
 | 各コネクタ（MF会計／Drive／Gmail or Superhuman／DocuSign） | それぞれ read 系を1回（`currentOffice`、ファイル一覧、スレッド検索） | 第2部 2-2 |
-| 設定ファイル `osi-finance-settings.md` があるか | 台帳フォルダの `_shared/` を読む | 第3部 |
+| 設定ファイル `osi-finance-settings.md` があるか | 経理フォルダ（`{{paths.finance}}/`）直下を読む（旧版の `_shared/`・`config/` にあれば後方互換で読み、移すよう案内） | 第3部 |
 | 導入完了レポートがあるか | 台帳ルート直下を探す | 完了の確認 |
 
 結果を「済／未」の一覧で1回だけ示し、未のうち最初の項目から始める。

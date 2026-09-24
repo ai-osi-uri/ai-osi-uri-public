@@ -11,6 +11,8 @@
 #
 # ▼ 編集する場所（"EDIT" コメントを探す）
 #  1) 色とブランド: RED(=自社/構築) / BLUE(=相手社/AI設計) / GRAY(=発注元) を担当に合わせる
+#     自社名は環境変数 OSI_OWN_COMPANY（osi-profile の company.name_display）、自社の色は OSI_BRAND_ACCENT で渡す。
+#     未設定なら凡例は「自社＝構築」、色は中立のティール
 #  2) ノード定義: node(x,y,w,h, owner, icon, l1, l2="", intro=段階)
 #       owner = RED/BLUE/GRAY（箱の背景＝担当色・薄め）
 #       icon  = lb/armor/iap/webapp/apigw/chat/agent/vertex/bigquery/dataform/
@@ -29,10 +31,11 @@
 # ============================================================================
 
 # -*- coding: utf-8 -*-
-import sys
+import sys, os
 STAGE=int(sys.argv[1]) if len(sys.argv)>1 else 3
 W,H=2400,1230
-RED="#B91C1C"; BLUE="#1D4ED8"; GRAY="#374151"
+OWN=os.environ.get("OSI_OWN_COMPANY","") or "自社"          # EDIT: 凡例に出す自社名
+RED="#"+((os.environ.get("OSI_BRAND_ACCENT","") or "0F766E").lstrip("#").upper()); BLUE="#1D4ED8"; GRAY="#374151"
 GBLUE="#4285F4"; GBLUE2="#1A73E8"; GRED="#EA4335"; GYEL="#FBBC04"; GGREEN="#34A853"
 TXT="#202124"; SUB="#5F6368"; BORD="#DADCE0"
 def tint(hx,f=0.9):
@@ -132,7 +135,7 @@ add('<defs><marker id="ah" markerWidth="11" markerHeight="11" refX="8" refY="5" 
 rrect(0,0,W,H,"#FFFFFF",rx=0)
 # legend
 lx=40; text(40,46,"担当：",19,TXT,"start","bold"); lx=160
-for name,col in [("AI OSI URI＝構築",RED),("パートナー社＝AI設計（ノウハウ）",BLUE),("発注元＝要求・ADR",GRAY)]:
+for name,col in [(f"{OWN}＝構築",RED),("パートナー社＝AI設計（ノウハウ）",BLUE),("発注元＝要求・ADR",GRAY)]:
     rrect(lx,28,26,26,tint(col,0.9),col,1.6,5); text(lx+34,46,name,17,TXT,"start","bold"); lx+=len(name)*14+70
 rrect(lx,28,26,26,"#F5F6F7","#D5D7DB",1.5,5,"5,4"); text(lx+34,46,"薄色＝未導入",16,SUB,"start"); lx+=230
 rrect(lx,28,44,22,"#34A853",rx=5); text(lx+52,46,"＝本段階で追加",16,SUB,"start")
@@ -210,9 +213,9 @@ oconn([(c3+200,rB),(c3+200,GY+96),(EAx+200,GY+96),(EAx+200,GY+62)],dashed=True,l
 oconn([(d2+250,CRy+348),(d2+250,DGy+38)],label="クエリ/結果",lx=d2+250,ly=DGy-6)
 oconn([(d1+150,CRy+348),(d1+150,VGy+38)],"#7C3AED",label="VPC接続",lx=d1+150,ly=VGy-8)
 oconn([(GX-50,DGy+69),(d1,DGy+69)],label="取込",lx=GX-14,ly=DGy+18)
-oconn([(d1+360,DGy+69),(d2,DGy+69)],"#B91C1C")
-oconn([(d3,DGy+69),(d2+520,DGy+69)],"#B91C1C",label="公開",lx=d3+12,ly=DGy+18)
-oconn([(c4+150,rA+56),(c4+150,DGy+10),(d2+360,DGy+10),(d2+360,DGy+38)],"#B91C1C",dashed=True,label="書戻し",lx=c4+150,ly=DGy-6,intro=3)
+oconn([(d1+360,DGy+69),(d2,DGy+69)],RED)
+oconn([(d3,DGy+69),(d2+520,DGy+69)],RED,label="公開",lx=d3+12,ly=DGy+18)
+oconn([(c4+150,rA+56),(c4+150,DGy+10),(d2+360,DGy+10),(d2+360,DGy+38)],RED,dashed=True,label="書戻し",lx=c4+150,ly=DGy-6,intro=3)
 
 CY=GY+GH+24
 rrect(GX,CY,GW,60,"#F1F3F4","#DADCE0",2,12)

@@ -9,12 +9,14 @@ description: >
   「○○の設計資料を読んで実装提案を作って」「アーキテクチャ提案」「PoC提案」「GCP/AWSの
   構成図つき提案」「段階的に作る技術提案」「既存構想を実装に落とす提案」「クラウド移行/
   構築の提案書」などで必ず発動する。設計資料(PDF/MD)が共有された提案依頼でも発動する。
-  ※ 自社サービス（CAIO / yourrecord 等）の新規営業・初回提案・見積提案は別スキル
-  （initial-proposal / proposal-estimate / proposal-package）の担当。本スキルは「相手の設計を
+  ※ 自社の定型サービスの新規営業・初回提案・見積提案は別スキル
+  （proposal-package / proposal-estimate）の担当。本スキルは「相手の設計を
   クラウド上に実装する技術・デリバリー提案」専用。
 requires_connectors:
+  # 任意：Box に設計資料がある場合だけ（無ければ共有されたファイル・連結フォルダから読む）
   - server: box
     provision: user-install
+    optional: true
 ---
 
 # 技術・アーキテクチャ提案スキル
@@ -29,7 +31,7 @@ requires_connectors:
 - アーキテクチャ図つきの技術提案、PoC提案、段階的（v1/v2/v3）な実装提案
 - GCP/AWS など特定クラウドでの構築・移行提案
 
-自社サービスの初回営業・見積は initial-proposal / proposal-estimate を使うこと。
+自社サービスの初回営業・見積は proposal-package / proposal-estimate を使うこと。
 
 ## ワークフロー
 1. **資料読解**：相手の設計資料を読む（PDFは pypdf でテキスト抽出）。目的・課題・確定事項
@@ -45,7 +47,7 @@ requires_connectors:
 6. **pptx生成**：scripts/deck_helpers.py を import して各スライドを組む（下記「pptxの作り方」）。
 7. **QA**：references/structure.md の QA 手順（markitdown＋画像化＋サブエージェント点検）を回す。
 8. （任意）Drive 格納・営業管理表への反映は proposal-package の流儀に合わせる。v1モック画面＋Vercel
-   公開が要るなら deploy-app と連携。
+   公開が要るなら `osi-deploy:create-app` と連携。
 
 ## アーキ図の作り方（scripts/arch_diagram.py）
 - これは**コピーして編集するテンプレート**。完全自動の汎用エンジンにしていないのは、任意
@@ -56,6 +58,8 @@ requires_connectors:
 - 段階表示：`STAGE` を 1→2→3 で渡して3回レンダリングすると、`intro>STAGE` は自動でグレーアウト、
   `intro==STAGE` は緑「NEW」バッジが付く。これで「v1/v2/v3で何が増えるか」を3枚で見せる。
   ```bash
+  export OSI_OWN_COMPANY="{{company.name_display}}"   # 凡例の「◯◯＝構築」。未設定なら「自社」
+  export OSI_BRAND_ACCENT="{{brand.accent_hex}}"       # 自社の担当色。未設定なら中立色
   for s in 1 2 3; do python3 arch_diagram.py $s; done
   for s in 1 2 3; do soffice --headless --convert-to png arch_v$s.svg; done
   ```
@@ -67,7 +71,7 @@ requires_connectors:
 > **提出前に `pptx-custom` の「日本語ビジネス文書の絶対ルール」を通すこと。** 金額は単位まで書く（「億」で終わらせない）／全章に中扉／目次は階層化しページ番号は実測／色は意味に割り当てる／抽象は Appendix。顧客提出物ではさらに `proposal-self-review` の F（機械チェック）を 0 件にしてから出す。
 
 - `from deck_helpers import *` → `prs=new_deck()`、各スライドは `s=slide(prs)` で作り、`head/rect/
-  txt/chip/pagenum/add_image` で組む。色は AIOSI/PARTNER/CLIENT（担当）と DARK/RED/LIGHT/LRED 等。
+  txt/chip/pagenum/add_image` で組む。色は OWN/PARTNER/CLIENT（担当。OWN＝自社）と DARK/RED/LIGHT/LRED 等（RED＝自社の強調色。`OSI_BRAND_ACCENT` で `{{brand.accent_hex}}` を渡す。未設定なら中立色）。
 - アーキ図は `add_image(s, "arch_v1.png")` で各段階スライドに貼る。
 - 構成と作法は references/structure.md に従う（特に：課題→解→効果の対応、略語の定義、
   vスコープを各1枚、役割の立て付け、箇条書きの独立）。

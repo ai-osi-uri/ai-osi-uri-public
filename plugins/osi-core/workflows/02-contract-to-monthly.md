@@ -14,7 +14,7 @@
 | 0 | `osi-finance:osi-finance-setup`（初回だけ） | 5〜7 問 → `osi-finance-settings.md`・台帳 3 本・規定フォルダ |
 | 1 | `osi-finance:osi-finance-contract-intake` | 契約書 PDF → 契約書フォルダに格納、契約マスタに 1 行、契約期間分の「月次請求スケジュール」行を展開 |
 | 2 | `osi-finance:osi-finance-invoice`（月初） | 当月の未請求行 → 請求書 PDF（`送付請求書/YYYY-MM/`）＋ Gmail 下書き（PDF 添付）。台帳「下書き済」 |
-| 3 | 人が送信 → `osi-finance:osi-finance-payment-detect` / `payment-intake` | 送信済み・受領請求書 → 台帳の請求済／支払予定の起票 |
+| 3 | 人が送信 → `osi-finance:osi-finance-payment-detect` / `osi-finance:osi-finance-payment-intake` | 送信済み・受領請求書 → 台帳の請求済／支払予定の起票 |
 | 4 | `osi-finance:osi-finance-ar-sync`（月末） | 台帳の請求済・入金済 ↔ MF の仕訳・**口座連携の明細** → 計上漏れ・消込漏れの一覧 |
 | 5 | `osi-finance:osi-finance-mf-sync`（月末） | 支払管理台帳の支払済 ↔ MF の仕訳 → 未計上の一覧（登録は人レビュー後） |
 | 6 | `osi-finance:osi-finance-monthly` | ①明細取込確認 → ②仕訳化 → ③突合 → ④残高試算表で検算 → ⑤月次報告。MF を使わない組織は `osi-finance-journal` でローカル仕訳帳に記帳 |

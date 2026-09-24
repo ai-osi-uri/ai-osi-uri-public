@@ -28,7 +28,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE = os.path.join(HERE, "..", "assets", "osi-profile.example.md")
 
 SALES_COLUMNS = ["案件ID", "取引先名", "URL", "事業区分", "紹介元", "獲得日", "ステータス", "確度", "営業担当",
-                 "CAIO担当", "サポート", "アサイン状態", "次アクション", "次アクション期日", "最終接触日",
+                 "デリバリー担当", "サポート", "アサイン状態", "次アクション", "次アクション期日", "最終接触日",
                  "想定額(税込)", "課金形態", "想定開始月", "想定期間(ヶ月)", "窓口氏名", "窓口メール",
                  "議事録", "提案書", "失注-保留日", "失注-保留理由", "再アプローチ月", "顧客課題メモ"]
 STATUSES = ["リード", "商談中", "提案中", "金額提示済み", "受注", "契約済み", "デリバリー中", "保留", "失注", "終了"]
@@ -37,7 +37,8 @@ SUBFOLDERS = ["01_提案・見積", "02_契約", "03_制作・成果物", "04_�
 DEFAULT_PATHS = {"root": ".", "projects": "案件", "project_naming": "{案件ID3桁}.{企業名}",
                  "project_template": "案件/000.フォルダ構造テンプレート", "shared": "共通", "sales_admin": "営業管理",
                  "sales_materials": "営業資料", "finance": "経理", "contracts": "経理/00.契約書", "billing": "経理",
-                 "expenses": "経理/03.経費管理", "pr_articles": "広報/案件記事", "vault": ""}
+                 "expenses": "経理/03.経費管理", "pr_articles": "広報/案件記事", "internal_docs": "共通/社内資料",
+                 "vault": ""}
 DEFAULT_LEDGERS = {"sales": "営業管理/営業管理表.xlsx", "sales_tab": "取引先管理", "sales_header_row": 5,
                    "sales_rules": "営業管理/営業管理表_運用ルール.md", "apps": "案件/_アプリ台帳.md"}
 CONNECTOR_KEYS = ["deploy", "finance", "creative", "obsidian", "money_forward", "docusign", "plaud", "slack", "gmail", "google_calendar"]
@@ -53,7 +54,10 @@ def render_profile(ans):
     paths = dict(DEFAULT_PATHS); paths.update(ans.get("paths", {}) or {})
     ledgers = dict(DEFAULT_LEDGERS); ledgers.update(ans.get("ledgers", {}) or {})
     conns = {k: bool((ans.get("connectors", {}) or {}).get(k, False)) for k in CONNECTOR_KEYS}
-    vals = {"company": company, "members": members, "paths": paths, "ledgers": ledgers, "connectors": conns}
+    brand = ans.get("brand", {}) or {}     # 空欄可（スキルは中立色で作ってブランド設定を案内する）
+    sales = ans.get("sales", {}) or {}     # 空欄可（スキルは既定の型で動く）
+    vals = {"company": company, "members": members, "paths": paths, "ledgers": ledgers, "connectors": conns,
+            "brand": brand, "sales": sales}
     out, section = [], None
     for line in fm.split("\n"):
         mm = re.match(r"^(\w+):\s*$", line)
@@ -148,7 +152,8 @@ def main():
     owner = (ans.get("members", {}) or {}).get("owner", "")
     layout = ans.get("layout", "new")
     if layout == "new" or ans.get("make_folders", True):
-        for key in ("projects", "project_template", "shared", "sales_admin", "sales_materials", "finance", "pr_articles"):
+        for key in ("projects", "project_template", "shared", "sales_admin", "sales_materials", "finance", "pr_articles",
+                    "internal_docs"):
             rel = paths.get(key)
             if rel: ensure_dir(rel)
         for sf in SUBFOLDERS: ensure_dir(os.path.join(paths["project_template"], sf))

@@ -1,8 +1,11 @@
 # 発行者情報（AR 請求書 発行元）— 汎用ロジック ＋ osi-finance-settings 参照
 
 > **具体値（社名・登録番号・住所・振込先・税率・採番ルール・支払サイト）は組織固有値であり、
-> `config/osi-finance-settings.md`（テンプレ：`config/osi-finance-settings.example.md`）を正本とする。**
+> `{{paths.finance}}/osi-finance-settings.md`（テンプレ：`config/osi-finance-settings.example.md`）を正本とする。**
 > 台帳に「発行者設定」シートがある場合はそれを最優先し、無ければ osi-finance-settings を参照する。
+> **発行者設定の値が空欄・括弧書きの入力指示（「（自社名を入力）」「（口座番号）」など）・`{{ }}` のままなら未記入として扱い、
+> settings の値を使う。settings も未記入なら発行しない**（SKILL.md「発行者情報」）。タブは setup が
+> `assets/scripts/fill_issuer_settings.py` で埋める。
 > このファイルには**汎用のレイアウト・運用ルールのみ**を置き、自社の実値は持たない。
 
 ## 参照すべき値（すべて osi-finance-settings から）
@@ -39,5 +42,7 @@
 ## 登録番号についての汎用ルール
 
 - 発行者は**常に自社のインボイス登録番号**（`ISSUER_INVOICE_REG_NO`）で固定する（相手側の番号ではない）。
+- 形式は **`T` ＋数字13桁**（ハイフン・空白なし）。形式が違う・`T0000000000000` のままなら発行しない
+  （`scripts/verify_invoice.py` / `render_invoice.py` が止める）。
 - 自社の登録番号が不明な場合は、国税庁 適格請求書発行事業者公表サイト
   （https://www.invoice-kohyo.nta.go.jp/）で確認し、osi-finance-settings に記録する。

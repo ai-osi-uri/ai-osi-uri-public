@@ -20,7 +20,7 @@ requires_connectors:
 
 > **組織固有値はプロファイルから読む。** 資本金の額（1億円以下か）、株主構成（大法人の子会社でないか）、
 > 青色申告の承認の有無、従業員数、役員の一覧と役員給与の決め方（株主総会・取締役会の決議）は
-> `osi-profile.md` と `config/osi-finance-settings.md` を正とする。
+> `osi-profile.md` と `{{paths.finance}}/osi-finance-settings.md` を正とする。
 > 判断ルールの正本は `references/tax-adjust-rules.md`。税制は毎年変わるので、同ファイルの最終確認日から
 > 1年以上たっていたら国税庁のページで確かめ直してから使う。
 

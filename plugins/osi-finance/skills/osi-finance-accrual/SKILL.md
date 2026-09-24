@@ -22,7 +22,7 @@ requires_connectors:
 # 期ズレ計上（osi-finance-accrual）
 
 > **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` は、
-> 連結フォルダ直下の `osi-profile.md` と `config/osi-finance-settings.md` の値に置き換えて解釈する。
+> 連結フォルダ直下の `osi-profile.md` と `{{paths.finance}}/osi-finance-settings.md` の値に置き換えて解釈する。
 > 判断ルールの正本は `references/accrual-rules.md`。毎回それに沿って判定し、ブレさせない。
 
 ## なぜ毎月やるのか
@@ -53,7 +53,7 @@ requires_connectors:
 ## 確定する範囲と確認する範囲
 
 判断は人が1回だけ確認し、決まったことの繰り返しはAIが確定する。設定 `AUTO_POST_ROUTINE`
-（`config/osi-finance-settings.md`）が `on` のときだけ、下の「定型」を人の承認なしに登録する（`off` なら全部を確認に回す）。
+（`{{paths.finance}}/osi-finance-settings.md`）が `on` のときだけ、下の「定型」を人の承認なしに登録する（`off` なら全部を確認に回す）。
 
 | 区分 | 中身 | 扱い |
 |---|---|---|

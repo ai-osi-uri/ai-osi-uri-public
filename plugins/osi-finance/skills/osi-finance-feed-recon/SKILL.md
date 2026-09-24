@@ -21,7 +21,7 @@ requires_connectors:
 # 経理：MF連携明細（未仕訳）の棚卸し・振り分けスキル（osi-finance-feed-recon）
 
 > **組織固有値（会計年度・支払先/取引先・科目マッピング等）は
-> `config/osi-finance-settings.md`（テンプレ：`config/osi-finance-settings.example.md`）を参照する。
+> `{{paths.finance}}/osi-finance-settings.md`（テンプレ：`config/osi-finance-settings.example.md`）を参照する。
 > 分類辞書・作法は `references/recon-rules.md` を正本にする。**
 
 銀行・法人カードの口座連携がMFに取り込んだ「未仕訳（連携明細）」を棚卸しし、各明細を

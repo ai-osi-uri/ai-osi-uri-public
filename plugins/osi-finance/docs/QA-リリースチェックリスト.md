@@ -16,7 +16,7 @@
 - [ ] **機微値スキャン** 登録番号(T+13桁)・口座番号・実在支払先名が repo に無い
       （`grep -rE 'T[0-9]{13}|[0-9]{7,}' plugins/osi-finance/skills` で0件）。
 - [ ] **設定外出し** 実値版 `osi-finance-settings.md` がコミットに含まれない（`.gitignore` の `**/osi-finance-settings.md`）。
-- [ ] **台帳テンプレ同梱** `assets/templates/請求管理台帳_テンプレート.xlsx` / `支払管理台帳_テンプレート.xlsx` が存在。
+- [ ] **台帳テンプレ同梱** `assets/templates/` に 共通マスタ／請求管理台帳／支払管理台帳／仕訳台帳 の `_テンプレート.xlsx` 4本が存在し、`python3 assets/scripts/build_templates.py --check` が OK（データ行が空・見出しが data-layout.yaml と一致）。
 - [ ] **CHANGELOG/README** を更新。タグ `osi-finance-v<version>` を正しいコミットに付ける。
 
 ## B. 導入直後スモークテスト（osi-finance-setup 実行後）

@@ -18,7 +18,7 @@ requires_connectors:
 # 月次経理クローズ（osi-finance-monthly）
 
 > **組織固有値（台帳ファイル名・支払先→科目マッピング・採番ルール・Drive ルート等）は
-> `config/osi-finance-settings.md`（テンプレ：`config/osi-finance-settings.example.md`）を参照する。**
+> `{{paths.finance}}/osi-finance-settings.md`（テンプレ：`config/osi-finance-settings.example.md`）を参照する。**
 > 判断辞書（`references/monthly-rules.md`）は汎用ロジック、自社の実値は osi-finance-settings 側に持つ。
 
 毎月の経理を一定の順序と判断ルールで回すオーケストレータ。会計仕訳の発生源はMFの口座連携明細

@@ -8,18 +8,25 @@ from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 from pptx.enum.shapes import MSO_SHAPE
 
-# ---- ブランド配色（CAIO資料準拠 / EDIT可） ----
-DARK="111827"; RED="B91C1C"; CARD="1F2937"; CARD2="3D3D4F"
-LIGHT="F7F7F7"; LRED="FEF2F2"; TMED="4B5563"; TLITE="9CA3AF"; WHITE="FFFFFF"
+# ---- 配色（EDIT可） ----
+# 自社の色は osi-profile.md の brand.accent_hex を環境変数 OSI_BRAND_ACCENT で渡す（例 OSI_BRAND_ACCENT=C2410C）。
+# 未設定なら中立のティール。変数名 RED/LRED は互換のため残している（＝自社・強調色の意味）。
+import os as _os
+_ACC=(_os.environ.get("OSI_BRAND_ACCENT","") or "0F766E").lstrip("#").upper()
+DARK="111827"; RED=_ACC; CARD="1F2937"; CARD2="3D3D4F"
+LIGHT="F7F7F7"; TMED="4B5563"; TLITE="9CA3AF"; WHITE="FFFFFF"
 GREEN="27AE60"; ORANGE="E67E22"
-# 担当色（構築=赤 / 相手社AI設計=青 / 発注元=グレー）
-AIOSI=RED; PARTNER="1D4ED8"; CLIENT="374151"; SHARED="7C3AED"
-FONT="Noto Sans CJK JP"
+# 担当色（構築=自社の強調色 / 相手社AI設計=青 / 発注元=グレー）
+OWN=RED; AIOSI=OWN   # AIOSI は旧名（互換）
+PARTNER="1D4ED8"; CLIENT="374151"; SHARED="7C3AED"
+FONT=_os.environ.get("OSI_BRAND_FONT_JA","") or "Noto Sans CJK JP"   # brand.font_ja があれば優先
 
 def C(h): return RGBColor.from_string(h)
 def tint(h,f=0.9):
     r=int(h[0:2],16);g=int(h[2:4],16);b=int(h[4:6],16)
     return "%02X%02X%02X"%(int(r+(255-r)*f),int(g+(255-g)*f),int(b+(255-b)*f))
+
+LRED=tint(RED,0.92)   # 強調色の薄い背景（注釈エリア）
 
 def new_deck():
     prs=Presentation(); prs.slide_width=Inches(13.333); prs.slide_height=Inches(7.5)

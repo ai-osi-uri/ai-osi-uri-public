@@ -34,7 +34,8 @@ except ImportError:
 # --- 組織固有値は osi-profile.md（会社プロファイル）から読む。環境変数で上書きできる ---
 # 探索順: $OSI_PROFILE → cwd の祖先の osi-profile.md / _shared/osi-profile.md
 #         → Cowork マウント ($HOME/mnt/*/osi-profile.md) → Google Drive 同期フォルダ
-# 雛形: ai-osi-uri-plugins/config/osi-profile.example.md（無ければ質問して作る）
+# 雛形: osi-core プラグインの skills/getting-started/assets/osi-profile.example.md
+#       （getting-started スキルが質問して作る。無ければ質問して作る）
 
 def _parse_frontmatter(text):
     m = re.match(r"^---\s*\n(.*?)\n---", text, re.S)
@@ -120,7 +121,8 @@ def _norm(s):
 def _open():
     if not PROFILE_PATH and not os.environ.get("OSI_SALES_LEDGER"):
         sys.exit("会社プロファイル osi-profile.md が見つからない。連結フォルダ直下に置く"
-                 "（雛形: ai-osi-uri-plugins/config/osi-profile.example.md）か、OSI_PROFILE で場所を指定する")
+                 "（osi-core の getting-started スキルで作れる。雛形は同スキルの assets/osi-profile.example.md）"
+                 "か、OSI_PROFILE で場所を指定する")
     if not os.path.exists(LEDGER):
         sys.exit(f"台帳が無い: {LEDGER}（osi-profile.md の ledgers.sales を確認）")
     lock = os.path.join(os.path.dirname(LEDGER), "~$" + os.path.basename(LEDGER))
@@ -162,7 +164,14 @@ def _rows(ws, H):
 def _backup():
     bdir = os.path.join(os.path.dirname(LEDGER), "_backup")
     os.makedirs(bdir, exist_ok=True)
-    dst = os.path.join(bdir, f"{datetime.now():%Y%m%d_%H%M%S}_" + os.path.basename(LEDGER))
+    # ミリ秒まで付け、それでも同名があれば連番を足す（同じ秒の連続書き込みで前のバックアップを潰さない）
+    stem = f"{datetime.now():%Y%m%d_%H%M%S_%f}"[:-3]
+    base = os.path.basename(LEDGER)
+    dst = os.path.join(bdir, f"{stem}_{base}")
+    n = 1
+    while os.path.exists(dst):
+        dst = os.path.join(bdir, f"{stem}-{n}_{base}")
+        n += 1
     shutil.copy2(LEDGER, dst)
     return dst
 

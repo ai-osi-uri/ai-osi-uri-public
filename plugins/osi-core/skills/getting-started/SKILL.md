@@ -75,6 +75,11 @@ connector_prose_ok: [AI_OSI_URI_Deploy, AI_OSI_URI_Finance, ai-osi-uri-creative,
 住所・ドメイン・URL・事業内容は、会社名から Web 検索で補完できるなら**補完して確認だけ取る**（質問数に入れない）。
 登記名の全角/半角・スペースは登記どおりに。分からなければ本人に登記簿の表記を確認してもらう。
 
+次の項目は**質問数に入れず空欄で作ってよい**（空欄でもスキルは既定で動く）。分かれば `answers.json` に入れる：
+- `brand.*`（主色・強調色・日本語フォント・ロゴ）— 自社資料の色。サイトやロゴから補完できるなら補完して確認だけ取る。空欄なら資料は中立色で作られる
+- `sales.first_meeting_goal` / `sales.proposal_policy` — 初回提案で取りたいもの・提案の考え方。空欄なら「次の打ち合わせの約束を取る」既定で動く
+- `paths.internal_docs` — 社内会議・稟議向け資料の置き場（既定「共通/社内資料」）
+
 ## Step 3. 作る（無いものだけ）
 
 回答を `answers.json` にまとめ、`python3 scripts/init_kit.py --root <連結フォルダ> --answers answers.json` を実行する。

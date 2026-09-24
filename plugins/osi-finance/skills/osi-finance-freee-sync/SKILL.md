@@ -20,7 +20,7 @@ requires_connectors:
 
 # osi-finance-freee-sync（freee 仕訳CSV ⇔ 台帳 突合）
 
-> **組織固有値（台帳ID・フォルダ・採番）は `config/osi-finance-settings.md` を参照。**
+> **組織固有値（台帳ID・フォルダ・採番）は `{{paths.finance}}/osi-finance-settings.md` を参照。**
 > 発動条件: `INTEGRATIONS.ACCOUNTING_SYNC = freee`。それ以外の値なら案内して止まる
 > （mf → mf-sync/ar-sync、none → 台帳のみ運用で突合対象なし）。
 

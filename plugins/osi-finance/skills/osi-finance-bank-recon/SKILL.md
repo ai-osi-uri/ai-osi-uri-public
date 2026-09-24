@@ -20,7 +20,7 @@ requires_connectors:
 
 # osi-finance-bank-recon（銀行明細CSV ⇔ 台帳 突合）
 
-> **組織固有値は `config/osi-finance-settings.md` を参照。** 発動条件: `INTEGRATIONS.BANK_RECON = ON`。
+> **組織固有値は `{{paths.finance}}/osi-finance-settings.md` を参照。** 発動条件: `INTEGRATIONS.BANK_RECON = ON`。
 > OFF なら案内して止まる。MF の口座連携で消込する運用（AR_BANK_LINK_HANDLING）とは併用に注意
 > （二重消込を防ぐため、どちらを正とするかを settings で確認する）。
 
