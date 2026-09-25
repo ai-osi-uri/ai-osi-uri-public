@@ -20,6 +20,8 @@ requires_connectors:
 
 # osi-finance-payment-detect（受領請求書 取りこぼし検出 — 日次）
 
+> **台帳の読み書き（拡張が無いとき）**：拡張（AI OSI URI Finance）の `sheets_*` があればそれを使う。**拡張の道具が無ければ同梱の `assets/scripts/ledger_io.py <経理フォルダ>` を使う**（`read` / `append` / `update` / `update-status` / `next-id`。タブ名＋列名で指定し、引数・戻りは拡張にそろえてある。書く前に `_backup/` へ控える）。
+
 > **組織固有値（Drive ルート／フォルダ名・台帳ファイル名・支払先→科目マッピング・採番ルール等）は
 > `{{paths.finance}}/osi-finance-settings.md`（テンプレ：`config/osi-finance-settings.example.md`）を参照する。**
 

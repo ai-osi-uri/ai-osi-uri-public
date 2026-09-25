@@ -28,7 +28,7 @@ connector_prose_ok:  # DocuSign は任意の補助。無くても運用は成立
 
 # osi-finance-setup（OSI Finance 初回セットアップ・オーケストレータ）
 
-> **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` `{{members.*}}` は、連結フォルダ直下の `osi-profile.md`（雛形: `config/osi-profile.example.md`）の値に置き換えて解釈する。無ければ会社名・案件フォルダ・台帳の有無・使うコネクタを質問して先に作る。値をここに直書きしない。
+> **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` `{{members.*}}` は、連結フォルダ直下の `osi-profile.md`（雛形: osi-core の `plugins/osi-core/skills/getting-started/assets/osi-profile.example.md`。作るときは getting-started の `scripts/init_kit.py`）の値に置き換えて解釈する。無ければ会社名・案件フォルダ・台帳の有無・使うコネクタを質問して先に作る。値をここに直書きしない。
 
 > **役割**：新しい組織（1 Cowork = 1 組織）に OSI Finance を導入するための初回セットアップを、
 > 対話で一気通貫に進める。**この後の日常運用は osi-finance-* 各スキルが担当**するので、本スキルは
@@ -60,55 +60,52 @@ connector_prose_ok:  # DocuSign は任意の補助。無くても運用は成立
 
 ---
 
-## ステップ 1: 組織値の収集 → `osi-finance-settings.md` 生成
+## ステップ 1: 質問に答えてもらう → `osi-finance-settings.md` を生成
 
-`config/osi-finance-settings.example.md`（プレースホルダ版）を雛形に、**実値版 `osi-finance-settings.md`** を
-**経理フォルダ直下（`{{paths.finance}}/osi-finance-settings.md`）**に作成する。台帳（xlsx）を置くフォルダと同じ。
-置き場所はここ1か所が正で、全 osi-finance スキルがここを読む。**実値版はコミットされない**（`.gitignore` の
-`**/osi-finance-settings.md` で除外済み）。
+設定ファイルは**経理フォルダ直下（`{{paths.finance}}/osi-finance-settings.md`）**に1つだけ作る。台帳（xlsx）を置くフォルダと同じ。
+全 osi-finance スキルがここを読む。**実値版はコミットされない**（`.gitignore` の `**/osi-finance-settings.md`）。
 旧版の置き場所（プラグインの `config/`・`skills/config/`、台帳フォルダの `_shared/`）に既存の設定がある組織は、
-内容を引き継いで `{{paths.finance}}/` へ移す（旧い場所のファイルは後方互換で読まれるが、2か所にあると片方だけ直される）。
+新しく作らずに内容を引き継いで `{{paths.finance}}/` へ移す（2か所にあると片方だけ直される）。
 
-### 1-1. 収集する値（example の章立てに対応）
+**雛形（`config/osi-finance-settings.example.md`）を手で写して埋めない。** 約390行あり、例の社名（○○株式会社）や
+支払先マッピングの例の行が残ったまま使われる。必ず次の道具で作る。
 
-対話で順に聞く。**機微値はチャットに長く残さず、設定ファイルに転記したら以後は設定参照に切り替える。**
+### 1-1. 聞くこと（普通の言葉で・4問だけ）
 
-0. **運用モード**：`OPERATION_MODE`（**編集可**＝既定／**参照専用**）。参照専用は「読み取りと報告のみ・
-   一切の書き込みなし」で、閲覧中心の導入（経営者・税理士・トライアル期間）向け。参照専用を選んだ場合は
-   ステップ2の共有と osi-finance-connect の接続を**閲覧/readスコープ**で行う（権限側でも書き込みを塞ぐ二重防御）。
-0a. **連携トグル（§0-2 INTEGRATIONS）**：`ACCOUNTING_SYNC`（mf / freee / **none＝既定**）・`ESIGN`（docusign / **none**）・
-   `BANK_RECON`（ON / **OFF**）・`GMAIL_INTAKE`・`INVOICE_ENGINE`・`AUTO_SEND`（既定 OFF）。使わない連携は既定のままでよい。
-   ここで選んだ値はステップ3-2で台帳「発行者設定」に写す（コンソールは台帳しか読めない）。
-0b. **起票確認方式**：`WRITE_CONFIRMATION`（**事前確認**＝既定／**事後確認**）。`OPERATION_MODE=編集可` の
-   場合に、契約取込・支払起票などの新規起票を「人が確認してから台帳へ反映するか」「先に台帳へ反映してから
-   人が見るか」を選ぶ（settings の「0-4. 起票確認方式」）。迷ったら事前確認（安全側）を既定として案内し、
-   運用に慣れてから事後確認へ切り替えられることを伝える。
-1. **発行者情報**：発行者名義／インボイス登録番号（T＋13桁）／郵便番号／住所
-2. **振込先（AR 入金口座）**：銀行・支店・預金種別・口座番号・口座名義・振込手数料の負担
-3. **税率**：標準消費税率（既定 10%）
-4. **採番ルール**：AR 請求書番号形式／AP 支払先ID形式／契約ID形式／支払サイト
-4b. **金額区分（`BILLING_PATTERNS`、settings §4-4）**：契約マスタ「金額区分」に使うラベルと課金パターン
-   （monthly／lump／variable／prepaid）の対応。**既定の3値（月額固定=monthly; 一括=lump; 都度=variable）で足りる組織は聞かない。**
-   回数券・チケット・リテナーなど前受・消化型の商品がある組織だけ、ラベルを足して `prepaid` に対応づける。
-   設定したら **請求管理台帳「発行者設定」に 項目=金額区分／値=同じ文字列 を1行写し**、タブ「消化記録」を作る
-   （コンソール・`ledger_maintain` は台帳側の行を読む。§0-2 の連携トグル3行と同じ扱い）。
-5. **Drive ルートの置き場所（1問だけ）**：規定レイアウト（`assets/schema/data-layout.yaml`）の
-   ルートフォルダ「OSI Finance」を**どこに作るか**だけを聞く。**共有ドライブを第一推奨**
-   （個人のマイドライブだと退職・異動で所有権ごと失われる。マイドライブの場合は経理チームへの共有を必須にする）。
-   配下のフォルダ構成は規定ツリーで固定し、個別には聞かない。
-   **既存のフォルダ体系がある組織のみ**、settings の Drive キー（請求管理ルート等）で名前を上書きする
-   （例: 経理と経費でフォルダを分けている構成）。
-6. **台帳ファイル名**：請求管理台帳（既定 `請求管理台帳`）／支払管理台帳（既定 `支払管理台帳`）。
-   台帳はローカルの xlsx。ステップ3で経理フォルダに配置する
-7. **支払先→勘定科目マッピング**（任意・後追いでも可）：主要な支払先の既定支払方法（振込／カード）・
-   勘定科目・税区分(MF)・源泉の有無
+設定キーの名前（`OPERATION_MODE` `ACCOUNTING_SYNC` `WRITE_CONFIRMATION` `INVOICE_ENGINE` `xlsx_ledger_dir` など）は
+**お客さんに見せない。** 下の言葉で聞き、答えをこちらでキーに対応させる。**既定値で作って後から直せる項目は聞かない**
+（税率・採番・支払サイト・金額区分・フォルダ名・台帳名・自動送信・操作ログ・定型仕訳の自動登録 など）。
 
-### 1-2. 生成
+| 聞き方（このまま使う） | 答え → answers.json | 対応する設定キー |
+|---|---|---|
+| 会計ソフトは何を使っていますか？（マネーフォワード／freee／使っていない） | `"accounting": "mf" / "freee" / "none"` | ACCOUNTING_SYNC |
+| 請求書はいま何で作っていますか？（マネーフォワードの請求書／freee／Excel・Word など特になし） | `"invoice_tool": "mf" / "freee" / "none"` | INVOICE_ENGINE（none → local＝同梱の雛形） |
+| 台帳に書く前に、毎回あなたが確認しますか？（はい＝おすすめ／いいえ＝先に書いて後で見る） | `"confirm_before_write": true / false` | WRITE_CONFIRMATION（事前確認／事後確認） |
+| 請求書を送るメールは何ですか？（Gmail／Outlook／メールはつながない） | `"mail": "gmail" / "outlook" / "none"` | GMAIL_INTAKE |
 
-- example の `{{ }}` を収集値で置換した `osi-finance-settings.md` を `{{paths.finance}}/` 直下に作成する。
-- 7（マッピング）が未確定なら**空行のまま**作り、「運用しながら追記」と案内する。
-- 生成後、機微値以外（フォルダ名・台帳名・税率・採番形式など非機微の構成）を要約提示して確認を取る。
-  **口座番号・登録番号などの機微値はチャットにエコーしない**（「設定ファイルに記録済み」とだけ伝える）。
+- 次は**相手が自分から言ったときだけ**入れる（聞かない）：見るだけの導入（`"read_only": true` → OPERATION_MODE=参照専用）、
+  電子署名を使う（`"esign": true` → ESIGN=docusign）、銀行の明細CSVで入金を確かめる（`"bank_csv": true` → BANK_RECON=ON）、
+  台帳の作成者欄に入れる名前（`"operator": "山田"`）、レシートを出す人（`"members": [...]`）。
+- 会社名・郵便番号・住所は `osi-profile.md` から取る（聞き直さない）。`osi-profile.md` が無ければ先に osi-core の
+  getting-started で作る（雛形は `plugins/osi-core/skills/getting-started/assets/osi-profile.example.md`）。
+- 回数券・チケットなど前受けの商品がある組織だけ、あとで settings §4-4 の金額区分に足す（ここでは聞かない）。
+
+### 1-2. 生成（`assets/scripts/make_settings.py`）
+
+答えを `answers.json` に書き、次を実行する（`<連結フォルダ>` は osi-profile.md のあるフォルダ）。
+
+```bash
+python3 assets/scripts/make_settings.py --profile <連結フォルダ>/osi-profile.md --answers answers.json --dry-run
+python3 assets/scripts/make_settings.py --profile <連結フォルダ>/osi-profile.md --answers answers.json
+```
+
+- 出力先は `<連結フォルダ>/<paths.finance>/osi-finance-settings.md`。**既にあれば上書きせずに止まる**（exit 1）。直すときはファイルを直す。
+- 聞かなかった項目は既定値（税率10%・`INV-YYYY-MM-連番3桁`・取引先ID `P-001` 形式・月末締め翌月末払い など）で入る。
+- 雛形の**例の行（支払先→科目マッピング・カード加盟店・定期支払先）は空の行で出る。** 運用しながら追記する。
+- **機微値（インボイス登録番号・振込先口座）は空欄で出る。** 最後の JSON の `blanks_for_person` に並ぶ欄を、
+  **本人にファイルを開いて直接書いてもらう**（チャットに貼らせない）。書き終わったと言われたらステップ3-2へ。
+  口座番号・登録番号をこちらから復唱しない（「記入済み」とだけ言う）。
+- 生成後、機微値以外（会計ソフト・確認方式・台帳名・採番）を1〜2行で要約して伝える。
 
 ---
 
@@ -126,8 +123,8 @@ OSI Finance/                 ← 顧客が決めるのはこの置き場所だ�
     └── レシート未処理/       （人単位サブフォルダ {氏名}/）
 ```
 
-- **このツリーは書類の置き場所で、台帳（xlsx）はここには置かない。** 台帳の場所は拡張の設定
-  `xlsx_ledger_dir`（ステップ3）が唯一の正本。両方を同じ親フォルダにするのが分かりやすいが、
+- **このツリーは書類の置き場所で、台帳（xlsx）はここには置かない。** 台帳の場所は経理フォルダ（拡張があれば拡張の設定
+  「台帳フォルダ」＝ `xlsx_ledger_dir`、ステップ3）が唯一の正本。両方を同じ親フォルダにするのが分かりやすいが、
   片方だけ移動すると台帳と発行PDFが離れて所在不明になるので、移動するときは必ず両方を見る。
 - settings に上書き（既存フォルダ体系）がある場合のみ、その名前で作成・照合する。
 - 既に同名フォルダがあれば作らずに再利用する（冪等）。
@@ -161,6 +158,7 @@ OSI Finance/                 ← 顧客が決めるのはこの置き場所だ�
    - **`コンソールを開く.html` … 名前はそのまま置く。台帳と必ずセットで配る**
      （これが台帳を画面で見る入口。xlsx だけ置いて HTML を忘れると、利用者から見て
      「コンソールが存在しない」状態になる。2026-09-22 に別 PC で実際に起きた）
+   **拡張（.mcpb）が無い環境はここで下の「拡張が無いとき」へ進む**（3〜4 と「拡張を入れる」は飛ばしてよい）。
 3. 拡張の設定で `xlsx_ledger_dir` にそのフォルダの**ローカルのフルパス**を入れ、
    **Claude Desktop を完全に終了して開き直す**（設定は起動時にしか読まれない）。
 4. 開き直したら `console_url` を呼び、`started: true` と URL が返ること、`launcher` が
@@ -169,6 +167,23 @@ OSI Finance/                 ← 顧客が決めるのはこの置き場所だ�
    - `console_url` そのものが無い → 拡張（.mcpb）が入っていない。下の「拡張を入れる」へ
    - 画面に「コンソールに接続できません」と出る → 画面の案内（起動・拡張・台帳フォルダ）どおりに直す
    - 拡張は入っていて HTML だけ無い → `health_check` を呼べば拡張が作り直す（`console.launcher_created`）
+
+### 拡張が無いとき（外部接続も拡張も無い環境）
+
+台帳の読み書きは同梱の **`assets/scripts/ledger_io.py`** で行う。拡張の `sheets_*` と同じく「タブ名＋列名」で指定し、
+見出し行の位置（data-layout.yaml の header_row）・末尾への追記・書く前のバックアップ（`<経理フォルダ>/_backup/`）・
+作成者/更新者の記録（settings の OPERATOR_EMAIL）・「〜ファイル」列の実在検査を道具が守る。
+
+```bash
+python3 assets/scripts/ledger_io.py <経理フォルダ> tabs                          # タブが読めるか（≒ sheets_list_tabs）
+python3 assets/scripts/ledger_io.py <経理フォルダ> read --tab 月次請求スケジュール  # 読む（≒ sheets_read_schedule）
+```
+
+- 追記は `append --tab … --row '{列名:値}' --dedupe-by …`、更新は `update --tab … --where 列=値 --set '{…}'`、
+  請求ステータスは `update-status`、ID の採番は `next-id`、契約からの展開は `expand-schedule`（引数は各スキル本文）。
+- **コンソール（`コンソールを開く.html`）は拡張が無いと動かない。** 台帳は Excel で直接見る、と伝える。
+  書き込み中は Excel で台帳を閉じてもらう（開いていると道具が書かずに止まる）。
+- 拡張を後から入れたら、以後は拡張の道具を使う（台帳は同じファイルなのでそのまま引き継げる）。
 
 ### 拡張を入れる（スキルが取ってきて置く）
 
@@ -239,7 +254,9 @@ python3 assets/scripts/fill_issuer_settings.py <経理フォルダ>             
   - **メール添付の取得（受領請求書PDFの添付ダウンロード）には Superhuman が必要**。
     **標準の Gmail コネクタでは添付の取得ができない**ため、添付起点の AP 運用をするなら Superhuman を入れる。
 - **任意 = DocuSign**：自社送付契約のメタ補完にのみ使う補助。無くても運用は成立する。
-- **台帳同期 = AI OSI URI Finance 拡張（.mcpb）**：請求管理台帳（台帳）の
+- **台帳同期 = AI OSI URI Finance 拡張（.mcpb）・任意**：無い環境では `assets/scripts/ledger_io.py <経理フォルダ> tabs`
+  で台帳が読めることを確かめて「拡張なし（台帳は同梱スクリプトで読み書き）」と記録し、次へ進む。
+  拡張がある場合：請求管理台帳（台帳）の
   読み書きと MoneyForward クラウド請求書のポーリングを担う専用拡張。**この拡張の OAuth 接続
   （Google／MoneyForward 請求書）を通す作業は、`osi-finance-connect` スキルに委譲する**
   （Claude in Chrome で半自動。規約同意・OAuth許可はユーザー確認、秘匿情報はファイル受け渡し）。
@@ -299,11 +316,12 @@ plugin.json に `schedules` / `cron` の欄は無く、`hooks` にも時刻で�
 2. **台帳ヘルスチェック**：`assets/schema/data-layout.yaml` と照合し、①ルート配下に required な
    フォルダが揃っているか、②各台帳に required なタブが揃っているか、③各タブのヘッダー行が
    仕様の列と一致するか（**ヘッダーは1行目とは限らない**。支払先マスタ・経費一覧・源泉徴収管理は3行目、
-   月次支払管理は4行目にある。`sheets_get_values` が返す `header_row` を使うこと）、を検査する。
+   月次支払管理は4行目にある。`sheets_get_values`（拡張が無ければ `ledger_io.py read`）が返す `header_row` を使うこと）、を検査する。
    ②③は `python3 assets/scripts/build_templates.py --check --ledgers <経理フォルダ> --allow-data` で機械的に見られる。
    あわせて「発行者設定」の必須項目が埋まっているか（`fill_issuer_settings.py --dry-run` が exit 0 か）も見る。**差分があっても自動修復しない**——欠け・不一致を一覧で報告し、
    テンプレ再配置／列名の復元／settings の上書き設定のいずれかを提案する。
-3. **当月の請求予定**：請求管理台帳「月次請求スケジュール」から当月の予定行が拾えるか（0件でも可）。
+3. **当月の請求予定**：請求管理台帳「月次請求スケジュール」から**請求月＝今月**の未請求行が拾えるか（0件でも可）。
+   拡張が無ければ `python3 skills/osi-finance-invoice/scripts/make_invoice_data.py <経理フォルダ> --out-dir <作業フォルダ>` の件数で見る。
 4. **受領請求書の検出**：受領請求書フォルダ／メール添付に当月分があれば軽く検出できるか（osi-finance-payment-detect の検出のみ）。
 5. **会計SaaS 疎通**（`ACCOUNTING_SYNC=mf` のときだけ。none / freee はスキップ）：MF の対象事業者・当月明細の取得状況を軽く確認。
 

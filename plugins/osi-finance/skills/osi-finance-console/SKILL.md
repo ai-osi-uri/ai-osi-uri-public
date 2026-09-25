@@ -15,6 +15,8 @@ connector_prose_ok:  # DocuSign 送付は contract-docusign-send の担当。本
 
 # OSI Finance ローカルコンソール
 
+> **台帳の読み書き（拡張が無いとき）**：拡張（AI OSI URI Finance）の `sheets_*` があればそれを使う。**拡張の道具が無ければ同梱の `assets/scripts/ledger_io.py <経理フォルダ>` を使う**（`read` / `append` / `update` / `update-status` / `next-id`。タブ名＋列名で指定し、引数・戻りは拡張にそろえてある。書く前に `_backup/` へ控える）。
+
 設計: `docs/osi-finance-local-console-design.md`
 
 台帳（ローカル Excel またはスプレッドシート）を見て直すための画面は、Finance コネクタが

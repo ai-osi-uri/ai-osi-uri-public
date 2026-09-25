@@ -20,6 +20,8 @@ requires_connectors:
 
 # osi-finance-journal（内部仕訳帳への仕訳生成・記帳）
 
+> **台帳の読み書き（拡張が無いとき）**：拡張（AI OSI URI Finance）の `sheets_*` があればそれを使う。**拡張の道具が無ければ同梱の `assets/scripts/ledger_io.py <経理フォルダ>` を使う**（`read` / `append` / `update` / `update-status` / `next-id`。タブ名＋列名で指定し、引数・戻りは拡張にそろえてある。書く前に `_backup/` へ控える）。
+
 > **組織固有値（台帳ID・科目マッピング・税率）は `{{paths.finance}}/osi-finance-settings.md` を参照。**
 > データ構造の正本は `assets/schema/data-layout.yaml` v4（仕訳台帳: 仕訳帳／勘定科目マスタ／月次サマリ）。
 > `OPERATION_MODE=参照専用` のときは生成案の提示までで記帳しない。

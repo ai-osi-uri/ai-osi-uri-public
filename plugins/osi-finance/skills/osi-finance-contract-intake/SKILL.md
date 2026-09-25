@@ -22,7 +22,7 @@ connector_prose_ok:  # DocuSign は ai-osi-uri-finance の ds_* 経由。docusig
 
 # osi-finance-contract-intake（契約取込 → 請求スケジュール展開）
 
-> **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` `{{members.*}}` は、連結フォルダ直下の `osi-profile.md`（雛形: `config/osi-profile.example.md`）の値に置き換えて解釈する。無ければ会社名・案件フォルダ・台帳の有無・使うコネクタを質問して先に作る。値をここに直書きしない。
+> **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` `{{members.*}}` は、連結フォルダ直下の `osi-profile.md`（雛形: osi-core の `plugins/osi-core/skills/getting-started/assets/osi-profile.example.md`）の値に置き換えて解釈する。無ければ会社名・案件フォルダ・台帳の有無・使うコネクタを質問して先に作る。値をここに直書きしない。
 
 > **組織固有値（Drive ルート／フォルダ名・台帳ファイル名・採番ルール・税率・支払サイト等）は
 > `{{paths.finance}}/osi-finance-settings.md`（テンプレ：`config/osi-finance-settings.example.md`）を参照する。**
@@ -110,7 +110,11 @@ connector_prose_ok:  # DocuSign は ai-osi-uri-finance の ds_* 経由。docusig
   | `lump`（既定ラベル 一括） | 該当月のみ1行（検収・完了月は人が決める） | 該当月のみ |
   | `variable`（既定ラベル 都度） | 展開しない（実績が出た月に起票） | 展開しない（受領請求書から payment-detect が起票） |
   | `prepaid`（組織が付けるラベル。例 チケット） | **購入月に1行**（請求額=一括額(税込)=数量×単価）。以後の役務提供は請求ではなく**「消化記録」タブに1行**（記録ID/契約ID/消化日/数量/単価/摘要） | 通常使わない |
-  受注の各行の請求ステータスは「未請求」、請求書番号・請求日・支払期限は osi-finance-invoice 発行時に確定。発注の各行の状態は「未払予定」。受領請求書との突合は osi-finance-payment-detect。
+  受注の各行の請求ステータスは「未請求」。**請求日・支払期限は展開時に予定日を入れる**（契約の支払サイトから。既定は
+  請求日＝対象月の翌月1日・支払期限＝その月末。契約で「対象月の末日までに請求」と定めたものは請求日＝対象月末）。
+  請求日の月がその行の**請求月**で、「今月の請求書を作って」は請求月で拾われる。請求日を空にすると対象月の翌月とみなされる。
+  **請求書番号は空のまま**（osi-finance-invoice が発行する瞬間に振る。先に予約しない）。発行時に請求日・支払期限を確定する。
+  発注の各行の状態は「未払予定」。受領請求書との突合は osi-finance-payment-detect。
   発行者設定に無いラベルは展開しない（`ledger_maintain expand_schedule` も同じ判定で skip する）。人に「settings §4-4 に足すか、既定ラベルに寄せるか」を聞く。
 - **初月日割り**：契約開始が月途中なら初月は日割り。
 - **既存の同 契約ID×対象月 があれば作らない**（二重展開防止）。
@@ -131,10 +135,28 @@ connector_prose_ok:  # DocuSign は ai-osi-uri-finance の ds_* 経由。docusig
 
 設定が無い/読めない場合は**事前確認（安全側）** を既定として動く。
 
+## 台帳への書き込み（拡張の道具／拡張が無いとき）
+
+- **拡張（AI OSI URI Finance .mcpb）があれば** `sheets_append_row`（`tab`＋`row`＝列名→値＋`dedupe_by`）で書き、
+  展開は `ledger_maintain`（action=`expand_schedule`）を使う。
+- **拡張の道具が無ければ、同梱の `assets/scripts/ledger_io.py` を使う**（引数・戻りは拡張にそろえてある。書く前に `_backup/` へ控える）。
+  ```bash
+  L="python3 assets/scripts/ledger_io.py <経理フォルダ>"
+  $L next-id --tab 取引先マスタ --col 取引先ID --prefix P-           # 新しい取引先ID（最大値+1）
+  $L append  --tab 取引先マスタ --dedupe-by 取引先ID --row '{"取引先ID":"P-001","正式名称":"サンプル株式会社","区分":"顧客",…}'
+  $L next-id --tab 契約マスタ --col 契約ID --prefix AR-C-             # 発注は AP-C-
+  $L append  --tab 契約マスタ --dedupe-by 契約ID --row '{"契約ID":"AR-C-001","取引先ID":"P-001","方向":"受注","状態":"締結済","金額区分":"月額固定","月額(税込)":110000,"契約開始":"2026-08-01","契約終了":"2027-01-31","出所":"手動",…}'
+  $L expand-schedule --contract AR-C-001 [--dry-run]                  # 締結済だけ。同 契約ID×対象月 は作らない
+  ```
+  `expand-schedule` は課金パターンで分岐する（monthly＝各月・初月/最終月が月途中なら日割して備考に「要確認」、
+  lump/prepaid＝`--month YYYY-MM` で人が決めた月に1行、variable＝展開しない）。当月請求の契約は `--bill-same-month`。
+  事前確認の組織は、先に `--dry-run` の結果を見せて OK をもらってから本実行する。
+
 ## 採番
 
-`INV-YYYY-MM-連番3桁`（YYYY-MM＝対象月、連番＝その月の発行順）。台帳の請求書番号列で一元管理。
-実際の採番・確定は osi-finance-invoice が発行時に行う。
+`INV-YYYY-MM-連番3桁`。**YYYY-MM＝請求月（請求日の月。既定は対象月の翌月）**、連番＝その請求月内の発行順。
+対象月 2026-08 の請求書は `INV-2026-09-001`。台帳の請求書番号列で一元管理し、採番・確定は osi-finance-invoice が発行時に行う
+（本スキルは番号を振らない）。
 
 ## 留意
 

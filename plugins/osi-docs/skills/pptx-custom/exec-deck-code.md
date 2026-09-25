@@ -19,12 +19,12 @@ pptx.layout = "WIDE_16x9";
 // 相手企業向けは相手の色（SKILL.md「色は毎回、相手から取り直す」）に差し替える。
 const BRAND = { primary: "", accent: "" };   // ← brand.primary_hex / brand.accent_hex（# なし）
 const C = {
-  navy:   BRAND.primary || "1E2761",  // 支配色
+  navy:   BRAND.primary || "1E3A8A",  // 支配色
   sky:    "CADCFC",  // 支える色
   ink:    "212121",  // 本文
   muted:  "6B7280",  // キャプション
   white:  "FFFFFF",
-  accent: BRAND.accent || "F96167",  // 鋭いアクセント
+  accent: BRAND.accent || "334155",  // 鋭いアクセント
   line:   "E5E7EB",  // 区切り線
 };
 // 日本語が入るので見出しも日本語フォント。brand.font_ja があれば優先（Montserrat 等の欧文専用は日本語が出ない）

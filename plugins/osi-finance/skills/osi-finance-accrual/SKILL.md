@@ -21,6 +21,8 @@ requires_connectors:
 
 # 期ズレ計上（osi-finance-accrual）
 
+> **台帳の読み書き（拡張が無いとき）**：拡張（AI OSI URI Finance）の `sheets_*` があればそれを使う。**拡張の道具が無ければ同梱の `assets/scripts/ledger_io.py <経理フォルダ>` を使う**（`read` / `append` / `update` / `update-status` / `next-id`。タブ名＋列名で指定し、引数・戻りは拡張にそろえてある。書く前に `_backup/` へ控える）。
+
 > **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` は、
 > 連結フォルダ直下の `osi-profile.md` と `{{paths.finance}}/osi-finance-settings.md` の値に置き換えて解釈する。
 > 判断ルールの正本は `references/accrual-rules.md`。毎回それに沿って判定し、ブレさせない。

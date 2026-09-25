@@ -25,6 +25,8 @@ requires_connectors:
 
 # osi-finance-receipt-intake（紙レシートの証憑化 → UPSIDER明細への突合・添付）
 
+> **台帳の読み書き（拡張が無いとき）**：拡張（AI OSI URI Finance）の `sheets_*` があればそれを使う。**拡張の道具が無ければ同梱の `assets/scripts/ledger_io.py <経理フォルダ>` を使う**（`read` / `append` / `update` / `update-status` / `next-id`。タブ名＋列名で指定し、引数・戻りは拡張にそろえてある。書く前に `_backup/` へ控える）。
+
 > **組織固有値（社名・Drive ルート／フォルダ名・台帳ファイル・メンバー・人↔カード対応・現金/未払金科目・
 > 少額特例の適用可否・事務処理規程の有無 等）は `{{paths.finance}}/osi-finance-settings.md`（テンプレ：
 > `config/osi-finance-settings.example.md` の「8. 経費（レシート）設定」）を参照する。** 実値版が無ければ作成を案内する。

@@ -90,8 +90,9 @@
 
 通常は `osi-finance-setup` に任せますが、手動で行う場合は次の通り。
 
-1. `config/osi-finance-settings.example.md` を `{{paths.finance}}/osi-finance-settings.md` にコピー。
-2. プレースホルダ `{{ }}` を自社の実値で埋める（発行者・振込先・税率・採番・Drive・台帳・支払先マッピング）。
+1. `python3 assets/scripts/make_settings.py --profile <連結フォルダ>/osi-profile.md --answers answers.json` で
+   `{{paths.finance}}/osi-finance-settings.md` を作る（雛形を手でコピーしない。answers.json の形はスクリプト冒頭）。
+2. 生成されたファイルの空欄（インボイス登録番号・振込先口座）を本人が直接書く。
 3. 必要コネクタを接続。
 4. Drive にフォルダ構成を作り、経理フォルダに `assets/templates/` の台帳テンプレ4本（共通マスタ・請求管理台帳・
    支払管理台帳・仕訳台帳。`_テンプレート` を外した名前にする）と `コンソールを開く.html` を配置
@@ -99,10 +100,12 @@
 5. 請求管理台帳「発行者設定」を settings の値で埋める：`python3 assets/scripts/fill_issuer_settings.py <経理フォルダ>`。
 6. 既存台帳の列が `assets/schema/data-layout.yaml` に準拠しているか確認
    （`python3 assets/scripts/build_templates.py --check --ledgers <経理フォルダ> --allow-data`）。
+   拡張（.mcpb）が無い環境では、台帳の読み書きに `python3 assets/scripts/ledger_io.py <経理フォルダ> …` を使う。
 7. 日次・月次のスケジュールタスクを登録（`skills/osi-finance-setup/references/scheduled-tasks.md` 参照）。
 
 ## バージョン
 
+- v0.59.0：**外部接続も拡張も無い環境で、手順どおり最後まで通るようにした。** setup の質問を普通の言葉の4問に絞り、答えと osi-profile.md から `assets/scripts/make_settings.py` が設定ファイルを生成（例の行は空・機微値は空欄で本人が書く・既存は上書きしない）。拡張が無いとき台帳を読み書きする `assets/scripts/ledger_io.py`（read / append / update / update-status / next-id / expand-schedule。sheets_* と同じ引数・戻り、バックアップつき）と、台帳から請求書 data.json を作る `osi-finance-invoice/scripts/make_invoice_data.py` を追加。data-layout.yaml を layout_version 8 に（月次支払管理に 突合結果・突合日時・受領請求書ファイル、月次請求スケジュールに 発行元、支払先マスタから 支払先名・主担当者名 を削除）。請求書番号・保存先・「今月の請求書」の抽出を**請求月**（請求日の月）に統一し、契約取込が請求日の予定を入れるように。「下書き済」を「PDF作成済み・未送付（メール下書きは任意）」と定義し直し、メールが無いときの手順を追加。取引先IDを P-001 形式に統一、osi-profile の雛形の参照先を osi-core に修正。
 - v0.58.0：**他社に配っても手順どおり動くように直した。** 台帳テンプレートを data-layout.yaml（layout_version 7）から
   `assets/scripts/build_templates.py` で生成（4本：共通マスタ・請求管理台帳・支払管理台帳・仕訳台帳。記入例の行を撤去、
   `--check` で照合）。setup に「発行者設定を settings で埋める」ステップと `fill_issuer_settings.py` を追加し、invoice は

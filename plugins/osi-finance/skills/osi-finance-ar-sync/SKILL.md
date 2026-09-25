@@ -21,6 +21,8 @@ requires_connectors:
 
 # 経理：請求台帳⇔MF 売上突合スキル（osi-finance-ar-sync）
 
+> **台帳の読み書き（拡張が無いとき）**：拡張（AI OSI URI Finance）の `sheets_*` があればそれを使う。**拡張の道具が無ければ同梱の `assets/scripts/ledger_io.py <経理フォルダ>` を使う**（`read` / `append` / `update` / `update-status` / `next-id`。タブ名＋列名で指定し、引数・戻りは拡張にそろえてある。書く前に `_backup/` へ控える）。
+
 > **組織固有値（台帳ファイル名・AR の勘定科目／税区分・採番ルール等）は
 > `{{paths.finance}}/osi-finance-settings.md`（テンプレ：`config/osi-finance-settings.example.md`）の「AR 会計設定」を参照する。**
 
@@ -122,6 +124,8 @@ MF会計MCP（currentOffice 等）と Googleコネクタが使えるか確認。
 
 各行の請求書ID（`INV-YYYY-MM-連番`、osi-finance-settings の `AR_NUMBERING`）を突合キーにする。
 売上計上と入金消込で**同じ請求書ID**を使い、摘要に必ず含める。
+**番号の `YYYY-MM` は請求月（請求日の月）で、計上月ではない。** 売上の計上月は行の `対象月`（対象月末計上）。
+対象月 2026-08 分の `INV-2026-09-001` は 2026-08 の売上として計上する。番号の月で計上月を決めないこと。
 
 ## Step 5-6: MF取得・突合
 
