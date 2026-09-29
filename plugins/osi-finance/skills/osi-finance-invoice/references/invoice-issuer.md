@@ -20,24 +20,45 @@
 | 振込手数料の負担 | `TRANSFER_FEE_BEARER` |
 | 採番ルール（AR） | `AR_NUMBERING` |
 | 支払サイト | `AR_PAYMENT_TERMS` |
+| 発行者の電話番号 | `ISSUER_TEL`（台帳「発行者設定」の「電話番号」） |
+| 振込先の表記（3行） | `PAYMENT_BLOCK`（台帳「発行者設定」の「振込先の表記」） |
+| 備考の文言 | `INVOICE_NOTE`（台帳「発行者設定」の「備考の文言」） |
 
-## 請求書レイアウト（汎用テンプレ・値は osi-finance-settings で差し込む）
+## 標準フォーマット（全請求書で統一。値は発行者設定で差し込む）
 
 ```
 請 求 書
-{宛名} 御中                         {ISSUER_NAME}
-                                     登録番号: {ISSUER_INVOICE_REG_NO}
-                                     〒{ISSUER_POSTAL_CODE} {ISSUER_ADDRESS}
-請求書番号: {AR_NUMBERING に従う採番}
-請求日: YYYY年M月D日
-お支払期限: YYYY年M月D日
-件名: {契約内容}（YYYY年MM月分）
+{正式名称} 御中                      {ISSUER_NAME}
+〒{相手の郵便番号}                    登録番号：{ISSUER_INVOICE_REG_NO}
+{相手の住所}                          〒{ISSUER_POSTAL_CODE}
+                                      {ISSUER_ADDRESS}
+                                      TEL: {ISSUER_TEL}
+請求書番号：{AR_NUMBERING に従う採番}
+請求日：{日付}　　お支払期限：{日付}
+件名：{契約内容}（YYYY年M月分）
 ご請求金額  {合計税込} 円
-─ 明細 ─ 納品日 / 品目 / 単価 / 数量 / 単位 / 価格
+─ 明細 ─ 品目 / 単価 / 数量 / 価格
+  {品目}（YYYY年M月分）
+    対象期間：YYYY年M月D日〜YYYY年M月D日（月額委託料）
 小計 {税抜} 円 ／ 消費税({CONSUMPTION_TAX_RATE}) {税額} 円 ／ 合計 {税込} 円
-お振込先 {BANK_NAME} {BANK_BRANCH} {ACCOUNT_TYPE} {ACCOUNT_NUMBER} {ACCOUNT_HOLDER}
-備考 お振込手数料は{TRANSFER_FEE_BEARER}にてお願いいたします。
+
+振込先
+{BANK_NAME} {BANK_BRANCH}
+{ACCOUNT_TYPE} {ACCOUNT_NUMBER}
+口座名義 {ACCOUNT_HOLDER}
+
+備考
+{INVOICE_NOTE}（例：お振込手数料はお客様にてご負担をお願いいたします。）
 ```
+
+**決まりごと**
+
+- **宛名に部署名（「本社」等）を入れない。** 相手の正式名称＋郵便番号・住所。住所は取引先マスタ（無ければ契約書）から。
+- **振込先は3行**（銀行・支店／種別・番号／口座名義）。1行に詰めない。「銀行名：」などの見出しは付けない。
+- **口座名義は銀行登録のカナ表記**（例 `サンプル（カ`）。振込人がカナの受取人名と照合できるようにする。
+- **振込手数料の一文は備考欄に置く。** 振込先欄に混ぜない。
+- **発行者欄は名義・登録番号・郵便番号・住所・電話番号の5点。** 住所は階数まで書く。
+- **日付**：MF 発行は MF の仕様で `YYYY/MM/DD`（変更不可）。ローカル生成は `YYYY年M月D日`。
 
 ## 登録番号についての汎用ルール
 
