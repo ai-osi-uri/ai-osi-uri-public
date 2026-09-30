@@ -33,6 +33,7 @@ storyline-gate → ★deck-composition（ここ）→ pptx-custom
 - **入力**：承認済み `storyline.md`（コアメッセージ＋論理の骨子3〜5段＋証拠設計＋落とし穴）。無ければ先に storyline-gate へ。business-plan-builder から来た場合は `question-tree.md`（問いの木）も受け取る。
 - **出力**：`slide-plan.md`。スライドの順序リスト。各スライドは「答える問い・Action title・1メッセージ・前からの繋ぎ（subtitle）・載せる証拠/ビジュアルの指定（数字は出どころ付き）・所属する章」を持つ。
 - **次工程**：`slide-plan.md` を pptx-custom に渡して描画させる。本スキルは描画しない。
+- **型（任意）**：`doc-type-router` から `doc-type.md` が来ていたら、その「構成する」節を以下の原則に足して使う（例：企画書の型なら、1枚1つの問い・本文2行まで・他にない一点を1枚）。型は**章の並びを決めない**。章は今までどおり問いの木から作る（原則0-0）。型の指示と原則がぶつかったら型の指示を優先するが、指摘台帳の問いは型で外さない。slide-plan.md の冒頭に型名を書き、doc-type.md を pptx-custom へ一緒に渡す。
 
 ---
 

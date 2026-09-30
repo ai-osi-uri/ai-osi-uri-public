@@ -95,6 +95,8 @@ unzip -o -q presentation.pptx -d unpacked/     # 代替
 
 > 章扉・目次・パンくず等のナビ部品が必要かは slide-plan.md に記載がある。実装ヘルパーは [exec-deck-code.md](exec-deck-code.md)（`addSectionHeader` / `addPartDivider` / `addTOC`）を使う。
 
+> **型（任意）**：`doc-type.md`（`doc-type-router` の出力）が一緒に来ていたら、その「刷る」節を本スキルの既定に足して使う（例：企画書の型なら、要所だけ全面イメージ＋片側を暗くして言葉を載せる＝下の「Full-Bleed Divider」の応用、画像は「AI-Generated Images」の手順で作る）。型の指示と既定がぶつかったら型の指示を優先するが、「日本語ビジネス文書の絶対ルール」は型で外さない。出力先が pptx 以外（スライドの成果物など）でも、型の「刷る」節はそのまま当てる。
+
 ---
 
 ## Layout Architecture
