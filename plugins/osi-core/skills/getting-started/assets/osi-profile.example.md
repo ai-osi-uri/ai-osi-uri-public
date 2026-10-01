@@ -65,6 +65,11 @@ sales:
   first_meeting_goal: ""   # 初回提案で取りたいもの（例: 無料ヒアリング60分のアポ／トライアル申込／見積依頼）
   proposal_policy: ""      # 提案の考え方（例: 効率化より売上側の価値を先に出す／まず小さく試す案を必ず入れる）
 
+# 会社の秘書（LINE 秘書）。空欄なら secretary-report は報告せずに止まる
+secretary:
+  project_ref: ""      # 秘書の置き場の Supabase プロジェクト ref（20文字）
+  member: ""           # 秘書での自分の呼び名（空なら会社メールから引く）
+
 # 使うコネクタ（true のものだけスキルが前提にする。false なら該当機能を案内して止まる）
 connectors:
   deploy: false        # AI OSI URI Deploy（GitHub / Vercel / AWS / Supabase / Stripe）
