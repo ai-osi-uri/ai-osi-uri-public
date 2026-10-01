@@ -6,6 +6,7 @@
 
 - `discussion-prep`
 - `shodan-prep`
+- `goal-setting-sheet`
 - `proposal-estimate`
 - `proposal-package`
 - `proposal-self-review`
