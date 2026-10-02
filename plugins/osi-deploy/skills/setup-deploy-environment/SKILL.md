@@ -3,11 +3,11 @@ name: setup-deploy-environment
 description: |
   デプロイを使えるようにする初回セットアップ。**共有ドライブの .env は使わず**、
   各ユーザーが「AI OSI URI Deploy」拡張（mcpb）を入れて設定欄に GitHub PAT / Vercel
-  Token / Cloudflare API Token / Stripe / Supabase PAT / Anthropic API Key を入力し、OS
+  Token / Cloudflare API Token / Railway API Token / Stripe / Supabase PAT / Anthropic API Key を入力し、OS
   キーチェーンに保存する方式に統一。「デプロイ環境を整える」「初回セットアップ」
   「自動デプロイを使えるようにしたい」で発動。トークンはチャットに貼らせない。
   毎回のデプロイは `create-app` の役割。
-version: 0.4.0
+version: 0.5.0
 ---
 
 # デプロイ環境構築（拡張インストール方式）
@@ -61,6 +61,8 @@ version: 0.4.0
 | Supabase PAT | 任意 | https://supabase.com/dashboard/account/tokens （`sbp_`） |
 | Cloudflare API Token | Cloudflare のみ | https://dash.cloudflare.com/profile/api-tokens → Create Token → **Custom token**（下の権限表） |
 | Cloudflare Account ID | Cloudflare のみ | ダッシュボード URL `https://dash.cloudflare.com/<ここ>` の 32 桁英数 |
+| Railway API Token | Railway のみ | https://railway.com/account/tokens → Create Token（下の「Railway のトークン」） |
+| Railway Workspace ID | 任意 | 既定の作成先ワークスペース。空なら `railway_health_check` の一覧から都度選ぶ |
 | Anthropic API Key | 任意 | https://console.anthropic.com/settings/keys （`sk-ant-`、デプロイ時に env 自動注入） |
 | App Store Connect API Key ID | iOS のみ | https://appstoreconnect.apple.com/access/integrations/api → Team Keys（10文字英数） |
 | App Store Connect Issuer ID | iOS のみ | 同上ページ最上部の UUID |
@@ -89,6 +91,16 @@ Global API Key は**使わない**（権限が広すぎる）。Custom token に
 > **workers.dev サブドメインは API で登録できない。** `cloudflare_health_check` が
 > `workers_dev_subdomain: "(未登録)"` を返したら、ダッシュボードの Workers & Pages で
 > 一度だけ登録してもらう（以降は不要）。
+
+### Railway のトークン（v1.35.0 以降）
+
+- Create Token の **Workspace 欄**で範囲が決まる。「No workspace」= アカウント全体（全ワークスペース）、
+  ワークスペースを選ぶ = そのワークスペース専用（チームで共有するならこちら）
+- **プロジェクトトークンは使えない**（1 環境専用でプロジェクト作成などができないため）
+- GitHub リポジトリからデプロイするなら、Railway の GitHub App をリポジトリ（org なら org）に
+  インストールしておく: https://github.com/apps/railway-app/installations/new
+
+入力後は **`railway_health_check`** で `valid: true` と作成先ワークスペースが一覧に出ることを確認する。
 
 > 作成先は create-app（旧 deploy-app）のプリフライト（GitHub org / Vercel team / Supabase org の3点可否＝USE_ORG）で
 > 決まる。3点揃えば org（`ai-osi-uri` / `ai-osi-uri` / `zsarvxuigtcmrmoewarw`）、1つでも欠ければ全部

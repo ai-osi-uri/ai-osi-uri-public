@@ -2,7 +2,7 @@
 name: create-app
 description: |
   自社が Cowork から
-  **アプリを新規に作って公開する**ための唯一のオーケストレータ。Web（Vercel / AWS / Cloudflare）
+  **アプリを新規に作って公開する**ための唯一のオーケストレータ。Web（Vercel / AWS / Cloudflare / Railway）
   ・Desktop（Electron）・ローカル出力（素のプロジェクト / コンテナ）に対応する。
   「アプリ作って」「LP 立ち上げて」「○○屋向けの在庫管理アプリ作って」
   「予約サイトを作って」「会員制のサブスク SaaS 作って」「業務系のシステム作って」
@@ -14,7 +14,7 @@ description: |
   `update-deploy`。**Lovable で作られたアプリの決済実装（Stripe 有効化・本番化）は
   `lovable-payments-golive` が直接受ける**（本スキルは Lovable プロジェクトの新規作成・
   改修は扱わない）。旧名 deploy-app。
-version: 1.3.0
+version: 1.4.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb
@@ -89,6 +89,7 @@ Phase 3: プラン承認
   Vercel:     Phase 4-W-V → references/web-vercel-path.md
   AWS:        Phase 4-W-A → references/web-aws-path.md
   Cloudflare: Phase 4-W-C → references/web-cloudflare-path.md
+  Railway:    Phase 4-W-R → references/web-railway-path.md
 
 [Desktop パス]
   Phase 4-D → references/desktop-path.md
@@ -154,6 +155,7 @@ Phase N:   完了レポート
    - 全パス共通: `github.valid: true`
    - Web-Vercel: `vercel.valid: true`
    - Web-Cloudflare: `cloudflare.valid: true`（+ `cloudflare_health_check` で権限を個別確認）
+   - Web-Railway: `railway.valid: true`（+ `railway_health_check` で作成先ワークスペースを確認）
    - Stripe: `stripe.test` / `stripe.live`
    - Supabase: `supabase.valid: true`
    - AI 機能: `anthropic.valid: true`
@@ -176,6 +178,7 @@ Phase N:   完了レポート
 | `supabase_*` | Supabase 操作一式 |
 | `stripe_*` | Stripe（`mode:"test"` 既定） |
 | `cloudflare_deploy_worker` / `cloudflare_deploy_status` / `cloudflare_d1_*` / `cloudflare_r2_*` | Cloudflare（Workers / D1 / R2） |
+| `railway_create_service` / `railway_add_database` / `railway_create_domain` / `railway_deployment_status` | Railway（常駐サーバー / DB） |
 
 ---
 
@@ -250,6 +253,7 @@ Phase N:   完了レポート
 | 個人情報 + Stripe | ~500 | **Vercel + Supabase + Stripe** |
 | 認証不要 + 配信量が多い / コスト最適化 | 任意 | **Cloudflare Workers + D1 + R2** |
 | 社内ツール（Cloudflare Access で前段認証） | ~500 | **Cloudflare Workers + D1** |
+| 常駐サーバー・WebSocket・ジョブ/cron・Python 等のバックエンド・Dockerfile 前提 | 任意 | **Railway**（+ Postgres / Redis） |
 | 大規模 / 業務系 / 機微情報 | 5000+ | **AWS** |
 
 **Vercel と Cloudflare の切り分け**: 判断軸は「**アプリ側で認証が必要か**」。
@@ -257,6 +261,11 @@ Phase N:   完了レポート
 Cloudflare。D1 には RLS も組み込み認証も無いため、認証つき SaaS を Cloudflare に
 寄せると自前実装のコストと責任を負う。ユーザーが「Cloudflare で」と明示した場合でも、
 認証要件があるなら**このトレードオフを伝えてから**進める。
+
+**Railway を選ぶとき**: 判断軸は「**サーバーレス関数で書けるか**」。常時接続（WebSocket）、
+キュー処理・長時間処理、cron、Python / Go などのサーバー、Dockerfile 前提のアプリは Railway。
+画面は Vercel・API だけ Railway の併用もよい。Railway にも認証機能は無いので、認証要件があれば
+Vercel と同じく Phase 3 で扱いを合意する。
 
 ---
 
@@ -268,9 +277,9 @@ Cloudflare。D1 には RLS も組み込み認証も無いため、認証つき S
 === 構築プラン ===
 【アプリ定義】名前 / 業種 / 概要
 【ターゲット】Web / Desktop / Mobile / ローカル
-【構成】Vercel + Supabase / Cloudflare Workers + D1 + R2 / Electron + SQLite / React Native 等
+【構成】Vercel + Supabase / Cloudflare Workers + D1 + R2 / Railway + Postgres / Electron + SQLite / React Native 等
 【作成先】ai-osi-uri org 配下 / 個人アカウント配下（health_check の repo_target）
-【配布方法】Vercel URL / workers.dev URL / GitHub Releases / TestFlight 等
+【配布方法】Vercel URL / workers.dev URL / *.up.railway.app URL / GitHub Releases / TestFlight 等
 【非機能】復旧の許容範囲 / 想定負荷 / 受け入れた既定値（nonfunctional.yaml の要約 3 行）
 
 このプランで進めますか？
@@ -317,6 +326,15 @@ tf-state-backend → spec.md + infra-decision.md 生成
 scaffold → gh-create-repo-and-push → harness-init
 → (D1/R2/KV) リソース先出し → wrangler.jsonc 記述
 → cloudflare-deploy → D1 マイグレーション適用 → app-smoke-test
+```
+
+### Web-Railway パス (Phase 4-W-R)
+
+> 詳細: [references/web-railway-path.md](references/web-railway-path.md)
+
+```
+scaffold（PORT で listen・/health）→ gh-create-repo-and-push → harness-init
+→ (DB) railway_add_database → railway-deploy → app-smoke-test
 ```
 
 **順序原則**: D1 / KV は**作ってから ID を wrangler.jsonc に書く**。先に deploy すると
@@ -446,7 +464,7 @@ scaffold → gh-create-repo-and-push → harness-init
 更新: {YYYY-MM-DD HH:MM}
 
 ## 確定事項
-- ターゲット: {Web-Vercel|Web-AWS|Web-Cloudflare|Desktop|Mobile|ローカル}
+- ターゲット: {Web-Vercel|Web-AWS|Web-Cloudflare|Web-Railway|Desktop|Mobile|ローカル}
 - リポジトリ: {REPO_URL or 未作成}
 
 ## 完了（evidence 付き）
@@ -482,6 +500,7 @@ scaffold → gh-create-repo-and-push → harness-init
 **Web パス:**
 - `vercel-connect-and-deploy` — Vercel 接続+デプロイ
 - `cloudflare-deploy` — Cloudflare Workers + D1 + R2 + KV / Pages
+- `railway-deploy` — Railway（常駐サーバー・ワーカー・cron + Postgres / MySQL / Redis / Mongo）
 - `aws-static-deploy` — S3+CloudFront
 - `supabase-set-auth-url` / `supabase-multitenant-rls` — Supabase 設定
 - `tf-state-backend` — Terraform state

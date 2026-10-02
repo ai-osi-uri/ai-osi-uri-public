@@ -1,15 +1,14 @@
 # サニタイズ要確認レポート
 
-対象プラグイン: osi-creative, osi-sales, osi-docs, osi-deploy, osi-mobile-deploy, osi-knowledge, osi-finance, osi-core, osi-backoffice, osi-marketing
+対象プラグイン: osi-creative, osi-sales, osi-docs, osi-deploy, osi-mobile-deploy, osi-knowledge, osi-finance, osi-core, osi-backoffice, osi-secretary, osi-marketing
 
-以下の 93 箇所に要注意語が残っています。publish 前に人手で確認してください（自動削除は文書を壊すため行いません）。
+以下の 97 箇所に要注意語が残っています。publish 前に人手で確認してください（自動削除は文書を壊すため行いません）。
 
 | ファイル | 行 | 語 | 抜粋 |
 |---|---|---|---|
 | plugins/osi-backoffice/skills/contract-docusign-send/SKILL.md | 94 | 共有ドライブ | - **Drive（マウント済み共有ドライブ）**：格納先は `references/storage-and-naming.md` の定義に従う。**このスキルにパスを直書きしない**（組織ごとに違い、移行でも動く）。 |
 | plugins/osi-backoffice/skills/contract-docusign-send/references/storage-and-naming.md | 3 | 共有ドライブ | 契約の正本は Drive の**契約書フォルダ**（`{契約書ルート}`）。マウント済み共有ドライブに書くと Drive に同期される。 |
 | plugins/osi-backoffice/skills/contract-docusign-send/_旧版_S3方式_20260817/docusign-and-s3.md | 30 | 共有ドライブ | - **file tools（Mac）**：outputs と共有ドライブのみ書ける。 |
-| plugins/osi-backoffice/skills/secretary-create/SKILL.md | 91 | Plaud | - 後から（別途設定）：議事録の取り込み（Plaud など）、Google ドライブの台帳、電子署名（DocuSign）、会計ソフト |
 | plugins/osi-docs/skills/business-flow-asis-tobe/references/data-schema.md | 135 | 共有ドライブ | { "name": "Excel管理簿", "where": "営業共有ドライブ" } |
 | plugins/osi-docs/skills/business-flow-asis-tobe/references/data-schema.md | 167 | Notion | \| `name`    \| yes  \| ドキュメント名（例：「契約書ドラフト Word」「Notion 商談 DB」） \| |
 | plugins/osi-finance/README.md | 193 | 共有ドライブ | 顧客が決めるのは「OSI Finance ルートをどこに置くか」1問だけ（**共有ドライブ推奨**）、配下は規定ツリーで固定 |
@@ -83,7 +82,7 @@
 | plugins/osi-core/skills/transcript-router/SKILL.md | 38 | Plaud | Plaud MCP コネクタ（`list_files` / `get_transcript` 等）が利用可能なら、文字起こしの |
 | plugins/osi-core/skills/getting-started/SKILL.md | 59 | Plaud | 3. 見えているツール名から、繋がっているコネクタを列挙する（AI OSI URI（マネージドのカスタムコネクタ。`health_check` / `whoami` / `list_projects` / `usage_status` と  |
 | plugins/osi-core/skills/getting-started/SKILL.md | 113 | Plaud | \| MoneyForward / DocuSign / Plaud / Obsidian \| 軽い読み取り 1 回 \| 同上 \| |
-| plugins/osi-core/skills/getting-started/references/tiers.md | 76 | Plaud | \| osi-sales \| `meeting-minutes` \| slack, box, plaud \| ○ \| 商談議事録を Plaud の文字起こしから自動生成し、Drive の `03_制作・成果物/` に docx として格納した |
+| plugins/osi-core/skills/getting-started/references/tiers.md | 82 | Plaud | \| osi-sales \| `meeting-minutes` \| slack, box, plaud \| ○ \| 商談議事録を Plaud の文字起こしから自動生成し、Drive の `03_制作・成果物/` に docx として格納した |
 | plugins/osi-core/workflows/01-shodan-to-proposal.md | 7 | Plaud | - 文字起こし（Plaud / 会議ツール / 手書きメモ） |
 | plugins/osi-core/workflows/README.md | 8 | Plaud | \| 1 \| [商談録音 → 提案書](01-shodan-to-proposal.md) \| 「○○社の録音、提案まで持っていって」 \| 1（議事録に Plaud/Drive）→ 0 \| 60〜90 分 \| |
 | plugins/osi-deploy/skills/aws-static-deploy/SKILL.md | 38 | 共有ドライブ | 共有ドライブの `.deploy-credentials/.env` は **任意フォールバック**としてのみ参照する。 |
@@ -98,4 +97,9 @@
 | plugins/osi-deploy/skills/tf-state-backend/SKILL.md | 73 | 共有ドライブ | 6. コード一式＋HANDOFF を共有ドライブへ退避（揮発対策） |
 | plugins/osi-deploy/skills/tf-state-backend/SKILL.md | 158 | 共有ドライブ | 復旧時にバケット/キーが分からなくなる**。コード一式を共有ドライブの案件フォルダへ退避する。 |
 | plugins/osi-deploy/skills/credential-handoff/SKILL.md | 99 | 共有ドライブ | \| Google Cloud サービスアカウント \| 鍵を作っただけでは Drive のファイルを読めない \| 対象ファイル／共有ドライブをサービスアカウントのメールに閲覧共有し、Drive API を有効化する \| |
+| plugins/osi-secretary/skills/secretary-flow/SKILL.md | 5 | Notion | Slack・Notion・添付ファイル）から作り直す・足すスキル。今の業務定義との違い（足す行・変わる行・やめる行）を見せ、会話で直してから書き込む。 |
+| plugins/osi-secretary/skills/secretary-create/SKILL.md | 6 | Notion | （Google ドライブ・Gmail・OneDrive・Slack・Notion・添付ファイル）から業務定義を作って書き込む → 人を入れる、まで伴走し、 |
+| plugins/osi-secretary/skills/secretary-create/SKILL.md | 48 | Notion | \| 資料を読む \| 繋がっているコネクタ（Google ドライブ・Gmail・Microsoft 365・Slack・Notion）と、会話に添付されたファイル \| |
+| plugins/osi-secretary/skills/secretary-create/SKILL.md | 111 | Notion | `▶ Google ドライブ ▶ Gmail（宛先・件名だけ） ▶ OneDrive・SharePoint ▶ Slack ▶ Notion ▶ ファイルを添付する ▶ 資料なしで、話して決める` |
+| plugins/osi-secretary/skills/secretary-create/SKILL.md | 114 | Notion | - ドライブ・OneDrive・Notion：「業務マニュアル」「運用ルール」「手順」「規程」「担当」「フロー」「台帳」などで探し、題名の一覧を見せて読むものを選んでもらう。 |
 | plugins/osi-mobile-deploy/skills/deploy-mobile-app/SKILL.md | 167 | GITHUB_ORG | \| GITHUB_ORG \| `ai-osi-uri` / `personal` \| `create-app` の `USE_ORG` 判定に準拠 \| |
