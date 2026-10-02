@@ -2,7 +2,7 @@
 name: create-app
 description: |
   自社が Cowork から
-  **アプリを新規に作って公開する**ための唯一のオーケストレータ。Web（Vercel / AWS）
+  **アプリを新規に作って公開する**ための唯一のオーケストレータ。Web（Vercel / AWS / Cloudflare）
   ・Desktop（Electron）・ローカル出力（素のプロジェクト / コンテナ）に対応する。
   「アプリ作って」「LP 立ち上げて」「○○屋向けの在庫管理アプリ作って」
   「予約サイトを作って」「会員制のサブスク SaaS 作って」「業務系のシステム作って」
@@ -86,8 +86,9 @@ Phase 3: プラン承認
 ─── パス分岐 ───
 
 [Web パス]
-  Vercel: Phase 4-W-V → references/web-vercel-path.md
-  AWS:    Phase 4-W-A → references/web-aws-path.md
+  Vercel:     Phase 4-W-V → references/web-vercel-path.md
+  AWS:        Phase 4-W-A → references/web-aws-path.md
+  Cloudflare: Phase 4-W-C → references/web-cloudflare-path.md
 
 [Desktop パス]
   Phase 4-D → references/desktop-path.md
@@ -152,6 +153,7 @@ Phase N:   完了レポート
 2. パスごとに必要なトークンを確認:
    - 全パス共通: `github.valid: true`
    - Web-Vercel: `vercel.valid: true`
+   - Web-Cloudflare: `cloudflare.valid: true`（+ `cloudflare_health_check` で権限を個別確認）
    - Stripe: `stripe.test` / `stripe.live`
    - Supabase: `supabase.valid: true`
    - AI 機能: `anthropic.valid: true`
@@ -173,6 +175,7 @@ Phase N:   完了レポート
 | `vercel_create_project_and_deploy`（ローカル）、`vercel_create_project`（リモート） / `vercel_get_deployment_status` / `vercel_get_build_logs` | Vercel |
 | `supabase_*` | Supabase 操作一式 |
 | `stripe_*` | Stripe（`mode:"test"` 既定） |
+| `cloudflare_deploy_worker` / `cloudflare_deploy_status` / `cloudflare_d1_*` / `cloudflare_r2_*` | Cloudflare（Workers / D1 / R2） |
 
 ---
 
@@ -242,10 +245,18 @@ Phase N:   完了レポート
 
 | 機密性 | 規模 | 推奨 |
 |--------|------|------|
-| 公開可 (LP/コーポ) | 任意 | **Vercel** (or AWS 静的) |
-| 個人情報あり | ~500 | **Vercel + Supabase** |
+| 公開可 (LP/コーポ) | 任意 | **Cloudflare Workers**（静的のみなら最安・最速） or Vercel |
+| 個人情報あり | ~500 | **Vercel + Supabase**（認証が要るなら既定） |
 | 個人情報 + Stripe | ~500 | **Vercel + Supabase + Stripe** |
+| 認証不要 + 配信量が多い / コスト最適化 | 任意 | **Cloudflare Workers + D1 + R2** |
+| 社内ツール（Cloudflare Access で前段認証） | ~500 | **Cloudflare Workers + D1** |
 | 大規模 / 業務系 / 機微情報 | 5000+ | **AWS** |
+
+**Vercel と Cloudflare の切り分け**: 判断軸は「**アプリ側で認証が必要か**」。
+必要なら Supabase Auth がある Vercel、不要（または Cloudflare Access で足りる）なら
+Cloudflare。D1 には RLS も組み込み認証も無いため、認証つき SaaS を Cloudflare に
+寄せると自前実装のコストと責任を負う。ユーザーが「Cloudflare で」と明示した場合でも、
+認証要件があるなら**このトレードオフを伝えてから**進める。
 
 ---
 
@@ -257,9 +268,9 @@ Phase N:   完了レポート
 === 構築プラン ===
 【アプリ定義】名前 / 業種 / 概要
 【ターゲット】Web / Desktop / Mobile / ローカル
-【構成】Vercel + Supabase / Electron + SQLite / React Native 等
+【構成】Vercel + Supabase / Cloudflare Workers + D1 + R2 / Electron + SQLite / React Native 等
 【作成先】ai-osi-uri org 配下 / 個人アカウント配下（health_check の repo_target）
-【配布方法】Vercel URL / GitHub Releases / TestFlight 等
+【配布方法】Vercel URL / workers.dev URL / GitHub Releases / TestFlight 等
 【非機能】復旧の許容範囲 / 想定負荷 / 受け入れた既定値（nonfunctional.yaml の要約 3 行）
 
 このプランで進めますか？
@@ -296,6 +307,20 @@ tf-state-backend → spec.md + infra-decision.md 生成
 → Claude Code 引き渡し (/initialize-project → /setup-infra → /create-app)
 → docker push → ECS → app-smoke-test
 ```
+
+### Web-Cloudflare パス (Phase 4-W-C)
+
+> 詳細: [references/web-cloudflare-path.md](references/web-cloudflare-path.md)
+> wrangler 設定テンプレ: `cloudflare-deploy` スキルの references/wrangler-config.md
+
+```
+scaffold → gh-create-repo-and-push → harness-init
+→ (D1/R2/KV) リソース先出し → wrangler.jsonc 記述
+→ cloudflare-deploy → D1 マイグレーション適用 → app-smoke-test
+```
+
+**順序原則**: D1 / KV は**作ってから ID を wrangler.jsonc に書く**。先に deploy すると
+バインディング未定義で落ちる。Vercel パスの「env を全部揃えてから 1 回だけ create」と同じ。
 
 ### Desktop パス (Phase 4-D)
 
@@ -421,7 +446,7 @@ scaffold → gh-create-repo-and-push → harness-init
 更新: {YYYY-MM-DD HH:MM}
 
 ## 確定事項
-- ターゲット: {Web-Vercel|Web-AWS|Desktop|Mobile|ローカル}
+- ターゲット: {Web-Vercel|Web-AWS|Web-Cloudflare|Desktop|Mobile|ローカル}
 - リポジトリ: {REPO_URL or 未作成}
 
 ## 完了（evidence 付き）
@@ -456,6 +481,7 @@ scaffold → gh-create-repo-and-push → harness-init
 
 **Web パス:**
 - `vercel-connect-and-deploy` — Vercel 接続+デプロイ
+- `cloudflare-deploy` — Cloudflare Workers + D1 + R2 + KV / Pages
 - `aws-static-deploy` — S3+CloudFront
 - `supabase-set-auth-url` / `supabase-multitenant-rls` — Supabase 設定
 - `tf-state-backend` — Terraform state

@@ -3,7 +3,7 @@ name: setup-deploy-environment
 description: |
   デプロイを使えるようにする初回セットアップ。**共有ドライブの .env は使わず**、
   各ユーザーが「AI OSI URI Deploy」拡張（mcpb）を入れて設定欄に GitHub PAT / Vercel
-  Token / Stripe / Supabase PAT / Anthropic API Key を入力し、OS
+  Token / Cloudflare API Token / Stripe / Supabase PAT / Anthropic API Key を入力し、OS
   キーチェーンに保存する方式に統一。「デプロイ環境を整える」「初回セットアップ」
   「自動デプロイを使えるようにしたい」で発動。トークンはチャットに貼らせない。
   毎回のデプロイは `create-app` の役割。
@@ -59,12 +59,36 @@ version: 0.4.0
 | Stripe Secret Key（テスト） | 任意 | https://dashboard.stripe.com/test/apikeys （`sk_test_`） |
 | Stripe Secret Key（本番/Live） | 任意 | https://dashboard.stripe.com/apikeys （`sk_live_`、実課金） |
 | Supabase PAT | 任意 | https://supabase.com/dashboard/account/tokens （`sbp_`） |
+| Cloudflare API Token | Cloudflare のみ | https://dash.cloudflare.com/profile/api-tokens → Create Token → **Custom token**（下の権限表） |
+| Cloudflare Account ID | Cloudflare のみ | ダッシュボード URL `https://dash.cloudflare.com/<ここ>` の 32 桁英数 |
 | Anthropic API Key | 任意 | https://console.anthropic.com/settings/keys （`sk-ant-`、デプロイ時に env 自動注入） |
 | App Store Connect API Key ID | iOS のみ | https://appstoreconnect.apple.com/access/integrations/api → Team Keys（10文字英数） |
 | App Store Connect Issuer ID | iOS のみ | 同上ページ最上部の UUID |
 | App Store Connect API Key (.p8) を base64 化した文字列 | iOS のみ | 発行した `.p8` を `base64 -i AuthKey_XXXXXXXXXX.p8 \| pbcopy` |
 | iOS Distribution Cert (.p12) を base64 化 | iOS のみ | Keychain から書き出した `.p12` を base64（`ios-appstore-release` の references 参照） |
 | iOS Distribution Cert .p12 のパスワード | iOS のみ | 書き出し時に付けたパスワード |
+
+### Cloudflare API Token の権限（v1.20.0 以降）
+
+Global API Key は**使わない**（権限が広すぎる）。Custom token に必要な分だけ付ける。
+
+| スコープ | 権限 | いつ必要か |
+| --- | --- | --- |
+| Account / Workers Scripts | Edit | Workers デプロイ（必須） |
+| Account / Account Settings | Read | Account ID の自動解決 |
+| Account / D1 | Edit | D1 を使うとき |
+| Account / Workers R2 Storage | Edit | R2 を使うとき |
+| Account / Workers KV Storage | Edit | KV を使うとき |
+| Account / Cloudflare Pages | Edit | Pages（Git 連携）を使うとき |
+| Zone / Workers Routes | Edit | 独自ドメインを Worker に割り当てるとき |
+
+入力後は **`cloudflare_health_check`** を実行して `token_valid: true` /
+`d1_permission: "OK"` / `r2_permission: "OK"` を確認する。`health_check`（総合）の
+`cloudflare.valid` だけでは個別の権限不足に気づけない。
+
+> **workers.dev サブドメインは API で登録できない。** `cloudflare_health_check` が
+> `workers_dev_subdomain: "(未登録)"` を返したら、ダッシュボードの Workers & Pages で
+> 一度だけ登録してもらう（以降は不要）。
 
 > 作成先は create-app（旧 deploy-app）のプリフライト（GitHub org / Vercel team / Supabase org の3点可否＝USE_ORG）で
 > 決まる。3点揃えば org（`ai-osi-uri` / `ai-osi-uri` / `zsarvxuigtcmrmoewarw`）、1つでも欠ければ全部
