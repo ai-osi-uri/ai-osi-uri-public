@@ -9,7 +9,7 @@
 | plugins/osi-backoffice/skills/contract-docusign-send/SKILL.md | 94 | 共有ドライブ | - **Drive（マウント済み共有ドライブ）**：格納先は `references/storage-and-naming.md` の定義に従う。**このスキルにパスを直書きしない**（組織ごとに違い、移行でも動く）。 |
 | plugins/osi-backoffice/skills/contract-docusign-send/references/storage-and-naming.md | 3 | 共有ドライブ | 契約の正本は Drive の**契約書フォルダ**（`{契約書ルート}`）。マウント済み共有ドライブに書くと Drive に同期される。 |
 | plugins/osi-backoffice/skills/contract-docusign-send/_旧版_S3方式_20260817/docusign-and-s3.md | 30 | 共有ドライブ | - **file tools（Mac）**：outputs と共有ドライブのみ書ける。 |
-| plugins/osi-backoffice/skills/secretary-create/SKILL.md | 90 | Plaud | - 後から（別途設定）：議事録の取り込み（Plaud など）、Google ドライブの台帳、電子署名（DocuSign）、会計ソフト |
+| plugins/osi-backoffice/skills/secretary-create/SKILL.md | 91 | Plaud | - 後から（別途設定）：議事録の取り込み（Plaud など）、Google ドライブの台帳、電子署名（DocuSign）、会計ソフト |
 | plugins/osi-docs/skills/business-flow-asis-tobe/references/data-schema.md | 135 | 共有ドライブ | { "name": "Excel管理簿", "where": "営業共有ドライブ" } |
 | plugins/osi-docs/skills/business-flow-asis-tobe/references/data-schema.md | 167 | Notion | \| `name`    \| yes  \| ドキュメント名（例：「契約書ドラフト Word」「Notion 商談 DB」） \| |
 | plugins/osi-finance/README.md | 193 | 共有ドライブ | 顧客が決めるのは「OSI Finance ルートをどこに置くか」1問だけ（**共有ドライブ推奨**）、配下は規定ツリーで固定 |

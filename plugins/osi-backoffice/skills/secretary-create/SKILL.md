@@ -71,7 +71,8 @@ requires_connectors:
 2. `supabase_create_project`（db_pass は強い乱数を作って渡す。本人にも見せない）→ 数分待ち、`supabase_list_projects` で `ACTIVE_HEALTHY` を確認する。
 3. `secretary_install` を呼ぶ。失敗したら `done`（済んだ手順）を見て、同じ道具をもう一度呼ぶ（既にあるものは作り直さない）。
 4. 2/5 で OK をもらった業務定義を `secretary_write_flow` で書く（version は `v1.0`）。
-5. 返ってきた `project_ref`・`setup_url` を控える（再開に使う）。
+5. 返ってきた `project_ref`・`setup_url`・`admin_url` を控える（再開に使う）。`admin_url` はその会社の管理画面（全社共通の置き場を `?c=<project_ref>` で開く）。
+6. **関数を入れるのに1〜2分かかり、道具の返事が先に切れることがある。** そのときは数分待って `secretary_status` を見る。`template_version` が入っていて `functions_missing: []` なら入れ終わっている。設定用リンクは `secretary_install` をもう一度呼べば返る（済んだところは飛ばす）
 
 ### 4/5 LINE
 1. 聞く：`社内で使う LINE 公式アカウントを作りますか？ ▶ 作る（画面を開いて一緒に進めます） ▶ もうある ▶ LINE は使わない`
@@ -86,10 +87,11 @@ requires_connectors:
 
 ### 5/5 つなぐもの
 業務定義で「記録先」になったものだけ聞く。v1 で今すぐつなげるもの・後からのものを正直に分けて伝える：
-- すぐ使える：秘書の中の台帳（営業管理表・チケット）、管理画面
+- すぐ使える：秘書の中の台帳（営業管理表・チケット）、管理画面（`admin_url`。ログインは秘書の LINE にリンクが届く。メールで受け取るには RESEND_API_KEY が要る）
 - 後から（別途設定）：議事録の取り込み（Plaud など）、Google ドライブの台帳、電子署名（DocuSign）、会計ソフト
 
 ### 試運転
+0. 業務定義の行番号は、ひな形が最初から入れる行（議事録から ToDo の R1・R2）と重ならないようにする（請求は B1・B2 など）。
 1. `secretary_status` で、`line_key: true`・メンバーが1人以上・`functions_missing: []`・業務定義の行数を確認する。
 2. 本人に LINE で「残ってる？」と送ってもらい、返事が来たら完成。来なければ `secretary_status` の `last_event` を見る（Webhook が届いているか）。
 3. 最後に報告：作った置き場（ref）、業務定義の版と行数、LINE アカウント名、これから2週間はずれを業務定義に直していくこと、後からつなぐもの。
