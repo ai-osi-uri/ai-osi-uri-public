@@ -101,5 +101,5 @@
 | plugins/osi-secretary/skills/secretary-create/SKILL.md | 6 | Notion | （Google ドライブ・Gmail・OneDrive・Slack・Notion・添付ファイル）から業務定義を作って書き込む → 人を入れる、まで伴走し、 |
 | plugins/osi-secretary/skills/secretary-create/SKILL.md | 48 | Notion | \| 資料を読む \| 繋がっているコネクタ（Google ドライブ・Gmail・Microsoft 365・Slack・Notion）と、会話に添付されたファイル \| |
 | plugins/osi-secretary/skills/secretary-create/SKILL.md | 111 | Notion | `▶ Google ドライブ ▶ Gmail（宛先・件名だけ） ▶ OneDrive・SharePoint ▶ Slack ▶ Notion ▶ ファイルを添付する ▶ 資料なしで、話して決める` |
-| plugins/osi-secretary/skills/secretary-create/SKILL.md | 114 | Notion | - ドライブ・OneDrive・Notion：「業務マニュアル」「運用ルール」「手順」「規程」「担当」「フロー」「台帳」などで探し、題名の一覧を見せて読むものを選んでもらう。 |
+| plugins/osi-secretary/skills/secretary-create/SKILL.md | 119 | Notion | - ドライブ・OneDrive・Notion：「業務マニュアル」「運用ルール」「手順」「規程」「担当」「フロー」「台帳」などで探し、題名の一覧を見せて読むものを選んでもらう。 |
 | plugins/osi-mobile-deploy/skills/deploy-mobile-app/SKILL.md | 167 | GITHUB_ORG | \| GITHUB_ORG \| `ai-osi-uri` / `personal` \| `create-app` の `USE_ORG` 判定に準拠 \| |
