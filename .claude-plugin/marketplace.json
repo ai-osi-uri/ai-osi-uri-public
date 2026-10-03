@@ -30,7 +30,7 @@
       "name": "osi-sales",
       "source": "./plugins/osi-sales",
       "description": "営業ワークフロー。商談準備、提案、見積もり、案件管理、企業調査、決裁構造、社内推進戦略、決裁者向け説得パッケージまで一気通貫で扱う。",
-      "version": "0.8.0",
+      "version": "0.9.0",
       "category": "sales",
       "tags": [
         "proposal",

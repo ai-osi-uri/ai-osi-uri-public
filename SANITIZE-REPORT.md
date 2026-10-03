@@ -34,16 +34,16 @@
 | plugins/osi-sales/config/osi-sales-settings.example.md | 12 | Notion | 案件情報の**正本**。Notion のリード一覧は 2026-07 に、Google スプレッドシート版は |
 | plugins/osi-sales/config/osi-sales-settings.example.md | 98 | Notion | - 旧NotionのIDと現在のフォルダ番号は途中から乖離している。 |
 | plugins/osi-sales/skills/proposal-package/SKILL.md | 65 | Plaud | \| Plaud \| デモ後の文字起こしは貼り付けで受ける \| |
-| plugins/osi-sales/skills/proposal-package/SKILL.md | 575 | Plaud | デモ後に Plaud 文字起こしが渡されたら： |
+| plugins/osi-sales/skills/proposal-package/SKILL.md | 600 | Plaud | デモ後に Plaud 文字起こしが渡されたら： |
 | plugins/osi-sales/skills/session-review/SKILL.md | 56 | Plaud | - **必須**: 伴走セッションの文字起こし（Plaud 等。話者ラベル付き／なしの両対応）。 |
 | plugins/osi-sales/skills/session-review/SKILL.md | 57 | Plaud | - **取得はまず Plaud MCP から**：コネクタ（`list_files` / `get_transcript` 等）が |
 | plugins/osi-sales/skills/new-lead-registration/scripts/ledger.py | 77 | 共有ドライブ | os.path.expanduser("~/Library/CloudStorage/GoogleDrive-*/共有ドライブ/*/osi-profile.md"), |
 | plugins/osi-sales/skills/shodan-prep/SKILL.md | 6 | Plaud | Plaud の文字起こしから「初回で握れた／失敗した項目」を抽出し、初回チェックリスト（references/ |
 | plugins/osi-sales/skills/shodan-prep/SKILL.md | 9 | Plaud | 「Plaud文字起こしから握れた/失敗を抽出して」など、商談の事前準備・初回チェックリストの作成や |
 | plugins/osi-sales/skills/shodan-prep/SKILL.md | 40 | Plaud | 商談 後 ──▶ EXTRACT モード：Plaud文字起こし → 握れた/失敗を採点 → チェックリストを育てる |
-| plugins/osi-sales/skills/shodan-prep/SKILL.md | 163 | Plaud | **まず Plaud MCP で直接取得**：コネクタ（`list_files` / `get_transcript` 等）が利用可能なら、 |
-| plugins/osi-sales/skills/shodan-prep/SKILL.md | 233 | Plaud | - `references/extraction-guide.md` — Plaud 文字起こしの採点基準とチェックリスト更新の型。 |
-| plugins/osi-sales/skills/shodan-prep/SKILL.md | 242 | Plaud | - 「◯◯社の Plaud 文字起こし、握れた/失敗を抽出して」 |
+| plugins/osi-sales/skills/shodan-prep/SKILL.md | 175 | Plaud | **まず Plaud MCP で直接取得**：コネクタ（`list_files` / `get_transcript` 等）が利用可能なら、 |
+| plugins/osi-sales/skills/shodan-prep/SKILL.md | 245 | Plaud | - `references/extraction-guide.md` — Plaud 文字起こしの採点基準とチェックリスト更新の型。 |
+| plugins/osi-sales/skills/shodan-prep/SKILL.md | 254 | Plaud | - 「◯◯社の Plaud 文字起こし、握れた/失敗を抽出して」 |
 | plugins/osi-sales/skills/shodan-prep/references/extraction-guide.md | 1 | Plaud | # 抽出ガイド：Plaud 文字起こし → 握れた/失敗の採点とチェックリスト更新 |
 | plugins/osi-sales/skills/shodan-prep/references/extraction-guide.md | 22 | Plaud | - Plaud 特有のクセ（句読点が少ない・話者ラベルが曖昧・聞き間違い）に注意。数字や固有名は怪しければ |
 | plugins/osi-sales/skills/shodan-prep/references/initial-checklist.md | 4 | Plaud | 商談 **後** は Plaud 文字起こしから「握れた / 失敗した」を判定する採点軸として使う。 |
