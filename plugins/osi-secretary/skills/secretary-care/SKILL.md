@@ -21,6 +21,8 @@ requires_connectors:
    - 管理画面：`admin_site`
 
 ## 最新にする（版が古い・関数が足りない）
+ひな形は道具（Deploy 拡張／URL で繋いだコネクタ）に入っている。`template_latest` が古いと思ったら、先に道具を新しくする（拡張はツールポータルから入れ直す。URL のコネクタは自動で新しくなる）。GitHub から直接は読まない。
+
 1. 「秘書を <入っている版> から <最新> にします。設定・業務定義・人はそのまま残ります。▶ 進める」と見せて OK をもらう。
 2. `secretary_update`（`with_sql: true`。データの形の追加分も流す。何度流しても壊れない）。
 3. 管理画面も入れ直す：`secretary_admin_deploy`（同じ project_name。同じ Vercel のプロジェクトに新しい版が出る）。

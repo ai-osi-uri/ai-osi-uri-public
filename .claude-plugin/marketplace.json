@@ -188,7 +188,7 @@
       "name": "osi-secretary",
       "source": "./plugins/osi-secretary",
       "description": "会社の AI 秘書（LINE で仕事を頼める秘書）を、使う人自身の Supabase・Vercel の中に作って育てる。LINE 公式アカウント → 置き場 → 管理画面 → LINE とつなぐ → 社内の資料から業務定義、を会話で進める（secretary-create）。業務定義の作り直し（secretary-flow）、秘書を最新にする・様子を見る（secretary-care）。",
-      "version": "0.2.1",
+      "version": "0.2.2",
       "category": "backoffice",
       "tags": [
         "secretary",

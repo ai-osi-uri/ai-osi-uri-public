@@ -1,6 +1,6 @@
 {
   "name": "osi-secretary",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "requires_connectors": [],
   "description": "会社の AI 秘書（LINE で仕事を頼める秘書）を、使う人自身のアカウントの中に作って育てるプラグイン。LINE 公式アカウント → 置き場（Supabase）→ 管理画面（Vercel）→ LINE とつなぐ（Claude の API キーも）→ 社内の資料から業務定義、の順に会話で進める（secretary-create）。業務定義を資料から作り直す（secretary-flow）、秘書を最新にする・様子を見る（secretary-care）。道具は AI OSI URI Deploy 拡張（自分の Supabase・Vercel の鍵）を使う。",
   "author": {
