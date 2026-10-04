@@ -14,7 +14,7 @@
 | 2 | `osi-sales:session-review`（伴走セッションのとき） | 文字起こし → 前回宿題の進捗・論点・採用案と理由・決定・宿題・次回アジェンダの 1 枚＋横展開できる「伴走メソッド」「技術ナレッジ」 |
 | 3 | `osi-knowledge:obsidian-knowledge-capture` | レビュー・気づき → vault に Concept／Resource／Inbox として保存（命名・frontmatter は vault の規約）。**vault が無い組織は案件フォルダの `05_受領資料/ナレッジ/` に md で置く** |
 | 4 | `osi-knowledge:obsidian-knowledge-consult`（次に当たる前） | 相手・論点 → 過去のノートから「自分は前に何を考えたか」を `[[ノート名]]` 付きで引く |
-| 5 | `osi-sales:discussion-prep` | 相手の会社 → vault の類似案件＋Web 調査 → 壁打ちの論点 3 点＋証拠レベル |
+| 5 | `osi-sales:discussion-prep` | 相手の会社 → vault の類似案件＋Web 調査 → 壁打ちの論点 3 点＋見せるもの（言葉／実物／動くもの）の叩き台 |
 | 6 | `osi-sales:shodan-prep`（準備面） | 論点 → 期待値質問リスト・初回チェックリスト |
 
 ## 止まる場所
