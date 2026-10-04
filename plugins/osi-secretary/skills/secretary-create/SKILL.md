@@ -39,7 +39,7 @@ Deploy 拡張に入っている「ひな形」から入る。
 
 | 段階 | 道具 |
 |---|---|
-| 鍵の確認 | `health_check`（Supabase と Vercel が使えるか）。足りなければ `osi-deploy:setup-deploy-environment` に渡して、終わったらここへ戻る |
+| 鍵の確認 | `health_check`（Supabase と Vercel が使えるか）。足りなければ `osi-deploy:setup-deploy-environment` に渡して、終わったらここへ戻る。URL で繋いだコネクタ（`health_check` がテキストで返る）なら、`uses` の `[secretary]` 行を見て、`✕` なら `osi-deploy:own-keys-setup`（やりたいこと `secretary`）に渡す。お試し（マネージド）では秘書は作れない |
 | 置き場の作成 | `supabase_list_organizations` → `supabase_create_project` → `supabase_list_projects`（ACTIVE_HEALTHY を待つ） |
 | 秘書を入れる | `secretary_install`（データの形・初期設定・関数・定時処理） |
 | 管理画面を出す | `secretary_admin_deploy`（使う人の Vercel に管理画面を出し、秘書のリンクをそこへ向ける。`admin_url`・`setup_url` を返す） |
@@ -67,6 +67,8 @@ Deploy 拡張に入っている「ひな形」から入る。
 ### 0. 鍵の確認（最初に1回）
 - `health_check` で Supabase と Vercel が使えるかを見る。足りなければ「先に Deploy の初回セットアップをします」と伝え、
   `osi-deploy:setup-deploy-environment`（Supabase と Vercel の段だけでよい。GitHub は秘書には要らない）を進めてから、ここへ戻る。
+- URL で繋いだコネクタ（`health_check` がテキストで返る）を使っている人は、`uses` の `[secretary]` 行を見る。`✕` なら
+  `osi-deploy:own-keys-setup`（やりたいこと `secretary`）で鍵を登録して「自分の鍵を使う」に切り替えてから、ここへ戻る。お試し（マネージド）では秘書は作れない。
 - Deploy 拡張が 1.37.0 より古ければ、ツールポータルから入れ直してもらう（1.36.0 より前には `secretary_admin_deploy` が無く、1.37.0 より前の管理画面には会社のドライブ・Gmail・OneDrive を「つなぐ」口が無い）。
 
 ### 1/6 会社のこと
