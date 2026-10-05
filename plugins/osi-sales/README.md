@@ -10,6 +10,7 @@
 - `proposal-estimate`
 - `proposal-package`
 - `proposal-self-review`
+- `asset-partnership-proposal`
 - `decision-maker-research`
 - `champion-strategy`
 - `persuasion-document`
