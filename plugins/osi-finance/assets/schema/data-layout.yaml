@@ -107,6 +107,7 @@ ledgers:
           - {name: "銀行明細突合", settings: "BANK_RECON", default: "OFF"}
           - {name: "金額区分",     settings: "BILLING_PATTERNS", default: "月額固定=monthly; 一括=lump; 都度=variable"}
           # 前受の有効期限（PREPAID_TERM_MONTHS）／失効前通知（PREPAID_NOTICE_DAYS）は prepaid を使う組織だけが行を足す
+          # 請求日の決め方（AR_BILLING_DATE: 予定日／発行日）は既定（予定日）から変える組織だけが行を足す（fill_issuer_settings.py が写す）
 
       契約マスタ:
         header_row: 1

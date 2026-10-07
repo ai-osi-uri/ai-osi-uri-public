@@ -16,7 +16,7 @@ data.json の形（必須キー）:
   "issuer_name": "...", "issuer_reg_no": "T…", "issuer_zip": "...", "issuer_address": "...",
   "issuer_rep": "代表取締役　…",                     # 任意
   "customer_name": "...", "customer_honorific": "御中",
-  "customer_contact": "… 様",                        # 任意（無ければ会社名宛）
+  "customer_contact": "… 様",                        # 任意。標準では付けない（宛名は「{正式名称} 御中」だけ。2026-09-30〜）
   "invoice_no": "INV-YYYY-MM-001",
   "billing_date": "YYYY年M月D日", "due_date": "YYYY年M月D日",
   "subject": "件名",

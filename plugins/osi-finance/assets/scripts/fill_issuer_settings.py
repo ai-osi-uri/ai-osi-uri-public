@@ -53,6 +53,7 @@ ITEMS = [
     ("消費税率", "CONSUMPTION_TAX_RATE", "3", "標準消費税率", False),
     ("採番ルール", "AR_NUMBERING", "4", "AR（送付請求書番号）", False),
     ("支払サイト", "AR_PAYMENT_TERMS", "4", "支払サイト（AR）", False),
+    ("請求日の決め方", "AR_BILLING_DATE", "4", "請求日の決め方（AR）", False),
     ("電子署名", "ESIGN", "0-2", "ESIGN", False),
     ("会計SaaS", "ACCOUNTING_SYNC", "0-2", "ACCOUNTING_SYNC", False),
     ("銀行明細突合", "BANK_RECON", "0-2", "BANK_RECON", False),
@@ -62,7 +63,7 @@ ITEMS = [
 ]
 SECRET = {"登録番号", "口座番号", "口座名義"}
 # 連携トグルと金額区分は settings が正本で、タブは写し。台帳側の値に関係なく settings に揃える
-SYNC_ALWAYS = {"電子署名", "会計SaaS", "銀行明細突合", "金額区分", "前受の有効期限", "失効前通知"}
+SYNC_ALWAYS = {"電子署名", "会計SaaS", "銀行明細突合", "金額区分", "前受の有効期限", "失効前通知", "請求日の決め方"}
 # テンプレートの既定値。これが入っているだけなら「未設定」と同じく settings で埋めてよい
 TEMPLATE_DEFAULTS = {"消費税率": "10%", "採番ルール": "INV-YYYY-MM-連番3桁"}
 REG_RE = re.compile(r"^T\d{13}$")

@@ -100,12 +100,16 @@ def main():
     ap.add_argument("--inv")
     ap.add_argument("--contract")
     ap.add_argument("--target", help="--contract と組で対象月 YYYY-MM")
+    ap.add_argument("--today", help="請求日の決め方=発行日 のときの発行日 YYYY-MM-DD（既定: 今日）")
     a = ap.parse_args()
     d = Path(a.ledger_dir).expanduser()
     out_dir = Path(a.out_dir).expanduser()
     month = a.month or dt.date.today().strftime("%Y-%m")
 
     iss, missing, from_settings = issuer(d)
+    billing_rule = (iss.get("請求日の決め方") or "予定日").strip()
+    today = (a.today or dt.date.today().isoformat())
+    warn = []
     if missing:
         print(json.dumps({"error": "発行者情報が未記入。1通も作らない（osi-finance-setup ステップ3-2 / fill_issuer_settings.py）",
                           "missing": missing}, ensure_ascii=False, indent=1))
@@ -165,16 +169,21 @@ def main():
             incl = int(round(num(r.get("請求額(税込)"))))
             rate = int(re.sub(r"\D", "", c.get("税率") or iss.get("消費税率") or "10") or 10)
             price = int(round(incl / (1 + rate / 100)))
+            # 品目は品目名だけ（詳細行＝description は付けない。2026-09-30〜）
             items.append({"delivery_date": r.get("対象月", ""), "name": r.get("件名") or c.get("契約内容") or "業務委託",
-                          "description": f"対象月 {r.get('対象月', '')}", "unit_price": price, "qty": 1, "unit": "式",
-                          "tax_rate": rate})
+                          "unit_price": price, "qty": 1, "unit": "式", "tax_rate": rate})
             total += incl
         calc = sum(round(sum(i["unit_price"] for i in items if i["tax_rate"] == t) * (1 + t / 100))
                    for t in {i["tax_rate"] for i in items})
-        bill = next((r.get("請求日") for r, _ in members if r.get("請求日")), f"{month}-01").replace("/", "-")[:10]
+        bill = next((str(r.get("請求日")).replace("/", "-")[:10] for r, _ in members
+                     if re.match(r"^\d{4}-\d{2}-\d{2}", str(r.get("請求日") or "").replace("/", "-"))), f"{month}-01")
+        if billing_rule == "発行日":  # 印字する請求日＝発行する日。番号・保存先の月（month）は変えない
+            bill = today
         y, m = map(int, month.split("-"))
-        due = next((r.get("支払期限") for r, _ in members if r.get("支払期限")),
-                   dt.date(y, m, calendar.monthrange(y, m)[1]).isoformat()).replace("/", "-")[:10]
+        isod = re.compile(r"^\d{4}-\d{2}-\d{2}")  # 「(要確認)」のような日付でない値は使わない（既定にフォールバック）
+        due = next((str(r.get("支払期限")).replace("/", "-")[:10] for r, _ in members
+                    if isod.match(str(r.get("支払期限") or "").replace("/", "-"))),
+                   dt.date(y, m, calendar.monthrange(y, m)[1]).isoformat())
         subject = items[0]["name"] + (" ほか" if len(items) > 1 else "")
         data = {
             "issuer_name": iss["発行者名義"], "issuer_reg_no": iss["登録番号"], "issuer_zip": iss["郵便番号"],
@@ -185,8 +194,9 @@ def main():
             "bank_name": iss["振込先 銀行"], "bank_branch": iss["振込先 支店"], "bank_account_type": iss["預金種別"],
             "bank_account_no": iss["口座番号"], "bank_account_holder": iss["口座名義"],
         }
-        if p.get("請求先To"):
-            data["customer_contact"] = f"{p['請求先To']} 様"
+        # 宛名は「{正式名称} 御中」だけ。請求先To（担当者名）は請求書に印字しない（メール本文の宛名にだけ使う）
+        if not p.get("住所"):
+            warn.append({"inv": inv, "customer": p["正式名称"], "reason": "取引先マスタに住所が無い（契約書等から補って書き戻す）"})
         if iss.get("振込手数料") and "当社" in iss["振込手数料"]:
             data["notes"] = "お振込手数料は当社にて負担いたします。"
         jpath = out_dir / f"{inv}.json"
@@ -200,7 +210,8 @@ def main():
             "tax_check": "ok" if calc == total else f"税込 {total:,} と税抜単価からの再計算 {calc:,} が一致しない（端数。金額を確認）",
         })
     print(json.dumps({"month": month, "issuer_from_settings": from_settings, "invoices": plan, "skipped": skipped,
-                      "past_unbilled": past},
+                      "past_unbilled": past,
+                      "billing_date_rule": billing_rule, "warnings": warn},
                      ensure_ascii=False, indent=1))
     return 0
 
