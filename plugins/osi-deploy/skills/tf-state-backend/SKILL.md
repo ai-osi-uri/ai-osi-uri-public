@@ -19,7 +19,7 @@ requires_connectors:
 
 > **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` `{{members.*}}` は、連結フォルダ直下の `osi-profile.md`（雛形: `config/osi-profile.example.md`）の値に置き換えて解釈する。無ければ会社名・案件フォルダ・台帳の有無・使うコネクタを質問して先に作る。値をここに直書きしない。
 
-Cowork のセッション作業フォルダ（`.../outputs/...`）は**セッション間でクリアされる揮発領域**。
+Claude のセッション作業フォルダ（`.../outputs/...`）は**セッション間でクリアされる揮発領域**。
 ここに `terraform.tfstate` を置いたままにすると、フォルダが消えた時に **AWSリソースは動き続ける
 （課金も続く）のに state が失われ、Terraform できれいに管理・削除できなくなる**（orphan化）。
 
@@ -86,7 +86,7 @@ bash scripts/bootstrap_state_backend.sh
 # → ACCOUNT_ID を取得し、{{company.slug}}-tfstate-<ACCOUNT_ID> と {{company.slug}}-tf-lock を確認/作成
 ```
 
-Cowork で `call_aws`（aws-api MCP）しか無い場合は、スクリプトの各 `aws` 行を `call_aws` で
+Claude で `call_aws`（aws-api MCP）しか無い場合は、スクリプトの各 `aws` 行を `call_aws` で
 1コマンドずつ実行してもよい（順序は同じ）。バケット作成→versioning→encryption→public-access-block→
 DynamoDB ロックテーブルの順。
 

@@ -96,7 +96,7 @@ vercel_get_project({ project: vercel_project_name または vercel_project_id })
 
 ### 最重要原則：認証が要る git/API は MCP 経由のみ
 
-Cowork の bash サンドボックスは **GitHub への認証情報を持たない**。したがって：
+Claude の bash サンドボックスは **GitHub への認証情報を持たない**。したがって：
 
 - **やってはいけない**: サンドボックスから `git fetch / git pull / git clone` を
   プライベートリポに対して直接実行する（必ず
@@ -126,7 +126,7 @@ Cowork の bash サンドボックスは **GitHub への認証情報を持たな
 3. それでも無ければユーザーに「ローカル clone はどこですか？」と AskUserQuestion で 1 問
 
 **ガード（他環境でも事故らないため）**:
-- Cowork では対象パスが**接続（マウント）済み＆書込可能**かを確認。未接続なら `mcp__cowork__request_cowork_directory` で接続を促すか、接続済みフォルダを選ばせる。
+- Claude では対象パスが**接続（マウント）済み＆書込可能**かを確認。未接続なら `mcp__cowork__request_cowork_directory` で接続を促すか、接続済みフォルダを選ばせる。
 - `~/projects` が無ければ作成してよい（`mkdir -p`）。同名で別アプリの clone が在る場合は remote 一致で必ず判別する。
 
 clone を見つけたら `git -C <dir> remote -v` で remote URL を確認し、対象 repo と一致することを検証。
@@ -231,7 +231,7 @@ cd <dir> && npx tsc --noEmit 2>/dev/null || true
 
 ### Step 4-0: pre-push hygiene（必須・サンドボックス由来の詰まり予防）
 
-Cowork サンドボックスから `git` を実行すると、ホスト側に
+Claude のサンドボックスから `git` を実行すると、ホスト側に
 `.git/index.lock` / `.git/HEAD.lock` / `.git/ORIG_HEAD.lock` /
 `.git/objects/maintenance.lock` が残ることがある。これらが残った状態で
 `github_push` を呼ぶと `fatal: Unable to create '.../index.lock': File exists.`

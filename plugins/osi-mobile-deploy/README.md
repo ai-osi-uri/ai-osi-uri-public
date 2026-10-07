@@ -103,7 +103,7 @@ osi-mobile-deploy が前提とする AI OSI URI Deploy 拡張は、モバイル�
 
 ## 前提
 
-- Cowork または Claude Desktop に `AI OSI URI Deploy` MCP 拡張 v1.18.5+ が導入済み
+- Claude デスクトップに `AI OSI URI Deploy` MCP 拡張 v1.18.5+ が導入済み
 - macOS Keychain に以下の secrets が格納済み（初回のみユーザーが登録）:
   - iOS: `APPLE_TEAM_ID`, `APP_STORE_CONNECT_API_KEY_ID`, `APP_STORE_CONNECT_API_KEY_ISSUER_ID`, `APP_STORE_CONNECT_API_KEY_B64`, `IOS_DIST_CERT_P12_B64`, `IOS_DIST_CERT_PASSWORD`, `IOS_KEYCHAIN_PASSWORD`
   - Android: `ANDROID_KEYSTORE_B64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`, `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`
@@ -112,7 +112,7 @@ osi-mobile-deploy が前提とする AI OSI URI Deploy 拡張は、モバイル�
 
 ## 使い方
 
-Cowork で:
+Claude で:
 
 ```
 モバイルアプリ作って。名前は Foo、メモを記録するだけの Hello World、iOS と Android 両方

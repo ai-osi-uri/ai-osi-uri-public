@@ -20,7 +20,7 @@ connector_prose_ok:  # DocuSign 送付は contract-docusign-send の担当。本
 設計: `docs/osi-finance-local-console-design.md`
 
 台帳（ローカル Excel またはスプレッドシート）を見て直すための画面は、Finance コネクタが
-`127.0.0.1` で配信している。Cowork のアーティファクトではない。
+`127.0.0.1` で配信している。Claude のアーティファクトではない。
 
 ## 1. URL を案内する
 
@@ -52,7 +52,7 @@ connector_prose_ok:  # DocuSign 送付は contract-docusign-send の担当。本
 **コンソールは 127.0.0.1 のブラウザページで、MCP コネクタには一切届かない。**
 呼べるのは Finance 拡張が許可した `sheets_*` だけで、DocuSign も MoneyForward クラウド会計も
 Gmail も、コンソールからは触れない。だから外部連携のボタンは、その場で実行するのではなく
-**プロンプトをクリップボードにコピーする**。ユーザーがそれを Cowork のチャットに貼り、
+**プロンプトをクリップボードにコピーする**。ユーザーがそれを Claude のチャットに貼り、
 そこで初めて実行される。
 
 貼られたプロンプトは、内容に応じて担当スキルへ渡す。

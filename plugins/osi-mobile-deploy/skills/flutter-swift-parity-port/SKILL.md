@@ -167,7 +167,7 @@ flutter run -d "iPhone 16 (Flutter用の別 Simulator)"
 xcrun simctl io booted screenshot flutter-home.png
 ```
 
-Cowork 上で `present_files` を使って 2 枚を並べて見せると、パリティのズレが一目でわかる。
+Claude 上で `present_files` を使って 2 枚を並べて見せると、パリティのズレが一目でわかる。
 
 ### xcode_sim_describe_ui のコツ
 

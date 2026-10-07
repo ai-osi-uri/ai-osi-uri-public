@@ -49,14 +49,14 @@ claude
 1. Claude Code が起動したら `/initialize-project` を実行
 2. 完了したら `/setup-infra` を実行
 3. `/setup-infra` が完了したら **ここで止まる**（次のコマンドは実行しない）
-4. **Cowork に戻ってくる**（Phase 4-A 監視に進む）
+4. **Claude に戻ってくる**（Phase 4-A 監視に進む）
 
 > `/bootstrap-project` は使わない。`/initialize-project` → `/setup-infra` の順序を守ること。
 > `/bootstrap-project` は内部で順序が逆転するため、インフラ構築に失敗する。
 
 ### Step 4: Phase 4-A インフラ監視（MCP ポーリング）
 
-ユーザーが Cowork に戻ってきたら、MCP を使って 30 秒間隔でインフラの構築状況をポーリングする。
+ユーザーが Claude に戻ってきたら、MCP を使って 30 秒間隔でインフラの構築状況をポーリングする。
 
 **監視対象:**
 
@@ -274,7 +274,7 @@ domain_name      = "<example.com>"
 
 ## 6. 注意事項
 
-- **Claude Code が必要**: AWS パスはローカルの Claude Code でインフラ構築を行う。Cowork 単体では完結しない。ユーザーに Claude Code のインストールと起動を案内すること。
+- **Claude Code が必要**: AWS パスはローカルの Claude Code でインフラ構築を行う。Claude デスクトップ単体では完結しない。ユーザーに Claude Code のインストールと起動を案内すること。
 - **`/bootstrap-project` は使わない**: このコマンドは `/setup-infra` → `/initialize-project` の順で実行するため、プロジェクト初期化の前にインフラを構築しようとして失敗する。必ず `/initialize-project` → `/setup-infra` の順序を守ること。
 - **MCP 監視は best effort**: AWS リソースの構築状況をポーリングで監視するが、ネットワークの一時的な問題やAPI レートリミットでエラーになる場合がある。数回のリトライで回復しなければ、ユーザーにマネジメントコンソールでの確認を依頼する。
 - **Terraform state の orphan 化**: Step 1（`tf-state-backend`）をスキップすると、state がローカルにしか残らず、以降の `terraform plan/apply` が別環境から実行できなくなる。絶対にスキップしない。

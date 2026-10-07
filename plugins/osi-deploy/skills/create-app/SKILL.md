@@ -1,7 +1,7 @@
 ---
 name: create-app
 description: |
-  自社が Cowork から
+  自社が Claude から
   **アプリを新規に作って公開する**ための唯一のオーケストレータ。Web（Vercel / AWS / Cloudflare / Railway）
   ・Desktop（Electron）・ローカル出力（素のプロジェクト / コンテナ）に対応する。
   「アプリ作って」「LP 立ち上げて」「○○屋向けの在庫管理アプリ作って」

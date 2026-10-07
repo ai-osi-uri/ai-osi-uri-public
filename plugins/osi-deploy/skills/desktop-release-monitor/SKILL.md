@@ -98,7 +98,7 @@ max_iterations = timeout_minutes * 60 / 15
 
 ## 進捗報告
 
-polling 中、各ジョブの完了を検出するたびに Cowork チャットに進捗を報告する:
+polling 中、各ジョブの完了を検出するたびに Claude のチャットに進捗を報告する:
 
 ```
 ビルド監視を開始します（flower-inventory v0.1.0）

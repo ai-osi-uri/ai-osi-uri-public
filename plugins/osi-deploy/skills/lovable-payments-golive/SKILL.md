@@ -50,7 +50,7 @@ Lovable の「seamless Payments」（Lovable 内蔵の Stripe 連携）を、テ
 | --- | --- | --- |
 | 対象が Lovable プロジェクトである | ユーザーに確認、または Lovable の project URL の有無 | 違う場合は `switch-to-live-mode` へ |
 | Claude in Chrome が接続されている | `mcp__claude-in-chrome__tabs_context_mcp` 等が呼べるか | 未接続ならユーザーに拡張のインストール・接続を案内 |
-| Lovable MCP（project 操作）が接続されている | `list_projects` / `get_project` が通るか | 未接続なら Cowork の Lovable コネクタ接続を案内。見つからない場合は `mcp-registry` でコネクタを検索し提案する |
+| Lovable MCP（project 操作）が接続されている | `list_projects` / `get_project` が通るか | 未接続なら Claude の Lovable コネクタ接続を案内。見つからない場合は `mcp-registry` でコネクタを検索し提案する |
 | Lovable Pro プラン | ユーザーに確認（Settings → Plan） | Pro 未満なら Lovable 側でアップグレードを案内 |
 | Lovable Cloud 有効 / 外部 Supabase 非接続 | プロジェクト設定を確認 | 外部 Supabase 接続中なら seamless Payments 不可を伝える |
 

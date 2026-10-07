@@ -1,6 +1,6 @@
 {
   "name": "osi-finance",
-  "version": "0.59.4",
+  "version": "0.59.5",
   "requires_connectors": [
     "Google Drive",
     "Gmail",

@@ -1,7 +1,7 @@
 ---
 name: gcp-ops
 description: |
-  Cowork から GCP を REST 経由で操作する（gcp_health_check / gcp_api / bq_query）。
+  Claude から GCP を REST 経由で操作する（gcp_health_check / gcp_api / bq_query）。
   BigQuery 検証・Cloud Run デプロイ・API 有効化・IAM・Resource Manager などを CLI
   不要で実行する。「BigQuery を叩いて」「Cloud Run にデプロイ」「API を有効化して」
   「gcloud 相当のことをして」で発動。破壊的呼び出しは confirm:true、bq は既定
@@ -13,7 +13,7 @@ requires_connectors:
 
 # GCP 操作（atomic・REST / CLI 不要）
 
-「AI OSI URI Deploy」拡張（v1.11.0 以降）が提供する GCP ツールで、Cowork から GCP を直接操作する。
+「AI OSI URI Deploy」拡張（v1.11.0 以降）が提供する GCP ツールで、Claude から GCP を直接操作する。
 拡張内で SA 鍵から OAuth トークンを発行し **REST API を直接叩く**ため、gcloud/bq/terraform の
 インストールは不要。GitHub/Vercel と同じ「鍵を入れたら即動く」運用。
 

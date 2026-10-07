@@ -66,7 +66,7 @@ Web 版 `update-deploy` と同じ:
 
 ## Phase 2: pull で最新化
 
-Web 版と同じ Cowork sandbox 制約に注意:
+Web 版と同じ Claude のサンドボックスの制約に注意:
 
 - サンドボックスから `git fetch/pull/clone` は認証で必ず落ちる
 - ユーザーのターミナルで `gh` を実行してもらう（コマンドは `write_clipboard` で投入）

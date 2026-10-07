@@ -3,7 +3,7 @@
 ## なぜ S3 が要るのか
 DocuSign の `createEnvelope` は **base64 アップロードを受け付けない**。ドキュメントは
 `remoteUrl`（公開HTTP(S) URL、生のファイルバイトを返すもの）経由でのみ取り込める。
-Cowork にアップした任意の契約書を送るには、DocuSign が一度だけ取得できる URL を用意する必要がある。
+Claude にアップした任意の契約書を送るには、DocuSign が一度だけ取得できる URL を用意する必要がある。
 そこで非公開 S3 に一時的に置き、**短命・推測困難な署名付きURL**で取得させる。
 
 ## 専用バケット
@@ -21,7 +21,7 @@ Cowork にアップした任意の契約書を送るには、DocuSign が一度�
 
 ## ファイルの橋渡し（重要）
 3つのファイルシステムが分かれている：
-- **Cowork bash サンドボックス**：契約書PDFがある／ネットワーク到達可／aws CLI なし・creds なし。
+- **Claude の bash サンドボックス**：契約書PDFがある／ネットワーク到達可／aws CLI なし・creds なし。
 - **`call_aws`（awslabs aws-api-mcp-server）**：creds を持つが、作業ディレクトリ
   `/tmp/aws-api-mcp/workdir` 外のファイルを読めない。**この橋渡しの制約が、下の federation token 方式の理由。**
   ※ ツール名は `call_aws`。コネクタ一覧に「AWS MCP」という表示名が無くても、`call_aws` があれば使える。

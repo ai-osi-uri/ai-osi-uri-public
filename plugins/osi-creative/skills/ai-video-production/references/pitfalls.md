@@ -57,7 +57,7 @@ for i in 01 02 03 04 05 06 07 08 09 10; do submit; done
 
 **症状**：`generate_video`（ブロッキング）で `MCP error -32001: Request timed out`。
 
-**原因**：Cowork のMCPツール呼び出しは 60〜120秒でタイムアウト。Veo 3 の生成は 1〜5分かかる。
+**原因**：Claude のMCPツール呼び出しは 60〜120秒でタイムアウト。Veo 3 の生成は 1〜5分かかる。
 
 **対処**：
 - 動画生成は必ず **`submit_video` + `check_status`** の非同期パターンを使う
@@ -317,9 +317,9 @@ curl -sSL -o "$DIR/bgm.wav" "$URL_FROM_ERROR"
 
 ---
 
-## 23. 生成物の置き場が Cowork から見えないと合成できない（2026-08 発見）
+## 23. 生成物の置き場が Claude から見えないと合成できない（2026-08 発見）
 
-コネクタは `FAL_OUTPUT_DIR` に書き出すが、そこが Cowork に接続されたフォルダの外だと、
+コネクタは `FAL_OUTPUT_DIR` に書き出すが、そこが Claude に接続されたフォルダの外だと、
 生成したナレ・BGM・クリップを**読み取れず合成に進めない**。動画は Source URL から拾えるが、
 `generate_speech` は URL を返さない（ローカル保存のみ）ので詰む。
 

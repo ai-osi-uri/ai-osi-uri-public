@@ -1,6 +1,6 @@
 ---
 name: ai-video-production
-description: AI動画を作るオーケストレータ（ディスパッチャ）スキル。依頼から動画タイプを判定し、最適なメソッド（vp-corporate-card＝企業の15/30秒動画名刺 / vp-personal-intro＝個人の自己紹介動画 / vp-character-action＝キャラ一貫アクション / vp-moveboard＝1枚＋カメラムーブ / vp-corporate-narrated＝ナレ付き企業動画 等）へ振り分け、共通インナー vp-core（プロンプト承認ゲート→生成→検証→連結）で作る。「動画を作って」「動画作成」「PR動画」「IR動画」「採用動画」「企業説明動画」「ピッチ動画」「ナレーション付き動画」「アニメ動画」「実写動画」「ドキュメンタリー動画」「TikTok動画」「Reels動画」「このキャラで動画」「商品を動かして」「動画名刺」「自己紹介動画」「30秒で会社紹介」「社員全員分の紹介動画」など、AI動画制作のリクエスト全般で発動する。既存の動画台本テキストが渡された場合も発動する。「AI OSI URI Creative」コネクタ（旧 fal-video。動画・音楽・ナレーション・静止画[nano-banana]を内包）が Cowork に登録されていることを前提とする。PPT・スライドのみ、静止画のみの依頼では使わない。
+description: AI動画を作るオーケストレータ（ディスパッチャ）スキル。依頼から動画タイプを判定し、最適なメソッド（vp-corporate-card＝企業の15/30秒動画名刺 / vp-personal-intro＝個人の自己紹介動画 / vp-character-action＝キャラ一貫アクション / vp-moveboard＝1枚＋カメラムーブ / vp-corporate-narrated＝ナレ付き企業動画 等）へ振り分け、共通インナー vp-core（プロンプト承認ゲート→生成→検証→連結）で作る。「動画を作って」「動画作成」「PR動画」「IR動画」「採用動画」「企業説明動画」「ピッチ動画」「ナレーション付き動画」「アニメ動画」「実写動画」「ドキュメンタリー動画」「TikTok動画」「Reels動画」「このキャラで動画」「商品を動かして」「動画名刺」「自己紹介動画」「30秒で会社紹介」「社員全員分の紹介動画」など、AI動画制作のリクエスト全般で発動する。既存の動画台本テキストが渡された場合も発動する。「AI OSI URI Creative」コネクタ（旧 fal-video。動画・音楽・ナレーション・静止画[nano-banana]を内包）が Claude に登録されていることを前提とする。PPT・スライドのみ、静止画のみの依頼では使わない。
 version: 1.1.0
 requires_connectors:
   - server: ai-osi-uri-creative
@@ -63,7 +63,7 @@ requires_connectors:
 
 ## 前提
 
-- 「AI OSI URI Creative」コネクタ（fal + ElevenLabs を内包）が Cowork に登録されている（動画・音楽・ナレーション＋静止画[nano-banana]。`generate_image` を含む）。**画像も Creative に統合済みなので、別途 nano-banana コネクタは不要**（既存の fal キーで動く）
+- 「AI OSI URI Creative」コネクタ（fal + ElevenLabs を内包）が Claude に登録されている（動画・音楽・ナレーション＋静止画[nano-banana]。`generate_image` を含む）。**画像も Creative に統合済みなので、別途 nano-banana コネクタは不要**（既存の fal キーで動く）
 - fal.ai のAPIキーが設定済み、最低 $10 のクレジットがある
 - ffmpeg が利用可能なBash環境がある（Linux sandbox）
 - 出力先フォルダ（FAL_OUTPUT_DIR）が Drive 等に設定済み

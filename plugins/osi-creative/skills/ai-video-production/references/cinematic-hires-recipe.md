@@ -131,7 +131,7 @@ ffmpeg -y -i n_A.mp4 -i n_B.mp4 -filter_complex "[0:v][1:v]xfade=transition=fade
 
 - **fal 並列制限**: 短時間に大量投入すると `Forbidden`。5本ずつ＋間に待機。発生したら数十秒〜数分待って1本ずつ再投入。クレジット残高も確認。
 - **ポーリング間隔**: 投入後 40〜60秒待ってから `fal_check_status`。Kling 3.0 4K は2〜4分。
-- **保存先**: fal出力は `FAL_OUTPUT_DIR`（Drive）に保存される。Cowork で提示するには outputs フォルダへコピー（curlでsource URL取得が確実）。
+- **保存先**: fal出力は `FAL_OUTPUT_DIR`（Drive）に保存される。Claude で提示するには outputs フォルダへコピー（curlでsource URL取得が確実）。
 - **edit モードは解像度が落ちることがある**（768px等）。高解像度を保ちたい時は edit より **同条件で再 generate**。
 - **bloom を4Kに直接かけない**（タイムアウト）。1080化してから。
 

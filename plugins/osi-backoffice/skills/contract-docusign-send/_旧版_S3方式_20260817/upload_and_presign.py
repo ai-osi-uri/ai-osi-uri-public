@@ -2,7 +2,7 @@
 """
 contract-docusign-send / upload_and_presign.py
 
-Cowork 側にある契約書ファイル（PDF/DOCX）を、DocuSign が remoteUrl 経由で
+Claude 側にある契約書ファイル（PDF/DOCX）を、DocuSign が remoteUrl 経由で
 一度だけ取得できるよう、非公開 S3 バケットにアップロードし、SigV4・
 リージョナルの署名付き GET URL を発行して標準出力に1行で返す。
 

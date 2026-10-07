@@ -3,7 +3,7 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "Cowork でデプロイ系スキルを使うための初期セットアップを手伝って。GitHub と Vercel のトークンから登録したい。",
+      "prompt": "Claude でデプロイ系スキルを使うための初期セットアップを手伝って。GitHub と Vercel のトークンから登録したい。",
       "expected_output": ".env の存在確認 → MCP 接続確認 → GitHub PAT 発行案内 → API 検証 → Vercel Token → Anthropic → Supabase の順で受け取って .env に書き込み。Phase 1 移行注記を踏まえ、Stripe/Anthropic/Supabase は任意である旨を伝える。",
       "files": []
     },

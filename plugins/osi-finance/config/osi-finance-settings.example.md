@@ -114,7 +114,7 @@ references 側には「汎用ロジック・判断基準」だけを残します
 ## 0-3. 操作者トラッキング（v3）
 
 **台帳への全書き込みで「誰がやったか」を記録する**（行の新規作成=作成者/作成日時、更新=更新者/更新日時。
-正本: `assets/schema/data-layout.yaml` の `operator_tracking`）。操作者は Cowork ログインユーザーの
+正本: `assets/schema/data-layout.yaml` の `operator_tracking`）。操作者は Claude にログインしているユーザーの
 メールアドレスを自動記録する。以下は取得できない場合のフォールバックと、履歴の細かさの選択。
 
 | キー | 値 | 意味 |

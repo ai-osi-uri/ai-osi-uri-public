@@ -1,7 +1,7 @@
 ---
 name: osi-finance-setup
 description: >
-  OSI Finance（請求AR・支払APの経理自動化）を新しい組織・Cowork に初回セットアップする
+  OSI Finance（請求AR・支払APの経理自動化）を新しい組織の Claude に初回セットアップする
   オーケストレータ・スキル。対話で組織の値を集めて `{{paths.finance}}/osi-finance-settings.md`（実値版・
   gitignore対象）を生成し、Drive にフォルダ構造を作成、台帳テンプレ（共通マスタ・請求管理台帳・
   支払管理台帳・仕訳台帳）を配置して「発行者設定」タブを settings の値で埋め、必要コネクタ
@@ -30,7 +30,7 @@ connector_prose_ok:  # DocuSign は任意の補助。無くても運用は成立
 
 > **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` `{{members.*}}` は、連結フォルダ直下の `osi-profile.md`（雛形: osi-core の `plugins/osi-core/skills/getting-started/assets/osi-profile.example.md`。作るときは getting-started の `scripts/init_kit.py`）の値に置き換えて解釈する。無ければ会社名・案件フォルダ・台帳の有無・使うコネクタを質問して先に作る。値をここに直書きしない。
 
-> **役割**：新しい組織（1 Cowork = 1 組織）に OSI Finance を導入するための初回セットアップを、
+> **役割**：新しい組織（1 つの Claude 組織 = 1 社）に OSI Finance を導入するための初回セットアップを、
 > 対話で一気通貫に進める。**この後の日常運用は osi-finance-* 各スキルが担当**するので、本スキルは
 > 「設定ファイル生成 → フォルダ構成 → 台帳配置 → コネクタ確認 → スケジュール案内 → スモークテスト」
 > までで完了する。
@@ -50,7 +50,7 @@ connector_prose_ok:  # DocuSign は任意の補助。無くても運用は成立
 
 最初に次を確認する（未接続でも進めるが、後段の疎通確認で再確認する）。
 
-- 対象は **1 つの組織**であること（1 Cowork = 1 組織）。複数法人を1つの Cowork で混ぜない。
+- 対象は **1 つの組織**であること（1 つの Claude 組織 = 1 社）。複数法人を1つの Claude 組織で混ぜない。
 - 国＝日本（消費税・インボイス・源泉の前提）。
 - 会計SaaS は**任意**。settings の `ACCOUNTING_SYNC`（`mf` / `freee` / `none`、**既定 none**）で選ぶ。
   none でも台帳＋内部仕訳帳（仕訳台帳）で運用できる。MF を使う組織は `mf`、freee は `freee`（CSV 突合のみ）。

@@ -1,6 +1,6 @@
 # AWS サーバレスアプリ — 最小構成と既知のハマりどころ
 
-自社のAWSアカウント（ap-northeast-1 / 東京）で、Cowork から Terraform（拡張の `aws_terraform_apply/status/destroy/output`）でWebアプリを公開する時の定番構成と、毎回詰まるポイント。**新規アプリのAWSパスでは着手前にこれを読む。** 実案件の2アプリ（在庫早期警戒・競合インテリジェンス）で確立。
+自社のAWSアカウント（ap-northeast-1 / 東京）で、Claude から Terraform（拡張の `aws_terraform_apply/status/destroy/output`）でWebアプリを公開する時の定番構成と、毎回詰まるポイント。**新規アプリのAWSパスでは着手前にこれを読む。** 実案件の2アプリ（在庫早期警戒・競合インテリジェンス）で確立。
 
 ## 最小構成（このまま流用できる）
 
@@ -39,7 +39,7 @@
 
 6. **コスト＝価値の所在**：静的フロント＋DynamoDBは月数十円。費用はBedrock（AI処理）の従量に集中。提案でもこの構造で説明する。
 
-7. **Terraform state を作業フォルダに残さない（最重要・orphan化防止）**。Cowork の `.../outputs/...` は**セッション間で消える揮発領域**。`infra/terraform.tfstate` をそこに置いたままにすると、フォルダ喪失時に**リソースは課金され続けるのにstateが消えて管理・削除不能**になる。→ 新規AWSアプリは**最初から共有S3 backend**にする。`infra/backend.tf` を必ず置く：
+7. **Terraform state を作業フォルダに残さない（最重要・orphan化防止）**。Claude の `.../outputs/...` は**セッション間で消える揮発領域**。`infra/terraform.tfstate` をそこに置いたままにすると、フォルダ喪失時に**リソースは課金され続けるのにstateが消えて管理・削除不能**になる。→ 新規AWSアプリは**最初から共有S3 backend**にする。`infra/backend.tf` を必ず置く：
    ```hcl
    terraform {
      backend "s3" {
@@ -61,7 +61,7 @@
 
 11. **`aws_terraform_apply` の `prebuild` に文字列 `"null"` を渡さない**。`null` がそのままシェルで実行され `null: command not found` で失敗する。不要なら **`true`（no-op）** を渡すか省略する。
 
-12. **Cowork サンドボックスは Google Drive(FUSE) マウント上で `git` を扱えない**。`.git/index.lock` 等の `.lock`/tmpオブジェクトを **unlink できず（Operation not permitted）**、commit/push が詰む。→ **リポ同期は拡張の `github_create_repo_and_push` / `github_push` で行う**（素のローカル `git` 認証は使わない方が確実）。プライベートリポは未認証だと 404「Repository not found」になる点に注意。ローカル `.git` とリモートの履歴が不一致（unrelated histories）で push 拒否されたら、**`rm -rf .git`（ユーザーのMac側）→ リモートを削除 → `github_create_repo_and_push` で作り直し**が最短。
+12. **Claude のサンドボックスは Google Drive(FUSE) マウント上で `git` を扱えない**。`.git/index.lock` 等の `.lock`/tmpオブジェクトを **unlink できず（Operation not permitted）**、commit/push が詰む。→ **リポ同期は拡張の `github_create_repo_and_push` / `github_push` で行う**（素のローカル `git` 認証は使わない方が確実）。プライベートリポは未認証だと 404「Repository not found」になる点に注意。ローカル `.git` とリモートの履歴が不一致（unrelated histories）で push 拒否されたら、**`rm -rf .git`（ユーザーのMac側）→ リモートを削除 → `github_create_repo_and_push` で作り直し**が最短。
 
 13. **外部API連携のゲートパターン（再利用テンプレ）**。鍵未設定でも壊れずにデプロイでき、鍵投入だけで有効化できる安全な型：
     - Lambda env に `<NAME>_SECRET_ID = "${project}-<name>-${env}"` を常設。コードは **env優先 → Secrets Manager の順**で鍵取得し、**取れなければ no-op**（収集本体を絶対に壊さない・try/exceptで保護）。

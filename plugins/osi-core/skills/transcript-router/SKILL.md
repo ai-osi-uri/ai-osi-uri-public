@@ -77,7 +77,7 @@ date_to）で録音を特定 → `get_transcript` で全文取得 → 通常の�
 ## ユーザー設定の反映（成果物を出す前に1回）
 本スキルは「スキル・カスタマイズ規約」に従う。成果物を作る前にユーザー個人設定を確認し、
 見つかればスキル既定より優先して反映する（無ければ既定で進む）。確認場所（あるものを使う・後勝ち下位）:
-1. Cowork の個人設定/プロジェクト記憶（常に文脈にある内容）
+1. Claude の個人設定/プロジェクト記憶（常に文脈にある内容）
 2. 連結フォルダの `{{paths.shared}}/skill-prefs/transcript-router.md`（あれば。`{{paths.shared}}` は osi-profile.md の値）
 3. 連結フォルダの `{{paths.shared}}/skill-prefs/_global.md`（あれば）
 4. （Claude Code 等）環境変数 `OSI_SKILL_PREFS_DIR` が指すフォルダの同名ファイル（あれば）

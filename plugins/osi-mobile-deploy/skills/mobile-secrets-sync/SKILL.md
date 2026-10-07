@@ -243,7 +243,7 @@ github_list_secrets({repo_owner, repo_name}) を再度叩いて、
 | Keychain に iOS secret 無し | 登録コマンド提示、halt |
 | keytool 無し | mobile_generate_keystore が fail 返却 → JDK 案内、halt |
 | github_set_secrets_batch で 403 | GITHUB_PAT の scope 不足（`repo`+`workflow`）、案内、halt |
-| Drive バックアップ失敗 | Cowork の Drive tool 状態確認、非致命的（Secret は既に投入済み） |
+| Drive バックアップ失敗 | Claude の Drive tool 状態確認、非致命的（Secret は既に投入済み） |
 | 一部 Secret のみ失敗 | 失敗した Secret 名を提示、再実行を案内 |
 
 ## 注意事項

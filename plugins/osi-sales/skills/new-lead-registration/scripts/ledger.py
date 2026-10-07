@@ -33,7 +33,7 @@ except ImportError:
 
 # --- 組織固有値は osi-profile.md（会社プロファイル）から読む。環境変数で上書きできる ---
 # 探索順: $OSI_PROFILE → cwd の祖先の osi-profile.md / _shared/osi-profile.md
-#         → Cowork マウント ($HOME/mnt/*/osi-profile.md) → Google Drive 同期フォルダ
+#         → Claude のマウント ($HOME/mnt/*/osi-profile.md) → Google Drive 同期フォルダ
 # 雛形: osi-core プラグインの skills/getting-started/assets/osi-profile.example.md
 #       （getting-started スキルが質問して作る。無ければ質問して作る）
 

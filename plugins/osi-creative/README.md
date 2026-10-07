@@ -11,7 +11,7 @@
 ## 前提
 
 - **ai-video-production を使う場合**：
-  - `fal-video-mcp` v0.3 以降が Cowork に登録されていること
+  - `fal-video-mcp` v0.3 以降が Claude に登録されていること
   - 環境変数 `ELEVENLABS_API_KEY` が設定されていること（TTS 用）
   - 環境変数 `FAL_OUTPUT_DIR` が設定されていること（任意、未設定なら `/tmp/`）
   - ffmpeg / curl が使える Linux サンドボックス
