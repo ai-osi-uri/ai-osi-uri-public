@@ -117,10 +117,12 @@
 <div class="bank">
   <div class="t">お振込先</div>
   <div>{{ bank_name }}　{{ bank_branch }}</div>
-  <div>{{ bank_account_type }}　{{ bank_account_no }}　口座名義　{{ bank_account_holder }}</div>
+  <div>{{ bank_account_type }}　{{ bank_account_no }}</div>
+  <div>口座名義　{{ bank_account_holder }}</div>
 </div>
 
 <div class="notes">
+  <div class="t" style="font-weight:700">備考</div>
   {% if has_reduced %}※印は軽減税率（8%）対象。<br>{% endif %}
   {{ notes | default('お振込手数料はお客様にてご負担をお願いいたします。') }}
 </div>
