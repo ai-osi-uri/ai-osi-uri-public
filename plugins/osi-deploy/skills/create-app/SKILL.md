@@ -137,7 +137,7 @@ Phase N:   完了レポート
 | `from_extension`（`vercel_set_env`） | 使えない。値は `value` で渡す |
 | 案件台帳への登録 | 不要（`github_create_repo` / `vercel_create_project` / `supabase_create_project` が自動で「公開中のアプリ」に載せる） |
 | `[quota_exceeded:…]` / `[managed_disabled]` が返る | 上限・残高・利用権の停止。作業を止めて理由を伝え、運用者への相談を案内する（`usage_status` で残りが見える） |
-| `[quota_exceeded:projects]` / `[quota_exceeded:resources]`（お試しの枠：アプリ 2 本・GitHub 2・Vercel 2・Supabase（データベース）1・動画 1・画像 2）／本人が枠を超えて作りたい／Stripe の鍵が未登録 | お試し（マネージド）は体験用。`own-keys-setup` に渡し（やりたいこと `app`、決済なら `pay`）、鍵がそろって「自分の鍵を使う」に切り替わったら、止まったところから続ける |
+| `[quota_exceeded:projects]` / `[quota_exceeded:resources]`（お試しの枠：アプリ 2 本・GitHub 2・Vercel 2・Supabase（データベース）1。画像・動画は生成枠で `[quota_exceeded:generation]`）／本人が枠を超えて作りたい／Stripe の鍵が未登録 | お試し（マネージド）は体験用。`own-keys-setup` に渡し（やりたいこと `app`、決済なら `pay`）、鍵がそろって「自分の鍵を使う」に切り替わったら、止まったところから続ける |
 
 リモートで**使えない**道具: `github_create_repo_and_push` / `github_push` / `github_clone` / `aws_terraform_*` / `mobile_*`（ローカル FS が要る）。Web-AWS・Desktop・Mobile パスはローカル経路でのみ実行できる。リモートでそれらを求められたら「この経路では Web-Vercel だけ」と伝える。
 
