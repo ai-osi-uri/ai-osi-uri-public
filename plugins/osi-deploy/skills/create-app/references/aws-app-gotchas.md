@@ -75,7 +75,7 @@
 - **チャット/生成**は `converse`（system=[{"text"}], messages=[{"role","content":[{"text"}]}], inferenceConfig={"maxTokens"}）。
 - **画像(vision)** は `converse` の image コンテンツに bytes を渡す。**formatはマジックバイトで判定**（拡張子を信じない：PNG=`89504E47`, JPEG=`FFD8FF`）。
 - IAM：Lambda実行ロールに `bedrock:InvokeModel`（converseも可）。
-- **`jp.` 推論プロファイル**（例 `jp.anthropic.claude-haiku-4-5-...`）で東京・データ国内。Bedrockは入出力を学習に使わない・保存しない・ログしない（情シス審査の回答に使える）。
+- **`jp.` 推論プロファイル**（例 `jp.anthropic.claude-haiku-5-5...`。正確な ID は Bedrock のコンソールで確かめる。Haiku 4.5 は旧世代なので新規には使わない）で東京・データ国内。Bedrockは入出力を学習に使わない・保存しない・ログしない（情シス審査の回答に使える）。
 
 ## データ自動更新の定番
 
