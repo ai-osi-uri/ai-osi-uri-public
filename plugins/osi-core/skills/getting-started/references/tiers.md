@@ -1,10 +1,10 @@
 # 導入の段（tiers）
 
 > `python3 scripts/build_tiers.py` で `requires_connectors` から自動生成。手で編集しない。
-> 段の意味：**0** は Plugins からインストールするだけ／**1** は Claude の Connectors で純正コネクタ（Gmail・Drive・Slack・Calendar・MoneyForward 等）を繋ぐ／**2** は AI OSI URI Deploy・Finance・Creative などの自社 MCP を繋ぐ。既定は**マネージド**（ツールポータルにログインし、コネクタの URL を Claude に貼るだけ。アカウント作成も鍵も要らない）。自分の鍵で動かす人だけ `.mcpb` を入れて鍵を設定する（ダウンロード経路）。
+> 段の意味：**0** は Plugins からインストールするだけ／**1** は Claude の Connectors で純正コネクタ（Gmail・Drive・Slack・Calendar・MoneyForward 等）を繋ぐ／**2** は AI OSI URI Deploy・Finance・Creative などの自社 MCP を繋ぐ。既定は**マネージド**（ツールポータルにログインし、コネクタの URL を Cowork に貼るだけ。アカウント作成も鍵も要らない）。自分の鍵で動かす人だけ `.mcpb` を入れて鍵を設定する（ダウンロード経路）。
 > 「公開」列は外部版（`build_external.py`）に含まれるか。
 
-## 0 段目：入れた瞬間に動く（コネクタ不要） — 48 本
+## 0 段目：入れた瞬間に動く（コネクタ不要） — 51 本
 
 | プラグイン | スキル | 必要なコネクタ | 公開 | 何をする |
 |---|---|---|---|---|
@@ -13,12 +13,13 @@
 | osi-core | `research-verifier` | — | ○ | 調査結果、営業リスト、提案書、事業計画、記事などに含まれる事実主張を、作成時の推論から独立して主張単位で再検証する横断品質ゲート |
 | osi-core | `secretary-report` | — | ○ | Claude でやった仕事の進み具合を、会社の秘書（LINE 秘書）に報告する横断スキル |
 | osi-deploy | `app-builder-container-export` | — | 内部 | 【コマンド専用・自動発火しない】任意スタックのフルスタックアプリ（フロント +自前バックエンド + DB）を、オンプレ App Builde… |
-| osi-deploy | `app-builder-export` | — | 内部 | 【コマンド専用・自動発火しない】アプリ仕様を、オンプレ AppBuilder（ソブリン推論筐体）が取り込める App Bundle（.app… |
+| osi-deploy | `app-builder-export` | — | 内部 | 【コマンド専用・自動発火しない】アプリ仕様を、App Builder（ローカル版）が取り込める App Bundle（.appbuilder… |
 | osi-deploy | `app-manual` | — | ○ | 公開したアプリの「使い方マニュアル」を、実装（ルート・画面のラベル・サーバーアクション・メール文面・認証方式）から起こして pptx で作る… |
 | osi-deploy | `app-smoke-test` | — | ○ | デプロイ済みの URL を curl で叩いて HTTP レベルの動作確認をする |
 | osi-deploy | `aws-static-deploy` | — | ○ | GitHub に push 済みの静的サイト（HTML / Vite / Next.js export）を S3 + CloudFront … |
 | osi-deploy | `harness-init` | — | ○ | 生成するリポに「ハーネスエンジニアリング」の最小構成（AGENTS.md /CLAUDE.md・init.sh・claude-progres… |
 | osi-deploy | `nextjs-pdf-export` | — | 内部 | Next.js（App Router）+ Vercel サーバレスで **日本語フォント埋め込み済み PDF** を出すAPI ルートを構築… |
+| osi-deploy | `own-keys-setup` | — | ○ | お試し（マネージド）から「自分の鍵」に移るときの案内役 |
 | osi-deploy | `scroll-3d-website` | — | ○ | Build premium 3D scroll-animated websites end to end — Next.js setup, … |
 | osi-deploy | `setup-deploy-environment` | — | ○ | デプロイを使えるようにする初回セットアップ |
 | osi-deploy | `supabase-set-auth-url` | — | ○ | Supabase の Auth 設定（Site URL / Redirect URLs）を本番デプロイ後の URL に更新する |
@@ -26,6 +27,7 @@
 | osi-docs | `business-plan-builder` | — | ○ | 新規事業・新会社・既存事業者の「事業計画一式」を作る唯一の窓口（オーケストレータ） |
 | osi-docs | `company-financial-report` | — | 内部 | 対象企業（主に上場企業）の「業績・財務分析レポート」を、Web一次情報の調査からWord(docx)納品まで一気通貫で作るスキル |
 | osi-docs | `deck-composition` | — | ○ | 承認済みの骨子（storyline.md）を、スライドの「構成」＝枚数・順序・各スライドの主張（Action title）・1スライド1メッ… |
+| osi-docs | `design-guide` | — | ○ | スライド・Word・Excel・アプリ画面を「誰が見ても伝わる形」で作るための、色を持たない共通の作り方 |
 | osi-docs | `doc-type-router` | — | ○ | 資料づくりの入口で「型」を選ぶルーター |
 | osi-docs | `financial-model-3statement` | — | ○ | 事業計画の「財務3表フル連動モデル（Excel）」を作る atomic スキル |
 | osi-docs | `network-diagram-package` | — | ○ | 確認済みの `network-source.json` から、物理構成図、論理構成図、接続表、機器一覧、BOM Excel、未確定事項一覧を… |
@@ -50,6 +52,7 @@
 | osi-meta | `marketplace-sync` | — | 内部 | ローカル Claude で更新したスキルを GitHub のマーケットプレイスリポ（ai-osi-uri/ai-osi-uri-plugin… |
 | osi-mobile-deploy | `flutter-swift-parity-port` | — | ○ | 既存の Flutter アプリを SwiftUI ネイティブに移行するときだけ使う 5フェーズの移植ワークフロー |
 | osi-mobile-deploy | `mobile-app-smoke-test` | — | ○ | ローカルビルドした IPA / AAB を Simulator / Emulatorで起動してクラッシュを検知する軽量スモークテスト |
+| osi-sales | `asset-partnership-proposal` | — | ○ | 提案の素材（人物・ブランド・サービス・コンテンツなど）を、相手企業がいま力を入れている事業につなぐ共同事業提案の骨子と企画素案を作るスキル |
 | osi-sales | `champion-strategy` | — | ○ | 法人営業で、公開調査や面談情報から社内推進者候補と関係者を整理し、相手が自社内で提案を説明・合意形成できる状態までの戦略を設計するスキル |
 | osi-sales | `decision-maker-research` | — | ○ | 法人営業や提案準備のために、対象企業の公開情報から経営課題、DX施策、意思決定構造、導入障壁、評価基準、社内推進者候補を調査し、根拠付きの決… |
 | osi-sales | `persuasion-document` | — | ○ | 企業調査、決裁構造、社内推進戦略、提案内容を統合し、顧客が社内判断に使える根拠付き説得文書と決裁者向けワンページを作成するスキル |
