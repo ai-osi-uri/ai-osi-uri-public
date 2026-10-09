@@ -19,7 +19,7 @@
 | osi-deploy | `aws-static-deploy` | — | ○ | GitHub に push 済みの静的サイト（HTML / Vite / Next.js export）を S3 + CloudFront … |
 | osi-deploy | `harness-init` | — | ○ | 生成するリポに「ハーネスエンジニアリング」の最小構成（AGENTS.md /CLAUDE.md・init.sh・claude-progres… |
 | osi-deploy | `nextjs-pdf-export` | — | 内部 | Next.js（App Router）+ Vercel サーバレスで **日本語フォント埋め込み済み PDF** を出すAPI ルートを構築… |
-| osi-deploy | `own-keys-setup` | — | ○ | お試し（マネージド）から「自分の鍵」に移るときの案内役 |
+| osi-deploy | `own-keys-setup` | — | ○ | お試し（マネージド）から「ツール設定」に移るときの案内役 |
 | osi-deploy | `scroll-3d-website` | — | ○ | Build premium 3D scroll-animated websites end to end — Next.js setup, … |
 | osi-deploy | `setup-deploy-environment` | — | ○ | デプロイを使えるようにする初回セットアップ |
 | osi-deploy | `supabase-set-auth-url` | — | ○ | Supabase の Auth 設定（Site URL / Redirect URLs）を本番デプロイ後の URL に更新する |

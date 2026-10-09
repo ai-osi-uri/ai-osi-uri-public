@@ -39,7 +39,7 @@ description: >
    - `questions`: `{問いID: {type, instructions, criteria}}`。1 回に複数の問いを混ぜてよい（安くなる）。
    - `threshold`（既定 0.8）、`noul_margin`（既定 0.2）、件数が多いときは `only_unsure: true`。
 2. 鍵:
-   - リモートMCP: ポータルの「自分の鍵」に TypeSafe の鍵があればそれで動く（クレジットを使わない）。無ければ、マネージドの会社は
+   - リモートMCP: ポータルの「ツール設定」に TypeSafe の鍵があればそれで動く（クレジットを使わない）。無ければ、マネージドの会社は
      共用の鍵で動き、10 万トークンごとに 1 クレジット（最低 1）を引く。
    - コアコネクタ（ダウンロード版）: 設定の「TypeSafe API Key」（社内は当社の鍵）。業務をまたいで使う共通の道具のコネクタで、Deploy などとは別に入れる。
    - **お客様に納めるアプリ**に判定を入れるときは、お客様自身の鍵を使う（`osi-deploy:create-app` の references/jev-in-app.md）。
