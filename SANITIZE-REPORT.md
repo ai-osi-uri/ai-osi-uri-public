@@ -81,8 +81,8 @@
 | plugins/osi-core/skills/transcript-router/SKILL.md | 35 | Plaud | Plaud 録音を指す一言が来ている（→ 下の「Plaud MCP からの取得」で先に本文を確保してから判定） |
 | plugins/osi-core/skills/transcript-router/SKILL.md | 37 | Plaud | ## Plaud MCP からの取得（貼り付け不要の入口） |
 | plugins/osi-core/skills/transcript-router/SKILL.md | 38 | Plaud | Plaud MCP コネクタ（`list_files` / `get_transcript` 等）が利用可能なら、文字起こしの |
-| plugins/osi-core/skills/getting-started/SKILL.md | 59 | Plaud | 3. 見えているツール名から、繋がっているコネクタを列挙する（AI OSI URI（マネージドのカスタムコネクタ。`health_check` / `whoami` / `list_projects` / `usage_status` と  |
-| plugins/osi-core/skills/getting-started/SKILL.md | 113 | Plaud | \| MoneyForward / DocuSign / Plaud / Obsidian \| 軽い読み取り 1 回 \| 同上 \| |
+| plugins/osi-core/skills/getting-started/SKILL.md | 63 | Plaud | 3. 見えているツール名から、繋がっているコネクタを列挙する（AI OSI URI（マネージドのカスタムコネクタ。`health_check` / `whoami` / `list_projects` / `usage_status` と  |
+| plugins/osi-core/skills/getting-started/SKILL.md | 117 | Plaud | \| MoneyForward / DocuSign / Plaud / Obsidian \| 軽い読み取り 1 回 \| 同上 \| |
 | plugins/osi-core/skills/getting-started/references/tiers.md | 85 | Plaud | \| osi-sales \| `meeting-minutes` \| slack, box, plaud \| ○ \| 商談議事録を Plaud の文字起こしから自動生成し、Drive の `03_制作・成果物/` に docx として格納した |
 | plugins/osi-core/workflows/01-shodan-to-proposal.md | 7 | Plaud | - 文字起こし（Plaud / 会議ツール / 手書きメモ） |
 | plugins/osi-core/workflows/README.md | 8 | Plaud | \| 1 \| [商談録音 → 提案書](01-shodan-to-proposal.md) \| 「○○社の録音、提案まで持っていって」 \| 1（議事録に Plaud/Drive）→ 0 \| 60〜90 分 \| |
