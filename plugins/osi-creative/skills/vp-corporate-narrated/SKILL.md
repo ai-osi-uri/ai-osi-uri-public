@@ -1,7 +1,7 @@
 ---
 name: vp-corporate-narrated
-description: AI動画の「ナレ付き企業動画」メソッド。IR・採用・PR・会社説明・ピッチなど、起承転結の12シーン構成＋ナレーション＋字幕＋BGMで2〜3分尺に仕上げる。中核は「①12シーンの台本を設計し ②各シーンの画像起点プロンプトを書き ③ナレ原稿をTTS最適化（感情タグ＋誤読対策）で書く」こと。書いた台本・プロンプト・ナレ原稿は vp-core の承認ゲートに通し、承認後に生成→ナレ→字幕→ffmpeg合成→BGMミックスする。「採用動画」「会社説明動画」「IR動画」「PR動画」「ピッチ動画」「ナレーション付き動画」「2〜3分の企業動画」などのリクエストで、オーケストレータ ai-video-production から呼ばれる（単独指定も可）。1枚＋カメラムーブだけは vp-moveboard、キャラの躍動アクションは vp-character-action。
-version: 0.2.0
+description: AI動画の「ナレ付き企業動画」メソッド。IR・採用・PR・会社説明・ピッチなど、起承転結の12シーン構成＋ナレーション＋字幕＋BGMで2〜3分尺に仕上げる。中核は「①12シーンの台本を設計し ②各シーンの画像起点プロンプトを書き ③ナレ原稿をTTS最適化（感情タグ＋誤読対策）で書く」こと。ナレは先に生成して尺を実測し、その尺でシーンを切る。書いた台本・ナレ原稿・プロンプトは vp-core の承認ゲートに通し、承認後に生成→字幕→ffmpeg合成→BGMミックスする。「採用動画」「会社説明動画」「IR動画」「PR動画」「ピッチ動画」「ナレーション付き動画」「2〜3分の企業動画」などのリクエストで、オーケストレータ ai-video-production から呼ばれる（単独指定も可）。想い・らしさを世界観から伝える情緒型の1本は vp-brand-film。1枚＋カメラムーブだけは vp-moveboard、キャラの躍動アクションは vp-character-action。
+version: 0.3.0
 requires_connectors:
   - server: ai-osi-uri-creative
     provision: user-install
@@ -31,35 +31,42 @@ OKWEB × JINEN 制作で確立。標準 60〜75分／約 $5〜$10。
 標準テンプレ（各シーンの役割と尺）で12シーンを設計し、**各シーンの主旨を1〜2文**でユーザー確認。
 ①問題提起 ②背景 ③数字・市場 ④日本市場 ⑤課題 ⑥強みA ⑦強みB ⑧統合ヒーロー ⑨成長 ⑩優位性 ⑪未来 ⑫クロージング（合計≒165秒、ナレは20%増を見込む）。
 
-### 3. シーン別プロンプト（画像起点）
-スタイルの `prompts-{style}.md` の構造（STYLE_PREFIX / SUBJECT / LIGHTING / CAMERA / SETTING / MOOD / STYLE_SUFFIX / no text / 4K）で12本起草。
-被写体の一貫性が要る人物・商品は `generate_image` の1枚目を参照に派生（character一貫が主目的なら vp-character-action を併用）。
-
-### 4. ナレ原稿（→ narration スキルに委譲）
+### 3. ナレ原稿（→ narration スキルに委譲）
 ナレの読み制御・声・発音辞書は **`narration` スキル**が担当する。本メソッドは
 **台本（何を言うか）と感情タグ設計**だけ行い、原稿はクリーンな漢字かな混じりで書く（壊さない）。
 - 声：既定 Konoha（`T7yYq3WpB94yAuOXraRi`）。感情タグ：[thoughtful]/[calm]/[serious]/[confident]/[hopeful]/[warm]。
 - 生成手順・辞書・誤読対策は `../narration/SKILL.md` を参照。
 
-### 5. 承認ゲート（vp-core）
-**台本＋12プロンプト＋ナレ原稿をまとめて提示**し、文章段階で承認/修正。承認まで生成しない。
+### 4. ナレを先に生成して実測し、シーン尺を確定する
+**シーン尺はナレの実測から決める。先に尺を決めて原稿を当てると必ず溢れる**（v3 は同じ字数でも尺が読めない／pitfalls #26）。
+- 原稿（2のシーン主旨＋3の文）をシーン単位で `narration` に渡して生成し、`ffprobe` で長さを測る。
+- シーン尺 ＝ ナレ実測 ＋ 頭の間 ＋ 尻の間。溢れたら速度ではなく文を削る。
+- 2の「合計≒165秒」は目安。実測で決まった尺を正とする。
 
-### 6. 生成（vp-core｜試作必須）
+### 5. シーン別プロンプト（画像起点）
+スタイルの `prompts-{style}.md` の構造（STYLE_PREFIX / SUBJECT / LIGHTING / CAMERA / SETTING / MOOD / STYLE_SUFFIX / no text / 4K）で12本起草。
+被写体の一貫性が要る人物・商品は `generate_image` の1枚目を参照に派生（character一貫が主目的なら vp-character-action を併用）。
+
+### 6. 承認ゲート（vp-core）
+**台本＋ナレ原稿（実測した尺つき）＋12プロンプトをまとめて提示**し、文章段階で承認/修正。承認まで生成しない。
+
+### 7. 生成（vp-core｜試作必須）
 - 試作：ヒーロー①と中盤⑧の **2本だけ** 先に生成して方向確認（コスト管理）。
 - 本番：5本ずつ2バッチ（6本以上同時で Forbidden #1）、45〜60秒間隔でポーリング。
 - モデル：環境/単独人物=Veo 3.1 Fast、複数人物/対話=Kling 3.0、激しい動き=Seedance 2.0、ヒーロー=Veo 3.1。
 
-### 7. ナレ生成（→ narration）
-クリーンな台本を `narration` に渡してナレ音声を生成する（jp_yomi_check→辞書→generate_speech）。
+### 8. ナレの仕上げ・字幕・合成（→ narration / vp-core）
+ナレ音声は4で生成済み。承認で原稿が変わったシーンだけ作り直す（jp_yomi_check→辞書→generate_speech）。
 詳細は `../narration/SKILL.md` フロー参照。SRT字幕（`make_subs.py`）・ffmpeg合成（`build_video.sh`：尺合わせPTS・12連結・BGM≈-15dB fade・字幕焼込み Noto Sans JP）は従来どおり vp-core/スクリプト。
 
-### 10. 納品
+### 9. 納品
 final.mp4（BGM＋字幕）／字幕なし／BGMなし／subtitles.srt と、累計コストを提示。
 
 ## 鉄則
 - ❌ 一気に全12本生成（必ず試作）。❌ Drive直書き。
 - ✅ ナレは narration スキルに委譲（クリーンテキスト＋発音辞書）。原稿の字面は壊さない。
 - ✅ 声は日本語ネイティブ（既定 Konoha）。
+- ✅ ナレを先に生成して実測し、その尺でシーンを切る（尺を先に決めない）。
 - ✅ 文章（台本・プロンプト・ナレ）を先に承認 → それから生成（vp-core ゲート）。
 - ✅ ショート/SNS狙いのBGMは AI生成より YouTuber定番フリー曲（`../ai-video-production/references/bgm-selection.md`）。
 
