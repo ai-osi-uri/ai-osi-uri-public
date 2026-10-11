@@ -1,13 +1,13 @@
 # モデル比較・使い分けガイド
 
-「AI OSI URI Creative」コネクタ（旧 fal-video）が公開する13ツールの中から、シーンに合わせて選ぶ。
+「AI OSI URI Creative」コネクタ（旧 fal-video）が公開するツールの中から、シーンに合わせて選ぶ。
 
-> **モデル指定の仕組み**：`model` 引数には ① コネクタに登録済みの **ショートカット slug**（`veo31-fast` 等）か、② `fal-ai/` `bytedance/` `alibaba/` `minimax/` `google/` で始まる **生エンドポイント**を直接渡せる。**slug が無い新モデルもコネクタ改修なしで使える**（H3 Max・Gemini Omni はこの経路）。
+> **モデル指定の仕組み**：`model` 引数には ① コネクタに登録済みの **ショートカット slug**（`veo31-fast` 等）か、② `fal-ai/` `bytedance/` `alibaba/` `minimax/` `google/` `lightricks/` `xai/` `blackforestlabs/` で始まる **生エンドポイント**を直接渡せる。**slug が無い新モデルもコネクタ改修なしで使える**（ただしこの8つ以外の名前空間はコネクタへの追加が要る）。
 > ✅ **v0.5 以降**：Veo 3.1（`veo31` / `veo31-fast`）・Kling 3.0（`kling30`）・Seedance 2.0（`seedance20`）はすべて slug 登録済み。Seedance の `bytedance/` 始まりエンドポイントも解決できる（v0.4 までは `Unknown video model` で弾かれていた）。
 
 ---
 
-## 動画モデル（2026-09-02 現行）
+## 動画モデル（2026-10-11 現行・コネクタ v2.4）
 
 > 単価は fal の従量（秒単価）。**8秒クリップ**基準の目安を併記。改定が速いので、金額は発注前に fal のモデルページで確認する。
 >
@@ -23,12 +23,12 @@
 
 | カットの性質 | 推奨 slug | 単価目安 | 理由 |
 |---|---|---|---|
-| 環境・風景・抽象（人物なし） | **`ltx23`** / `ltx23-fast` | $0.06 / $0.04 per s | 破綻リスクが低い領域。単発20秒・最大4Kで尺も稼げる |
-| **試作・当たり取り（全カット共通）** | **`h3max`** / `h3max-i2v` | $0.02 per s（〜9/7）→ 以降 $0.08 | **5秒が3秒未満で返る**。音声込み。詳細は下の「H3 Max」節 |
+| 環境・風景・抽象（人物なし） | **`ltx25-fast`** / `ltx25` | $0.09（720p）/ $0.13（1080p）per s | 破綻リスクが低い領域。単発20秒・最大4K・音声つき・マルチショット。2.3 より顔・文字・速い動きが改善 |
+| **試作・当たり取り（全カット共通）** | **`h3max-turbo`** / `h3max` / `h3max-i2v` | Turbo $0.04・通常 $0.08 per s（768P） | **5秒が3秒未満で返る**。音声込み。詳細は下の「H3 Max」節 |
 | 単独人物・標準カット | **`veo31-fast`** | $0.10〜 per s → 8s ≒ $0.80 | 安く写実。汎用の標準枠 |
 | **喋る人物・リップシンク** | **`happyhorse-i2v`** | $0.14〜0.18 per s | **日本語を含む7言語のネイティブ・リップシンク**。1080p 音声同期でこの価格は突出 |
 | 複数人物・対話・激しい動き | **`kling30`** / `kling30-i2v` | $0.112（音声off）/ $0.168（on）per s | 人物動作・物理表現。最大6カット連結・per-shot プロンプト |
-| キャラ一貫の連番カット | **`wan27-ref`** | $0.10 per s 一律 | キャラ参照＋声の一貫性を最安クラスで |
+| キャラ一貫の連番カット | **`wan30-ref`** / `h3max-ref` | fal で確認 | 画像・動画・音声の参照でキャラと声を保つ（`wan27-ref` の後継） |
 | ムーブボード（線駆動カメラ） | **`seedance20-ref`** | $0.30 per s | 参照モード。線が出力に出ない（#17 の根本解決） |
 | ↑の当たり確認・試作 | **`seedance20-mini-ref`** | 最安ティア | 構図の当たりを安く取ってから本番へ |
 | ヒーローカット（1〜2本だけ） | **`veo31`**（4K・ネイティブ音声） | $0.20〜0.60 per s | 本当の見せ場に限定する |
@@ -36,7 +36,7 @@
 ### 注意すべき課金の癖
 
 - **Seedance 2.0 は常に音声込みで課金**（720p $0.3034/s・**1080p $0.682/s**）。無音カットに使うと割高。無音なら `kling30`（音声off $0.112/s）や `ltx23` に逃がすとコストが約1/3。
-- **エンドポイントの名前空間がベンダーごとに違う**。`fal-ai/` のほか `bytedance/` `alibaba/` `minimax/` `google/` がある。slug を使えば意識不要。**この5つは生エンドポイントとしてそのまま `model` に渡せる**（コネクタの `RAW_ENDPOINT_PREFIXES`）。slug 未登録の新モデルは、コネクタを直さなくても今日から使える。
+- **エンドポイントの名前空間がベンダーごとに違う**。`fal-ai/` のほか `bytedance/` `alibaba/` `minimax/` `google/` `lightricks/` `xai/` `blackforestlabs/` がある。slug を使えば意識不要。**この8つは生エンドポイントとしてそのまま `model` に渡せる**（コネクタの `RAW_ENDPOINT_PREFIXES`）。slug 未登録の新モデルは、コネクタを直さなくても今日から使える。
 
 ### 解像度：モデルごとに上限が違う（コネクタ v2.2 で修正済み）
 
@@ -47,7 +47,13 @@
 | `seedance20` / `seedance20-ref` | 480p / 720p / 1080p / **4k** |
 | `seedance25` / `-i2v` / `-ref` | 480p / 720p / **1080p**（4K は無い） |
 | `seedance20-mini` | 480p / 720p |
-| `h3max` / `h3max-i2v` | **480P / 768P**（大文字 P。他モデルと綴りが違う） |
+| `h3max` 系（`-i2v` / `-turbo` / `-ref` / `-camera`） | **480P / 768P / 1080P**（大文字 P。他モデルと綴りが違う） |
+| `ltx25-fast` / `ltx25-i2v-fast` | 720p / 1080p / 1440p / **2160p** |
+| `ltx25` / `ltx25-i2v` | 720p / 1080p |
+| `wan30` 系 / `wan30-prime` 系 | 480p / 720p / 1080p |
+| `vidu-q4-i2v` / `-ref` | 540p / 720p / 1080p / **2K / 4K** |
+| `gemini-omni` 系 | 360p / 720p / 1080p / **4k** |
+| `veo31-lite` 系 | 720p / 1080p |
 | 上記以外 | 検証していないので素通し。fal 側が判断する |
 
 モデルに無い値を渡すと、**fal に送る前に**「Allowed: …」付きのエラーで止まる。
@@ -107,33 +113,35 @@ veo31-fast × 6本の方が量産に強い。2.5 でワンパス30秒を撮る�
    個人の自己紹介動画（`vp-personal-intro` の L1 アバター）で最も効く。
 2. **ヒーローの1本**（社長・看板メンバー）を、連結・尺合わせの工程ごと省いて一発で出したい。
 
-### H3 Max（2026-08-26・slug `h3max` / `h3max-i2v` をコネクタ v2.2 で登録済み）
+### H3 Max（2026-08-26・`h3max` / `h3max-i2v` は v2.2、`h3max-turbo` / `-turbo-i2v` / `h3max-ref` / `h3max-camera` は v2.4 で登録）
 
 fal Research が MiniMax H3（7/31 リリースの omni-modal 公開重み）を**再学習＋推論最適化**した派生。
 本家 MiniMax の公式エンドポイントに対して**品質で上、速度で約35倍**という珍しい位置にいる。
 
 ```
-model: "h3max"            // t2v。resolution: "480P" | "768P"（大文字P）
+model: "h3max"            // t2v。resolution: "480P" | "768P" | "1080P"（大文字P）
 model: "h3max-i2v"        // i2v
+model: "h3max-turbo"      // 半額版（t2v）。h3max-turbo-i2v も有り
+model: "h3max-ref"        // reference_to_video で使う（画像・動画・音声の参照）
+model: "h3max-camera"     // i2v。extra.camera_trajectory でカメラ軌道を指定
 extra: { "prompt_expansion_mode": "quality" }   // 任意。~30秒かけて richer な prompt に書き換える
 ```
 
 | | 値 |
 |---|---|
 | 速度 | **5秒クリップが3秒未満**（平均レイテンシ 3.49s）。Seedance 2.5 は 68s、Gemini Omni Flash は 27s |
-| 単価 | 480p $0.0125/s・768p $0.02/s（**launch promo、9/7 まで**）→ 以降 $0.05 / $0.08 |
-| 解像度 | 480P / **768P（1344×768・24fps）が上限** |
+| 単価 | 480P $0.05/s・768P $0.08/s・1080P $0.16/s（promo は 9/7 で終了）。Turbo は半額 |
+| 解像度 | 480P / 768P / **1080P**（2026-10 時点） |
 | 尺 | 5〜15秒 |
 | 音声 | **ネイティブ同期音声が常時付く**（別パス不要） |
-| モード | t2v / i2v のみ。**reference-to-video が無い**＝キャラ一貫は Seedance 2.5 ref のまま |
+| モード | t2v / i2v / **reference-to-video（8/29 追加）** / カメラ制御 / Turbo。fal には他に lip-sync・relight・recast・extend・スタイル系もある（動画→動画の道具が要るので未登録） |
 | 評価 | Artificial Analysis・Design Arena いずれも i2v(音声付き) で1位 |
 
-**使いどころは「試作の高速化」であって、納品の置き換えではない。** 768p 上限なので
-最終納品には足りない。逆に、これまで「1本2分待つから3案しか試さない」だった工程を
+**使いどころは「試作の高速化」であって、納品の置き換えではない。** 1080P は出せるようになったが、
+最終納品の画質は veo31 / seedance に分がある。逆に、これまで「1本2分待つから3案しか試さない」だった工程を
 「20案投げて19本捨てる」に変えられる。**当たりを H3 Max で取り、決まったカットだけ
 veo31 / seedance で本番解像度に焼き直す**、という二段構えが今の最適解。
 
-> ⚠️ **プロモ価格で見積もらない。** 9/7 に $0.02 → $0.08（4倍）に戻る。顧客見積は $0.08/s で作る。
 > ※ 実測：`extra:{"resolution":"480P"}` を渡して 832×480・5.17秒・AAC音声つきの MP4 が返ることを確認済み（2026-09-02）。
 
 **fal.live / H3 Max Director**：fal は「生成が再生に追いつく」ことを使って、チャットで指示しながら
@@ -141,13 +149,15 @@ veo31 / seedance で本番解像度に焼き直す**、という二段構えが�
 API 製品ではない**ので、案件では使えない。「動画を生成しながら再生できるらしい」という記事は
 このデモを指しており、**Seedance ではなく H3 Max の話**。混同しないこと。
 
-### Gemini Omni Flash（2026-05 I/O・slug 未登録／生エンドポイントで使う）
+### Gemini Omni Flash 1.1（slug `gemini-omni` / `-i2v` / `-ref` を v2.4 で登録）
 
 **期待されていた Veo 4 は出ず、Google の次世代枠はこれになった。** Veo 3.1 は現役のまま。
 
 ```
-model: "google/gemini-omni-flash/v1.1/text-to-video"
-（他に /image-to-video, /reference-to-video, /edit＝video-to-video）
+model: "gemini-omni"      // = google/gemini-omni-flash/v1.1/text-to-video。360p〜4k
+model: "gemini-omni-i2v"  // image-to-video
+model: "gemini-omni-ref"  // reference_to_video（画像・動画の参照）
+（/edit＝video-to-video は未登録。生エンドポイントで使う）
 ```
 
 - 尺 3〜10秒、16:9 と 9:16、ネイティブ同期音声。レイテンシ約27秒
@@ -161,15 +171,28 @@ model: "google/gemini-omni-flash/v1.1/text-to-video"
 | slug | 用途 |
 |---|---|
 | `veo3` / `veo3-fast` | Veo 3 系（旧標準）。3.1 が不調なときのみ |
+| `ltx23` / `ltx23-fast` / `ltx23-i2v` | LTX-2.3。後継は `ltx25-fast` 系 |
+| `wan27-ref` | Wan 2.7。後継は `wan30-ref` |
 | `kling25` / `kling25-i2v` | Kling 2.5 Turbo Pro |
 | `minimax` / `minimax-i2v` | MiniMax Hailuo 02。**H3 Max とは別物**（こちらは旧世代） |
 | `hunyuan` | Tencent Hunyuan |
 | `luma` | Luma Dream Machine |
 
-### 未評価（fal にあるが、まだ使い分けを決めていない）
+### 2026-10 に登録したが、まだ使い分けを決めていない（v2.4）
 
-`wan-3`（`wan27-ref` の後継。2026-08）/ `grok-imagine-video-1.5` / `happy-oyster` / `pixverse-v6`。
-案件で必要になったら、まず `llms.txt` で単価・解像度・尺を取ってからここに追記する。
+| slug | 中身 |
+|---|---|
+| `wan30` / `wan30-i2v` / `wan30-ref`、`wan30-prime` 系 | Alibaba Wan 3.0（音声つき）。起点画像は `start_image_url`（コネクタが自動で合わせる） |
+| `grok15` / `-i2v` / `-ref` / `grok15-lite` / `-lite-i2v` | xAI Grok Imagine Video 1.5。ref は画像のみ・480p/720p |
+| `vidu-q4-i2v` / `vidu-q4-ref` | Vidu Q4（2026-10-05）。4K まで |
+| `pixverse6` / `pixverse6-i2v` | PixVerse V6。`extra.style` でアニメ・クレイ等 |
+| `kling3-turbo` / `-i2v` | Kling v3 Turbo Pro（v3 の高速版） |
+| `veo31-lite` / `-i2v` | Veo 3.1 の最安版 |
+| `happyhorse-ref` | Happy Horse 1.1 の参照版 |
+| `flux3-video` / `flux3-i2v` | FLUX 3（Black Forest Labs）。5〜20秒・音声つき |
+
+案件で使ったら、`llms.txt` で単価を取り、上の「使い分けの原則」表に昇格させる。
+未登録：`happy-oyster`、Kandinsky 6、Seedance の `/us/` 版、H3 Max の動画→動画系（relight / recast / lip-sync 等）。
 
 ### Sora について（顧客に聞かれたとき用）
 
