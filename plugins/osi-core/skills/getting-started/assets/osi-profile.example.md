@@ -97,7 +97,7 @@ connectors:
 1. 連結フォルダ直下の `osi-profile.md`（このファイルの実値版）
 2. 連結フォルダ直下の `_shared/osi-profile.md`
 3. どちらも無ければ **質問して作る**（osi-core の `getting-started/assets/osi-profile.example.md` を雛形に、会社名・案件フォルダ・
-   台帳の有無・使うコネクタの 4〜5 問）。値が埋まるまで、パスや社名に依存する処理へ進まない。
+   台帳の有無・使うコネクタの 4 問）。値が埋まるまで、パスや社名に依存する処理へ進まない。
 
 `{{paths.*}}` `{{ledgers.*}}` は root からの相対パス。実体は `{{paths.root}}/<値>`。
 `{{company.*}}` `{{members.*}}` は文字列をそのまま差し込む。
