@@ -7,6 +7,8 @@ description: |
   APP_URL を返す。`create-app` から呼ばれるほか、単体で「AWS で LP 公開して」「S3 +
   CloudFront でデプロイ」「Vercel じゃなくて AWS に上げて」で発動。Next.js SSR / API
   Routes / 認証付き SaaS には使わない。
+# 手元が要る準備（get_skill が「手元の準備」の節を出す。導入手順は osi-core:local-setup）
+local_setup: [computer]
 ---
 
 # AWS 静的サイトデプロイ（atomic）

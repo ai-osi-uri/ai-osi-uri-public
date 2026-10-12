@@ -21,6 +21,8 @@ requires_connectors:
     provision: fs
   - server: superhuman
     provision: user-install
+# 手元が要る準備（get_skill が「手元の準備」の節を出す。導入手順は osi-core:local-setup）
+local_setup: [finance]
 ---
 
 # osi-finance-receipt-intake（紙レシートの証憑化 → UPSIDER明細への突合・添付）

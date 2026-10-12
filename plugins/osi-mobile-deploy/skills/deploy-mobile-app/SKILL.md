@@ -17,6 +17,8 @@ requires_connectors:
     provision: builtin
   - server: ai-osi-uri-creative
     provision: user-install
+# 手元が要る準備（get_skill が「手元の準備」の節を出す。導入手順は osi-core:local-setup）
+local_setup: [ext-deploy, mac, android]
 ---
 
 # deploy-mobile-app — モバイルアプリ新規作成オーケストレータ

@@ -15,6 +15,8 @@ description: >
 requires_connectors:
   - server: money-forward
     provision: user-install
+# 手元が要る準備（get_skill が「手元の準備」の節を出す。導入手順は osi-core:local-setup）
+local_setup: [finance]
 ---
 
 # 経理：台帳⇔MF 突合スキル（osi-finance-mf-sync）

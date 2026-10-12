@@ -14,6 +14,8 @@ requires_connectors:
     provision: mcpb
   - server: drive-fs
     provision: fs
+# 手元が要る準備（get_skill が「手元の準備」の節を出す。導入手順は osi-core:local-setup）
+local_setup: [finance]
 ---
 
 # osi-finance-freee-sync（freee 仕訳CSV ⇔ 台帳 突合）

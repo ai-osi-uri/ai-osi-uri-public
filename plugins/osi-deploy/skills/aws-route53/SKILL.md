@@ -9,6 +9,8 @@ description: |
   `aws-static-deploy` / `create-app` の中で行う。
 requires_connectors:
   - server: AI_OSI_URI_Deploy
+# 手元が要る準備（get_skill が「手元の準備」の節を出す。導入手順は osi-core:local-setup）
+local_setup: [computer]
 ---
 
 # Route 53 DNS 管理（atomic）

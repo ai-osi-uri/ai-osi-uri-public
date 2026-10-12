@@ -6,6 +6,8 @@ description: |
   を SwiftUI に置き換えて」「Flutter 版と挙動をそろえて」「Dart のこの画面を Swift
   に移して」「UI parity を取って」で発動する。**新規開発には使わない**（新規は
   `mobile-app-scaffold`）。
+# 手元が要る準備（get_skill が「手元の準備」の節を出す。導入手順は osi-core:local-setup）
+local_setup: [mac]
 ---
 
 # flutter-swift-parity-port — 既存 Flutter → SwiftUI 移植 workflow (migration only)

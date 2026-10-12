@@ -17,6 +17,8 @@ requires_connectors:
     provision: mcpb
   - server: money-forward
     provision: user-install
+# 手元が要る準備（get_skill が「手元の準備」の節を出す。導入手順は osi-core:local-setup）
+local_setup: [finance]
 ---
 
 # osi-finance-connect（AI OSI URI Finance の OAuth 接続を Chrome 伴走で通す）

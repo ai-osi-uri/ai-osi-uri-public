@@ -5,6 +5,8 @@ description: |
   で起動してクラッシュを検知する軽量スモークテスト。落ちたら `mobile-crash-triage`
   に渡す。`deploy-mobile-app` / `mobile-update-deploy` から呼ばれる。
   単体では「Simulator で起動確認して」「全画面をタップして確認して」で発動。
+# 手元が要る準備（get_skill が「手元の準備」の節を出す。導入手順は osi-core:local-setup）
+local_setup: [mac, android]
 ---
 
 # mobile-app-smoke-test — Simulator / Emulator でのスモーク起動確認

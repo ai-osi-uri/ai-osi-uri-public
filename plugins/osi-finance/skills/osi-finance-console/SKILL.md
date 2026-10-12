@@ -11,6 +11,8 @@ description: >-
   本スキルは「コンソールへの入口」に特化し、実処理そのものは各担当スキルに委ねる。
 connector_prose_ok:  # DocuSign 送付は contract-docusign-send の担当。本スキルは呼ばない
   - docusign
+# 手元が要る準備（get_skill が「手元の準備」の節を出す。導入手順は osi-core:local-setup）
+local_setup: [finance]
 ---
 
 # OSI Finance ローカルコンソール

@@ -16,6 +16,8 @@ requires_connectors:
     provision: user-install
   - server: AI_OSI_URI_Finance
     provision: mcpb
+# 手元が要る準備（get_skill が「手元の準備」の節を出す。導入手順は osi-core:local-setup）
+local_setup: [finance]
 ---
 
 # 期ズレ計上（osi-finance-accrual）

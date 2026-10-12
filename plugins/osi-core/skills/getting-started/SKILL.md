@@ -13,6 +13,8 @@ description: >
   設定の点検（コネクタの疎通・不足キーの補完）だけを行い、作り直さない。
 # コネクタは「あれば実測する」任意の対象。依存ではないので requires には書かない
 connector_prose_ok: [AI_OSI_URI_Deploy, AI_OSI_URI_Finance, ai-osi-uri-creative, slack, docusign, plaud, gmail, google-calendar, obsidian, money-forward, notion]
+# 手元が要る準備（get_skill が「手元の準備」の節を出す。導入手順は osi-core:local-setup）
+local_setup: [computer]
 ---
 
 # 初回セットアップ（getting-started）

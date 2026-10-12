@@ -18,6 +18,8 @@ requires_connectors:
 
 connector_prose_ok:  # DocuSign は ai-osi-uri-finance の ds_* 経由。docusign コネクタ自体は要らない
   - docusign
+# 手元が要る準備（get_skill が「手元の準備」の節を出す。導入手順は osi-core:local-setup）
+local_setup: [finance]
 ---
 
 # osi-finance-contract-intake（契約取込 → 請求スケジュール展開）
