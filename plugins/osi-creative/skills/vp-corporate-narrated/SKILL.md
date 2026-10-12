@@ -1,7 +1,6 @@
 ---
 name: vp-corporate-narrated
 description: AI動画の「ナレ付き企業動画」メソッド。IR・採用・PR・会社説明・ピッチなど、起承転結の12シーン構成＋ナレーション＋字幕＋BGMで2〜3分尺に仕上げる。中核は「①12シーンの台本を設計し ②各シーンの画像起点プロンプトを書き ③ナレ原稿をTTS最適化（感情タグ＋誤読対策）で書く」こと。ナレは先に生成して尺を実測し、その尺でシーンを切る。書いた台本・ナレ原稿・プロンプトは vp-core の承認ゲートに通し、承認後に生成→字幕→ffmpeg合成→BGMミックスする。「採用動画」「会社説明動画」「IR動画」「PR動画」「ピッチ動画」「ナレーション付き動画」「2〜3分の企業動画」などのリクエストで、オーケストレータ ai-video-production から呼ばれる（単独指定も可）。想い・らしさを世界観から伝える情緒型の1本は vp-brand-film。1枚＋カメラムーブだけは vp-moveboard、キャラの躍動アクションは vp-character-action。
-version: 0.3.0
 requires_connectors:
   - server: ai-osi-uri-creative
     provision: user-install

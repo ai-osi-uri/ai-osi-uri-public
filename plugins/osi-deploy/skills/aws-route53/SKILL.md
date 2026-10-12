@@ -7,7 +7,6 @@ description: |
   を設定して」「CNAME を張って」「DNS を書き換えて」で発動。
   ドメイン自体の新規購入・移管は対象外。アプリ初回公開時の ACM 検証 + alias は
   `aws-static-deploy` / `create-app` の中で行う。
-version: 0.1.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
 ---

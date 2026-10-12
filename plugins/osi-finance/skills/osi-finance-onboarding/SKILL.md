@@ -11,7 +11,6 @@ description: >
   終わっているか見て」で発動する。※ 組織値の対話生成・フォルダ・台帳・スケジュール・スモークは
   `osi-finance-setup`、MF のOAuth は `osi-finance-connect`、鍵の受け渡しの型は `credential-handoff`
   （osi-deploy）に委ねる。本スキルは「入口から完了まで途切れさせない」ことに特化する。
-version: 0.1.0
 requires_connectors:
   - server: claude-in-chrome
     provision: builtin

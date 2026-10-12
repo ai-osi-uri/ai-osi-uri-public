@@ -12,7 +12,6 @@ description: >
   「売掛金の相手別残高」「未払金の中身」「仮払金が残っていないか」「内訳明細書の元を作って」
   「決算前の残高チェック」などで発動する。osi-finance-monthly の Step 2e から呼ばれる。
   仕訳の登録はしない（読むだけ）。税額計算・申告書作成は対象外（税理士）。
-version: 0.1.0
 requires_connectors:
   - server: money-forward
     provision: user-install

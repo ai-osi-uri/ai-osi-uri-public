@@ -6,7 +6,6 @@ description: |
   不要で実行する。「BigQuery を叩いて」「Cloud Run にデプロイ」「API を有効化して」
   「gcloud 相当のことをして」で発動。破壊的呼び出しは confirm:true、bq は既定
   read-only。
-version: 0.1.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
 ---

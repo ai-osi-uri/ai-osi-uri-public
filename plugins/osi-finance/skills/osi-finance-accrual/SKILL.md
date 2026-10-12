@@ -11,7 +11,6 @@ description: >
   「決算整理の月次分をやって」「未払費用を見積もって」「前払費用を取り崩して」
   「9月分の期ズレ仕訳案」などで発動する。osi-finance-monthly の Step 2b から呼ばれる。
   減価償却・固定資産の判定・税額計算・税務調整は対象外（別スキル／税理士）。
-version: 0.1.0
 requires_connectors:
   - server: money-forward
     provision: user-install

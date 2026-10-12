@@ -1,7 +1,6 @@
 ---
 name: narration
 description: AI音声ナレーション（日本語特化）を作る atomic スキル。ElevenLabs v3 ＋ 日本語ネイティブ声（既定 Konoha）で、原稿を壊さずクリーンな漢字かな混じりのまま、読みの補正は「発音辞書(.pls)」に外出しして生成する。誤読検出は pyopenjtalk（G2P前処理）で機械化し、固有名詞・英字・複数読み漢字の読みを共通辞書＋会社別辞書に蓄積する。「ナレーションを作って」「この原稿を読み上げて」「音声を生成」「ナレ音声」「日本語の読み上げ」「TTSで音声化」など、音声ナレ生成のリクエストで発動する。動画オーケストレータ ai-video-production / vp-corporate-narrated から「ナレ生成パート」として呼ばれるほか、単体（ナレ単発・ポッドキャスト等）でも使える。BGM生成は music、動画は各vpメソッド、字幕焼き込みは subtitle（将来）の担当。
-version: 0.1.0
 requires_connectors:
   - server: ai-osi-uri-creative
     provision: user-install

@@ -14,7 +14,6 @@ description: |
   `update-deploy`。**Lovable で作られたアプリの決済実装（Stripe 有効化・本番化）は
   `lovable-payments-golive` が直接受ける**（本スキルは Lovable プロジェクトの新規作成・
   改修は扱わない）。旧名 deploy-app。
-version: 1.4.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb

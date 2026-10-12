@@ -11,7 +11,6 @@ description: |
   「Docker のまま動かしたい」「常駐サーバーを置きたい」で発動する。
   既存アプリの修正・再デプロイは `update-deploy`、Vercel は `vercel-connect-and-deploy`、
   Cloudflare は `cloudflare-deploy`、AWS は `aws-static-deploy` / `tf-state-backend` の役割。
-version: 0.1.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb

@@ -6,7 +6,6 @@ description: |
   エンコーディングによるフィールド名の食い違いのいずれか。「callable が
   unauthenticated」「PERMISSION_DENIED runInvoker」「USER_UNKNOWN_FIELDS」「apiv2
   が呼べない」「deploy したらクライアントから呼べない」で発動する。
-version: 0.1.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb

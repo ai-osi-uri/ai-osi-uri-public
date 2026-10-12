@@ -4,7 +4,6 @@ description: |
   1枚の 1024x1024 画像から iOS AppIcon と Android mipmap の全サイズを一括生成する。
   ソース画像が無ければロゴ生成にフォールバックする。`deploy-mobile-app` の Phase 4
   から呼ばれる。単体では「アプリのアイコンを差し替えて」で発動。
-version: 0.1.0
 requires_connectors:
   - server: nano-banana
     provision: user-install

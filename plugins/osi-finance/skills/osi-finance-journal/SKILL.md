@@ -11,11 +11,9 @@ description: >
   「台帳から仕訳を起こして」「ローカルで仕訳を作成」「仕訳帳を更新して」など、仕訳の生成・記帳に
   関わるリクエストで発動する。会計SaaSとの突合は mf-sync/ar-sync/freee-sync、月次全体の進行は
   osi-finance-monthly（将来 close）の役割。減価償却・引当等の決算整理仕訳は対象外（税理士の領分）。
-version: 0.1.0
 requires_connectors:
   - server: AI_OSI_URI_Finance
     provision: mcpb
-
 ---
 
 # osi-finance-journal（内部仕訳帳への仕訳生成・記帳）

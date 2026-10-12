@@ -8,7 +8,6 @@ description: |
   `update-deploy` / `deploy-preflight` など、鍵の不足に気づいたスキルから呼ばれる。単体では
   「鍵を通したい」「トークンを入れたい」「認証情報の受け渡し」「API キーの設定を手伝って」
   「Chrome で発行画面まで連れて行って」で発動。発行元ごとの手順表は持たない（画面を読んで進む）。
-version: 0.1.0
 requires_connectors:
   - server: claude-in-chrome
     provision: builtin

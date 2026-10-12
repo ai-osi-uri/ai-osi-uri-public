@@ -10,7 +10,6 @@ description: |
   Lovable で作られたプロジェクトの場合は使わない**（Lovable 内蔵 Payments の有効化・
   本番化は `lovable-payments-golive` の担当。本スキルは Vercel/AWS + AI OSI URI Deploy 拡張
   の BYOK Stripe 前提）。
-version: 0.1.1
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb

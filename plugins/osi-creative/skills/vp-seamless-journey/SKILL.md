@@ -1,7 +1,6 @@
 ---
 name: vp-seamless-journey
 description: AI動画の「連続する1本のカメラ・ジャーニー」を作るメソッド。複数の生成クリップを“前カットの最終フレームを次カットの起点画像にする”連鎖生成で継ぎ目なく繋ぎ、さらに音楽のうねり（ビート・緩急・エネルギー）に映像の加速とカット/繋ぎを同期させて疾走感を出す。「車→空撮→疾走→人物」のような一本の移動、「シームレスに繋いで」「フラッシュじゃなく映像で繋いで」「音楽に合わせて疾走感を」「引かずに前に進むカメラで」などのリクエストで、オーケストレータ ai-video-production から呼ばれる（単独指定も可）。1枚＋カメラムーブ単体は vp-moveboard、キャラの躍動は vp-character-action、ナレ主体の企業説明は vp-corporate-narrated。書いたプロンプト/ムーブ/タイミング設計は vp-core の承認ゲートに通し、承認後に生成する。
-version: 0.1.0
 requires_connectors:
   - server: ai-osi-uri-creative
     provision: user-install

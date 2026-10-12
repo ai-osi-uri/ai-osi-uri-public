@@ -16,7 +16,7 @@
 | plugins/osi-finance/config/osi-finance-settings.example.md | 277 | 共有ドライブ | \| OSI Finance ルートの場所 \| {{DRIVE_ROOT_LOCATION 例: 共有ドライブ「経理」直下／マイドライブ（要・経理チーム共有）}} \| |
 | plugins/osi-finance/skills/osi-finance-plan/SKILL.md | 41 | CAIO | 実績は勘定科目、計画は計画自身の切り方（CAIO契約売上、コンサル外注、通信費の内訳…）で、 |
 | plugins/osi-finance/skills/osi-finance-setup/SKILL.md | 117 | 共有ドライブ | OSI Finance/                 ← 顧客が決めるのはこの置き場所だけ（共有ドライブ推奨） |
-| plugins/osi-finance/skills/osi-finance-ar-sync/SKILL.md | 82 | CAIO | `INV-2026-07-016` は 対象月 2026-06 の行（CAIO 550,000）と 2026-07 の行（準備金 1,375,000 / 2,200,000）が |
+| plugins/osi-finance/skills/osi-finance-ar-sync/SKILL.md | 80 | CAIO | `INV-2026-07-016` は 対象月 2026-06 の行（CAIO 550,000）と 2026-07 の行（準備金 1,375,000 / 2,200,000）が |
 | plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 53 | Plaud | - 予備：`mail_*` が使えない環境だけ、既存下書きへの添付に Claude in Chrome（ブラウザ操作の `file_upload`）、本文パーソナライズに Obsidian（`obsidian-knowledge-consu |
 | plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 211 | CAIO | - **グループが複数の対象月にまたがる場合は、対象月を摘要・明細名に必ず残す**（例「CAIO業務 2026年4〜6月分」）。 |
 | plugins/osi-finance/skills/osi-finance-invoice/SKILL.md | 312 | 共有ドライブ | `02.送付請求書/YYYY-MM/` は**台帳フォルダ（ルート）からの相対パス**であって、共有ドライブ直下からの |
@@ -29,13 +29,13 @@
 | plugins/osi-finance/docs/導入手順書.md | 35 | 共有ドライブ | \| Google Workspace（共有ドライブ推奨） \| 必須 \| 台帳・契約書・証憑の保管 \| |
 | plugins/osi-finance/docs/導入マニュアル.md | 47 | 共有ドライブ | \| Google Workspace（**共有ドライブ**）＋ デスクトップアプリ \| 必須 \| 台帳・契約書・証憑の保管 \| |
 | plugins/osi-creative/skills/ai-video-production/references/hook-insight.md | 57 | CAIO | この一言だと、B4（会社にひとりAIの意思決定者を置く＝CAIO）がそのまま答えになる。 |
-| plugins/osi-creative/skills/vp-corporate-card/SKILL.md | 9 | Plaud | connector_prose_ok:  # Plaud は「音声の入手経路の例」。このスキルが呼ぶわけではない |
-| plugins/osi-creative/skills/vp-corporate-card/SKILL.md | 39 | Plaud | \| **A. 音声1本**（既定） \| 社長・担当が60〜90秒喋った音声／Plaud文字起こし \| 材料を集める時間がないとき。「1分喋ってください」で済む \| |
+| plugins/osi-creative/skills/vp-corporate-card/SKILL.md | 8 | Plaud | connector_prose_ok:  # Plaud は「音声の入手経路の例」。このスキルが呼ぶわけではない |
+| plugins/osi-creative/skills/vp-corporate-card/SKILL.md | 38 | Plaud | \| **A. 音声1本**（既定） \| 社長・担当が60〜90秒喋った音声／Plaud文字起こし \| 材料を集める時間がないとき。「1分喋ってください」で済む \| |
 | plugins/osi-sales/config/osi-sales-settings.example.md | 12 | Notion | 案件情報の**正本**。Notion のリード一覧は 2026-07 に、Google スプレッドシート版は |
 | plugins/osi-sales/config/osi-sales-settings.example.md | 98 | Notion | - 旧NotionのIDと現在のフォルダ番号は途中から乖離している。 |
-| plugins/osi-sales/skills/proposal-package/SKILL.md | 65 | Plaud | \| Plaud \| デモ後の文字起こしは貼り付けで受ける \| |
-| plugins/osi-sales/skills/proposal-package/SKILL.md | 108 | 共有ドライブ | - 台帳・案件フォルダ・共有ドライブ（下の表） |
-| plugins/osi-sales/skills/proposal-package/SKILL.md | 619 | Plaud | デモ後に Plaud 文字起こしが渡されたら： |
+| plugins/osi-sales/skills/proposal-package/SKILL.md | 63 | Plaud | \| Plaud \| デモ後の文字起こしは貼り付けで受ける \| |
+| plugins/osi-sales/skills/proposal-package/SKILL.md | 106 | 共有ドライブ | - 台帳・案件フォルダ・共有ドライブ（下の表） |
+| plugins/osi-sales/skills/proposal-package/SKILL.md | 617 | Plaud | デモ後に Plaud 文字起こしが渡されたら： |
 | plugins/osi-sales/skills/session-review/SKILL.md | 56 | Plaud | - **必須**: 伴走セッションの文字起こし（Plaud 等。話者ラベル付き／なしの両対応）。 |
 | plugins/osi-sales/skills/session-review/SKILL.md | 57 | Plaud | - **取得はまず Plaud MCP から**：コネクタ（`list_files` / `get_transcript` 等）が |
 | plugins/osi-sales/skills/new-lead-registration/scripts/ledger.py | 77 | 共有ドライブ | os.path.expanduser("~/Library/CloudStorage/GoogleDrive-*/共有ドライブ/*/osi-profile.md"), |
@@ -86,21 +86,21 @@
 | plugins/osi-core/skills/getting-started/references/tiers.md | 85 | Plaud | \| osi-sales \| `meeting-minutes` \| slack, box, plaud \| ○ \| 商談議事録を Plaud の文字起こしから自動生成し、Drive の `03_制作・成果物/` に docx として格納した |
 | plugins/osi-core/workflows/01-shodan-to-proposal.md | 7 | Plaud | - 文字起こし（Plaud / 会議ツール / 手書きメモ） |
 | plugins/osi-core/workflows/README.md | 8 | Plaud | \| 1 \| [商談録音 → 提案書](01-shodan-to-proposal.md) \| 「○○社の録音、提案まで持っていって」 \| 1（議事録に Plaud/Drive）→ 0 \| 60〜90 分 \| |
-| plugins/osi-deploy/skills/aws-static-deploy/SKILL.md | 38 | 共有ドライブ | 共有ドライブの `.deploy-credentials/.env` は **任意フォールバック**としてのみ参照する。 |
-| plugins/osi-deploy/skills/update-deploy/SKILL.md | 68 | GITHUB_ORG | \| `repo_owner` \| `ai-osi-uri` または個人 username \| 既定は GITHUB_ORG / GITHUB_USERNAME \| |
-| plugins/osi-deploy/skills/create-app/SKILL.md | 58 | GITHUB_ORG | **重要:** `GITHUB_ORG` が未設定だと、`github_create_repo_and_push` は `owner_override` を |
+| plugins/osi-deploy/skills/aws-static-deploy/SKILL.md | 37 | 共有ドライブ | 共有ドライブの `.deploy-credentials/.env` は **任意フォールバック**としてのみ参照する。 |
+| plugins/osi-deploy/skills/update-deploy/SKILL.md | 67 | GITHUB_ORG | \| `repo_owner` \| `ai-osi-uri` または個人 username \| 既定は GITHUB_ORG / GITHUB_USERNAME \| |
+| plugins/osi-deploy/skills/create-app/SKILL.md | 57 | GITHUB_ORG | **重要:** `GITHUB_ORG` が未設定だと、`github_create_repo_and_push` は `owner_override` を |
 | plugins/osi-deploy/skills/create-app/references/drive-record.md | 21 | Notion | Notion のリード一覧に案件が登録されていれば、対応する Drive 案件フォルダが存在する。 |
 | plugins/osi-deploy/skills/create-app/references/drive-record.md | 66 | Notion | \| 案件 \| （Notion リード ID / 案件名 / なし） \| |
 | plugins/osi-deploy/skills/create-app/references/aws-app-gotchas.md | 54 | 共有ドライブ | 初回 apply 前に **`tf-state-backend` スキル**を呼ぶ（state基盤の作成＋backend.tf差し込み）。既存のローカルstateアプリは同スキルの migrate-existing（`aws_terrafo |
 | plugins/osi-deploy/skills/setup-deploy-environment/SKILL.md | 4 | 共有ドライブ | デプロイを使えるようにする初回セットアップ。**共有ドライブの .env は使わず**、 |
-| plugins/osi-deploy/skills/setup-deploy-environment/SKILL.md | 19 | 共有ドライブ | > 旧版は `.deploy-credentials/.env` にトークンを書き込んでいたが、平文・共有ドライブ同期・ |
-| plugins/osi-deploy/skills/setup-deploy-environment/SKILL.md | 25 | 共有ドライブ | （社内手順：共有ドライブ「環境構築キット」参照） |
-| plugins/osi-deploy/skills/tf-state-backend/SKILL.md | 73 | 共有ドライブ | 6. コード一式＋HANDOFF を共有ドライブへ退避（揮発対策） |
-| plugins/osi-deploy/skills/tf-state-backend/SKILL.md | 158 | 共有ドライブ | 復旧時にバケット/キーが分からなくなる**。コード一式を共有ドライブの案件フォルダへ退避する。 |
-| plugins/osi-deploy/skills/credential-handoff/SKILL.md | 99 | 共有ドライブ | \| Google Cloud サービスアカウント \| 鍵を作っただけでは Drive のファイルを読めない \| 対象ファイル／共有ドライブをサービスアカウントのメールに閲覧共有し、Drive API を有効化する \| |
+| plugins/osi-deploy/skills/setup-deploy-environment/SKILL.md | 18 | 共有ドライブ | > 旧版は `.deploy-credentials/.env` にトークンを書き込んでいたが、平文・共有ドライブ同期・ |
+| plugins/osi-deploy/skills/setup-deploy-environment/SKILL.md | 24 | 共有ドライブ | （社内手順：共有ドライブ「環境構築キット」参照） |
+| plugins/osi-deploy/skills/tf-state-backend/SKILL.md | 72 | 共有ドライブ | 6. コード一式＋HANDOFF を共有ドライブへ退避（揮発対策） |
+| plugins/osi-deploy/skills/tf-state-backend/SKILL.md | 157 | 共有ドライブ | 復旧時にバケット/キーが分からなくなる**。コード一式を共有ドライブの案件フォルダへ退避する。 |
+| plugins/osi-deploy/skills/credential-handoff/SKILL.md | 98 | 共有ドライブ | \| Google Cloud サービスアカウント \| 鍵を作っただけでは Drive のファイルを読めない \| 対象ファイル／共有ドライブをサービスアカウントのメールに閲覧共有し、Drive API を有効化する \| |
 | plugins/osi-secretary/skills/secretary-flow/SKILL.md | 5 | Notion | Slack・Notion・添付ファイル）から作り直す・足すスキル。今の業務定義との違い（足す行・変わる行・やめる行）を見せ、会話で直してから書き込む。 |
 | plugins/osi-secretary/skills/secretary-create/SKILL.md | 6 | Notion | （Google ドライブ・Gmail・OneDrive・Slack・Notion・添付ファイル）から業務定義を作って書き込む → 人を入れる、まで伴走し、 |
 | plugins/osi-secretary/skills/secretary-create/SKILL.md | 48 | Notion | \| 資料を読む \| 繋がっているコネクタ（Google ドライブ・Gmail・Microsoft 365・Slack・Notion）と、会話に添付されたファイル \| |
 | plugins/osi-secretary/skills/secretary-create/SKILL.md | 113 | Notion | `▶ Google ドライブ ▶ Gmail（宛先・件名だけ） ▶ OneDrive・SharePoint ▶ Slack ▶ Notion ▶ ファイルを添付する ▶ 資料なしで、話して決める` |
 | plugins/osi-secretary/skills/secretary-create/SKILL.md | 121 | Notion | - ドライブ・OneDrive・Notion：「業務マニュアル」「運用ルール」「手順」「規程」「担当」「フロー」「台帳」などで探し、題名の一覧を見せて読むものを選んでもらう。 |
-| plugins/osi-mobile-deploy/skills/deploy-mobile-app/SKILL.md | 167 | GITHUB_ORG | \| GITHUB_ORG \| `ai-osi-uri` / `personal` \| `create-app` の `USE_ORG` 判定に準拠 \| |
+| plugins/osi-mobile-deploy/skills/deploy-mobile-app/SKILL.md | 166 | GITHUB_ORG | \| GITHUB_ORG \| `ai-osi-uri` / `personal` \| `create-app` の `USE_ORG` 判定に準拠 \| |

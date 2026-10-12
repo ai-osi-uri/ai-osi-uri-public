@@ -7,7 +7,6 @@ description: |
   「xcodeproj が壊れた」「pull したらビルドできない」「SPM の product が見つからない」
   「Unable to find module dependency: FirebaseFunctions」「Debug-Dev で build する」
   で発動する。
-version: 0.2.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb

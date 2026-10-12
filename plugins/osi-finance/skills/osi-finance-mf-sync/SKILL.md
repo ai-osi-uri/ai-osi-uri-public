@@ -12,11 +12,9 @@ description: >
   「台帳とマネーフォワードの差分」「支払済がMFに入っているか確認」「銀行連携が止まっていないか確認」
   「明細が取り込まれていない」「台帳のステータスを最新にして」など、突合・計上漏れ確認・連携監視の
   リクエストで発動する。日々の自動仕訳そのものは 会計SaaS（v1=MF）の口座連携（銀行・法人カード〔例: UPSIDER〕）で行う前提。
-version: 0.3.0
 requires_connectors:
   - server: money-forward
     provision: user-install
-
 ---
 
 # 経理：台帳⇔MF 突合スキル（osi-finance-mf-sync）

@@ -1,7 +1,6 @@
 ---
 name: vp-core
 description: AI動画制作の「共通インナー」atomicスキル。どの動画タイプのメソッド（vp-character-action / vp-moveboard / vp-corporate-narrated 等）からも呼ばれる、承認ゲート付きの生成ループを標準化する。役割は「①メソッドが書いたプロンプトを提示して承認/修正をもらう → ②承認後に AI OSI URI Creative コネクタで生成（generate_image / submit_video→check_status）→ ③1フレーム目・繋ぎ目を検証 → ④必要なら ffmpeg で連結 → ⑤納品」。プロンプトそのものを承認対象にするのが肝。単独では発動せず、上位メソッド／オーケストレータ ai-video-production から呼ばれる前提。動画タイプ判定や台本設計、プロンプト起草そのものは各メソッドの責任で、本スキルは行わない。
-version: 0.1.0
 requires_connectors:
   - server: ai-osi-uri-creative
     provision: user-install

@@ -1,7 +1,6 @@
 ---
 name: vp-brand-film
 description: AI動画の「ブランドムービー」メソッド。会社の想い・らしさを1〜2分で伝える情緒型の1本を、世界観設計書→試し絵の比較→台本→ナレを先に作って尺を実測→キービジュアル→動画→音の設計→仕上げ、の順で作る。伝える中身より先に「その会社らしい見え方」を決める案件向け。「ブランドムービー」「ブランド動画」「理念動画」「コンセプトムービー」「想いを伝える動画」「会社の世界観を映像に」「ビジョン動画」「高単価の1本を作りたい」などで、オーケストレータ ai-video-production から呼ばれる（単独指定も可）。会社説明・IR・採用で情報を理解させる2〜3分は vp-corporate-narrated、15/30秒の動画名刺は vp-corporate-card。
-version: 0.1.0
 requires_connectors:
   - server: ai-osi-uri-creative
     provision: user-install

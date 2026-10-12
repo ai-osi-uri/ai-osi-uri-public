@@ -11,11 +11,9 @@ description: >
   「受領請求書の取りこぼしを検出」「新着請求書を支払予定に」「未起票の請求書がないか確認」「払い漏れ
   チェック」「今朝届いた請求書を確認」「今週払うものを教えて」などで発動する。日次スケジュールタスクから呼ばれる前提。
   実際の起票（台帳書き込み）と振込情報整形は osi-finance-payment-intake、突合・月次は osi-finance-mf-sync / osi-finance-monthly。
-version: 0.2.0
 requires_connectors:
   - server: superhuman
     provision: user-install
-
 ---
 
 # osi-finance-payment-detect（受領請求書 取りこぼし検出 — 日次）

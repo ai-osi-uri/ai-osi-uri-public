@@ -1,7 +1,6 @@
 ---
 name: vp-moveboard
 description: AI動画の「1枚の画像をカメラの動きで魅せる」メソッド。写真・絵画・イラスト・商品・建築・人物など“動かしたい画像1枚”を、引いた線（ムーブボード）の通りに動かす（仕上がりはシネマティックにもフラットにも、用途次第）。中核は「ルート＋番号＋動き説明ラベル付きのムーブボードをコードで1本だけ描き、Seedance 2.0 reference-to-video の参照画像として渡す」。書いたムーブボード／プロンプトは vp-core の承認ゲートに渡し、承認後に生成する。「この画像を動かして」「絵の中を潜り込む」「商品をかっこよく回す（オービット）」「建物の中をウォークスルー」「ドローン空撮」「上空から○○」などのリクエストで、オーケストレータ ai-video-production から呼ばれる（単独指定も可）。キャラの躍動アクションは vp-character-action、ナレ主体の企業説明は vp-corporate-narrated。
-version: 0.1.0
 requires_connectors:
   - server: ai-osi-uri-creative
     provision: user-install

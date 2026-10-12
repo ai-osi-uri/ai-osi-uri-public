@@ -1,7 +1,6 @@
 ---
 name: vp-character-action
 description: AI動画の「キャラ一貫アクション」メソッド。同一キャラ・マスコット・VTuber・商品を、何カット出しても見た目をブレさせずに、躍動感のあるアクション動画にする。中核は3つのプロンプトを自分で書くこと——A:キービジュアル、B:設定シート、C:Seedanceビート列。書いたプロンプトは vp-core の承認ゲートに渡し、承認後に生成する。「このキャラで動画」「マスコットを動かす」「キャラの戦闘/アクション動画」「アニメキャラのPV」「同じキャラを複数カットでブレさせず」などのリクエストで、オーケストレータ ai-video-production から呼ばれる（単独指定も可）。1枚＋カメラムーブだけ・ナレ主体の企業説明は別メソッド（vp-moveboard / vp-corporate-narrated）。
-version: 0.1.0
 requires_connectors:
   - server: ai-osi-uri-creative
     provision: user-install

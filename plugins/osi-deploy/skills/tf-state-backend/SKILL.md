@@ -7,7 +7,6 @@ description: |
   「tfstate が消えると困る」「Terraform state を S3 に」「リモート backend に移行」
   「orphan 化が心配」「別セッションでも terraform を続けたい」で発動。新規は
   `create-app` の初回 apply 前、既存アプリは移行として使う。
-version: 0.1.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb

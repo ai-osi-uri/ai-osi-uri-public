@@ -11,7 +11,6 @@ description: >
   「10万円以上の買い物を確認して」「少額減価償却の特例を使えるか」「償却資産申告の対象を出して」
   「固定資産台帳を作って」などで発動する。osi-finance-monthly の Step 2c から呼ばれる。
   前払・前受・未払の期ズレは osi-finance-accrual、税額計算・申告書作成は対象外（税理士）。
-version: 0.1.0
 requires_connectors:
   - server: money-forward
     provision: user-install

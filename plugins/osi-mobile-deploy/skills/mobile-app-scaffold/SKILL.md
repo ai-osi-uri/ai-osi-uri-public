@@ -5,7 +5,6 @@ description: |
   から新規モバイルリポを起こして GitHub に push する。`deploy-mobile-app` の Phase 2
   から呼ばれる。単体では「モバイルの雛形を作って」「Golden Template からリポ作って」
   で発動。
-version: 0.2.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb

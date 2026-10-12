@@ -4,7 +4,6 @@ description: |
   モバイルアプリ用の Firebase プロジェクトを作成し、iOS / Android アプリを追加して
   config を GitHub Secrets に投入する。`deploy-mobile-app` の Phase 3 から呼ばれる。
   単体では「モバイルの Firebase 設定して」で発動。
-version: 0.2.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb

@@ -9,7 +9,6 @@ description: |
   「プリフライト」「apply する前に確認して」「なぜデプロイが失敗するか事前に知りたい」
   で発動。read-only で実際のデプロイはしない。デプロイ後の HTTP 確認は
   `app-smoke-test`。
-version: 0.2.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
 ---

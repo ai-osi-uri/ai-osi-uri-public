@@ -6,7 +6,6 @@ description: |
   **自動修正はしない**（修正は人の承認後に `mobile-update-deploy`）。
   「配信したアプリが起動しない」「TestFlight ビルドが落ちる」「Play で ANR が出てる」
   で発動する。
-version: 0.1.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb

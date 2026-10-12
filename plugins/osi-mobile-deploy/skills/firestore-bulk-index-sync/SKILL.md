@@ -5,7 +5,6 @@ description: |
   で詰まるとき、Firestore Admin REST API を直叩きして composite index を 1
   本ずつ冪等に作成する。「firestore の index が deploy できない」「index limit」「409
   で index 作れない」「複合インデックスを一括作成」で発動する。
-version: 0.1.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb

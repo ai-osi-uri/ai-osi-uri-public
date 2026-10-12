@@ -8,11 +8,9 @@ description: >
   に持ち、毎月それに沿って処理する。「今月の経理を締めて」「月次クローズ」「月次の会計処理」
   「先月分の仕訳をレビュー」「経理の月次チェック」「未払金を検算して」などで発動する。
   会計の正本はMFの口座連携明細、台帳は資金管理という前提。日本語の経理ワークフローに特化。
-version: 0.1.0
 requires_connectors:
   - server: money-forward
     provision: user-install
-
 ---
 
 # 月次経理クローズ（osi-finance-monthly）

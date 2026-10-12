@@ -6,7 +6,6 @@ description: |
   `deploy-mobile-app` / `mobile-update-deploy` から呼ばれる。単体では「TestFlight
   に上げて」「iOS を再配信して」で発動。TestFlight に上がった後のビルド昇格・App Store
   申請・Xcode バージョン運用は `ios-appstore-release` の担当。
-version: 0.3.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb

@@ -1,7 +1,6 @@
 ---
 name: music
 description: 動画のBGM・音楽を担う atomic スキル（narration と同格の能力アトミック）。①ブランドごとの「シグネチャー音源」を3〜5本作って使い回す設計、②AI生成（stable-audio-3 / lyria2 / cassetteai）とフリー音源（DOVA等）の使い分け、③映像のビート切り替えを曲の拍に合わせる音ハメ、④ffmpeg でのミックス（音量・フェード・途切れ防止）を扱う。「BGMを付けて」「音楽を作って」「この動画に合う曲を」「シグネチャー音源を作りたい」「テーマ曲を決めたい」「音ハメして」「BGMの音量を調整」「フリーBGMを探して」などで発動する。動画オーケストレータ ai-video-production および vp-* 各メソッドから「BGMパート」として呼ばれるほか、単体でも使える。ナレ音声は narration、映像生成は各 vp-* メソッドの担当。
-version: 0.1.0
 requires_connectors:
   - server: ai-osi-uri-creative
     provision: user-install

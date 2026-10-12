@@ -9,13 +9,11 @@ description: >
   「銀行明細と突合して」「銀行明細突合を実行して」「入金を確認して」「振込が来ているか照合」
   「銀行CSVで消込チェック」「支払の実績を明細で裏取り」など、銀行明細による照合のリクエストで発動する。
   MFの口座連携を使う組織の突合は osi-finance-mf-sync / feed-recon の役割（本スキルはCSV運用向け）。
-version: 0.1.0
 requires_connectors:
   - server: AI_OSI_URI_Finance
     provision: mcpb
   - server: drive-fs
     provision: fs
-
 ---
 
 # osi-finance-bank-recon（銀行明細CSV ⇔ 台帳 突合）

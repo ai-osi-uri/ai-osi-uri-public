@@ -11,11 +11,9 @@ description: >
   「出資/借入が売上高に推定されてる」など、MF連携明細（未仕訳）の整理に関わるリクエストで発動する。
   会計の正本はMFの口座連携明細、台帳は資金管理という前提。osi-finance-mf-sync(AP突合)・osi-finance-ar-sync(AR突合)と
   並ぶ、連携明細を入口で仕分けるスキル。
-version: 0.1.0
 requires_connectors:
   - server: money-forward
     provision: user-install
-
 ---
 
 # 経理：MF連携明細（未仕訳）の棚卸し・振り分けスキル（osi-finance-feed-recon）

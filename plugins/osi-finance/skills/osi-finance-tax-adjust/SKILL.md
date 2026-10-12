@@ -10,7 +10,6 @@ description: >
   「認定利息になりそうなものは」「税理士に渡す論点をまとめて」「節税で使える特例を確かめて」などで発動する。
   osi-finance-year-end-close の手順3から呼ばれる。仕訳はしない（候補を出すだけ）。
   所得・税額の計算、申告書の作成、どの特例を使うかの最終判断は対象外（税理士）。
-version: 0.1.0
 requires_connectors:
   - server: money-forward
     provision: user-install

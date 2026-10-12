@@ -9,13 +9,11 @@ description: >
   freee 側の起票は人が行う）。「freeeと突合して」「freee CSV 突合を実行して」「freeeの計上漏れを確認」
   「freeeエクスポートと台帳を照合」「freee連携の突合」など、freee との突合に関わるリクエストで発動する。
   MF を使う組織は osi-finance-mf-sync / osi-finance-ar-sync の役割（本スキルは使わない）。
-version: 0.1.0
 requires_connectors:
   - server: AI_OSI_URI_Finance
     provision: mcpb
   - server: drive-fs
     provision: fs
-
 ---
 
 # osi-finance-freee-sync（freee 仕訳CSV ⇔ 台帳 突合）

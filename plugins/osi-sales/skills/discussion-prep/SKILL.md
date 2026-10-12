@@ -1,6 +1,5 @@
 ---
 name: discussion-prep
-version: 0.1.0
 description: |
   「方向性ディスカッション（経営メンバーとの壁打ち）」に
   丸腰で臨まないための準備スキル。対象企業について、(1) vault（Obsidian）から過去の
@@ -16,7 +15,6 @@ description: |
 requires_connectors:
   - server: obsidian
     provision: user-install
-
 ---
 
 # 方向性ディスカッション準備スキル（discussion-prep）

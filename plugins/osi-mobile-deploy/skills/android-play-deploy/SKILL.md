@@ -6,7 +6,6 @@ description: |
   production）は明示指示があるときだけ実行する。`deploy-mobile-app` /
   `mobile-update-deploy` から呼ばれる。単体では「Play Internal に上げて」「Android
   を再配信して」で発動。
-version: 0.1.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb

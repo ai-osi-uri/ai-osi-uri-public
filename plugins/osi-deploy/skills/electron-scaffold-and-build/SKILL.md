@@ -5,7 +5,6 @@ description: |
   ビルド workflow 同梱 + push + CI 監視までを行う。`create-app` の Phase 4-D
   から呼ばれる。単体では「Electron アプリの scaffold を作って Actions でビルド」
   で発動。
-version: 0.1.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb

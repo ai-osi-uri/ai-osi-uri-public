@@ -6,7 +6,6 @@ description: |
   の文言を修正して再配信」「Android の crash を直して」
   「既存モバイルアプリに機能を足して」で発動する。新規作成は `deploy-mobile-app`、Web
   は `update-deploy`（osi-deploy）。
-version: 0.1.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb

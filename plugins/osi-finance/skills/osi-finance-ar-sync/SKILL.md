@@ -12,11 +12,9 @@ description: >
   「AR連携」「請求台帳とMFを売上で突合」「売上の計上漏れを確認」「入金漏れを確認」
   「未回収（売掛金）をMFに反映」など、AR（請求・売上・入金）の突合・裏取りのリクエストで発動する。
   会計仕訳の正本はMF、請求管理台帳は資金管理（請求予定・採番・入金予定）の正本という前提。
-version: 0.1.0
 requires_connectors:
   - server: money-forward
     provision: user-install
-
 ---
 
 # 経理：請求台帳⇔MF 売上突合スキル（osi-finance-ar-sync）

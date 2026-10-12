@@ -6,7 +6,6 @@ description: |
   `electron-scaffold-and-build` から呼ばれる。単体では「GitHub Actions
   のビルドを監視して」「Release の URL を取得して」で発動。Vercel
   のデプロイ監視には使わない。
-version: 0.1.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb

@@ -1,8 +1,6 @@
 ---
 name: proposal-estimate
 description: 見積もり・スケジュール入り**詳細提案書（pptx）を単発生成する atomic スキル**。まず storyline-gate で「この相手が、このスコープ・価格・期間で Yes と言う筋」を骨子1枚にして承認を取り、そのあとで pptx を1ファイル生成する。具体的なサービス内容（自社の定型サービス / カスタム開発 等）、初期費用・月額・割引、契約期間、ガント、週次定例を盛り込む。**通常はオーケストレータ `proposal-package` から呼ばれる**設計で、Drive 格納や営業管理表への反映は本スキルでは行わない。「pptx だけ単発で見積もり付き提案書を作って」など pptx 生成だけが目的のとき直接呼ぶ。価格・期間にまだ踏み込まない初回アプローチは proposal-package の初回ルート（storyline-gate→deck-composition→pptx-custom の3層）で組む。
-version: 0.2.0
-
 ---
 
 # 提案見積もり作成スキル（atomic）

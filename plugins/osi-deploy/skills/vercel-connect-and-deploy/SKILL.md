@@ -6,7 +6,6 @@ description: |
   ビルド失敗の自動修正ループ（最大 5 回）まで行い、既定で Deployment Protection
   を解除して認証なしで公開する。`create-app` から呼ばれる。単体では「Vercel
   にデプロイして」「Next.js を Vercel に上げて」で発動。
-version: 0.4.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb

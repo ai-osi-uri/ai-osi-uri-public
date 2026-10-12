@@ -10,7 +10,6 @@ description: |
   アカウント作成・パスワード入力・Stripe/Lovable の各種「有効化」「承認」「Go live」
   ボタンのクリックなど、アカウント本人性に関わる操作は必ずユーザー自身が行う（本スキルは
   実装・確認・案内のみを担当する）。
-version: 0.1.0
 requires_connectors:
   - server: Lovable
     provision: user-install

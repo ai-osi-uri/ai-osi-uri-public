@@ -5,7 +5,6 @@ description: |
   URI Deploy 拡張の PAT を使い `.env` は読まない。`create-app` の Step 1
   として呼ばれる。単体では「GitHub に push して」「リポジトリ作って push」で発動。
   リポ作成のみ・push のみの片割れ作業には使わない。
-version: 0.3.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb

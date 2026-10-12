@@ -5,7 +5,6 @@ description: |
   / Firebase config 等）を一括投入する。keystore が未生成なら作成して Drive
   に退避する。`deploy-mobile-app` の Phase 5 から呼ばれる。単体では「モバイルの
   Secrets を入れて」で発動。
-version: 0.3.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb

@@ -8,7 +8,6 @@ description: |
   「決済を付けたい」「お試しの上限に当たった」で発動する。`create-app` が `[quota_exceeded:projects]`・`[quota_exceeded:resources]`・`[quota_exceeded:media]`・`[quota_exceeded:generation]` を受けたとき、
   `secretary-create` が URL のコネクタで「自分の鍵のときだけ」と止められたときにも呼ばれる。
   ダウンロード版（AI OSI URI Deploy 拡張）の鍵は `setup-deploy-environment` の担当。
-version: 0.2.0
 ---
 
 # 自社アカウントに移る（own-keys-setup）

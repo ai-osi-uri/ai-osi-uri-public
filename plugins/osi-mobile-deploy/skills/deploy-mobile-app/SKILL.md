@@ -8,7 +8,6 @@ description: |
   アプリ作って」「Play Store に出したい」「TestFlight に上げるところまでやって」
   で発動する。既定はネイティブ 2 本立て（新規で Flutter / React Native は選ばない）。
   既存リポの修正は `mobile-update-deploy`、Web / SaaS は `create-app`（osi-deploy）。
-version: 0.3.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb

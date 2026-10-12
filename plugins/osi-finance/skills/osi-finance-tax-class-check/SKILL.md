@@ -9,7 +9,6 @@ description: >
   「税区分をチェックして」「消費税区分を確認して」「インボイスの有無を確かめて」「非課税・不課税の誤りを探して」
   「経過措置の80%・70%を確かめて」「海外SaaSの税区分を見て」などで発動する。osi-finance-monthly の Step 2e から呼ばれる。
   消費税額の計算・申告書の作成は対象外（税理士または申告ソフト）。
-version: 0.1.0
 requires_connectors:
   - server: money-forward
     provision: user-install

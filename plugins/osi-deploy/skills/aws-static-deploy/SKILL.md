@@ -7,7 +7,6 @@ description: |
   APP_URL を返す。`create-app` から呼ばれるほか、単体で「AWS で LP 公開して」「S3 +
   CloudFront でデプロイ」「Vercel じゃなくて AWS に上げて」で発動。Next.js SSR / API
   Routes / 認証付き SaaS には使わない。
-version: 0.1.0
 ---
 
 # AWS 静的サイトデプロイ（atomic）

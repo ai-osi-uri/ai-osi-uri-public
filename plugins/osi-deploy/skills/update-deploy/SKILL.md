@@ -7,7 +7,6 @@ description: |
   アプリにパッチ当てて」など、**新規作成ではなく既存リポを更新する**依頼で発動する。
   新規作成は `create-app`。**モバイルアプリの更新は
   `mobile-update-deploy`（osi-mobile-deploy）**の担当で、本スキルは扱わない。
-version: 0.7.0
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb
