@@ -152,7 +152,7 @@ local_setup: [computer]
 |---|---|---|
 | 提案書の骨子・営業資料 | `osi-docs:storyline-gate` → `osi-sales:proposal-package` | 商談のメモ・相手先の公式サイト |
 | 議事録から次にやること | `osi-sales:meeting-minutes`（1 段目。無理なら `osi-core:transcript-router` に文字起こしを貼る） | 議事録・文字起こし |
-| 請求書・経費の整理 | `osi-finance:osi-finance-setup` に引き継ぐ（経理は専用の初期設定がある） | 請求の一覧・領収書 |
+| 請求書・領収書から支払の一覧／今月の入金・支払の予定表 | 本体で表にする（写真・PDF を読み、相手・金額・期日を並べる。台帳への登録は経理の初期設定 `osi-finance:osi-finance-onboarding` のあとで） | 請求書・領収書の写真や PDF、入金・支払の予定 |
 | 社内のお知らせ文・募集文 | 本体で下書き（社内向けの文の書き方は会社プロファイルの決まりに沿う） | 決まりの中身・条件 |
 | 受付ページ・サイト | `osi-deploy:create-app`（2 段目。マネージドも Deploy も ✕ なら `osi-deploy:local-project-output`） | 何を受け付けるか |
 | 動画 | `osi-creative:ai-video-production`（2 段目。Creative が ✕ なら見送り、ほかを選んでもらう。鍵の登録には誘わない） | — |
