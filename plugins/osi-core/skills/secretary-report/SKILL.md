@@ -42,7 +42,7 @@ description: >
 | 引数 | 値 |
 |---|---|
 | project_ref | `{{secretary.project_ref}}` |
-| member | `{{secretary.member}}`（空なら省いて `email` に本人の会社メール） |
+| member | `{{secretary.member}}`（空なら省いて `email` に本人の会社メール）。リモートの道具では省いてよい（呼んだ本人のアカウントに固定され、指定しても使われない） |
 | report | 上の書き方の本文 |
 | account / links | 分かれば |
 
