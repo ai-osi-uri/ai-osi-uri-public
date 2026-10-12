@@ -118,7 +118,7 @@
       "name": "osi-knowledge",
       "source": "./plugins/osi-knowledge",
       "description": "知識管理：記録を知識に育てる一式（整える・集める・束ねる・答える・確かめて直す）と、Google Calendar の空き時間取得。",
-      "version": "0.3.1",
+      "version": "0.3.2",
       "category": "knowledge",
       "tags": [
         "obsidian",
