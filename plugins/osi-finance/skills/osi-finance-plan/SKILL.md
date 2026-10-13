@@ -12,6 +12,9 @@ description: >
 
 # 計画を読む
 
+> **台帳の置き場（手元の xlsx ／ Web）を先に確かめる。** URL のコネクタの `ledger_status` が `backend: web` を返したら、本文の `sheets_*`・`ledger_maintain` を `ledger_*` に読み替える（対応表と注意は `osi-finance-setup/references/ledger-backend.md`。Web の書く道具は既定で dry_run なので、書くときは `dry_run:false`）。Web なら台帳の仕事に手元の Finance 拡張は要らない（DocuSign・メールの添付だけは手元）。`mfi_*` は置き場に関係なく URL のコネクタでも使える。
+
+
 > **台帳の読み書き（拡張が無いとき）**：拡張（AI OSI URI Finance）の `sheets_*` があればそれを使う。**拡張の道具が無ければ同梱の `assets/scripts/ledger_io.py <経理フォルダ>` を使う**（`read` / `append` / `update` / `update-status` / `next-id`。タブ名＋列名で指定し、引数・戻りは拡張にそろえてある。書く前に `_backup/` へ控える）。
 
 > **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` `{{members.*}}` は、連結フォルダ直下の `osi-profile.md`（雛形: osi-core の `plugins/osi-core/skills/getting-started/assets/osi-profile.example.md`）の値に置き換えて解釈する。無ければ会社名・案件フォルダ・台帳の有無・使うコネクタを質問して先に作る。値をここに直書きしない。

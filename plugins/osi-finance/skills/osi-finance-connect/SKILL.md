@@ -23,6 +23,9 @@ local_setup: [finance]
 
 # osi-finance-connect（AI OSI URI Finance の OAuth 接続を Chrome 伴走で通す）
 
+> **URL のコネクタがつながっているなら、MF クラウド請求書はそちらでつなぐのが早い。** `mfi_connect` が会計のサイトの URL を返すので、利用者はそこでアプリ（Client ID・Secret）を預けて「MF クラウド請求書とつなぐ」を押すだけ（リダイレクト URI は https://finance.ai-osi-uri.info/connect/mfi/callback をアプリに足す）。つないだら URL のコネクタの `mfi_*`・`sync_ledger` が使える（台帳の置き場が手元なら、`sync_ledger` だけは手元の拡張のものを使う。`osi-finance-setup/references/ledger-backend.md`）。以下の手順は、手元の拡張（.mcpb）の `mfi_*` をつなぐときのもの。
+
+
 > **役割**：`AI OSI URI Finance` 拡張（.mcpb）に必要な認証情報を、Claude in Chrome で画面を
 > 一緒に操作しながら取得し、コネクタ設定に入れて疎通確認まで持っていく。**接続を通す**ことだけが責務。
 >

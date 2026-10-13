@@ -28,6 +28,9 @@ connector_prose_ok:  # DocuSign は任意の補助。無くても運用は成立
 
 # osi-finance-setup（OSI Finance 初回セットアップ・オーケストレータ）
 
+> **台帳の置き場（手元の xlsx ／ Web）を先に確かめる。** URL のコネクタの `ledger_status` が `backend: web` を返したら、本文の `sheets_*`・`ledger_maintain` を `ledger_*` に読み替える（対応表と注意は `osi-finance-setup/references/ledger-backend.md`。Web の書く道具は既定で dry_run なので、書くときは `dry_run:false`）。Web なら台帳の仕事に手元の Finance 拡張は要らない（DocuSign・メールの添付だけは手元）。`mfi_*` は置き場に関係なく URL のコネクタでも使える。
+
+
 > **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` `{{members.*}}` は、連結フォルダ直下の `osi-profile.md`（雛形: osi-core の `plugins/osi-core/skills/getting-started/assets/osi-profile.example.md`。作るときは getting-started の `scripts/init_kit.py`）の値に置き換えて解釈する。無ければ会社名・案件フォルダ・台帳の有無・使うコネクタを質問して先に作る。値をここに直書きしない。
 
 > **役割**：新しい組織（1 つの Claude 組織 = 1 社）に OSI Finance を導入するための初回セットアップを、
@@ -145,6 +148,23 @@ OSI Finance/                 ← 顧客が決めるのはこの置き場所だ�
 ---
 
 ## ステップ 3: 台帳の配置
+
+### 3-0. 置き場を選ぶ（手元の xlsx ／ Web）
+
+台帳の置き場は会社ごとに **手元（xlsx）** か **Web（会計のサイトの中）** を選べる。表と列はどちらも同じ。
+利用者にこう聞く（普通の言葉で・1問）：
+
+> 台帳（請求・支払の記録）をどこに置きますか？
+> ・パソコンの中の Excel（経理フォルダ。手元の Finance 拡張とコンソールで扱う）
+> ・会計のサイトの中（どのパソコン・スマートフォンからも同じ台帳を見られる。Claude は URL のコネクタだけで扱える）
+
+- **Web を選んだ** → URL のコネクタの `ledger_setup`（まず dry_run で作る表を見せ、OK のあと `dry_run:false`）。
+  手元の xlsx・拡張・コンソールの準備（下の 1〜4 と「拡張を入れる」）は飛ばし、3-2 の「発行者設定」は `ledger_update_rows` で埋める。
+  人が見る画面は会計のサイトの `/ledger`。以後の道具の読み替えは `references/ledger-backend.md`。
+- **手元を選んだ** → `ledger_set_backend`（backend: local）で選んだことを残し（URL のコネクタがあるとき）、下の 1 から進める。
+- 迷っている・URL のコネクタが無い → 手元で進める（あとから会計のサイトの「台帳」画面で Web に切り替えられる）。
+
+### 3-1. 手元（xlsx）に置く
 
 台帳はローカルの xlsx。Google スプレッドシート版は 2026-08 に廃止した。
 
