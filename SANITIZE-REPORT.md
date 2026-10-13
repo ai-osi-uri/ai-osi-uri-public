@@ -97,7 +97,7 @@
 | plugins/osi-deploy/skills/setup-deploy-environment/SKILL.md | 24 | 共有ドライブ | （社内手順：共有ドライブ「環境構築キット」参照） |
 | plugins/osi-deploy/skills/tf-state-backend/SKILL.md | 74 | 共有ドライブ | 6. コード一式＋HANDOFF を共有ドライブへ退避（揮発対策） |
 | plugins/osi-deploy/skills/tf-state-backend/SKILL.md | 159 | 共有ドライブ | 復旧時にバケット/キーが分からなくなる**。コード一式を共有ドライブの案件フォルダへ退避する。 |
-| plugins/osi-deploy/skills/credential-handoff/SKILL.md | 100 | 共有ドライブ | \| Google Cloud サービスアカウント \| 鍵を作っただけでは Drive のファイルを読めない \| 対象ファイル／共有ドライブをサービスアカウントのメールに閲覧共有し、Drive API を有効化する \| |
+| plugins/osi-deploy/skills/credential-handoff/SKILL.md | 105 | 共有ドライブ | \| Google Cloud サービスアカウント \| 鍵を作っただけでは Drive のファイルを読めない \| 対象ファイル／共有ドライブをサービスアカウントのメールに閲覧共有し、Drive API を有効化する \| |
 | plugins/osi-secretary/skills/secretary-flow/SKILL.md | 5 | Notion | Slack・Notion・添付ファイル）から作り直す・足すスキル。今の業務定義との違い（足す行・変わる行・やめる行）を見せ、会話で直してから書き込む。 |
 | plugins/osi-secretary/skills/secretary-create/SKILL.md | 6 | Notion | （Google ドライブ・Gmail・OneDrive・Slack・Notion・添付ファイル）から業務定義を作って書き込む → 人を入れる、まで伴走し、 |
 | plugins/osi-secretary/skills/secretary-create/SKILL.md | 48 | Notion | \| 資料を読む \| 繋がっているコネクタ（Google ドライブ・Gmail・Microsoft 365・Slack・Notion）と、会話に添付されたファイル \| |
