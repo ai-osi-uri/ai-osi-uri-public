@@ -89,6 +89,11 @@ requires_connectors:
   接続は `ds_connect`（ブラウザで「許可」を1回）、鍵の保存はコンソールの［DocuSign］画面。
   **未接続のまま `ds_create_envelope` を呼ぶと、送信せずに `need_connect` と認可URLを返す。**
 
+- **URL のコネクタ（リモート）の `ds_*`**：手元の拡張が無い環境ではこちら。DocuSign のつながりは Finance のものではなく、
+  ポータルの「ツール設定」→「DocuSign」（`/keys/service/docusign`）で本人がつなぐ共通の道具。
+  送る書類は会社の書類の置き場の相対パスで指す（先に `files_put` で上げる）。締結済みは `ds_save_documents` で置き場に戻る。
+  クラウドサインで送る組織は同じ形の `cs_*`（ツール設定 →「クラウドサイン」でクライアント ID を預ける）。
+
 - **AWS / S3 / Supabase：使わない。** 契約書のための置き場所を新設しない（2026-08-17 の判断を維持）。
 - **Claude の bash**：契約書の PDF 変換や中身の確認に使う（アップロードには使わない）。
 - **Drive（マウント済み共有ドライブ）**：格納先は `references/storage-and-naming.md` の定義に従う。**このスキルにパスを直書きしない**（組織ごとに違い、移行でも動く）。

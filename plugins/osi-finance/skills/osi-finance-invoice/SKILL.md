@@ -32,7 +32,7 @@ local_setup: [finance]
 
 # osi-finance-invoice（月次 請求書発行 → Gmail下書き）
 
-> **台帳の置き場（手元の xlsx ／ Web）を先に確かめる。** URL のコネクタの `ledger_status` が `backend: web` を返したら、本文の `sheets_*`・`ledger_maintain` を `ledger_*` に読み替える（対応表と注意は `osi-finance-setup/references/ledger-backend.md`。Web の書く道具は既定で dry_run なので、書くときは `dry_run:false`）。Web なら台帳の仕事に手元の Finance 拡張は要らない。`mfi_*`・DocuSign（`ds_*`）・クラウドサイン（`cs_*`・Web 版だけ）・メールの添付（`mail_*`）は置き場に関係なく URL のコネクタでも使え、そちらではファイルを書類の置き場の相対パスで指す（`files_put` で上げる）。
+> **台帳の置き場（手元の xlsx ／ Web）を先に確かめる。** URL のコネクタの `ledger_status` が `backend: web` を返したら、本文の `sheets_*`・`ledger_maintain` を `ledger_*` に読み替える（対応表と注意は `osi-finance-setup/references/ledger-backend.md`。Web の書く道具は既定で dry_run なので、書くときは `dry_run:false`）。Web なら台帳の仕事に手元の Finance 拡張は要らない。`mfi_*` は置き場に関係なく URL のコネクタでも使える。メール（`mail_*`）・電子署名（`ds_*`・`cs_*`）は Finance の外の共通の道具で、つなぐのはポータルの「ツール設定」（ファイルは会社の書類の置き場の相対パスで指す。`files_put` で上げる）。
 
 
 > **組織固有値（社名・登録番号・住所・振込先・税率・採番ルール・Drive ルート／フォルダ名・台帳ファイル名）は

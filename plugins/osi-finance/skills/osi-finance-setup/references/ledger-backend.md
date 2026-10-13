@@ -36,29 +36,30 @@
 | `mfi_get_billing_pdf` の `out_path`（台帳フォルダ） | 同じ道具の `out_path`（会計のサイトのファイル置き場） | Web では「送付請求書ファイル」列に返った `saved` を書く |
 | 手元のコンソール | 会計のサイト `/ledger` | |
 
-## 書類の置き場・電子署名・メールの添付（Web 版）
+## メール・電子署名・書類の置き場（共通の道具）
 
-URL のコネクタには、台帳とは別に次の道具がある。**台帳の置き場（local / web）に関係なく使える。**
-ファイルは手元のパスではなく、会計のサイトの「書類の置き場」の中の相対パス（例 `03.契約書/送付前/業務委託契約書.pdf`）で指す。
+メールと電子署名は Finance の道具ではなく、URL のコネクタの**共通の道具**（どの仕事からも使う）。
+台帳の置き場（local / web）に関係なく使える。**つなぐのはポータルの「ツール設定」**（https://www.ai-osi-uri.info/keys/use/mail ・ /keys/use/esign）。
+Finance のスキルは「使う側」として、請求書の送付・受け取った請求書の保存・契約書の送付にこれらを使う。
 
-| 仕事 | URL のコネクタの道具 | 手元の Finance 拡張 | つなぐ場所（会計のサイト） |
+| 使い道（Finance の仕事） | 共通の道具 | 手元の Finance 拡張 | つなぐ場所（ツール設定） |
 |---|---|---|---|
-| 書類を置く・一覧・見せる | `files_put`・`files_list`・`files_url` | 台帳フォルダ | `/files`（「書類」） |
-| DocuSign で契約書を送る・締結済みを保存 | `ds_status`・`ds_connect`・`ds_create_envelope`・`ds_get_envelope`・`ds_list_envelopes`・`ds_save_documents` | `ds_*`（手元のパス） | `/connect/docusign` |
-| クラウドサインで送る・締結済みを保存 | `cs_status`・`cs_create_document`・`cs_send_document`・`cs_get_document`・`cs_list_documents`・`cs_save_files` | **無い（Web 版だけ）** | `/connect/cloudsign` |
-| メールに添付して送る・受け取った添付を保存 | `mail_status`・`mail_connect`・`mail_create_draft`・`mail_send_draft`・`mail_list_attachments`・`mail_save_attachments` | `mail_*`（手元のパス） | `/connect/mail`（人ごと） |
+| 請求書 PDF・契約書を置く・一覧・見せる | `files_put`・`files_list`・`files_url`（会社の書類の置き場） | 台帳フォルダ | 置き場は会計のサイトの「書類」でも見られる |
+| 請求書を添付して送る・受け取った請求書をしまう | `mail_status`・`mail_connect`・`mail_create_draft`・`mail_send_draft`・`mail_list_attachments`・`mail_save_attachments` | `mail_*`（手元のパス） | `/keys/service/gmail`・`/keys/service/outlook`（人ごと） |
+| 契約書を DocuSign で送る・締結済みを戻す | `ds_status`・`ds_connect`・`ds_create_envelope`・`ds_get_envelope`・`ds_list_envelopes`・`ds_save_documents` | `ds_*`（手元のパス） | `/keys/service/docusign` |
+| 契約書をクラウドサインで送る・締結済みを戻す | `cs_status`・`cs_create_document`・`cs_send_document`・`cs_get_document`・`cs_list_documents`・`cs_save_files` | **無い（リモートだけ）** | `/keys/service/cloudsign` |
 
-- 手元と Web で同じ名前の道具（`ds_*`・`mail_*`）がある。どちらのコネクタの道具かで、ファイルの指し方（手元のパス／置き場の相対パス）が違う。
-  台帳が Web なら URL のコネクタのほうを使う。手元の台帳フォルダのファイルを Web で送りたいときは、先に `files_put` で置き場に上げる。
+- 手元と URL のコネクタで同じ名前の道具（`ds_*`・`mail_*`）がある。どちらの道具かで、ファイルの指し方（手元のパス／会社の書類の置き場の相対パス）が違う。
+  台帳が Web なら URL のコネクタのほうを使う。手元の台帳フォルダのファイルを送りたいときは、先に `files_put` で置き場に上げる。
 - 作る道具は既定で `dry_run:true`、作っても下書き（`send:false`）。送るのは本人が宛先・書類を確かめて OK したときだけ。
   - `cs_send_document` は `expect_emails`、`mail_send_draft` は `expect_to`・`expect_attachments` が実物と一致しないと送らない。
 - 締結済みの保存先は既定で `03.契約書/締結済/`、受け取った添付は `04.受領書類/YYYY-MM/`。保存した `path` を台帳の「〜ファイル」列に書く。
-- メールのつながりは人ごと（会社のアプリは会計を変えられる人が 1 回預け、各自が「つなぐ」を押す）。DocuSign・クラウドサインは会社ごと。
-- まだつないでいないときは、道具がつなぐ場所の URL を返す。その URL を本人に渡し、鍵の値は会話に貼ってもらわない。
+- つながりは人ごと（本人の鍵とトークン。本人に無いアプリの鍵は会社に預けた鍵を使う）。
+- まだつないでいないときは、道具がツール設定の URL を返す。その URL を本人に渡し、鍵の値は会話に貼ってもらわない。
 
 ## 事故の型
 
 - 置き場を確かめずに手元の `sheets_*` を叩き、Web 台帳と手元の xlsx が食い違う → 仕事の始めに `ledger_status`
 - Web の道具は既定で dry_run。書いたつもりで書けていない → 書くときは `dry_run:false` を明示し、返事の `appended` / `updatedCells` を見る
-- Web の `ds_*`・`cs_*`・`mail_*` に手元のパスを渡して「ファイルがありません」→ 先に `files_put` で置き場に上げる（`files_list` で確かめる）
+- URL のコネクタの `ds_*`・`cs_*`・`mail_*` に手元のパスを渡して「ファイルがありません」→ 先に `files_put` で置き場に上げる（`files_list` で確かめる）
 - 置き場を切り替えたら中身も移ったと思い込む → 移すのは別の作業（会計のサイトの「台帳」画面の「AI に頼む」）
