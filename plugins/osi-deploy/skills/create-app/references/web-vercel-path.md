@@ -130,7 +130,20 @@ Deploy 拡張の Stripe ツールを使用する（詳細は後述）。
 | Next.js のみ | `NEXT_PUBLIC_APP_URL` |
 | + Supabase | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` |
 | + Anthropic (Claude API) | `ANTHROPIC_API_KEY` |
+| + OpenAI (ChatGPT API) | `OPENAI_API_KEY` |
+| + 判定（Jev） | `TYPESAFE_API_KEY` |
 | + Stripe | `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PRICE_ID`, `STRIPE_WEBHOOK_SECRET` |
+
+### AI の鍵をアプリに入れる（値は Claude を通さない）
+
+`ANTHROPIC_API_KEY`・`OPENAI_API_KEY`・`TYPESAFE_API_KEY` は、env_vars に値を書かない。プロジェクトを作ったあと、
+`vercel_set_env` の `from_extension`（`anthropic` / `openai` / `typesafe`）で、預けてある鍵をそのまま入れる。
+
+- URL のコネクタでは、ポータルの「ツール設定」に預けた鍵（本人 → 会社の順）が入る。共用の鍵は入らない。
+- 手元の拡張では、拡張設定に保存した鍵が入る。
+- 鍵が無いと「まだ預けられていません」と返る。そのときは `own-keys-setup`（ツール設定の Anthropic・OpenAI・TypeSafe）に渡し、預けてもらってから入れ直す。
+- お客様に納めるアプリは、お客様のツール設定（お客様の会社）に預けた鍵を使う。当社の鍵を入れたまま納めない。
+- 入れたあとは `vercel_redeploy` で反映する。
 
 ### 組み立て例
 

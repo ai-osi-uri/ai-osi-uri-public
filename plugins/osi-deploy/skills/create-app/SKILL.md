@@ -158,7 +158,7 @@ Phase N:   完了レポート
    - Web-Railway: `railway.valid: true`（+ `railway_health_check` で作成先ワークスペースを確認）
    - Stripe: `stripe.test` / `stripe.live`
    - Supabase: `supabase.valid: true`
-   - AI 機能: `anthropic.valid: true`
+   - AI 機能: `anthropic.valid: true`（URL のコネクタでは、ツール設定に Anthropic・OpenAI・TypeSafe の鍵があるか。アプリへは `vercel_set_env` の `from_extension` で値を見せずに入れる）
 3. **`github.repo_target` を読み、リポジトリの作成先を確定する**（[作成先の決定ルール](#作成先の決定ルールorg-or-個人)）。
    `personal:` になっていて Org に置きたい場合は、Phase 3 のプランで作成先を明示して承認を取り、
    `github_create_repo_and_push` に `owner_override: "<org slug>"` を渡す
