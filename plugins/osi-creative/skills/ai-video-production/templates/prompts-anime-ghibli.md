@@ -35,7 +35,7 @@ warm watercolor and gouache painted background,
 
 ## 推奨モデル
 
-`veo3-fast`（コスト・品質のバランス）
+`kling30-i2v`（コスト・品質のバランス。下書きは `h3max-turbo-i2v`）（Veo 3 / 3.1 系は fal で廃止済み・廃止予定のため 2026-10 に置き換え。正本は `../references/model-comparison.md`）
 
 ## キャラクターの扱い
 

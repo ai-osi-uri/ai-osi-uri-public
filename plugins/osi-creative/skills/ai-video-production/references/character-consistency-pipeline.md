@@ -102,6 +102,55 @@ ENEMIES: [任意。群がる敵など]
 
 ---
 
+## 連番カットで見た目をそろえる手順（設定シート → 固定文 → 起点画像の清書 → 部分修正）
+
+ナレ付き・物語・動画名刺など、**1カット1動作の i2v を何本も並べる**案件の手順。プロンプトB（設定シート）の軽量版と、
+その後の「起点画像の清書」「部分修正」までを1本の流れにする。アクションの一発生成（プロンプトC）とは別の使い方。
+
+```
+① キービジュアル（全身・正面寄り・無地背景）   人が見て OK した1枚を正本にする
+② 設定シート      正面・斜め・横・後ろ ＋ 表情3（笑顔・驚き・困り顔）＋ 手に持つ物
+③ 見た目の固定文  英語1文に固定し、以後すべての画像・動画プロンプトに同じ文言で入れる
+④ 起点画像の清書  設定シート＋構図ラフを参照に、カットごとの起点画像を高解像度で描き直す
+⑤ 部分修正        崩れやすい小物・残った文字は、描き直さず edit_image で「消す・置き換える」だけ
+```
+
+### ② 設定シート（キャラごとに1回だけ作り、使い回す）
+プロンプトBの「Turnaround＋Expressions」を最小構成にしたもの。アクション用の武器分解・シルエット一覧は要らない。
+```
+Character reference sheet of the SAME character as the reference image:
+front, three-quarter, side and back views, plus three expressions (smile, surprised, troubled),
+and the one object the character holds. Same outfit, colors and proportions.
+Plain light background, no text, no labels.
+```
+- `generate_image`（`nano-banana-pro` 推奨）の `extra.image_urls` に①を渡す。横長（16:9）で作る。
+- **設定シートは参照用。動画の起点にしない**（i2v は入力が1フレーム目になる #17）。
+
+### ③ 見た目の固定文
+- 例：`wavy dark-brown hair, round face, rosy cheeks, grey blazer over white T-shirt, grey trousers`
+- 画像・動画のどのプロンプトにも**一字一句同じ文言**で入れる。言い換えると別人になりやすい。
+- 世界観設計書の**画風の固定文（style_lock）**を先頭に、見た目の固定文をその次に置く（`prompt-quality-rubric.md` の i2v 節の型）。
+- 作品のブリーフかブランドキット（`brandkit.md`）に書いて残し、次の動画でも使い回す。
+
+### ④ 起点画像の清書（承認後・カットごと）
+- 構図のラフ（コンテ段階の安い画像）は確認用。本番の起点は、**設定シート（1枚目）＋ラフ（2枚目）を参照**に描き直す。
+  ```
+  <style_lock>. Recreate the composition of the second reference image with the character exactly as
+  in the first reference sheet. <見た目の固定文>. <場面>. No text, no speech bubbles, no logos.
+  ```
+- 縦型なら起点も 9:16 で作る（動画モデルの多くは起点画像の比率に従う）。
+- ラフに描いてあった文字・吹き出し・ボタンの位置取りは、**起点画像では消す**（文字は仕上げで載せる）。
+
+### ⑤ 部分修正（消す・置き換えるだけ）
+- 小物の差し替え・仮置きの削除は `edit_image` で行う。**画風を変える指示は崩れの元**なので書かない。
+  ```
+  Remove the sickle: his right hand is empty, raised and waving (open palm, five fingers).
+  Keep everything else exactly the same.
+  ```
+- 直した絵は元の絵と並べて目で確認し、元の絵は別名で残す。直し方の全体は `fix-ladder.md`（4段目）。
+
+---
+
 ## モデル・API の実地知見（2026-06）
 
 - **動画は Seedance 2.0（`seedance20-i2v`）が躍動感の要**。Kling は滑らかだが迫力では劣る。
@@ -125,3 +174,5 @@ ENEMIES: [任意。群がる敵など]
 - [ ] C：起点は A のキービジュアル（B のシートではない）か／ビート列で時間設計したか
 - [ ] C は Seedance 2.0 の一発生成か（迫力用途で first-last-frame チェーンを使っていないか）
 - [ ] 非同期（submit→check_status）で、長尺は数分待ちを見込んだか
+- [ ] （連番カット）見た目の固定文が、全カットのプロンプトに同じ文言で入っている
+- [ ] （連番カット）起点画像に文字・吹き出し・ロゴが無く、手に持つ物が形の単純なもの

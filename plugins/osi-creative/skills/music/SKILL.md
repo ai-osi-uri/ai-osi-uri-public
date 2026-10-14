@@ -24,7 +24,10 @@ requires_connectors:
 | `signature_c` | 静・余韻 | 士業・医療、B5（動機）を効かせたいとき |
 | `sting` | 2秒のロゴ音 | **全動画のB6に共通で置く＝耳のロゴ** |
 
-音源はブランドキット `brandkit/<company>/music/` に置く（`../ai-video-production/references/brandkit.md`）。
+**最小構成はシグネチャー曲3本**（例：前向き・温かい・静か）＋スティング。3本あれば、ほとんどの動画は「どれを敷くか選ぶだけ」で済む。
+曲の条件：ボーカル無し／ナレと同じ帯域の楽器が前に出ない／最後は解決して終わる。決め台詞やつかみの瞬間を曲の小節の頭に合わせると気持ちよく見える。
+
+音源はブランドキット `brandkit/<company>/music/` に置く。**曲ごとに出どころの記録 `SOURCE.md` を必ず添える**（下の「出どころの記録」）。（`../ai-video-production/references/brandkit.md`）。
 **新規案件で最初にやるのは「曲を作ること」ではなく「この4本を決めること」。**
 
 ### 人のプロに頼むならどこか
@@ -71,6 +74,29 @@ AIが弱いのは**トップライン（メロディと展開の設計）**。�
 - **ヒット曲は商用利用ほぼ不可**（アプリ内ライブラリの包括契約は個人・非商用向け）。焼き込んでアプリ外配信すると原盤権侵害。
 - **DOVA-SYNDROME** は商用OK・クレジット不要・加工OK。**魔王魂**はクレジット条件あり。**甘茶の音楽工房**は商用OK。
 - クラシックは作曲がPDでも**演奏音源の権利は別**。PD/CCの音源を使う。
+- **ダウンロードは人が行う**（素材サイトから自動で一括取得しない）。使う前に、サイトの規約と曲・作者ごとの条件（作者の条件があればそちらが優先されることが多い）を確かめる。
+- **曲のファイルは公開の場所に置かない**（Git リポジトリ・プラグイン・公開フォルダ）。多くの素材サイトは再配布・AI 学習への利用・ツールへの組み込みを禁じている。置くのは案件フォルダとブランドキットだけ。
+
+## 出どころの記録（SOURCE.md）
+
+フリー素材でも AI 生成でも、**使った曲には必ず `SOURCE.md` を1つ添える**（曲ファイルと同じフォルダ）。
+後から規約を確かめ直せるように、また別の動画で使い回すときに条件を引き継げるようにするため。
+
+```markdown
+# SOURCE — <曲ファイル名>
+- 種別: フリー素材 ／ AI 生成 ／ 委託制作
+- 曲名 / 作者: <曲名> / <作者>
+- URL: <曲のページ>
+- サイトの規約: <規約の URL>（確かめた日: YYYY-MM-DD）
+- 作者ごとの条件: <あり（内容）／サイトの規約に準拠>
+- 商用利用: <可／不可>　SNS 動画での利用: <可／要確認（どの項目で判断したか）>
+- クレジット表記: <要（文言）／不要>
+- 加工: <切り出し 0:12〜0:47・ループ・フェード 等>（規約で可否を確かめた）
+- AI 生成の場合: サービスとモデル <例 stable-audio-3>、生成日 YYYY-MM-DD、プロンプト全文
+- 使った動画: <案件・動画名>
+```
+
+クレジット表記が要る曲は、その文言を動画の概要欄・投稿本文に入れる。
 
 ## 音ハメ（映像のビートに合わせる）
 
@@ -103,6 +129,37 @@ ffmpeg -y -i voice.mp4 -i BGM.mp3 -filter_complex \
   [a0][b]amix=inputs=2:duration=first:dropout_transition=0[a]" \
  -map 0:v -map "[a]" -t "$DUR" -c:v copy -c:a aac -ar 48000 final.mp4
 ```
+
+### ナレの区間だけ BGM を -20dB 下げる（ダッキング）
+
+全体の音量を下げるだけだと、ナレの無い区間で音楽が痩せる。**ナレの間だけ -20dB 下げ、0.15秒で下げて 0.3秒で戻す**と、
+間（ま）では音楽が戻ってくる。0.7秒より近いナレ区間はまとめる（音楽が細かく上下に揺れない）。
+
+**方法A：区間を指定して下げる（確実・推奨）** — `scripts/duck_expr.py` が ffmpeg の volume 式を作る。
+```bash
+# ナレ音声（通しの1本）の無音検出で区間を取る。区間を確かめるだけなら --show-windows
+EXPR=$(python3 scripts/duck_expr.py --from-audio narration.mp3)
+#   区間が分かっているなら: python3 scripts/duck_expr.py --windows "2.0-5.0,7.0-9.0"
+
+DUR=$(ffprobe -v error -show_entries format=duration -of csv=p=0 voice.mp4)
+ffmpeg -y -i voice.mp4 -i BGM.mp3 -filter_complex \
+ "[1:a]atrim=0:$DUR,asetpts=N/SR/TB,aresample=48000,volume='pow(10,($EXPR)/20)':eval=frame,\
+afade=t=in:st=0:d=1.2,afade=t=out:st=$(awk "BEGIN{print $DUR-2}"):d=2[b];\
+  [0:a]aresample=48000[a0];[a0][b]amix=inputs=2:duration=first:normalize=0[a]" \
+ -map 0:v -map "[a]" -c:v copy -c:a aac final.mp4
+```
+- BGM の地の音量は、元の曲を先に `volume` で整えておく（ナレの無い区間でナレより少し下）。`normalize=0` にしないと amix が全体を勝手に下げる。
+- 実測（2026-10・sine の BGM とナレ2区間で確認）：ナレの外 -27.1dB → ナレの間 -47.1dB（ちょうど -20dB）。
+
+**方法B：ナレの音で自動に下げる（sidechaincompress）** — 区間を出さずに済むが、下がる量はナレの音量しだいで一定にならない。
+```bash
+ffmpeg -y -i BGM.wav -i narration.wav -filter_complex \
+ "[1:a]asplit=2[sc][vo];[0:a][sc]sidechaincompress=threshold=0.02:ratio=20:attack=20:release=300:makeup=1[bg];\
+  [bg][vo]amix=inputs=2:duration=first:normalize=0[a]" -map "[a]" mix.wav
+```
+- 同じ素材で約 -14dB だった（ratio・threshold で変わる）。「ナレの間だけ -20dB」を守りたいときは方法A。
+
+仕上げに `volumedetect` で、ナレの区間と間の区間をそれぞれ測って差を確かめる（`ffmpeg -ss <秒> -t 0.5 -i mix.wav -af volumedetect -f null -`）。
 
 ## ユーザーへの出し方
 

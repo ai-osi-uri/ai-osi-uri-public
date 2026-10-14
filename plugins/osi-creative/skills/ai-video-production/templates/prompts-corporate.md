@@ -23,8 +23,10 @@ photorealistic
 
 ## 推奨モデル
 
-- ヒーローカット → **Veo 3 Fast**
-- 環境カット → **Veo 3 Fast** または **MiniMax**
+- ヒーローカット → **`seedance20`**（1080p）
+- 環境カット → **`ltx25-fast`**
+- 人物カット → **`kling30-i2v`**
+（Veo 3 / 3.1 系は fal で廃止済み・廃止予定のため 2026-10 に置き換え。正本は `../references/model-comparison.md`）
 
 ## 配色パレット2案
 

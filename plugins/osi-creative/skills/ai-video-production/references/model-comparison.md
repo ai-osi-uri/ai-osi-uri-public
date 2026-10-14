@@ -2,12 +2,22 @@
 
 「AI OSI URI Creative」コネクタ（旧 fal-video）が公開するツールの中から、シーンに合わせて選ぶ。
 
-> **モデル指定の仕組み**：`model` 引数には ① コネクタに登録済みの **ショートカット slug**（`veo31-fast` 等）か、② `fal-ai/` `bytedance/` `alibaba/` `minimax/` `google/` `lightricks/` `xai/` `blackforestlabs/` で始まる **生エンドポイント**を直接渡せる。**slug が無い新モデルもコネクタ改修なしで使える**（ただしこの8つ以外の名前空間はコネクタへの追加が要る）。
+> **モデル指定の仕組み**：`model` 引数には ① コネクタに登録済みの **ショートカット slug**（`kling30-i2v` 等）か、② `fal-ai/` `bytedance/` `alibaba/` `minimax/` `google/` `lightricks/` `xai/` `blackforestlabs/` で始まる **生エンドポイント**を直接渡せる。**slug が無い新モデルもコネクタ改修なしで使える**（ただしこの8つ以外の名前空間はコネクタへの追加が要る）。
 > ✅ **v0.5 以降**：Veo 3.1（`veo31` / `veo31-fast`）・Kling 3.0（`kling30`）・Seedance 2.0（`seedance20`）はすべて slug 登録済み。Seedance の `bytedance/` 始まりエンドポイントも解決できる（v0.4 までは `Unknown video model` で弾かれていた）。
+
+> ⚠️ **Veo 3.1 系は fal で 2026-11-17 に廃止予定。既定・標準から外した（osi-creative 0.10.0）。**
+> fal のモデルページに埋め込まれた廃止予定の一覧に、`fal-ai/veo3.1`（完全一致）と `fal-ai/veo3.1/` で始まる全エンドポイントが
+> 「This endpoint will be deprecated on November 17, 2026.」として載っている（2026-10-14 確認。
+> 出典：https://fal.ai/models/fal-ai/veo3.1/fast/api ・ https://fal.ai/models/fal-ai/veo3.1/fast/image-to-video/api のページ内の掲示）。
+> コネクタの `veo31-fast`（`fal-ai/veo3.1/fast`）・`veo31`・`veo31-i2v`・`veo31-ref`・`veo31-flf`・`veo31-extend`・`veo31-lite` 系は**すべて対象**。
+> - それまでは動くが、**新しい案件の既定にしない**。見積もり・提案書にも書かない（納品前に止まる恐れがある）。
+> - 置き換え：単独人物・標準カット → **`kling30-i2v`**（Kling O3）／環境・抽象 → `ltx25-fast`／ヒーロー → `seedance20`（1080p・4K）か `gemini-omni`。下の表が正本。
+> - 旧 Veo 3（`veo3` / `veo3-fast` ＝ `fal-ai/veo3` 系）は fal のページで既に「This endpoint is deprecated」と表示されている（同日確認）。使わない。
+> - 一部の外部メモには「2026-10-22 廃止」とあったが、2026-10-14 時点の fal の掲示は 11-17。**日付は動くので、使う前に fal のページで確かめる。**
 
 ---
 
-## 動画モデル（2026-10-11 現行・コネクタ v2.4）
+## 動画モデル（2026-10-14 更新・コネクタ v2.4）
 
 > 単価は fal の従量（秒単価）。**8秒クリップ**基準の目安を併記。改定が速いので、金額は発注前に fal のモデルページで確認する。
 >
@@ -25,13 +35,30 @@
 |---|---|---|---|
 | 環境・風景・抽象（人物なし） | **`ltx25-fast`** / `ltx25` | $0.09（720p）/ $0.13（1080p）per s | 破綻リスクが低い領域。単発20秒・最大4K・音声つき・マルチショット。2.3 より顔・文字・速い動きが改善 |
 | **試作・当たり取り（全カット共通）** | **`h3max-turbo`** / `h3max` / `h3max-i2v` | Turbo $0.04・通常 $0.08 per s（768P） | **5秒が3秒未満で返る**。音声込み。詳細は下の「H3 Max」節 |
-| 単独人物・標準カット | **`veo31-fast`** | $0.10〜 per s → 8s ≒ $0.80 | 安く写実。汎用の標準枠 |
+| 単独人物・標準カット | **`kling30-i2v`**（t2v は `kling30`） | $0.112（音声off）/ $0.14（on）per s → 8s ≒ $0.90 | 汎用の標準枠（2026-10 から。旧 `veo31-fast` は廃止予定）。3〜15秒・`end_image_url` 可 |
 | **喋る人物・リップシンク** | **`happyhorse-i2v`** | $0.14〜0.18 per s | **日本語を含む7言語のネイティブ・リップシンク**。1080p 音声同期でこの価格は突出 |
-| 複数人物・対話・激しい動き | **`kling30`** / `kling30-i2v` | $0.112（音声off）/ $0.168（on）per s | 人物動作・物理表現。最大6カット連結・per-shot プロンプト |
+| 複数人物・対話・激しい動き | **`kling30`** / `kling30-i2v` | $0.112（音声off）/ $0.14（on）per s | 人物動作・物理表現。最大6カット連結・per-shot プロンプト |
 | キャラ一貫の連番カット | **`wan30-ref`** / `h3max-ref` | fal で確認 | 画像・動画・音声の参照でキャラと声を保つ（`wan27-ref` の後継） |
 | ムーブボード（線駆動カメラ） | **`seedance20-ref`** | $0.30 per s | 参照モード。線が出力に出ない（#17 の根本解決） |
 | ↑の当たり確認・試作 | **`seedance20-mini-ref`** | 最安ティア | 構図の当たりを安く取ってから本番へ |
-| ヒーローカット（1〜2本だけ） | **`veo31`**（4K・ネイティブ音声） | $0.20〜0.60 per s | 本当の見せ場に限定する |
+| ヒーローカット（1〜2本だけ） | **`seedance20`**（1080p / 4K）／ `gemini-omni`（4K・音声つき） | Seedance 720p $0.30・1080p $0.68 per s。Gemini Omni はトークン課金で高め | 本当の見せ場に限定する（旧 `veo31` は廃止予定） |
+
+### カットの性質別の選び方（下書き → 本番の2段）
+
+上の表を「1カットずつ、まず安い下書きで当たりを取ってから本番」に落としたもの。`vp-core` STEP 2 の 2a/2b と対応する。
+
+| カットの性質 | 下書き（当たり取り） | 本番 | メモ |
+|---|---|---|---|
+| アニメ調・人物1〜2人の普通の動き | `h3max-turbo-i2v`（480P）か `seedance20-fast` | `seedance20`（720p）／費用を抑えるなら `kling30-i2v` | Seedance 2.0 は音声なしでも音声込みの料金。無音なら Kling O3 が約1/3。画風が保てるかは下書きで比べる |
+| 写実・単独人物の標準カット | `h3max-turbo-i2v` | `kling30-i2v` | 旧標準 `veo31-fast` の置き換え |
+| 最初と最後の絵を決めたいカット | — | `kling30-i2v`＋`end_image_url`（2.5.0〜は正式な引数） | 終わりの絵を固定（`fix-ladder.md` 5段目）。躍動感は落ちる |
+| 情景（人物なし）・カメラワークが主役 | `seedance20-mini-ref` / `h3max-turbo` | `seedance20-ref`（ムーブボード）／`ltx25-fast` | 線を描いた参照画像は reference-to-video で（#17） |
+| 複数人物・大きな動き | `h3max-turbo-i2v` | `kling30-i2v` | 人物の動きと物理表現に強い |
+| 激しいアクション・迫力（一発生成） | `seedance20-mini` | `seedance20-i2v` | 継ぎ接ぎにしない（`character-consistency-pipeline.md`） |
+| 喋る人物 | — | `happyhorse-i2v` | 日本語リップシンク |
+
+- 単価・許容秒数・解像度は改定が速い。**生成前に fal の `llms.txt` で単価と許容値を確かめ、コスト見込みを出してから**投げる（`vp-core` STEP 2）。
+- 並列は最大5本。受付番号は投入直後に `jobs.json` へ（`vp-core` STEP 2）。
 
 ### 注意すべき課金の癖
 
@@ -69,17 +96,24 @@
 
 | 用途 | slug |
 |---|---|
-| 参照画像でキャラ一貫 | `veo31-ref` / `wan27-ref` / `seedance20-ref` |
-| 開始/終了フレーム指定（厳密な構図制御。躍動感は落ちる） | `veo31-flf` |
-| 生成済み動画の尺を延長 | `veo31-extend` |
+| 参照画像でキャラ一貫 | `wan30-ref` / `seedance20-ref` / `h3max-ref`（`veo31-ref` は 2026-11-17 廃止予定） |
+| 開始/終了フレーム指定（厳密な構図制御。躍動感は落ちる） | `kling30-i2v` ＋ `end_image_url`（2.5.0〜は正式な引数）（`veo31-flf` は廃止予定） |
+| 生成済み動画の尺を延長 | `veo31-extend`（**廃止予定**。代わりの延長モデルは未確認。前カットの最終フレームを次の起点にする連鎖生成で代用：`../../vp-seamless-journey/`） |
 
-### Kling の系統に注意
+### Kling の系統に注意（`kling30` という名前の衝突）
 
-fal 上では **`v3` 系と `O3` 系が別ライン**として並存する（どちらも 2026-02 追加）。
-- `kling30` / `kling30-i2v` → **O3 ライン**（`fal-ai/kling-video/o3/pro/...`）
-- `kling3` / `kling3-i2v` → **v3 ライン**（`fal-ai/kling-video/v3/pro/...`）
+fal 上では **`v3` 系と `O3` 系が別ライン**として並存する（どちらも 2026-02 追加）。**このコネクタでは：**
+- `kling30` / `kling30-i2v` → **O3 ライン**（`fal-ai/kling-video/o3/pro/text-to-video` / `.../image-to-video`）。$0.112（音声off）/ $0.14（on）per s
+- `kling3` / `kling3-i2v` → **v3 ライン**（`fal-ai/kling-video/v3/pro/...`）。$0.112 / $0.168（on）、声の指定つき $0.196 per s
+- `kling3-turbo` / `-i2v` → v3 Turbo Pro
 
-slug 名が紛らわしいので、指定時は `list_models` で endpoint を確認する。
+（単価は 2026-10-14 に fal の llms.txt で確認：
+https://fal.ai/models/fal-ai/kling-video/o3/pro/image-to-video/llms.txt ・
+https://fal.ai/models/fal-ai/kling-video/v3/pro/image-to-video/llms.txt）
+
+⚠️ **他の道具・メモから持ち込んだ `kling30` は、v3 ラインを指していることがある**（例：`kling30` = `fal-ai/kling-video/v3/pro/image-to-video` と定義した制作スクリプトがある）。
+同じ名前で中身が違うので、外のメモの単価・挙動をそのまま当てない。指定時は `list_models` で endpoint を確認し、
+迷ったら slug ではなく生エンドポイントを `model` に直接渡す。
 
 ### Seedance 2.5（2026-08 に fal で公開済み・利用可）
 
@@ -101,10 +135,10 @@ slug 名が紛らわしいので、指定時は `list_models` で endpoint を�
 > ムーブボードを動画で渡す運用は、画像だけで渡すより安い。
 
 **単価**：トークン課金 $0.0214/1K（tokens = 縦×横×秒×24/1024）。16:9 換算で **720p 約 $0.473/秒・480p 約 $0.2205/秒**。
-30秒フルだと 720p で約$14、480p で約$6.6。**veo31-fast の4〜5倍**。
+30秒フルだと 720p で約$14、480p で約$6.6。**kling30-i2v（音声off）の約4倍**。
 
-**既定にはしない。** 動画名刺（6ビート）のような分割構成では、1ビートだけ約$0.8で撮り直せる
-veo31-fast × 6本の方が量産に強い。2.5 でワンパス30秒を撮ると、1カット外しただけで全額を捨てる。
+**既定にはしない。** 動画名刺（6ビート）のような分割構成では、1ビートだけ約$0.6（5秒）で撮り直せる
+kling30-i2v × 6本の方が量産に強い。2.5 でワンパス30秒を撮ると、1カット外しただけで全額を捨てる。
 
 使うのは次の2つの場面に限る：
 
@@ -151,7 +185,7 @@ API 製品ではない**ので、案件では使えない。「動画を生成�
 
 ### Gemini Omni Flash 1.1（slug `gemini-omni` / `-i2v` / `-ref` を v2.4 で登録）
 
-**期待されていた Veo 4 は出ず、Google の次世代枠はこれになった。** Veo 3.1 は現役のまま。
+**期待されていた Veo 4 は出ず、Google の次世代枠はこれになった。** Veo 3.1 は fal で 2026-11-17 廃止予定（冒頭の注記）。
 
 ```
 model: "gemini-omni"      // = google/gemini-omni-flash/v1.1/text-to-video。360p〜4k
@@ -170,7 +204,8 @@ model: "gemini-omni-ref"  // reference_to_video（画像・動画の参照）
 
 | slug | 用途 |
 |---|---|
-| `veo3` / `veo3-fast` | Veo 3 系（旧標準）。3.1 が不調なときのみ |
+| `veo31` / `veo31-fast` / `veo31-i2v` / `-ref` / `-flf` / `-extend` / `veo31-lite` 系 | Veo 3.1。**fal で 2026-11-17 廃止予定**（冒頭の注記）。新規案件では使わない |
+| `veo3` / `veo3-fast` | Veo 3 系。**fal のページで既に deprecated 表示**。使わない |
 | `ltx23` / `ltx23-fast` / `ltx23-i2v` | LTX-2.3。後継は `ltx25-fast` 系 |
 | `wan27-ref` | Wan 2.7。後継は `wan30-ref` |
 | `kling25` / `kling25-i2v` | Kling 2.5 Turbo Pro |
@@ -187,7 +222,7 @@ model: "gemini-omni-ref"  // reference_to_video（画像・動画の参照）
 | `vidu-q4-i2v` / `vidu-q4-ref` | Vidu Q4（2026-10-05）。4K まで |
 | `pixverse6` / `pixverse6-i2v` | PixVerse V6。`extra.style` でアニメ・クレイ等 |
 | `kling3-turbo` / `-i2v` | Kling v3 Turbo Pro（v3 の高速版） |
-| `veo31-lite` / `-i2v` | Veo 3.1 の最安版 |
+| `veo31-lite` / `-i2v` | Veo 3.1 の最安版（**2026-11-17 廃止予定**。昇格させない） |
 | `happyhorse-ref` | Happy Horse 1.1 の参照版 |
 | `flux3-video` / `flux3-i2v` | FLUX 3（Black Forest Labs）。5〜20秒・音声つき |
 
@@ -198,7 +233,7 @@ model: "gemini-omni-ref"  // reference_to_video（画像・動画の参照）
 
 **OpenAI Sora は終了する。** Web/アプリは 2026-04-26 に停止済み、**API も 2026-09-24 に停止**。
 「Sora で作れますか」と聞かれたら、*作れない（正確には、あと数週間で作れなくなる）* と答え、
-Seedance 2.5 / Veo 3.1 / H3 Max を代替として出す。**Sora 前提の提案は書かない。**
+Seedance 2.5 / Kling O3 / H3 Max を代替として出す（Veo 3.1 も廃止予定なので出さない）。**Sora 前提の提案は書かない。**
 
 ## 推奨シーン別配分
 
@@ -206,28 +241,28 @@ Seedance 2.5 / Veo 3.1 / H3 Max を代替として出す。**Sora 前提の提�
 
 | シーン | モデル | 理由 |
 |---|---|---|
-| ① オフィスの単独人物 | Veo 3.1 Fast | 環境＋単独人物、写実 |
-| ② 国際会議（複数人） | Kling 3.0 | 多人数対話・連結 |
-| ③ 金融街・データ | Veo 3.1 Fast | 環境・グラフィック |
-| ④ 朝の東京 | Veo 3.1 Fast | 街並み |
-| ⑤ 困った経営層（会議） | Kling 3.0 | 複数人物の表情 |
-| ⑥ 画面・図書館 | Veo 3.1 Fast | 抽象 |
-| ⑦ デザインチーム | Kling 3.0 | 多人数ブレスト |
-| ⑧ 握手のクローズアップ | **Veo 3.1（ヒーロー）または Kling 3.0** | ヒーローカット候補 |
-| ⑨ オフィスタイムラプス | Veo 3.1 Fast | 環境 |
-| ⑩ 3モニター統合 | Veo 3.1 Fast | 抽象・グラフィック |
-| ⑪ 多様な日常モンタージュ | Seedance 2.0 または Kling 3.0 | 多シーン・激しい動き |
-| ⑫ ロゴカード | Veo 3.1 Fast | 静謐 |
+| ① オフィスの単独人物 | `kling30-i2v` | 単独人物の標準 |
+| ② 国際会議（複数人） | `kling30-i2v` | 多人数対話・連結 |
+| ③ 金融街・データ | `ltx25-fast` | 環境・グラフィック（人物なし） |
+| ④ 朝の東京 | `ltx25-fast` | 街並み |
+| ⑤ 困った経営層（会議） | `kling30-i2v` | 複数人物の表情 |
+| ⑥ 画面・図書館 | `ltx25-fast` | 抽象 |
+| ⑦ デザインチーム | `kling30-i2v` | 多人数ブレスト |
+| ⑧ 握手のクローズアップ | **`seedance20`（ヒーロー）または `kling30-i2v`** | ヒーローカット候補 |
+| ⑨ オフィスタイムラプス | `ltx25-fast` | 環境 |
+| ⑩ 3モニター統合 | `ltx25-fast` | 抽象・グラフィック |
+| ⑪ 多様な日常モンタージュ | `seedance20` または `kling30-i2v` | 多シーン・激しい動き |
+| ⑫ ロゴカード | `ltx25-fast` | 静謐 |
 
-合計コスト目安（8s/カット基準）：Veo 3.1 Fast×7（≒$5.6）＋Kling 3.0×5（≒$4.5）＝ **約 $10**。
-コスト最優先なら全カット Veo 3.1 Fast で **約 $6.4**。
+合計コスト目安（8s/カット・音声off 基準）：`ltx25-fast`×6（720p $0.09/s ≒ $4.3）＋`kling30-i2v`×6（≒ $5.4）＝ **約 $10**。
+ヒーロー1本を `seedance20` 720p に上げると +約$1.5。金額は発注前に llms.txt で確かめる。
 
 ### スタイル：アニメ（ジブリ風）
 
-全シーン Veo 3.1 Fast で統一。
+全シーン `kling30-i2v` で統一（下書きは `h3max-turbo-i2v`）。
 - 「Studio Ghibli style 2D hand-drawn anime」を強くアンカー
 - IP filter回避のため "watercolor" "hand-painted" を併記
-- 全12本で約 **$6.4**
+- 全12本で約 **$10.8**（8s・音声off）。費用を抑えるなら 5〜6秒で作って編集で伸ばす
 
 ---
 
@@ -263,7 +298,7 @@ i2v は「静止画を作る → `image_to_video` の起点に渡す」流れ。
 1. generate_image（model: nano-banana / 4Kは nano-banana-pro）でシーン①のキーフレーム生成
 2. edit_image で②③…を「同じ人物・絵柄」で派生（一貫性キープ）
    ※ テロップ/ロゴ入りカットは任意で openai-image で焼き込む
-3. 各フレームを image_to_video（kling30-i2v / veo31-i2v）に渡して動画化
+3. 各フレームを image_to_video（kling30-i2v / seedance20-i2v）に渡して動画化
 ```
 
 > v0.6.0 での方針変更：以前は「画像は専用直コネクタ(nano-banana=Gemini直)で作る」設計だったが、**fal が nano-banana 本体をホストしている**ため、Creative 1コネクタ＋fal キーに統合した（別 Gemini キー・LOCAL DEV の nano-banana コネクタは不要）。テキスト焼き込みが要る案件のみ openai-image を任意で併用。動画/音楽/画像/ナレーションが Creative 1本に集約。
@@ -305,7 +340,7 @@ i2v は「静止画を作る → `image_to_video` の起点に渡す」流れ。
 ナレコスト = 動画尺 × 0.10 × $0.30 / 1K chars  ※v3使用時
             ≒ $0.50 / 12シーン
 BGMコスト = $0.20
-合計 ≒ $5〜$10
+合計 ≒ $10〜$16（12カット・8秒。2026-10 の既定 ltx25-fast＋kling30-i2v）
 
 ※ ElevenLabs プラン代:
  - Starter $5/月（library voice 使用、月30K chars）
@@ -325,4 +360,5 @@ BGMコスト = $0.20
 - [ ] ナレ原稿はクリーンなまま（発音辞書で読みを補正／`../../narration/SKILL.md`）
 - [ ] 感情タグマップ確認（`../../narration/templates/voice-strategy.md` §3）
 - [ ] BGM 選定
-- [ ] コスト見積もり（$5〜$10レンジ内か）
+- [ ] コスト見積もり（$10〜$16レンジ内か。単価は llms.txt で確認）
+- [ ] 既定・指定のモデルが廃止予定でないか（Veo 3.1 系は 2026-11-17 廃止予定）

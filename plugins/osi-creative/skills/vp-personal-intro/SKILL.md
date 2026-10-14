@@ -95,7 +95,7 @@ L2・L3は本人が明示的に望んだときだけ。L3を選んだ時点で�
 
 ```
 plan:
-  model: veo31-fast      # L1（アニメ）はこれで統一。L2は seedance20-ref（vp-moveboard 側）
+  model: kling30-i2v     # L1（アニメ）はこれで統一（旧 veo31-fast は廃止予定）。L2は seedance20-ref（vp-moveboard 側）
   clips: 6               # 15秒版は4
   duration_per_clip: 5s
   mode: image_to_video

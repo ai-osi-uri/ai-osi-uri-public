@@ -30,7 +30,7 @@
 | 高解像度の本命 | `fal-ai/kling-video/v3/4k/image-to-video` | 出力 約2148×3856。Kling 3.0 4K。**これが本レシピの基準** |
 | 標準 | `fal-ai/kling-video/v3/pro/image-to-video` | 約1076×1924。速い・安い |
 | 激しい動き | Seedance 2.0（fal）| モーション最強・合議ベンチ首位 |
-| 最高画質ヒーロー | `fal-ai/veo3.1/image-to-video` | ※現行 fal コネクタは **ポーリング不可（Unprocessable Entity）**。引き出せないので当面は Kling を使う |
+| 最高画質ヒーロー | `bytedance/seedance-2.0/image-to-video`（`seedance20-i2v`・4K 可） | 旧記載の `fal-ai/veo3.1/image-to-video` は fal で 2026-11-17 廃止予定（`model-comparison.md`）。使わない |
 
 > モデルは fal 1本で endpoint 直指定すれば最新も呼べる。`fal_list_models` の既定は Kling 2.5 / Veo 3 止まりなので **必ず endpoint を直書きする**。
 > 投入は `fal_submit_video`、状態確認は `fal_check_status`（i2v 用に画像URL/参照を渡す）。

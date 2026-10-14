@@ -22,8 +22,9 @@ no text overlays,
 
 ## 推奨モデル
 
-- 人物中心 → **Kling 2.5 Turbo Pro**
-- 環境 → **Veo 3 Fast**
+- 人物中心 → **`kling30-i2v`**（Kling O3）
+- 環境 → **`ltx25-fast`**
+（Veo 3 / 3.1 系は fal で廃止済み・廃止予定のため 2026-10 に置き換え。正本は `../references/model-comparison.md`）
 
 ## 配色パレット
 

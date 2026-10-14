@@ -1,6 +1,6 @@
 ---
 name: vp-core
-description: AI動画制作の「共通インナー」atomicスキル。どの動画タイプのメソッド（vp-character-action / vp-moveboard / vp-corporate-narrated 等）からも呼ばれる、承認ゲート付きの生成ループを標準化する。役割は「①メソッドが書いたプロンプトを提示して承認/修正をもらう → ②承認後に AI OSI URI Creative コネクタで生成（generate_image / submit_video→check_status）→ ③1フレーム目・繋ぎ目を検証 → ④必要なら ffmpeg で連結 → ⑤納品」。プロンプトそのものを承認対象にするのが肝。単独では発動せず、上位メソッド／オーケストレータ ai-video-production から呼ばれる前提。動画タイプ判定や台本設計、プロンプト起草そのものは各メソッドの責任で、本スキルは行わない。
+description: AI動画制作の「共通インナー」atomicスキル。どの動画タイプのメソッド（vp-character-action / vp-moveboard / vp-corporate-narrated 等）からも呼ばれる、承認ゲート付きの生成ループを標準化する。役割は「①メソッドが書いたプロンプトを提示して承認/修正をもらう → ②承認後に AI OSI URI Creative コネクタで生成（generate_image / submit_video→check_status）→ ③全コマQA（0.25秒ごとのコンタクトシート・0.4秒超の静止・つなぎ目の差）で検証し、不合格は安い順のラダーで直す → ④必要なら ffmpeg で連結 → ⑤納品」。プロンプトそのものを承認対象にするのが肝。単独では発動せず、上位メソッド／オーケストレータ ai-video-production から呼ばれる前提。動画タイプ判定や台本設計、プロンプト起草そのものは各メソッドの責任で、本スキルは行わない。
 requires_connectors:
   - server: ai-osi-uri-creative
     provision: user-install
@@ -53,16 +53,51 @@ requires_connectors:
 
 - 画像：`generate_image`（nano-banana-2, 4K, 16:9）。一貫性参照は `extra.image_urls`。
 - 動画：**必ず非同期** `submit_video` → `check_status`（ブロッキング generate_video は使わない／タイムアウト #4）。
+  - **受付番号（request id）は投入した直後に作業フォルダの `jobs.json` に書き残す**（会話の中だけに置かない）。
+    通信が切れても・会話が切り替わっても、`jobs.json` の番号で `check_status` を呼べば**続きから受け取れる**（投げ直さない＝費用が二重にかからない）。
+    ```json
+    {"jobs": [
+      {"cut": "c01", "stage": "draft", "model": "h3max-turbo-i2v", "request_id": "<submit_video が返した番号>",
+       "submitted_at": "2026-10-14T10:00:00", "status": "IN_QUEUE", "result": null}
+    ]}
+    ```
+    受け取れたら `status` を `COMPLETED`・`result` に保存先（ファイルパスか URL）を書く。再開時は `status` が `COMPLETED` でない行だけ `check_status` する。
+    作業フォルダが無い（URL 経路でファイルを書けない）ときは、番号の一覧を会話に表で残し、ユーザーにも控えてもらう。
   - 並列は5本まで（6本以上で Forbidden #1）。塩漬けキュー（課金前ジョブが枠占有）に注意（fal Concurrency 0/N 確認）。クレジット切れ時はキューに入るが進まない→課金後に再投入。
   - **入力モードはメソッドが `plan` で指定する**。2系統あるので取り違えない：
     - **i2v（first-frame）**：`seedance20-i2v` 等。渡した画像が**1フレーム目**になる。キービジュアルを起点にする用途（例 vp-character-action）。**線や設定シート入りの画像を起点にしない**＝そのまま冒頭に映る（#17）。
     - **reference-to-video（参照）**：`bytedance/seedance-2.0/reference-to-video`。渡した画像は**参照(指示)**で1フレーム目にならない。**ルート/番号/ラベル入りのムーブボードを渡す用途（vp-moveboard）**。赤線は出力に出ない＝頭トリック不要（#17の根本解決）。
 - コスト見込みを生成前に提示する。
 
-### STEP 3. 検証
-- 画像/動画を取得し、内容を確認（数フレーム抽出）。
-- i2v：1フレーム目が意図通りか。reference-to-video：**赤線/番号が出力に出ていないか**＋経路に沿っているか。
-- 連結前提なら各区間の**繋ぎ目フレーム**が一致するか。大きな動き（フル360°等）が回りきらない/カットは #18。
+### STEP 3. 検証 — 全コマ QA（ユーザーに見せる前に必ず）
+
+数フレームの抜き取りでは崩れを見落とす。**0.25秒ごとの全コマ**を1枚に並べ、数値でも止まり・跳びを拾う。
+
+**3a. 手元で ffmpeg が使える場合（ダウンロード版・Claude Code・作業フォルダあり）**
+```bash
+python3 scripts/qa_frames.py --video clips/c01.mp4            # 1本：0.25秒ごとのコンタクトシート＋数値
+python3 scripts/qa_frames.py --dir clips                      # フォルダ一括＋隣どうしのつなぎ目の差
+python3 scripts/qa_frames.py --video final.mp4 --fps 2        # 完成動画は 0.5秒ごとで足りる
+```
+- 出力：`<対象フォルダ>/qa/<名前>-sheet.jpg` と `qa/qa.json`。ffmpeg / ffprobe だけで動く（API・課金なし）。
+- 数値の読み方：
+  - **静止（freeze）**：0.4秒を超えて止まった区間を秒で出す。**警告扱い**（止まった絵は死んで見える）。尺から外すか作り直す。
+  - **動き（motion）**：コマ間の平均差（0〜1）。ほぼ 0 なら「動いていない」。人物カットで小さすぎるときは pitfalls #21。
+  - **つなぎ目（seams）**：前のクリップの最後と次の最初の差。普通のカット切り替えなら大きくて当然。**連鎖生成（前カットの最終フレーム起点）で 0.25 を超えたら跳んで見える**。
+
+**3b. URL（マネージド）経路の場合**：コネクタをブラウザの Claude から使っているだけで手元に ffmpeg が無いなら、
+このスクリプトは動かせない。代わりに、生成物の動画を開いて**目視で 0.25〜0.5秒ずつコマ送り**し、
+ユーザーにも「何秒あたりの、どこが」を一緒に見てもらう（動画プレイヤーのコマ送り、またはスマホで一時停止を繰り返す）。
+ffmpeg が使える PC が1台でもあれば、そこで `ffmpeg -i clip.mp4 -vf "fps=4,scale=240:-2,tile=8x4" -frames:v 1 sheet.jpg` だけでもコンタクトシートは作れる。
+
+**コンタクトシートで見る観点**
+- 手・指の崩れ／**手に持つ物の形が変わっていないか**（増える・両端になる・消える）
+- 文字・吹き出しの残り／人数の増減／顔と服がカット間で同じか
+- 主役がカメラの移動で画面の外に出ていないか
+- i2v：1フレーム目が意図通りか。reference-to-video：**赤線/番号が出力に出ていないか**＋経路に沿っているか（#17）。
+- 大きな動き（フル360°等）が回りきらない/途中でカットが入る（#18）。
+
+不合格のカットは、**最初から作り直さず** `../ai-video-production/references/fix-ladder.md` の安い順（切る→同条件引き直し→プロンプト局所修正→起点画像を edit で直す→end frame 固定→カット分割→コンテに戻る）で直す。
 
 ### STEP 4. 連結・仕上げ（必要時）
 - ffmpeg は **必ず /tmp で作業 → cp で配置**（Drive直書きは破損 #9）。長尺処理は nohup+ポーリング #10。
@@ -74,6 +109,8 @@ requires_connectors:
 ## 共通参照（オーケストレータ ai-video-production 配下の正本を参照）
 - `../ai-video-production/references/prompt-quality-rubric.md` … ★提示前の自己採点ゲート（STEP 1で必須）
 - `../ai-video-production/references/model-comparison.md` … モデル使い分け・単価
+- `../ai-video-production/references/fix-ladder.md` … ★不合格カットの直し方（安い順のラダー。STEP 3 の後）
+- `scripts/qa_frames.py` … 全コマ QA（コンタクトシート・静止・動き・つなぎ目。ffmpeg だけで動く。MIT 由来）
 - `../ai-video-production/references/pitfalls.md` … 落とし穴（#1〜、Forbidden/塩漬け/ffmpeg/#17 i2v1フレーム目/#18 モーション予算）
 - `../ai-video-production/references/character-consistency-pipeline.md` … 一貫性とプロンプト型（vp-character-action用）
 - `../ai-video-production/references/moveboard.md` … 線駆動カメラムーブ＋reference-to-video（vp-moveboard用）
