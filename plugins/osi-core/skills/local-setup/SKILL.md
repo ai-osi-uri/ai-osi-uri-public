@@ -34,11 +34,12 @@ Claude の手が届かない操作だけ。それ以外（何が要るかを確�
 | chrome | 本人の Chrome で画面を操作する（鍵の発行画面・管理画面など） | `references/chrome.md` |
 | mac | iPhone アプリの手元での確認（Xcode・シミュレーター・キーチェーン） | `references/mac.md` |
 | android | Android アプリの手元での確認（Android Studio・エミュレーター・keytool） | `references/android.md` |
-| ext-deploy | デスクトップ拡張「Deploy」（手元の git・CI のログ・GCP/AWS の操作） | `references/extension.md` |
+| ext-deploy | デスクトップ拡張「Deploy」（手元から Vercel に直接上げる・Terraform・署名鍵・Cloudflare Worker。Git は URL のコネクタでもできる） | `references/extension.md` |
 | finance | 経理の台帳（デスクトップ拡張「Finance」＋台帳フォルダ） | `references/finance.md` |
 | obsidian | Obsidian のノートの置き場 | `references/obsidian.md` |
 
 手順書は `get_skill`（name=`osi-core:local-setup`, file=`references/<名前>.md`）で読む。
+手元の拡張（Deploy・Finance・Creative・Core）を入れる・上げるのは、どれも `references/install-extension.md` の共通の手順（`local_tools_status` で版を比べ、Claude が落として開き、本人は「インストール」を1回押す）。
 手元にこのスキルが入っていれば、そのファイルを直接読んでもよい。
 
 ## 2. いま揃っているかを確かめる

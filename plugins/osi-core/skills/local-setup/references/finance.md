@@ -9,7 +9,7 @@
 ## 手順
 導入はスキル osi-finance-onboarding が一本でやる。`get_skill` で osi-finance-onboarding を読み、その手順で進める
 （会社の準備 → 担当者のパソコンの準備（拡張・コネクタ・鍵）→ 初期設定 → 確認）。
-拡張のファイルは、道具 `get_download_link` を Finance の拡張の製品キーで呼んで渡す。
+拡張は `references/install-extension.md` の手順で入れる・上げる（製品キー `ai-osi-uri-finance`。本人は「インストール」を1回押すだけ）。
 
 ## 台帳が無くてもできること
 マネーフォワード クラウド会計がつながっていれば、口座明細の突合・固定資産・税区分の点検・決算の準備は台帳なしで進められる。
