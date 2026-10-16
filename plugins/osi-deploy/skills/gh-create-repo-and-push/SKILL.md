@@ -15,7 +15,8 @@ local_setup: [computer, ext-deploy]
 # GitHub リポジトリ作成 + 初回 push（atomic / 拡張ツール版）
 
 > **Git の道（2026-10-16）**：Git の push・取り込みは**手元の Deploy 拡張の道具（`github_push`・`github_clone`・`github_pull` など）が基本**（差分だけを送るので大きなリポジトリでも軽い）。
-> 手元の拡張が無いとき（ブラウザ版の Claude・まだ入れていない人）や小さなアプリだけ、URL でつなぐコネクタの `github_upload_url` → `github_push_folder` ／ `github_download_folder` を予備に使う
+> 入っていなければ、先に入れる（get_skill の頭の「手元の準備」→ `local_tools_status` → 本人が「インストール」を1回押す）。
+> 入れられない・断られたとき（ブラウザ版の Claude など）や小さなアプリだけ、URL でつなぐコネクタの `github_upload_url` → `github_push_folder` ／ `github_download_folder` を予備に使う
 > （毎回フォルダ全体を zip で送るので 1 回 200MB まで）。手順は osi-deploy の update-deploy の `references/git-via-url-connector.md`。
 
 入力ディレクトリの中身を新規 GitHub リポジトリに push する。**認証情報は AI OSI URI Deploy

@@ -1,9 +1,9 @@
 # 手元のフォルダと GitHub を、URL でつなぐコネクタでつなぐ（予備・2026-10-16〜）
 
 **Git の push・取り込みは、手元の Deploy 拡張の道具（`github_push`・`github_clone`・`github_pull`・`github_create_repo_and_push`）が基本。**
-手元の Git は差分だけを送り、履歴・ブランチ・やり直しも扱える。この道は、手元の拡張が無いとき（ブラウザ版の Claude・まだ入れていない人）と、
+手元の Git は差分だけを送り、履歴・ブランチ・やり直しも扱える。この道は、手元の拡張を入れられない・断られたとき（ブラウザ版の Claude など）と、
 小さなアプリを急いで上げるときの予備。毎回フォルダ全体を zip にして送るので、大きなリポジトリには向かない（1 回 200MB・5,000 ファイルまで）。
-手元の拡張を入れられるなら、osi-core:local-setup の `references/install-extension.md` で入れてから手元の道具を使う。
+まだ入っていないだけなら、この道に進まず、先に osi-core:local-setup の `references/install-extension.md` で入れる（`local_tools_status` → 本人が「インストール」を1回押す）。
 
 GitHub の鍵はサーバーの中だけで使い、Claude にも手元にも出ない。中身は会話を通さず、Claude が zip にして直接上げる。
 

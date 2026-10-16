@@ -87,8 +87,8 @@
 | plugins/osi-core/workflows/01-shodan-to-proposal.md | 7 | Plaud | - 文字起こし（Plaud / 会議ツール / 手書きメモ） |
 | plugins/osi-core/workflows/README.md | 8 | Plaud | \| 1 \| [商談録音 → 提案書](01-shodan-to-proposal.md) \| 「○○社の録音、提案まで持っていって」 \| 1（議事録に Plaud/Drive）→ 0 \| 60〜90 分 \| |
 | plugins/osi-deploy/skills/aws-static-deploy/SKILL.md | 39 | 共有ドライブ | 共有ドライブの `.deploy-credentials/.env` は **任意フォールバック**としてのみ参照する。 |
-| plugins/osi-deploy/skills/update-deploy/SKILL.md | 73 | GITHUB_ORG | \| `repo_owner` \| `ai-osi-uri` または個人 username \| 既定は GITHUB_ORG / GITHUB_USERNAME \| |
-| plugins/osi-deploy/skills/create-app/SKILL.md | 62 | GITHUB_ORG | **重要:** `GITHUB_ORG` が未設定だと、`github_create_repo_and_push` は `owner_override` を |
+| plugins/osi-deploy/skills/update-deploy/SKILL.md | 74 | GITHUB_ORG | \| `repo_owner` \| `ai-osi-uri` または個人 username \| 既定は GITHUB_ORG / GITHUB_USERNAME \| |
+| plugins/osi-deploy/skills/create-app/SKILL.md | 65 | GITHUB_ORG | **重要:** `GITHUB_ORG` が未設定だと、`github_create_repo_and_push` は `owner_override` を |
 | plugins/osi-deploy/skills/create-app/references/screen-structure.md | 25 | Notion | Salesforce・Notion・Linear など、業務アプリの定番はみなこの作りになっている。 |
 | plugins/osi-deploy/skills/create-app/references/drive-record.md | 21 | Notion | Notion のリード一覧に案件が登録されていれば、対応する Drive 案件フォルダが存在する。 |
 | plugins/osi-deploy/skills/create-app/references/drive-record.md | 66 | Notion | \| 案件 \| （Notion リード ID / 案件名 / なし） \| |
@@ -104,4 +104,4 @@
 | plugins/osi-secretary/skills/secretary-create/SKILL.md | 48 | Notion | \| 資料を読む \| 繋がっているコネクタ（Google ドライブ・Gmail・Microsoft 365・Slack・Notion）と、会話に添付されたファイル \| |
 | plugins/osi-secretary/skills/secretary-create/SKILL.md | 113 | Notion | `▶ Google ドライブ ▶ Gmail（宛先・件名だけ） ▶ OneDrive・SharePoint ▶ Slack ▶ Notion ▶ ファイルを添付する ▶ 資料なしで、話して決める` |
 | plugins/osi-secretary/skills/secretary-create/SKILL.md | 121 | Notion | - ドライブ・OneDrive・Notion：「業務マニュアル」「運用ルール」「手順」「規程」「担当」「フロー」「台帳」などで探し、題名の一覧を見せて読むものを選んでもらう。 |
-| plugins/osi-mobile-deploy/skills/deploy-mobile-app/SKILL.md | 172 | GITHUB_ORG | \| GITHUB_ORG \| `ai-osi-uri` / `personal` \| `create-app` の `USE_ORG` 判定に準拠 \| |
+| plugins/osi-mobile-deploy/skills/deploy-mobile-app/SKILL.md | 173 | GITHUB_ORG | \| GITHUB_ORG \| `ai-osi-uri` / `personal` \| `create-app` の `USE_ORG` 判定に準拠 \| |
