@@ -30,7 +30,7 @@ Claude の手が届かない操作だけ。それ以外（何が要るかを確�
 | 種類 | 何のため | 手順書 |
 | --- | --- | --- |
 | computer | 本人のパソコンのファイル・フォルダを読み書きする、パソコンでプログラムを動かす | `references/computer.md` |
-| plugin | 雛形ファイル（フォント・PDF・pptx・プログラム一式）を手元に置く | `references/plugin.md` |
+| plugin | 手元にスキルを置く（任意。雛形ファイルは get_skill の download で落とせるので要らない） | `references/plugin.md` |
 | chrome | 本人の Chrome で画面を操作する（鍵の発行画面・管理画面など） | `references/chrome.md` |
 | mac | iPhone アプリの手元での確認（Xcode・シミュレーター・キーチェーン） | `references/mac.md` |
 | android | Android アプリの手元での確認（Android Studio・エミュレーター・keytool） | `references/android.md` |
