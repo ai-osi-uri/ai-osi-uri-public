@@ -52,7 +52,7 @@ local_setup: [finance]
 
 - **AI OSI URI Finance 拡張**（`mfi_create_partner` / `mfi_create_billing` / `mfi_get_billing_pdf` / `sheets_*`）＝発行と台帳の読み書き。発行には MF を **data.write スコープ**で接続しておく（osi-finance-connect 参照）。
 - Google Drive（公式PDFの格納）。
-- **メールは AI OSI URI Finance 拡張の `mail_*` を第一手段にする**（v1.44.0〜）。`mail_create_draft` が PDF 添付付きの下書きを作り、`mail_send_draft` が送信直前に下書きを読み直して宛先・添付を照合してから送る。Gmail／Outlook のどちらかは会社の設定（`mail_setup`）で決まるので、スキルはサービス名を意識しない。未接続なら `mail_status` の `next` に従い、「メールにつないで」で1回許可してもらう。
+- **メールは URL のコネクタの `mail_*` を使う**（手元の Finance 拡張の `mail_*` は 1.47.0 で外した）。PDF は先に `files_put` で会社の書類の置き場に上げ、`mail_create_draft` の `attachments` に置き場の相対パスを渡す。`mail_send_draft` が送信直前に下書きを読み直して宛先・添付を照合してから送る。未接続なら `mail_status` が返すツール設定の URL を本人に渡し、「つなぐ」を1回押してもらう。
 - 冪等ガードの検索（送信済み・下書きの有無）は純正のメールコネクタ（Gmail なら Gmail、Outlook なら Microsoft 365 の `outlook_email_search`）で行う。
 - 請求書PDFの生成元は**発行元の優先順位**で決める（次節「発行元（INVOICE_ENGINE）」）。発行者情報・採番・支払条件は `osi-finance-settings` を参照。
 - 予備：`mail_*` が使えない環境だけ、既存下書きへの添付に Claude in Chrome（ブラウザ操作の `file_upload`）、本文パーソナライズに Obsidian（`obsidian-knowledge-consult`）／Plaud／Drive。無ければ手動・汎用にフォールバック。
@@ -455,8 +455,8 @@ MF の請求書は**作成した時点の取引先情報（敬称・住所・部
 - **発行者欄が古いまま**：MF は作成時点の送付元情報を焼き込む。送付元情報を直したあとに作り直す（未送付の下書きなら人が削除→同じ番号で再発行）。
 - **備考欄が空／振込先欄に手数料の一文が入っている**：`mfi_create_billing` は備考を渡せない。MF 画面で備考欄へ移す（手順3-2.5）。
 - **発行が 403**：MF の権限が読み取りのみ。「MF を接続して」で `data.write` を含めて再認可する。
-- **下書きにPDFが添付されない**：純正のメール系コネクタでは添付できない。拡張の `mail_create_draft` を使う。`mail_status` が未接続なら「メールにつないで」。拡張が古い（1.44.0 未満）なら更新を案内し、その間だけ Chrome `file_upload` か人の手動添付（手順5）。
-- **`mail_create_draft` が「書類フォルダの中だけです」で止まる**：PDFが台帳フォルダの外にある。保存先を台帳フォルダ起点で直すか、そのフォルダを `mail_set_file_roots` で登録する。
+- **下書きにPDFが添付されない**：純正のメール系コネクタでは添付できない。URL のコネクタの `mail_create_draft` を使う（PDF は先に `files_put`）。未接続なら `mail_status` のツール設定の URL を渡す。それも使えない間だけ Chrome `file_upload` か人の手動添付（手順5）。
+- **`mail_create_draft` が「ファイルがありません」で止まる**：手元のパスを渡している。先に `files_put` で置き場に上げ、`files_list` で相対パスを確かめてから渡す。
 - **（フォールバックで自前PDFを作る場合）英数字が □ 化**：非埋め込みCIDフォントが原因。weasyprint + Noto Sans CJK JP 埋め込みに切替、生成後は画像化で目視検証。
 - **請求書PDF・台帳xlsx の Drive 格納が失敗**するとき：Google Drive の**ローカル同期フォルダにコピー**して配置する（直アップロードは大容量で不安定）。配置後に開けるか確認。
 - **共有ドライブ直下に `02.送付請求書` ができている**：保存先を台帳フォルダ起点で解決していない（手順4-2）。中身は `{ledger_dir}/02.送付請求書/_ドライブ直下から移動_YYYYMMDD/` へ退避し、正しい月フォルダに公式PDFが揃っているかを確認する。

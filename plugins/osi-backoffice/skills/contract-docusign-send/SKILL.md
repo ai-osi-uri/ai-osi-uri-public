@@ -13,12 +13,13 @@ description: >
   ※ 契約書そのものを新規作成するのは nda-creation 等の役割。受領契約 → 請求スケジュール化は
   osi-finance の osi-finance-contract-intake。本スキルは「手元の契約書をチェックして送る」ことに特化する。
 requires_connectors:
-  # 既定の経路。Claude のコネクタ一覧からボタン1つで接続でき、鍵の登録は要らない
+  # 既定の経路（2026-10-16〜）。URL でつなぐコネクタ（リモート MCP）の ds_*・files_*。
+  # 連携アプリの鍵は会社の鍵（ポータルの「ツール設定」）、各自は「DocuSign とつなぐ」を1回押す
+  - server: ai-osi-uri-remote
+    provision: user-connect
+  # つないでいない人のための予備。公式 DocuSign コネクタ（人が書類をドラッグする）
   - server: docusign
     provision: user-connect
-  # 台帳の読み書きと、Integration Key がある組織向けの ds_* に使う
-  - server: ai-osi-uri-finance
-    provision: user-install
 ---
 
 # contract-docusign-send（契約書チェック → DocuSign 送付）
@@ -82,17 +83,13 @@ requires_connectors:
   > * 本番 DocuSign アカウントで Integration Key を発行 → **画面に「実稼働環境では作成
   >   できません。開発者アカウントで作成し Go-Live を経て移行」と明記**されている
 
-- **自前コネクタ（`ai-osi-uri-finance` の `ds_*`）＝上級者向け・任意**：
-  `ds_create_envelope` は**台帳フォルダのファイルを base64 で直接送る**ので、URL も置き場所も
-  要らない。ただし **Integration Key が必要**で、そのためには開発者アカウント（無料・即時）を
-  作り、Go-Live を通す必要がある。通せる組織はこちらが最短。
-  接続は `ds_connect`（ブラウザで「許可」を1回）、鍵の保存はコンソールの［DocuSign］画面。
-  **未接続のまま `ds_create_envelope` を呼ぶと、送信せずに `need_connect` と認可URLを返す。**
-
-- **URL のコネクタ（リモート）の `ds_*`**：手元の拡張が無い環境ではこちら。DocuSign のつながりは Finance のものではなく、
-  ポータルの「ツール設定」→「DocuSign」（`/keys/service/docusign`）で本人がつなぐ共通の道具。
-  送る書類は会社の書類の置き場の相対パスで指す（先に `files_put` で上げる）。締結済みは `ds_save_documents` で置き場に戻る。
+- **URL のコネクタ（リモート MCP）の `ds_*`＝既定（2026-10-16〜）**：DocuSign のつながりは Finance のものではなく、
+  ポータルの「ツール設定」→「DocuSign」（`/keys/service/docusign`）で本人が「DocuSign とつなぐ」を1回押す共通の道具。
+  連携アプリの鍵（Integration Key・Secret Key・本番/試し）は会社の鍵として1回だけ預けてあれば、社員は鍵を作らない。
+  送る書類は会社の書類の置き場の相対パスで指す（手元の契約書は先に `files_put` で上げる）。締結済みは `ds_save_documents` で置き場に戻る。
+  まず `ds_status` を見る。`connected:false` なら返ってくる `connect_url` を本人に渡し、それまでは下の公式コネクタの経路で進める。
   クラウドサインで送る組織は同じ形の `cs_*`（ツール設定 →「クラウドサイン」でクライアント ID を預ける）。
+  手元の Finance 拡張の `ds_*` は 1.47.0 で外した（使わない）。
 
 - **AWS / S3 / Supabase：使わない。** 契約書のための置き場所を新設しない（2026-08-17 の判断を維持）。
 - **Claude の bash**：契約書の PDF 変換や中身の確認に使う（アップロードには使わない）。
@@ -168,9 +165,9 @@ requires_connectors:
 
 ### Step 4. 書類を DocuSign に載せる（自社送付の場合のみ）
 
-**経路を1つ選ぶ。既定は A。**
+**経路を1つ選ぶ。既定は C（`ds_status` が `connected:true` のとき）。つながっていなければ A。**
 
-**A. 人がアップロードする（既定・設定不要）**
+**A. 人がアップロードする（つないでいない人の予備・設定不要）**
 
 1. 送付用の PDF（または docx）の場所を人に伝える。Drive の案件フォルダに置いておく。
 2. 「DocuSign を開いて［今すぐ開始］→ このファイルを追加して、**下書きのまま閉じて**ください」と案内する。
@@ -187,10 +184,12 @@ requires_connectors:
 `NO_DOCUMENT_RECEIVED` になる。2026-08-20 に確認済み）。
 **この経路のために新しく公開の置き場所を作らない。**既に公開されている URL があるときだけ使う。
 
-**C. 自前コネクタ（Integration Key がある組織のみ）**
+**C. URL のコネクタの `ds_*`（既定）**
 
-`ds_create_envelope(documents: ["<台帳フォルダからの相対パス>"], ...)`。
-台帳フォルダの外は拒否される。1ファイル 25MB まで。未接続なら `need_connect` が返る。
+1. 契約書を `files_put` で会社の書類の置き場に上げる（例 `03.契約書/送付前/<ファイル名>.pdf`）。`files_list` で相対パスを確かめる。
+2. `ds_create_envelope(documents: ["<置き場の相対パス>"], signers: [...], email_subject: ...)` をまず `dry_run`（既定）で呼び、作る中身を人に見せる。
+3. 人の OK のあと `dry_run:false` で作る。**既定は下書き（`status: created`）で相手には届かない。** `send:true` は人が明示的に頼んだときだけ。
+1ファイル 25MB まで。未接続なら `connect_url` が返る（本人に渡す）。
 
 ### Step 5. 封筒を整える（ドラフトで止める。送信は人が DocuSign で行う）
 

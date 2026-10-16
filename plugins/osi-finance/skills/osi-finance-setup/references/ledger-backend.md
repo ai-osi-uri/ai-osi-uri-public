@@ -42,15 +42,15 @@
 台帳の置き場（local / web）に関係なく使える。**つなぐのはポータルの「ツール設定」**（https://www.ai-osi-uri.info/keys/use/mail ・ /keys/use/esign）。
 Finance のスキルは「使う側」として、請求書の送付・受け取った請求書の保存・契約書の送付にこれらを使う。
 
-| 使い道（Finance の仕事） | 共通の道具 | 手元の Finance 拡張 | つなぐ場所（ツール設定） |
-|---|---|---|---|
-| 請求書 PDF・契約書を置く・一覧・見せる | `files_put`・`files_list`・`files_url`（会社の書類の置き場） | 台帳フォルダ | 置き場は会計のサイトの「書類」でも見られる |
-| 請求書を添付して送る・受け取った請求書をしまう | `mail_status`・`mail_connect`・`mail_create_draft`・`mail_send_draft`・`mail_list_attachments`・`mail_save_attachments` | `mail_*`（手元のパス） | `/keys/service/gmail`・`/keys/service/outlook`（人ごと） |
-| 契約書を DocuSign で送る・締結済みを戻す | `ds_status`・`ds_connect`・`ds_create_envelope`・`ds_get_envelope`・`ds_list_envelopes`・`ds_save_documents` | `ds_*`（手元のパス） | `/keys/service/docusign` |
-| 契約書をクラウドサインで送る・締結済みを戻す | `cs_status`・`cs_create_document`・`cs_send_document`・`cs_get_document`・`cs_list_documents`・`cs_save_files` | **無い（リモートだけ）** | `/keys/service/cloudsign` |
+| 使い道（Finance の仕事） | 共通の道具 | つなぐ場所（ツール設定） |
+|---|---|---|
+| 請求書 PDF・契約書を置く・一覧・見せる | `files_put`・`files_list`・`files_url`（会社の書類の置き場） | 置き場は会計のサイトの「書類」でも見られる |
+| 請求書を添付して送る・受け取った請求書をしまう | `mail_status`・`mail_connect`・`mail_create_draft`・`mail_send_draft`・`mail_list_attachments`・`mail_save_attachments` | `/keys/service/gmail`・`/keys/service/outlook`（人ごと） |
+| 契約書を DocuSign で送る・締結済みを戻す | `ds_status`・`ds_connect`・`ds_create_envelope`・`ds_get_envelope`・`ds_list_envelopes`・`ds_save_documents` | `/keys/service/docusign` |
+| 契約書をクラウドサインで送る・締結済みを戻す | `cs_status`・`cs_create_document`・`cs_send_document`・`cs_get_document`・`cs_list_documents`・`cs_save_files` | `/keys/service/cloudsign` |
 
-- 手元と URL のコネクタで同じ名前の道具（`ds_*`・`mail_*`）がある。どちらの道具かで、ファイルの指し方（手元のパス／会社の書類の置き場の相対パス）が違う。
-  台帳が Web なら URL のコネクタのほうを使う。手元の台帳フォルダのファイルを送りたいときは、先に `files_put` で置き場に上げる。
+- メールと電子署名は URL のコネクタの道具だけ（手元の Finance 拡張の `mail_*`・`ds_*` は 1.47.0 で外した・2026-10-16）。ファイルは会社の書類の置き場の相対パスで指す。
+  台帳が手元（local）でも同じ。手元の台帳フォルダのファイルを送るときは、先に `files_put` で置き場に上げる。受け取った添付を手元の台帳フォルダにも置きたいときは、`mail_save_attachments` で置き場に保存してから `files_url` で取ってくる。
 - 作る道具は既定で `dry_run:true`、作っても下書き（`send:false`）。送るのは本人が宛先・書類を確かめて OK したときだけ。
   - `cs_send_document` は `expect_emails`、`mail_send_draft` は `expect_to`・`expect_attachments` が実物と一致しないと送らない。
 - 締結済みの保存先は既定で `03.契約書/締結済/`、受け取った添付は `04.受領書類/YYYY-MM/`。保存した `path` を台帳の「〜ファイル」列に書く。

@@ -13,10 +13,12 @@ description: >
 requires_connectors:
   - server: gmail
     provision: user-install
-  - server: ai-osi-uri-finance   # DocuSign は自前コネクタの ds_* を使う（公式MCPは remoteUrl しか受けず送付に使えない）
+  - server: ai-osi-uri-finance   # 手元の台帳（sheets_*）。台帳を Web に置く会社は使わない
     provision: user-install
+  - server: ai-osi-uri-remote   # DocuSign・メール・書類の置き場（ds_*・mail_*・files_*）。手元の Finance 拡張の ds_*・mail_* は 1.47.0 で外した
+    provision: user-connect
 
-connector_prose_ok:  # DocuSign は ai-osi-uri-finance の ds_* 経由。docusign コネクタ自体は要らない
+connector_prose_ok:  # DocuSign は URL のコネクタの ds_* 経由。公式の docusign コネクタ自体は要らない
   - docusign
 # 手元が要る準備（get_skill が「手元の準備」の節を出す。導入手順は osi-core:local-setup）
 local_setup: [finance]
@@ -44,7 +46,7 @@ local_setup: [finance]
 
 ## 前提コネクタ
 
-- メール：検索は純正のメールコネクタ（Gmail／Microsoft 365）、**添付の取り出しは AI OSI URI Finance 拡張の `mail_save_attachments`**（v1.44.0〜。契約書フォルダを `mail_set_file_roots` で登録しておく）、Google Drive / 台帳（設定の `請求管理ルート`、例: `{{paths.finance}}`）。
+- メール：検索は純正のメールコネクタ（Gmail／Microsoft 365）、**添付の取り出しは URL のコネクタの `mail_save_attachments`**（会社の書類の置き場の `04.受領書類/` に保存。手元の台帳フォルダに置くときは `files_url` で取ってくる。つなぎ方は osi-finance-setup の `references/ledger-backend.md`「共通の道具」）、Google Drive / 台帳（設定の `請求管理ルート`、例: `{{paths.finance}}`）。
 - DocuSign（任意・補助）：`getEnvelopes` / `listEnvelopeDocuments` で自社送付契約のメタ・PDFを補完。
   Navigator API（構造化金額・期間）はプラン外なので使わない。
 
@@ -174,6 +176,6 @@ local_setup: [finance]
 詳細は **[`docs/エラー処理ガイド.md`](../../docs/エラー処理ガイド.md)** を正本とする。本スキルで詰まりやすい点：
 
 - **大容量の契約PDF**は Drive 直アップロードが不安定。Google Drive の**ローカル同期フォルダにコピー**して格納する（配置後に開けるか確認）。
-- **メール添付が取得できない**場合：純正のメールコネクタでは添付を取り出せない。拡張の `mail_save_attachments` を使う。「書類フォルダの中だけです」で止まったら、契約書フォルダを `mail_set_file_roots` で登録する。拡張が使えない環境だけ **Superhuman**、それも無ければ契約PDFを**Drive手置き**してもらう。
+- **メール添付が取得できない**場合：純正のメールコネクタでは添付を取り出せない。URL のコネクタの `mail_save_attachments` を使う（未接続なら返ってくるツール設定の URL を本人に渡す）。それも使えない環境だけ **Superhuman**、それも無ければ契約PDFを**Drive手置き**してもらう。
 - 金額・期間が読めない／`osi-finance-settings.md` 未整備のときは、**推測せず「要確認」**として残す（`WRITE_CONFIRMATION=事前確認` なら止めて人に確認、`事後確認` なら備考欄に残して書き込みは続行）。
 - **台帳xlsxへの書き込みが「Excelで開かれています」で失敗する**場合：多くは同フォルダに残る `~$台帳名.xlsx` という残骸ロックファイルが原因（Excelの異常終了などで消えずに残る）。bashサンドボックスからは権限上削除できないことがあるため、その場合はユーザーに「実際にExcelで開いていないか」確認のうえ Finder での削除を依頼し、削除後に書き込みをリトライする。

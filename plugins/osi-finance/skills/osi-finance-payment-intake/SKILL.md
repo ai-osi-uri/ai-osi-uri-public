@@ -48,7 +48,7 @@ local_setup: [finance]
   - (a) **Claude 直接アップロード（推奨・サミダレ運用の主役）** … ユーザーが請求書PDFを Claude にドロップして
     「この請求書を支払予定に起票して」と言う。アップロードされた PDF をその場で読み、Drive の受領請求書フォルダに格納してから処理する。
   - (b) **Drive 手置き** … `osi-finance-settings` の `受領請求書` フォルダに置かれた PDF。
-  - (c) **メール添付** … 拡張の `mail_save_attachments` で取引先からの請求書PDF添付を受領請求書フォルダへ直接保存する（完了メール等に添付）。メールの特定は純正のメールコネクタの検索で行い、その ID をそのまま渡す。
+  - (c) **メール添付** … URL のコネクタの `mail_save_attachments` で取引先からの請求書PDF添付を会社の書類の置き場（既定 `04.受領書類/YYYY-MM/`）に保存する（完了メール等に添付）。台帳が手元のときは、保存した `path` を台帳に書き、手元にも置くなら `files_url` で取ってくる。メールの特定は純正のメールコネクタの検索で行い、その ID をそのまま渡す。
 
 ## 役割と非役割
 
@@ -62,7 +62,7 @@ local_setup: [finance]
 ## 前提コネクタ
 
 - Google Drive / 台帳（受領請求書の格納・支払管理台帳）。
-- AI OSI URI Finance 拡張の `mail_list_attachments` / `mail_save_attachments`（v1.44.0〜。Gmail／Outlook 両対応）で請求書PDF添付を取得。予備として Superhuman Mail の `get_attachment`。
+- URL のコネクタの `mail_list_attachments` / `mail_save_attachments`（Gmail／Outlook 両対応。つなぐのはポータルの「ツール設定」）で請求書PDF添付を取得。予備として Superhuman Mail の `get_attachment`。
 - MF会計（任意）：`getTradePartners` を支払先マッチングの補助に使う（正本は台帳）。
 
 ## 手順
@@ -181,6 +181,6 @@ $L append --tab 月次支払管理 --dedupe-by 請求書番号 支払先ID --row
 
 詳細は **[`docs/エラー処理ガイド.md`](../../docs/エラー処理ガイド.md)** を正本とする。本スキルで詰まりやすい点：
 
-- **メール添付（受領請求書PDF）が取得できない**：純正のメールコネクタでは不可。拡張の `mail_save_attachments` を使う（未接続なら「メールにつないで」）。拡張が使えない環境だけ Superhuman の `get_attachment`、それも無ければ **Drive手置き**（受領請求書フォルダ）を案内して止める。
+- **メール添付（受領請求書PDF）が取得できない**：純正のメールコネクタでは不可。URL のコネクタの `mail_save_attachments` を使う（未接続なら `mail_status` が返すツール設定の URL を本人に渡す）。それも使えない環境だけ Superhuman の `get_attachment`、それも無ければ **Drive手置き**（受領請求書フォルダ）を案内して止める。
 - **大容量の請求書PDF**は Drive の**ローカル同期フォルダにコピー**して格納（直アップロードは不安定）。
 - 読めない値は**推測せず「要確認」**。新規・不明な支払先はその場で確認。**送金しない**。台帳へ書くタイミングは `WRITE_CONFIRMATION` に従う。

@@ -19,8 +19,10 @@ requires_connectors:
     provision: user-install
   - server: superhuman
     provision: user-install
-  - server: ai-osi-uri-finance   # DocuSign は自前コネクタの ds_* を使う（公式MCPは remoteUrl しか受けず送付に使えない）
+  - server: ai-osi-uri-finance   # 手元の台帳（sheets_*）。台帳を Web に置く会社は使わない
     provision: user-install
+  - server: ai-osi-uri-remote   # DocuSign・メール・書類の置き場（ds_*・mail_*・files_*）。手元の Finance 拡張の ds_*・mail_* は 1.47.0 で外した
+    provision: user-connect
 
 connector_prose_ok:  # DocuSign は任意の補助。無くても運用は成立する
   - docusign
