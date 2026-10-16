@@ -15,7 +15,7 @@ description: >
 requires_connectors:
   # 既定の経路（2026-10-16〜）。URL でつなぐコネクタ（リモート MCP）の ds_*・files_*。
   # 連携アプリの鍵は会社の鍵（ポータルの「ツール設定」）、各自は「DocuSign とつなぐ」を1回押す
-  - server: ai-osi-uri-remote
+  - server: AI_OSI_URI_Remote_MCP
     provision: user-connect
   # つないでいない人のための予備。公式 DocuSign コネクタ（人が書類をドラッグする）
   - server: docusign
