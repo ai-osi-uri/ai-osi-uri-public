@@ -1,6 +1,6 @@
 # サニタイズ要確認レポート
 
-対象プラグイン: osi-creative, osi-sales, osi-docs, osi-deploy, osi-mobile-deploy, osi-knowledge, osi-finance, osi-core, osi-backoffice, osi-secretary, osi-marketing
+対象プラグイン: osi-creative, osi-sales, osi-docs, osi-deploy, osi-mobile-deploy, osi-knowledge, osi-finance, osi-core, osi-backoffice, osi-secretary, osi-marketing, osi-line
 
 以下の 99 箇所に要注意語が残っています。publish 前に人手で確認してください（自動削除は文書を壊すため行いません）。
 
