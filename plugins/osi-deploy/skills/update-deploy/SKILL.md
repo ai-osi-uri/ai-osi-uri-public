@@ -22,9 +22,9 @@ local_setup: [computer, ext-deploy]
 
 # update-deploy — 既存アプリを更新するオーケストレータ
 
-> **Git の道（2026-10-16〜）**：URL でつなぐコネクタでは、手元の `github_push`・`github_clone`・`github_pull`・`github_create_repo_and_push` は使わない。
-> 送るのは `github_upload_url` →（手元でフォルダを zip にして curl で上げる）→ `github_push_folder`（まず dry_run で、消すものを本人に見せる）、
-> 取り込むのは `github_download_folder`。手順は references/git-via-url-connector.md。下の本文の手元の道具の手順は、手元の Deploy 拡張がつながっているときだけ使う。
+> **Git の道（2026-10-16）**：Git の push・取り込みは**手元の Deploy 拡張の道具（`github_push`・`github_clone`・`github_pull` など）が基本**（差分だけを送るので大きなリポジトリでも軽い）。
+> 手元の拡張が無いとき（ブラウザ版の Claude・まだ入れていない人）や小さなアプリだけ、URL でつなぐコネクタの `github_upload_url` → `github_push_folder` ／ `github_download_folder` を予備に使う
+> （毎回フォルダ全体を zip で送るので 1 回 200MB まで）。手順は references/git-via-url-connector.md。
 
 `create-app`（旧 deploy-app） が「新規作成」を担うのに対し、本スキルは「既にある GitHub リポ＋
 Vercel/AWS のデプロイを、ローカル修正→push→自動再デプロイ→検証」まで貫通する。

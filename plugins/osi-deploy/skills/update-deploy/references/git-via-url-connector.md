@@ -1,6 +1,10 @@
-# 手元のフォルダと GitHub を、URL でつなぐコネクタでつなぐ（2026-10-16〜）
+# 手元のフォルダと GitHub を、URL でつなぐコネクタでつなぐ（予備・2026-10-16〜）
 
-手元の Deploy 拡張の `github_push`・`github_clone`・`github_pull`・`github_create_repo_and_push` の代わり。
+**Git の push・取り込みは、手元の Deploy 拡張の道具（`github_push`・`github_clone`・`github_pull`・`github_create_repo_and_push`）が基本。**
+手元の Git は差分だけを送り、履歴・ブランチ・やり直しも扱える。この道は、手元の拡張が無いとき（ブラウザ版の Claude・まだ入れていない人）と、
+小さなアプリを急いで上げるときの予備。毎回フォルダ全体を zip にして送るので、大きなリポジトリには向かない（1 回 200MB・5,000 ファイルまで）。
+手元の拡張を入れられるなら、osi-core:local-setup の `references/install-extension.md` で入れてから手元の道具を使う。
+
 GitHub の鍵はサーバーの中だけで使い、Claude にも手元にも出ない。中身は会話を通さず、Claude が zip にして直接上げる。
 
 ## 送る（push の代わり）
@@ -37,4 +41,4 @@ GitHub の鍵はサーバーの中だけで使い、Claude にも手元にも出
 - いきなり `dry_run:false` で送り、要るファイル（`.github/workflows/` など）を消す → 必ず dry_run の `deleted` を見せてから
 - zip の 1 段目に余計なフォルダが入り、リポジトリが一段深くなる → 1 段目が 1 つのフォルダだけなら自動で外す。外れていないときは `stripped_root` を見る
 - `upload_url` が切れていた（10 分）→ `github_upload_url` からやり直す
-- 手元の Deploy 拡張がつながっていて、手元の Git の細かい操作（ブランチの付け替え・やり直し）が要るときだけ、手元の道具を使ってよい
+- 大きなリポジトリ・画像や動画の多いリポジトリをこの道で何度も送る → 手元の Deploy 拡張を入れて手元の道具に切り替える
