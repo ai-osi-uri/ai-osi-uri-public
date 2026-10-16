@@ -14,6 +14,10 @@ local_setup: [ext-deploy]
 
 # Electron scaffold + electron-builder + GitHub Actions CI（atomic）
 
+> **Git の道（2026-10-16〜）**：URL でつなぐコネクタでは、手元の `github_push`・`github_clone`・`github_pull`・`github_create_repo_and_push` は使わない。
+> 送るのは `github_upload_url` →（手元でフォルダを zip にして curl で上げる）→ `github_push_folder`（まず dry_run で、消すものを本人に見せる）、
+> 取り込むのは `github_download_folder`。手順は osi-deploy の update-deploy の `references/git-via-url-connector.md`。下の本文の手元の道具の手順は、手元の Deploy 拡張がつながっているときだけ使う。
+
 > **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` `{{members.*}}` は、連結フォルダ直下の `osi-profile.md`（雛形: `config/osi-profile.example.md`）の値に置き換えて解釈する。無ければ会社名・案件フォルダ・台帳の有無・使うコネクタを質問して先に作る。値をここに直書きしない。
 
 Electron + React の scaffold を生成し、electron-builder 設定と GitHub Actions の

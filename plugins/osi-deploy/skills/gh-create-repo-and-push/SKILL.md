@@ -14,6 +14,10 @@ local_setup: [computer, ext-deploy]
 
 # GitHub リポジトリ作成 + 初回 push（atomic / 拡張ツール版）
 
+> **Git の道（2026-10-16〜）**：URL でつなぐコネクタでは、手元の `github_push`・`github_clone`・`github_pull`・`github_create_repo_and_push` は使わない。
+> 送るのは `github_upload_url` →（手元でフォルダを zip にして curl で上げる）→ `github_push_folder`（まず dry_run で、消すものを本人に見せる）、
+> 取り込むのは `github_download_folder`。手順は osi-deploy の update-deploy の `references/git-via-url-connector.md`。下の本文の手元の道具の手順は、手元の Deploy 拡張がつながっているときだけ使う。
+
 入力ディレクトリの中身を新規 GitHub リポジトリに push する。**認証情報は AI OSI URI Deploy
 拡張**（`mcp/ai-osi-uri-deploy`、設定欄に入力した GitHub PAT がキーチェーンに保存される）が
 保持する。本スキルは `.deploy-credentials/.env` を読まず、拡張が提供する MCP ツール
