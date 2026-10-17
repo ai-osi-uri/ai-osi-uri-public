@@ -14,6 +14,8 @@ description: >
 requires_connectors:
   - server: money-forward
     provision: user-install
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 固定資産・減価償却
 ---
 
 # 固定資産の判定と償却（osi-finance-fixed-assets）

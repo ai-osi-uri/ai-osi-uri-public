@@ -28,6 +28,8 @@ requires_connectors:
 
 # 手元が要る準備（get_skill が「手元の準備」の節を出す。導入手順は osi-core:local-setup）
 local_setup: [finance]
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 請求書を作る・送る
 ---
 
 # osi-finance-invoice（月次 請求書発行 → Gmail下書き）

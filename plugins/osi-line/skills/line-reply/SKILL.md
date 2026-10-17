@@ -9,6 +9,8 @@ description: >
 requires_connectors:
   - server: AI_OSI_URI_LINE
     provision: mcpb
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: LINEの返信を作る
 ---
 
 # line-reply（LINE の返信を作る・送る）

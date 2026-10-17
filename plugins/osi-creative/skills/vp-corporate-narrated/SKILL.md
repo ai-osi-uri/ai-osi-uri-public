@@ -5,6 +5,8 @@ requires_connectors:
   - server: ai-osi-uri-creative
     provision: user-install
     tools: [generate_image, image_to_video, submit_video, check_status, generate_speech, generate_music]
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: ナレ付き会社紹介動画
 ---
 
 # vp-corporate-narrated — ナレ付き企業動画（プロンプト＆台本作者）

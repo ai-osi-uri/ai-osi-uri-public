@@ -17,6 +17,8 @@ requires_connectors:
     provision: user-install
     optional: true
 
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 商談の議事録
 ---
 
 # 商談議事録自動化スキル

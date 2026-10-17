@@ -14,6 +14,8 @@ requires_connectors:
     provision: user-install
     optional: true
 
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: プレスリリース
 ---
 
 # PR TIMES 記事作成スキル

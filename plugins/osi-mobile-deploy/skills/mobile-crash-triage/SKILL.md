@@ -9,6 +9,8 @@ description: |
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: スマホアプリの落ちる原因
 ---
 
 # mobile-crash-triage — クラッシュ調査と修正提案

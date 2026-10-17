@@ -7,6 +7,8 @@ description: |
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: スマホのFirebase設定
 ---
 
 # mobile-firebase-setup — Firebase プロビジョニング + GitHub Secrets 投入

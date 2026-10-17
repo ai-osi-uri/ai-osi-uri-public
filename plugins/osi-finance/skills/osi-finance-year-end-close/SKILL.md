@@ -14,6 +14,8 @@ requires_connectors:
     provision: user-install
   - server: AI_OSI_URI_Finance
     provision: mcpb
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 決算
 ---
 
 # 決算整理と決算書一式（osi-finance-year-end-close）

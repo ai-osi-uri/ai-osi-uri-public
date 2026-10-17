@@ -11,6 +11,8 @@ description: >-
 requires_connectors:
   - server: plaud
     provision: user-install
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 文字起こしをまとめる入口
 ---
 
 # transcript-router（文字起こし振り分け／横断ディスパッチ層）

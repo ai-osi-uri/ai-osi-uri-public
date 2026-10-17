@@ -13,6 +13,8 @@ description: >
 requires_connectors:
   - server: money-forward
     provision: user-install
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 税務調整の下準備
 ---
 
 # 税務調整の候補（osi-finance-tax-adjust）

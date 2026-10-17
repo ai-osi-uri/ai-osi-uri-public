@@ -9,6 +9,8 @@ description: >
 requires_connectors:
   - server: AI_OSI_URI_LINE
     provision: mcpb
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: LINEをつなぐ
 ---
 
 # line-setup（LINE をつなぐ）

@@ -13,6 +13,8 @@ requires_connectors:
   - server: AI_OSI_URI_Deploy
 # 手元が要る準備（get_skill が「手元の準備」の節を出す。導入手順は osi-core:local-setup）
 local_setup: [computer, ext-deploy]
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 公開前の点検
 ---
 
 # デプロイ前プリフライト検証（atomic・read-only）

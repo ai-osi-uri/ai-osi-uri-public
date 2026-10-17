@@ -7,6 +7,8 @@ requires_connectors:
     tools: [generate_image, edit_image, image_to_video, submit_video, check_status, generate_speech, generate_music]
 connector_prose_ok:  # Plaud は「音声の入手経路の例」。このスキルが呼ぶわけではない
   - plaud
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 企業の動画名刺
 ---
 
 # vp-corporate-card — 企業の動画名刺（15秒／30秒）

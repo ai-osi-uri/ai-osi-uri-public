@@ -5,6 +5,8 @@ requires_connectors:
   - server: ai-osi-uri-creative
     provision: user-install
     tools: [generate_image, edit_image, image_to_video, submit_video, reference_to_video, check_status, generate_speech, generate_music]
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 動画の共通部品
 ---
 
 # vp-core — 動画制作の共通インナー（承認ゲート付き生成ループ）

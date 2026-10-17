@@ -17,6 +17,8 @@ requires_connectors:
     provision: user-install
 # 手元が要る準備（get_skill が「手元の準備」の節を出す。導入手順は osi-core:local-setup）
 local_setup: [chrome]
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: Lovableの決済を本番に
 ---
 
 # Lovable 内蔵決済 有効化〜Go Live スキル（lovable-payments-golive）

@@ -5,6 +5,8 @@ requires_connectors:
   - server: ai-osi-uri-creative
     provision: user-install
     tools: [generate_image, edit_image, submit_video, reference_to_video, check_status]
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 1枚の画像を動かす
 ---
 
 # vp-moveboard — 1枚の画像をカメラムーブで魅せる（プロンプト作者）

@@ -5,6 +5,8 @@ requires_connectors:
   - server: ai-osi-uri-creative
     provision: user-install
     tools: [generate_image, edit_image, generate_video, image_to_video, submit_video, reference_to_video, check_status, generate_speech, generate_music]
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: AI動画を作る入口
 ---
 
 # AI動画制作パイプライン（ディスパッチャ）

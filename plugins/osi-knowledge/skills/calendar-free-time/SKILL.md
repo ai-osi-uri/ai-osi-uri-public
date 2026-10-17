@@ -12,6 +12,8 @@ requires_connectors:
   - server: google-calendar
     provision: user-install
 
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 空き時間を探す
 ---
 
 # カレンダー空き時間表示スキル

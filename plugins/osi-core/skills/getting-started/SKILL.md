@@ -14,6 +14,8 @@ description: >
 # コネクタは「あれば実測する」任意の対象。依存ではないので requires には書かない
 connector_prose_ok: [AI_OSI_URI_Deploy, AI_OSI_URI_Finance, ai-osi-uri-creative, slack, docusign, plaud, gmail, google-calendar, obsidian, money-forward, notion]
 # 手元の準備は求めない（2026-10-16〜）。パソコンのフォルダが無いブラウザ版でも、フォルダなしで最後まで進める（Step 1）
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: はじめての案内
 ---
 
 # 初回セットアップ（getting-started）

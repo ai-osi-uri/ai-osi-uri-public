@@ -9,6 +9,8 @@ description: |
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: iPhoneアプリをTestFlightへ
 ---
 
 # ios-testflight-deploy — iOS TestFlight 配信の詳細ノウハウ

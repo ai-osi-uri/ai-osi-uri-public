@@ -9,6 +9,8 @@ requires_connectors:
     provision: user-install
   - server: ai-osi-uri-creative
     provision: user-install
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: アプリのアイコン
 ---
 
 # mobile-icon-generator — 1枚から全 density を生成

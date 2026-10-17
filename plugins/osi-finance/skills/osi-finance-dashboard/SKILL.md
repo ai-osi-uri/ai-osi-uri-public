@@ -14,6 +14,8 @@ requires_connectors:
   - server: cowork
     provision: builtin
 
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 会計ダッシュボード
 ---
 
 # osi-finance-dashboard（会計ダッシュボード — ライブ・アーティファクト生成）

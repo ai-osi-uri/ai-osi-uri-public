@@ -5,6 +5,8 @@ requires_connectors:
   - server: ai-osi-uri-creative
     provision: user-install
     tools: [generate_image, edit_image, image_to_video, submit_video, check_status, generate_speech, generate_music]
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 個人の自己紹介動画
 ---
 
 # vp-personal-intro — 個人の自己紹介動画（15秒／30秒）

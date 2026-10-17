@@ -22,6 +22,8 @@ connector_prose_ok:  # DocuSign は URL のコネクタの ds_* 経由。公式�
   - docusign
 # 手元が要る準備（get_skill が「手元の準備」の節を出す。導入手順は osi-core:local-setup）
 local_setup: [finance]
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 契約から請求予定を作る
 ---
 
 # osi-finance-contract-intake（契約取込 → 請求スケジュール展開）

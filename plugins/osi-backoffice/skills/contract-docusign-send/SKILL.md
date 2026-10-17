@@ -20,6 +20,8 @@ requires_connectors:
   # つないでいない人のための予備。公式 DocuSign コネクタ（人が書類をドラッグする）
   - server: docusign
     provision: user-connect
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 契約書を確認しDocuSignで送る
 ---
 
 # contract-docusign-send（契約書チェック → DocuSign 送付）

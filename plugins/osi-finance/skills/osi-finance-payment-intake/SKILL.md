@@ -20,6 +20,8 @@ requires_connectors:
 
 # 手元が要る準備（get_skill が「手元の準備」の節を出す。導入手順は osi-core:local-setup）
 local_setup: [finance]
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 受け取った請求書の起票
 ---
 
 # osi-finance-payment-intake（受領請求書 → 支払予定 起票）

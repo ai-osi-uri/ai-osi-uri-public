@@ -17,6 +17,8 @@ requires_connectors:
   - server: plaud
     provision: user-install
 
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 伴走セッションの振り返り
 ---
 
 # 伴走セッション・レビュースキル（session-review）

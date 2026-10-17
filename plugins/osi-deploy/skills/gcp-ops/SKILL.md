@@ -10,6 +10,8 @@ requires_connectors:
   - server: AI_OSI_URI_Deploy
 # 手元が要る準備（get_skill が「手元の準備」の節を出す。導入手順は osi-core:local-setup）
 local_setup: [ext-deploy]
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: GCP・BigQueryの操作
 ---
 
 # GCP 操作（atomic・REST / CLI 不要）

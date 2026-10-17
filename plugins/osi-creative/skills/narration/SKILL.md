@@ -5,6 +5,8 @@ requires_connectors:
   - server: ai-osi-uri-creative
     provision: user-install
     tools: [generate_speech, submit_speech, check_speech, list_voices, create_pronunciation_dictionary, add_pronunciation_rules, list_pronunciation_dictionaries, get_pronunciation_dictionary]
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: ナレーション音声
 ---
 
 # narration — 日本語音声ナレーション（クリーンテキスト＋発音辞書）

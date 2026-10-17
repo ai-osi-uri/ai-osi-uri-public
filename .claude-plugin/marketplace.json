@@ -14,7 +14,7 @@
       "name": "osi-creative",
       "source": "./plugins/osi-creative",
       "description": "AI 動画制作・日本語音声ナレーション（narration）と出資お礼メッセージ生成。汎用クリエイティブスキル集。",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "category": "creative",
       "tags": [
         "ai-video",
@@ -30,7 +30,7 @@
       "name": "osi-sales",
       "source": "./plugins/osi-sales",
       "description": "営業ワークフロー。商談準備、提案、見積もり、案件管理、企業調査、決裁構造、社内推進戦略、決裁者向け説得パッケージまで一気通貫で扱う。",
-      "version": "0.12.1",
+      "version": "0.12.2",
       "category": "sales",
       "tags": [
         "proposal",
@@ -51,7 +51,7 @@
       "name": "osi-docs",
       "source": "./plugins/osi-docs",
       "description": "文書・契約・業務フロー・事業計画・構成図作成。財務モデル、企業分析、提案資料に加え、手描き配線図から物理・論理構成図とBOMを生成。 financial-model-3statement は config の開始年月から月次三表に「年月」行を出し、暦月の実績と並べられる。 明細（売上・原価・販管費の行）は業態別テンプレを持たず config の 明細 から生やす。合計と検算はコード側。",
-      "version": "0.13.2",
+      "version": "0.13.3",
       "category": "docs",
       "tags": [
         "docs",
@@ -69,7 +69,7 @@
       "name": "osi-deploy",
       "source": "./plugins/osi-deploy",
       "description": "アプリ作成・公開自動化。Web（Vercel / AWS）・Desktop（Electron）・ローカル出力に対応し、create-app を入口に DNS 設定・事前診断・公開後の更新まで一気通貫で扱う。**モバイル（iOS / Android）は osi-mobile-deploy に全面委譲**する。Lovable プロジェクトの決済有効化・本番化は `lovable-payments-golive` が担当（AI OSI URI Deploy 拡張は使わない）。オンプレ App Builder への受け渡しは `app-builder-export`（kind: app-builder-app-spec）に一本化。29 スキル（お試しから自分の鍵へ移る案内 `own-keys-setup` を追加）。",
-      "version": "1.22.2",
+      "version": "1.22.3",
       "category": "deploy",
       "tags": [
         "deploy",
@@ -91,7 +91,7 @@
       "name": "osi-mobile-deploy",
       "source": "./plugins/osi-mobile-deploy",
       "description": "ネイティブモバイルアプリ（iOS / Android）作成〜配信自動化。**既定スタック: iOS = SwiftUI (iOS 16+) / Android = Kotlin + Jetpack Compose (minSdk 26)。Flutter は新規では使わない**（既存 Flutter アプリの移行時のみ flutter-swift-parity-port）。「モバイルアプリ作って」の一言で、Golden Template から新規リポを起こし、Firebase プロビジョニング・アイコン生成・GitHub Secrets 投入・CI 自動修正ループを回して TestFlight / Google Play Internal Track まで到達させる。TestFlight より先（ビルド昇格・App Store 申請・Xcode の N-1 ピン運用）は ios-appstore-release が担当する。osi-deploy（Web / SaaS）と対を成すモバイル配信専用プラグイン。16 スキル。",
-      "version": "0.8.2",
+      "version": "0.8.3",
       "category": "deploy",
       "tags": [
         "mobile",
@@ -118,7 +118,7 @@
       "name": "osi-knowledge",
       "source": "./plugins/osi-knowledge",
       "description": "知識管理：記録を知識に育てる一式（整える・集める・束ねる・答える・確かめて直す）と、Google Calendar の空き時間取得。",
-      "version": "0.3.3",
+      "version": "0.3.4",
       "category": "knowledge",
       "tags": [
         "obsidian",
@@ -133,7 +133,7 @@
       "name": "osi-finance",
       "source": "./plugins/osi-finance",
       "description": "OSI Finance — 日本の中小企業向け経理（請求AR・支払AP）自動化プラグイン。台帳（ローカル xlsx か、会計のサイトの Web 台帳を会社ごとに選べる）と内部仕訳帳を正本に、「OSI Finance を入れたい」の一言で導入を伴走する onboarding、初回セットアップ、契約取込→請求スケジュール化、請求書発行、受領請求書の支払起票・取りこぼし検出、MF/freee/銀行明細との突合、仕訳生成、経費レシート証憑化、期ズレ計上（前受・前払・未払の月次整理）、月次クローズ、会計ダッシュボード、ローカルコンソール（台帳ビュー・財務三表）までを収録。送金・請求書の発行送信・会計計上の確定は常に人が実行。運用モード・連携トグル・起票確認方式で書き込み可否を組織ごとに統制できる。詳細は各スキルの説明を参照。",
-      "version": "0.63.0",
+      "version": "0.63.1",
       "category": "finance",
       "tags": [
         "finance",
@@ -153,7 +153,7 @@
       "name": "osi-core",
       "source": "./plugins/osi-core",
       "description": "横断オーケストレーション・品質層・入口。初回セットアップ（getting-started）で会社プロファイルと初期環境を整え、入力振り分けと独立ファクトチェックを行う。",
-      "version": "0.10.2",
+      "version": "0.10.3",
       "category": "core",
       "tags": [
         "core",
@@ -170,7 +170,7 @@
       "name": "osi-backoffice",
       "source": "./plugins/osi-backoffice",
       "description": "バックオフィス業務自動化。契約書の内容チェック→DocuSign 署名依頼（contract-docusign-send）と、名刺のラクスル入稿用PDF自動生成（meishi-generator：氏名・役職等を伝えるだけで原本.aiテンプレの可変部分を差し替えた入稿PDFを生成、CMYK・トンボ維持）。送付・発注は人が行う安全設計（自動送付・自動発注しない）。",
-      "version": "0.8.3",
+      "version": "0.8.4",
       "category": "backoffice",
       "tags": [
         "backoffice",
@@ -188,7 +188,7 @@
       "name": "osi-secretary",
       "source": "./plugins/osi-secretary",
       "description": "会社の AI 秘書（LINE で仕事を頼める秘書）を、使う人自身の Supabase・Vercel の中に作って育てる。LINE 公式アカウント → 置き場 → 管理画面 → LINE とつなぐ → 社内の資料から業務定義、を会話で進める（secretary-create）。業務定義の作り直し（secretary-flow）、秘書を最新にする・様子を見る（secretary-care）。",
-      "version": "0.2.3",
+      "version": "0.2.4",
       "category": "backoffice",
       "tags": [
         "secretary",
@@ -203,7 +203,7 @@
       "name": "osi-marketing",
       "source": "./plugins/osi-marketing",
       "description": "顧客理解、商品コンセプト、ファネル、ウェビナー、講座、アウトリーチ、掲載先の陣取り調査を一気通貫で設計・実行。",
-      "version": "0.3.3",
+      "version": "0.3.4",
       "category": "marketing",
       "tags": [
         "outreach",
@@ -225,7 +225,7 @@
       "name": "osi-line",
       "source": "./plugins/osi-line",
       "description": "自分の LINE（個人アカウント）を Claude から使う。QR でログイン（line-setup）、未読・返事待ちのまとめ（line-inbox）、下書きを見せて本人の OK 後に 1 通ずつ送る返信（line-reply・送信は設定でオンにしたときだけ）、友だち・トーク・画像やファイル・設定の基本操作（line-basics）。道具は AI OSI URI LINE 拡張（非公式・PC 版 LINE と同時に使える・既定は読むだけ）。",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "category": "backoffice",
       "tags": [
         "line",

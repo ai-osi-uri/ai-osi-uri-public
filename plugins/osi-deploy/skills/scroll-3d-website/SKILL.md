@@ -8,6 +8,8 @@ description: |
   landing page with scroll effects", or sites in the vein of Igloo / Lusion / Active
   Theory. The word "3D" is not required.
 
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 3Dスクロールのサイト
 ---
 
 # Build Premium 3D Scroll-Animated Websites

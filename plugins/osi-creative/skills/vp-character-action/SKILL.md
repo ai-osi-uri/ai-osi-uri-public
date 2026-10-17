@@ -5,6 +5,8 @@ requires_connectors:
   - server: ai-osi-uri-creative
     provision: user-install
     tools: [generate_image, edit_image, submit_video, check_status]
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: キャラが動く動画
 ---
 
 # vp-character-action — キャラ一貫アクション（プロンプト作者）

@@ -8,6 +8,8 @@ requires_connectors:
     optional: true
     tools: [generate_image]
 
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 自社体裁のpptx
 ---
 
 # PPTX Skill（描画エンジン）

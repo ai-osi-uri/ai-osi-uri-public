@@ -11,6 +11,8 @@ description: |
   「決済を付けたい」「お試しの上限に当たった」、ツール設定の「AI に頼む」の指示文（「ツール設定で「…」を使えるようにしたいです」）で発動する。`create-app` が `[quota_exceeded:projects]`・`[quota_exceeded:resources]`・`[quota_exceeded:media]`・`[quota_exceeded:generation]` を受けたとき、
   `secretary-create` が URL のコネクタで「自分の鍵のときだけ」と止められたときにも呼ばれる。
   ダウンロード版（AI OSI URI Deploy 拡張）の鍵は `setup-deploy-environment` の担当。
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 鍵を預ける(ツール設定)
 ---
 
 # ツール設定に鍵を預ける（own-keys-setup）

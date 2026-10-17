@@ -8,6 +8,8 @@ description: >
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: AI秘書の業務定義
 ---
 
 # secretary-flow（業務定義を資料から作り直す）

@@ -13,6 +13,8 @@ description: |
   business-plan-builder などから呼ばれる。単体でも使える。
   ※ レイアウト・配色・図形・画像・QA などの「描き方」は本スキルの担当外（pptx-custom の責任）。
   本スキルは「どのスライドが何を言うか・どう並ぶか」だけを扱い、slide-plan.md を出力する。
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: スライドの構成
 ---
 
 # デッキ構成（Deck Composition）

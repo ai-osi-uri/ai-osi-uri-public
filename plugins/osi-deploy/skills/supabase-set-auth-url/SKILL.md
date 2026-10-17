@@ -6,6 +6,8 @@ description: |
   に飛ぶ典型問題を潰す。`create-app` から呼ばれる。単体では「Supabase Auth URL
   を更新して」「Magic Link が localhost に飛ぶ」で発動。DB スキーマ・edge function
   の操作には使わない。
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: ログインのURL設定
 ---
 
 # Supabase Auth URL 更新（atomic / 拡張ツール版）

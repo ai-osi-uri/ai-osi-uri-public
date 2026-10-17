@@ -11,6 +11,8 @@ requires_connectors:
   - server: plaud
     provision: external
     optional: true
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 提案書(入口)
 ---
 
 # 提案パッケージ生成スキル（proposal-package）— オーケストレータ

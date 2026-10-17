@@ -1,6 +1,8 @@
 ---
 name: network-diagram-package
 description: 確認済みの `network-source.json` から、物理構成図、論理構成図、接続表、機器一覧、BOM Excel、未確定事項一覧を一貫したIDで生成するスキル。「確定データからネットワーク構成図を作って」「物理図と論理図とBOMを出して」「配線情報をPPTXとExcelにして」などで発動する。入力の不確実性を隠さず、図とBOMの数量・型番・接続が一致するまで検証する。画像認識とユーザー確認は `wiring-diagram-intake` の役割。
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: ネットワーク構成図一式
 ---
 
 # Network Diagram Package

@@ -13,6 +13,8 @@ description: |
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 決済を本番に切替
 ---
 
 # Stripe テストモード → 本番モード切替スキル（switch-to-live-mode）

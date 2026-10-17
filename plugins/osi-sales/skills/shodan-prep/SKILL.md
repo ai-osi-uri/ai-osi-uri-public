@@ -19,6 +19,8 @@ requires_connectors:
   - server: web-fetch
     provision: builtin
 
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 商談の準備と振り返り
 ---
 
 # 商談準備Skill（初回チェックリスト連動）

@@ -5,6 +5,8 @@ requires_connectors:
   - server: ai-osi-uri-creative
     provision: user-install
     tools: [generate_image, edit_image, image_to_video, submit_video, check_status, generate_music]
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: つながる1本の動画
 ---
 
 # vp-seamless-journey — 継ぎ目のない1本のカメラ移動 × 音楽同期の疾走感

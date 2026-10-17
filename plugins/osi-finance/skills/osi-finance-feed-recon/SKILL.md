@@ -14,6 +14,8 @@ description: >
 requires_connectors:
   - server: money-forward
     provision: user-install
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: MFの未仕訳の整理
 ---
 
 # 経理：MF連携明細（未仕訳）の棚卸し・振り分けスキル（osi-finance-feed-recon）

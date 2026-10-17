@@ -1,6 +1,8 @@
 ---
 name: wiring-diagram-package
 description: 手描き配線図や現場写真の受領から、画像補正、構造化抽出、段階的なユーザー確認、必要な型番調査、物理・論理ネットワーク構成図、接続表、BOM、最終検証までを統括するオーケストレータースキル。「この配線図を正式な構成図とBOMにして」「手描き図から納品一式を作って」「途中から配線図作成を再開して」などで発動する。`wiring-diagram-intake` と `network-diagram-package` を順に呼び、セッション状態と意思決定履歴を保存して再開可能にする。
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 配線図から構成図一式
 ---
 
 # Wiring Diagram Package

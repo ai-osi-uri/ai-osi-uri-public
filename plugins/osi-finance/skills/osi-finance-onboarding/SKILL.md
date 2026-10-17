@@ -19,6 +19,8 @@ connector_prose_ok:
   - gmail
   - superhuman
   - docusign
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 経理の導入
 ---
 
 # osi-finance-onboarding（OSI Finance を話しかけるだけで導入する）

@@ -17,6 +17,8 @@ requires_connectors:
   - server: box
     provision: user-install
     optional: true
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: システム構成の提案書
 ---
 
 # 技術・アーキテクチャ提案スキル

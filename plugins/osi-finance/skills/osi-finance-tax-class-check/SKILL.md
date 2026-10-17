@@ -12,6 +12,8 @@ description: >
 requires_connectors:
   - server: money-forward
     provision: user-install
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 税区分のチェック
 ---
 
 # 消費税区分のチェック（osi-finance-tax-class-check）

@@ -9,6 +9,8 @@ description: |
 requires_connectors:
   - server: web-fetch
     provision: builtin
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 目標設定シート
 ---
 
 # 目標設定シートの作り方

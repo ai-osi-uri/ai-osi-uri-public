@@ -5,6 +5,8 @@ requires_connectors:
   - server: ai-osi-uri-creative
     provision: user-install
     tools: [generate_music, submit_music, check_music, list_music_models]
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: BGM・音楽
 ---
 
 # music — BGM／シグネチャー音源

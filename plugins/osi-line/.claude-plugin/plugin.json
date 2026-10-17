@@ -1,6 +1,6 @@
 {
   "name": "osi-line",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "requires_connectors": [],
   "description": "自分の LINE（個人アカウント）を Claude から使うプラグイン。QR コードでログインし（line-setup）、未読や返事待ちのトークをまとめ（line-inbox）、返信は下書きを見せて本人の OK のあとで 1 通ずつ送り（line-reply・送るのは拡張の「読むだけ」を外したときだけ）、友だち・トーク・画像やファイル・設定などの基本操作（line-basics）を扱う。道具は AI OSI URI LINE 拡張（非公式・サブ端末としてログインするので PC 版 LINE と同時に使える・既定は読むだけ）。",
   "author": {

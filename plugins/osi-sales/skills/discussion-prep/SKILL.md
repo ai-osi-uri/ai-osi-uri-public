@@ -15,6 +15,8 @@ description: |
 requires_connectors:
   - server: obsidian
     provision: user-install
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 経営陣との壁打ち準備
 ---
 
 # 方向性ディスカッション準備スキル（discussion-prep）

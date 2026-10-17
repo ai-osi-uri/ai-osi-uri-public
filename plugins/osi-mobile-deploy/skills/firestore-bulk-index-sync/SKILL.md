@@ -8,6 +8,8 @@ description: |
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: Firestoreのインデックス
 ---
 
 # firestore-bulk-index-sync — 大量 composite index を REST で冪等に貼る

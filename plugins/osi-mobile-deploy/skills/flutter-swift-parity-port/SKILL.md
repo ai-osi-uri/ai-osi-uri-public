@@ -8,6 +8,8 @@ description: |
   `mobile-app-scaffold`）。
 # 手元が要る準備（get_skill が「手元の準備」の節を出す。導入手順は osi-core:local-setup）
 local_setup: [mac]
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: FlutterをSwiftUIへ移す
 ---
 
 # flutter-swift-parity-port — 既存 Flutter → SwiftUI 移植 workflow (migration only)

@@ -26,6 +26,8 @@ requires_connectors:
 
 connector_prose_ok:  # DocuSign は任意の補助。無くても運用は成立する
   - docusign
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 経理の初期設定
 ---
 
 # osi-finance-setup（OSI Finance 初回セットアップ・オーケストレータ）

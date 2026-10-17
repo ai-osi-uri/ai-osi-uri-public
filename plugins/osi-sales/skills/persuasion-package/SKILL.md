@@ -1,6 +1,8 @@
 ---
 name: persuasion-package
 description: 法人営業の重要提案について、対象企業の調査、決裁構造分析、社内推進戦略、説得文書、決裁者向けワンページ、独立ファクトチェックまでを一括で統括するオーケストレータースキル。「この企業向けの説得パッケージを作って」「調査から決裁資料まで一式」「大型提案の社内稟議を支援して」などで発動する。`decision-maker-research`、`champion-strategy`、`persuasion-document`、`research-verifier` を順に呼び、各ゲートを通過した成果物だけを次工程へ渡す。通常の初回提案や概算見積だけなら `proposal-package` を使う。
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 重要提案の一式
 ---
 
 # Persuasion Package

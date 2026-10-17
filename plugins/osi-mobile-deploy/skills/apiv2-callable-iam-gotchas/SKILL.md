@@ -9,6 +9,8 @@ description: |
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: Firebase関数が呼べない
 ---
 
 # apiv2-callable-iam-gotchas — Cloud Functions v2 / apiv2 が呼べない時の 2 大原因

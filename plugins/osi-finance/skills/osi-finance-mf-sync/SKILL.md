@@ -17,6 +17,8 @@ requires_connectors:
     provision: user-install
 # 手元が要る準備（get_skill が「手元の準備」の節を出す。導入手順は osi-core:local-setup）
 local_setup: [finance]
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 支払とMFの突合
 ---
 
 # 経理：台帳⇔MF 突合スキル（osi-finance-mf-sync）
