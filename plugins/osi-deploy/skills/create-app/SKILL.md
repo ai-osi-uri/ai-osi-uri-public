@@ -55,25 +55,20 @@ label: アプリ・サイトを新しく作る
 
 ---
 
-## 作成先の決定ルール（org or 個人）
+## 作成先の決定ルール（組織だけ）
 
-リポジトリの作成先は `health_check` の `github.repo_target` が示す。**推測しない。**
+**リポジトリは組織（Organization）の下にだけ作る。個人アカウントには作らない。** 道具もそう作ってあり、
+組織が決まらないときは作らずに止まる（以前は組織名が空だと黙って個人アカウントに作り、返事には頼んだ組織名を返していた）。
 
-| `github.repo_target` | 意味 | 既定の作成先 |
+| 経路 | 作る先 | 組織が決まらないとき |
 |---|---|---|
-| `org:<slug>` | 拡張設定の「GitHub Organization」に slug が入っている | その Org 配下 |
-| `personal:<username>` | Org 未設定 | 個人アカウント配下 |
+| ローカル（.mcpb） | `health_check` の `github.repo_target` が `org:<slug>`（拡張設定の「GitHub Organization」）。`owner_override` に組織名を渡せば、その組織 | `repo_target: none`。作らずに止まる → 拡張設定に組織名を入れてもらう |
+| リモート・お試し | 自社の org に固定（名前に会社の接頭辞が付く） | — |
+| リモート・自分の鍵 | ツール設定の「GitHub の組織名」（`github.org`）。別の組織を `repo_owner` に指定しても作らない | 作らずに止まる → ツール設定に組織名を入れてもらう |
 
-**重要:** `GITHUB_ORG` が未設定だと、`github_create_repo_and_push` は `owner_override` を
-渡さない限り**必ず個人アカウント**（`POST /user/repos`）に作りにいく。
-Org 配下に置きたいのに設定が空、というのが最も多い取り違えなので、Phase 3 のプラン提示で
-**作成先を必ず明示してユーザーの承認を取る**。
-
-- `repo_target` が意図と違う → `owner_override` を渡す（`'personal'` で個人、Org slug でその Org）。
-  恒久的に変えるなら拡張設定の「GitHub Organization」を埋めてもらう
-- 403 が返ったら、エラー本文の `target` フィールドで**どちらに作りにいって失敗したか**を確認する。
-  個人で 403 なら PAT に個人リポの作成権限がないだけで、Org 側の権限は無関係
-- **org と個人を混在させない**。GitHub を Org にしたら Vercel / Supabase も Org / Team 側に寄せる
+- 作ったあとは、返事の `repo` と `html_url` の持ち主が同じ組織かを必ず見る。違えば中身を入れずに止めて報告する
+- 403 / 404 が返ったら、トークンがその組織に作る権限を持っていない（組織の承認・Administration の書き込み）。個人に作り直さない
+- GitHub を組織にしたら、Vercel / Supabase もチーム・組織の側に寄せる
 
 ---
 
@@ -140,7 +135,7 @@ Phase N:   完了レポート
 | 本文の手順・道具 | リモートではこうする |
 |---|---|
 | 「必要 mcpb >= 1.23.0」の版チェック | `tools : Deploy` の道具数が **33 以上**なら続行。少なければ「コネクタを切断→接続し直して」と案内して中断 |
-| `github.repo_target` / `owner_override` | 読まない・渡さない。作成先は自社の org に固定され、リポ名には会社の接頭辞（`health_check` の `projects : … 名前空間 <slug>-*`）が自動で付く |
+| `github.repo_target` / `owner_override` | お試しでは読まない・渡さない。自分の鍵ではツール設定の「GitHub の組織名」の組織に作る（空なら作らずに止まる）。お試しの作成先は自社の org に固定され、リポ名には会社の接頭辞（`health_check` の `projects : … 名前空間 <slug>-*`）が自動で付く |
 | `gh-create-repo-and-push`（`github_create_repo_and_push`） | `github_create_repo`（`name` = アプリの slug、`project_name` = 表示名）→ `github_put_files`（`files: [{path, content}]` を **1 コミット**で。`node_modules` / `.next` / `.env*` は含めない。合計 200 ファイルや 5 MB を超えそうなら数回に分けて push する） |
 | `github_push`（再 push） | 変更したファイルだけを `github_put_files`（同じブランチ・上書き） |
 | `vercel-connect-and-deploy`（`vercel_create_project_and_deploy`） | `vercel_create_project`（`repo_name`, `env_vars`, 必要なら `framework`）→ `vercel_get_deployment_status` で READY を待つ。clone / push は要らない |
@@ -171,15 +166,14 @@ Phase N:   完了レポート
    - Stripe: `stripe.test` / `stripe.live`
    - Supabase: `supabase.valid: true`
    - AI 機能: `anthropic.valid: true`（URL のコネクタでは、ツール設定に Anthropic・OpenAI・TypeSafe の鍵があるか。アプリへは `vercel_set_env` の `from_extension` で値を見せずに入れる）
-3. **`github.repo_target` を読み、リポジトリの作成先を確定する**（[作成先の決定ルール](#作成先の決定ルールorg-or-個人)）。
-   `personal:` になっていて Org に置きたい場合は、Phase 3 のプランで作成先を明示して承認を取り、
-   `github_create_repo_and_push` に `owner_override: "<org slug>"` を渡す
+3. **`github.repo_target` を読み、リポジトリを作る組織を確定する**（[作成先の決定ルール](#作成先の決定ルール組織だけ)）。
+   `none` なら組織名が未設定なので、拡張設定（リモートの自分の鍵ならツール設定の「GitHub の組織名」）に入れてもらってから進む
 4. 不足 → `setup-deploy-environment` を案内して中断。**発行そのものが必要なら `credential-handoff` に渡す**
    （何のため／どこで生まれる／どこで使う／どう確かめる を添える）。「○○で発行して貼ってください」と
    文章で説明して止まらない。鍵の値は受け取らない
 
 > `health_check` はトークンの**有効性**しか見ない。「リポジトリを作れるか」までは判定できないため、
-> 403 が出たら第一容疑は権限ではなく**作成先の取り違え**。まず `repo_target` を疑うこと。
+> 403 / 404 が出たら、トークンがその組織に作る権限を持っているかを確かめる。個人アカウントに作り直さない。
 
 ### 使用する拡張ツール
 
@@ -302,7 +296,7 @@ Vercel と同じく Phase 3 で扱いを合意する。
 【ターゲット】Web / Desktop / Mobile / ローカル
 【構成】Vercel + Supabase / Cloudflare Workers + D1 + R2 / Railway + Postgres / Electron + SQLite / React Native 等
 【画面構成】ナビに出すオブジェクト（例: 受注票／顧客）と、各一覧の右上に置く操作（例: ＋注文を入れる・取り込み）。本文は横幅いっぱい
-【作成先】ai-osi-uri org 配下 / 個人アカウント配下（health_check の repo_target）
+【作成先】組織名（health_check の repo_target。個人アカウントには作らない）
 【配布方法】Vercel URL / workers.dev URL / *.up.railway.app URL / GitHub Releases / TestFlight 等
 【非機能】復旧の許容範囲 / 想定負荷 / 受け入れた既定値（nonfunctional.yaml の要約 3 行）
 
@@ -525,7 +519,7 @@ scaffold → gh-create-repo-and-push → harness-init
 | Phase | 失敗 | 対応 |
 |---|---|---|
 | 0 | 拡張未導入 / トークン不足 | setup-deploy-environment 案内 |
-| 4 | リポジトリ作成が 403 | **まず作成先を疑う。** エラー本文の `target` を見る。`user/repos` なら個人に作りにいっている → `owner_override` に Org slug を渡して再実行。`orgs/<slug>` なら PAT の Resource owner / Administration 権限を確認 |
+| 4 | リポジトリ作成が 403 / 404 | 組織への作成権限が無い。PAT の Resource owner が組織か・Administration が書き込みか・組織がトークンを承認しているかを確認。個人アカウントには作り直さない |
 | 1 | 業種不明 | 再度聞く |
 | 2 | ターゲット不確定 | デフォルト Web-Vercel |
 | 3 | プラン却下 | Phase 1-2 に戻る |
