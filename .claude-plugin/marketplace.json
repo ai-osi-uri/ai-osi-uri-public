@@ -225,7 +225,7 @@
       "name": "osi-line",
       "source": "./plugins/osi-line",
       "description": "自分の LINE（個人アカウント）を Claude から使う。QR でログイン（line-setup）、未読・返事待ちのまとめ（line-inbox）、下書きを見せて本人の OK 後に 1 通ずつ送る返信（line-reply・送信は設定でオンにしたときだけ）、友だち・トーク・画像やファイル・設定の基本操作（line-basics）。道具は AI OSI URI LINE 拡張（非公式・PC 版 LINE と同時に使える・既定は読むだけ）。",
-      "version": "0.1.2",
+      "version": "0.1.3",
       "category": "backoffice",
       "tags": [
         "line",
