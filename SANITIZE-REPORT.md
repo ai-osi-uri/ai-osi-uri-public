@@ -35,7 +35,7 @@
 | plugins/osi-sales/config/osi-sales-settings.example.md | 98 | Notion | - 旧NotionのIDと現在のフォルダ番号は途中から乖離している。 |
 | plugins/osi-sales/skills/proposal-package/SKILL.md | 65 | Plaud | \| Plaud \| デモ後の文字起こしは貼り付けで受ける \| |
 | plugins/osi-sales/skills/proposal-package/SKILL.md | 108 | 共有ドライブ | - 台帳・案件フォルダ・共有ドライブ（下の表） |
-| plugins/osi-sales/skills/proposal-package/SKILL.md | 619 | Plaud | デモ後に Plaud 文字起こしが渡されたら： |
+| plugins/osi-sales/skills/proposal-package/SKILL.md | 626 | Plaud | デモ後に Plaud 文字起こしが渡されたら： |
 | plugins/osi-sales/skills/session-review/SKILL.md | 58 | Plaud | - **必須**: 伴走セッションの文字起こし（Plaud 等。話者ラベル付き／なしの両対応）。 |
 | plugins/osi-sales/skills/session-review/SKILL.md | 59 | Plaud | - **取得はまず Plaud MCP から**：コネクタ（`list_files` / `get_transcript` 等）が |
 | plugins/osi-sales/skills/new-lead-registration/scripts/ledger.py | 77 | 共有ドライブ | os.path.expanduser("~/Library/CloudStorage/GoogleDrive-*/共有ドライブ/*/osi-profile.md"), |
