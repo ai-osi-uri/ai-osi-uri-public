@@ -59,7 +59,7 @@ label: Deploy拡張の初回設定
 | Vercel API Token | ✅ | https://vercel.com/account/tokens （`vcp_`） |
 | Stripe Secret Key（テスト） | 任意 | https://dashboard.stripe.com/test/apikeys （`sk_test_`） |
 | Stripe Secret Key（本番/Live） | 任意 | https://dashboard.stripe.com/apikeys （`sk_live_`、実課金） |
-| Supabase PAT | 任意 | https://supabase.com/dashboard/account/tokens （`sbp_`） |
+| Supabase PAT | 任意 | 先に組織を作ってから https://supabase.com/dashboard/account/tokens の「Create legacy token」（`sbp_`。「Generate new token」は権限を選ぶ方式なので使わない） |
 | Cloudflare API Token | Cloudflare のみ | https://dash.cloudflare.com/profile/api-tokens → Create Token → **Custom token**（下の権限表） |
 | Cloudflare Account ID | Cloudflare のみ | ダッシュボード URL `https://dash.cloudflare.com/<ここ>` の 32 桁英数 |
 | Railway API Token | Railway のみ | https://railway.com/account/tokens → Create Token（下の「Railway のトークン」） |
