@@ -19,6 +19,17 @@
 
 ## Changelog
 
+### v0.9.0 — 配信を人のボタン待ちにしない（2026-10）
+
+鍵を GitHub に入れる道具はあったのに配信を動かす道具が無く、手作りの「手動だけ」のワークフローで最後の一押しが人の手になった実例を教訓にする。
+
+- **雛形 `ios-release-auto.yml` を作り直し** — 鍵は App Store Connect の 3 点（`ASC_KEY_ID` / `ASC_ISSUER_ID` / `ASC_PRIVATE_KEY`）だけ、署名は Apple のクラウド署名（.p12・一時 keychain をやめた）。鍵が無いときは「鍵待ち」で緑のまま終わる。`set -o pipefail` で失敗を隠さない。ビルド番号は `run_number` + `BUILD_NUMBER_OFFSET`
+- **雛形 `android-release-auto.yml`** — Play の鍵の名前を `PLAY_SERVICE_ACCOUNT_JSON` に（コネクタが入れる名前とそろえた）。鍵待ちスキップを追加
+- **配信の仕組みの決まりを明文化**（`mobile-app-scaffold`）— push で動く＋手でも動かせる／鍵待ちは緑／pipefail／鍵の名前固定。手で書くときも守る
+- **`ios-testflight-deploy` v0.4.0** — fastlane + altool + P12 の手順を、鍵 3 点 + xcodebuild + クラウド署名に書き直し。鍵を入れて流す・成否を見る・届いたかを見る、をコネクタの道具（`mobile_keys_to_github` / `github_run_workflow` / `github_workflow_runs` / `ios_get_status`）で通す
+- **`mobile-secrets-sync` / `deploy-mobile-app` / `mobile-update-deploy`** — 配信の鍵は手元の Keychain ではなくツール設定の会社の鍵から入れる。鍵がそろったら `start_release: true` で 1 回目を流す。鍵が足りなくても止めない
+- 前提: remote-mcp 0.51.0（`github_run_workflow` / `github_workflow_runs` / `mobile_keys_to_github` の `start_release`）
+
 ### v0.6.0 — ASC App 記録の Phase 0 事前登録（2026-08）
 
 SampleApp の prod 初回 TestFlight 配信が 37 秒で失敗した実例（`Could not find App with App Identifier {{company.reverse_domain}}.sampleapp.prod`）を教訓としてプラグインに定着させる。
@@ -48,7 +59,7 @@ SampleApp（Flutter → SwiftUI ネイティブ化）で獲得した実運用ノ
 - **`apiv2-callable-iam-gotchas`** — Cloud Functions v2（Cloud Run 実装）の apiv2-* が client から `UNAUTHENTICATED` / `communication error` になる 2 大原因（allUsers → roles/run.invoker の一括付与忘れ + JSONEncoder の snake_case 変換）を潰す
 - **`firestore-bulk-index-sync`** — `firebase deploy --only firestore:indexes` が 50+ index で詰まる問題を、Admin REST 直叩き（`collectionGroups/{cg}/indexes` POST）+ 409 と 400「not necessary」を成功に丸めて冪等化
 - **`xcodegen-project-regen`** — `git pull` 後の「Missing package product 'FirebaseCore'」× 14 個症状を `xcodegen generate --spec apps/ios/project.yml` + Reset/Resolve Packages で 30 秒修復
-- **`ios-testflight-deploy` v0.2.0** — SampleApp 実運用中の `.github/workflows/ios-release-auto.yml` 完全版を `references/ios-release-auto.yml.example` に同梱（macos-15 + Xcode 26.x + P12 一時 keychain + auto-signing + flavor 3 種）
+- **`ios-testflight-deploy` v0.2.0** — SampleApp 実運用中の `.github/workflows/ios-release-auto.yml` 完全版を `references/ios-release-auto.yml.example` に同梱（macos-15 + Xcode 26.x + P12 一時 keychain + auto-signing + flavor 3 種）※ v0.9.0 でクラウド署名に置き換え
 
 ### v0.2.0 — 初版（10 スキル）
 
@@ -104,9 +115,10 @@ osi-mobile-deploy が前提とする AI OSI URI Deploy 拡張は、モバイル�
 ## 前提
 
 - Claude デスクトップに `AI OSI URI Deploy` MCP 拡張 v1.18.5+ が導入済み
-- macOS Keychain に以下の secrets が格納済み（初回のみユーザーが登録）:
-  - iOS: `APPLE_TEAM_ID`, `APP_STORE_CONNECT_API_KEY_ID`, `APP_STORE_CONNECT_API_KEY_ISSUER_ID`, `APP_STORE_CONNECT_API_KEY_B64`, `IOS_DIST_CERT_P12_B64`, `IOS_DIST_CERT_PASSWORD`, `IOS_KEYCHAIN_PASSWORD`
-  - Android: `ANDROID_KEYSTORE_B64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`, `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`
+- 配信の鍵はポータルの「ツール設定」に会社の鍵として預ける（手元の Keychain は使わない）:
+  - iOS: App Store Connect の 3 点（Key ID・Issuer ID・.p8）。証明書（.p12）は要らない（Apple のクラウド署名）
+  - Android: Play のサービスアカウント JSON。アップロード用キーストアは `mobile_generate_keystore` で作り Drive に控える
+  - GitHub への投入は URL のコネクタの `mobile_keys_to_github`（シークレット名は `ASC_KEY_ID` / `ASC_ISSUER_ID` / `ASC_PRIVATE_KEY` / `PLAY_SERVICE_ACCOUNT_JSON`）
 - ローカル環境: Xcode 26+（iOS 26 SDK）, fastlane, xcodegen, Android Studio / SDK, JDK 17+
 - **Xcode を一度は起動していること**（Automatic Signing の初期セットアップに必要）
 
@@ -123,8 +135,8 @@ Claude で:
 1. アプリ情報のヒアリング（Bundle ID / GitHub Org 等）— スタックは既定でネイティブ 2 本立て
 2. Golden Template（SwiftUI + Jetpack Compose）から新規リポ生成 → GitHub push
 3. Firebase プロジェクト新規作成 + iOS/Android App 追加 + plist取得
-4. GitHub Secrets 10個を投入
-5. CI 起動を検知 → iOS/Android の両ワークフローを監視
+4. 配信の鍵を GitHub に入れて、そのまま 1 回目の配信を流す（`mobile_keys_to_github` の `start_release`）
+5. `github_workflow_runs` で iOS/Android の両ワークフローを監視
 6. CI 失敗したら `ci-failure-patterns.md` と照合 → 既知パターンなら auto-fix push（最大3回）
 7. 両方 green → Simulator / Emulator でスモークテスト
 8. TestFlight リンク + Play Internal Track リンクをユーザーに提示

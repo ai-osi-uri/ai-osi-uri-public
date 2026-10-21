@@ -35,16 +35,25 @@ ANDROID_PACKAGE_BY_FLAVOR = {
   "prod" => "com.example.myapp",
 }
 
+# App Store Connect の鍵。CI と同じ 3 点（ASC_KEY_ID / ASC_ISSUER_ID / ASC_PRIVATE_KEY＝.p8 の中身そのまま）を使う。
+# 手元の古い名前（APP_STORE_CONNECT_API_KEY_*・.p8 の base64・ファイルのパス）も読めるようにしてある。
+# iOS の CI は fastlane を使わない（ios-release-auto.yml が xcodebuild で直接上げる）。この lane は手元で回す予備。
 def load_app_store_connect_api_key!
-  app_store_connect_api_key(
-    key_id:       ENV.fetch("APP_STORE_CONNECT_API_KEY_ID"),
-    issuer_id:    ENV.fetch("APP_STORE_CONNECT_API_KEY_ISSUER_ID"),
-    key_filepath: ENV["APP_STORE_CONNECT_API_KEY_PATH"],
-    key_content:  ENV["APP_STORE_CONNECT_API_KEY_B64"],
-    is_key_content_base64: !ENV["APP_STORE_CONNECT_API_KEY_B64"].nil?,
-    in_house:  false,
-    duration:  1200,
-  )
+  key_id    = ENV["ASC_KEY_ID"]    || ENV.fetch("APP_STORE_CONNECT_API_KEY_ID")
+  issuer_id = ENV["ASC_ISSUER_ID"] || ENV.fetch("APP_STORE_CONNECT_API_KEY_ISSUER_ID")
+  if ENV["ASC_PRIVATE_KEY"].to_s.strip != ""
+    app_store_connect_api_key(key_id: key_id, issuer_id: issuer_id, key_content: ENV["ASC_PRIVATE_KEY"], in_house: false, duration: 1200)
+  else
+    app_store_connect_api_key(
+      key_id:       key_id,
+      issuer_id:    issuer_id,
+      key_filepath: ENV["APP_STORE_CONNECT_API_KEY_PATH"],
+      key_content:  ENV["APP_STORE_CONNECT_API_KEY_B64"],
+      is_key_content_base64: !ENV["APP_STORE_CONNECT_API_KEY_B64"].nil?,
+      in_house:  false,
+      duration:  1200,
+    )
+  end
 end
 
 # =========================================================================
@@ -86,7 +95,7 @@ platform :ios do
         export_method:    "app-store",
         output_directory: "build/ios/ipa",
         output_name:      "MyApp-#{flavor}.ipa",
-        xcargs:           "-allowProvisioningUpdates DEVELOPMENT_TEAM=#{ENV.fetch('APPLE_TEAM_ID')}",
+        xcargs:           ["-allowProvisioningUpdates", (ENV["APPLE_TEAM_ID"].to_s.empty? ? nil : "DEVELOPMENT_TEAM=#{ENV['APPLE_TEAM_ID']}")].compact.join(" "),
       )
     end
 

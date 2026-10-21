@@ -44,7 +44,7 @@ React Native）は greenfield では **選ばない**。理由は次の通り:
 
 | プラットフォーム | UI | 言語 | 最小サポート | ビルド | CI |
 |---|---|---|---|---|---|
-| iOS | **SwiftUI** (`@main App`) | Swift 5.10+ | **iOS 16.0** | xcodegen + xcodebuild + fastlane pilot | `.github/workflows/ios-release-auto.yml` |
+| iOS | **SwiftUI** (`@main App`) | Swift 5.10+ | **iOS 16.0** | xcodegen + xcodebuild（Apple のクラウド署名で TestFlight へ） | `.github/workflows/ios-release-auto.yml` |
 | Android | **Jetpack Compose** (`@Composable`) | Kotlin 1.9+ | **minSdk 26** (Android 8.0) | Gradle + Kotlin DSL + fastlane supply | `.github/workflows/android-release-auto.yml` |
 
 **DI**：v1 は SwiftUI 側は `@StateObject` / `@EnvironmentObject`、Compose 側は
@@ -64,6 +64,17 @@ plist / json 未配置でも起動時に crash しない guard 済み。
 `android-play-deploy` が CI を回して TestFlight / Play Internal Track まで届ける。
 `.github/workflows/*-release-auto.yml` は「今日の罠回避全部入り」の実運用版を同梱。
 
+**配信の仕組みの決まり（0.9.0〜。雛形に入っている。後から変えない）**:
+
+1. 配信のワークフローは**最初から push で動き、手でも動かせる**（`on: push` + `workflow_dispatch`）。「手動だけ」で作らない
+   （最後の一押しが人のボタン待ちになる。AI が後から `on:` を書き換えるのは安全チェックで止まる）
+2. **鍵が無いときは失敗にせず「鍵待ち」で緑のまま終わる**（鍵を後から入れる進め方でも、push のたびに赤が並ばない）
+3. 出力を tail で絞る行には **`set -o pipefail`**（付けないと失敗が「成功」に見える）
+4. 鍵の名前は **`ASC_KEY_ID` / `ASC_ISSUER_ID` / `ASC_PRIVATE_KEY` / `PLAY_SERVICE_ACCOUNT_JSON`** に固定
+   （コネクタの `mobile_keys_to_github` がこの名前で入れる）。iOS は証明書（.p12）を使わず Apple のクラウド署名
+
+雛形を使わずに手で書くときも、この 4 つは必ず守る。鍵を入れたら `mobile_keys_to_github`（`start_release: true`）で 1 回目を流す。
+
 ## 入力契約
 
 | 項目 | 必須 | 説明 | 例 |
@@ -72,7 +83,7 @@ plist / json 未配置でも起動時に crash しない guard 済み。
 | `bundle_id` | ✅ | iOS Bundle ID | `{{company.reverse_domain}}.foo` |
 | `package_name` | ✅ | Android Package Name（= applicationId） | `{{company.reverse_domain}}.foo` |
 | `display_name` | 任意 | 画面表示名（既定: `app_name`） | `Foo` |
-| `team_id` | 任意 | Apple Developer Team ID（既定: Keychain の `APPLE_TEAM_ID`） | `24X327Z9SJ` |
+| `team_id` | ✅（iOS） | Apple Developer Team ID（project.yml の `DEVELOPMENT_TEAM` に入る。App Store Connect → ユーザとアクセス → 「チーム ID」） | `ABCDE12345` |
 | `targets` | 任意 | `ios` / `android` / `both`（既定: `both`） | `both` |
 | `github_org` | 任意 | `ai-osi-uri` / `personal`（既定: personal） | `ai-osi-uri` |
 | `local_dir` | 任意 | 既定: `~/projects/{app_name_lower}` | |
@@ -239,8 +250,7 @@ README.md
 - `Info.plist` に `CFBundleIconName` + `CFBundleIcons`（ITMS-90XXX ガード）
 - `UIAppFonts` を **敢えて入れていない**（missing-font crash 回避）
 - Google Sign-In の URL scheme を **敢えて入れていない**（空の REVERSED_CLIENT_ID で crash 回避）
-- iOS CI は macOS 15 + Xcode 26.x + P12 一時 keychain + auto-signing + flavor 3 種
-- IPA 再パッケージは `ditto` で SwiftSupport 保全（ITMS-90426 ガード）
+- iOS CI は macOS 15 + xcodegen + Apple のクラウド署名（鍵は ASC の 3 点だけ）+ flavor 3 種 + 鍵待ちスキップ + pipefail
 - Android は `versionCode` を Play internal max + 1 に自動採番
 
 ## 戻り値
@@ -270,8 +280,8 @@ README.md
 
 - **既定はネイティブ 2 本立て**：iOS = SwiftUI, Android = Kotlin + Jetpack Compose。Flutter / React Native は greenfield では選ばない
 - **Bundle ID / Package Name は同じ値で OK**（`{{company.reverse_domain}}.foo` 統一）。iOS と Android で分けたい特別な理由がある時だけ変える
-- **Team ID が Keychain に無い** → Phase 0 でチェック済み前提。抜けていれば halt
-- Golden Template 側にある `.github/workflows/*.yml` は既に「今日の罠回避全部入り」。scaffold 時に workflow は書き換えない（Bundle ID / Package Name の env だけ差し替える）
+- **Team ID が分からない** → 本人に App Store Connect の「チーム ID」を 1 回だけ聞く（鍵ではないので会話に出してよい）
+- Golden Template 側にある `.github/workflows/*.yml` は既に「今日の罠回避全部入り」。scaffold 時に workflow は書き換えない（`MyApp` などのプレースホルダだけ差し替える）。特に `on:`（push で動く・手でも動かせる）は消さない
 - `Podfile` は入っていない（SPM のみで組む前提）。Firebase iOS SDK も SPM から入れる
 - iOS デプロイメントターゲットは **16.0** を既定（`apps/ios/project.yml`）。より広い互換性が必要な案件でも 16 未満には下げない
 - Android は **minSdk 26**（Android 8.0）を既定（`apps/android/app/build.gradle.kts`）。26 未満は adaptive icon / Compose の JVM 要件で古くなり過ぎるので下げない
@@ -282,6 +292,6 @@ README.md
 - `mobile-firebase-setup` — scaffold 直後に呼ばれる Firebase プロビジョニング
 - `mobile-secrets-sync` — TestFlight / Play 配信に必要な GitHub Secrets 投入
 - `mobile-icon-generator` — 1024x1024 PNG から全 density アイコン生成
-- `ios-testflight-deploy` — iOS の実配信（fastlane pilot + altool）
+- `ios-testflight-deploy` — iOS の実配信（xcodebuild + Apple のクラウド署名）
 - `android-play-deploy` — Android の実配信（Gradle + bundletool + Play API）
 - `flutter-swift-parity-port` — **既存 Flutter アプリからの移行時のみ** 使う（新規では使わない）

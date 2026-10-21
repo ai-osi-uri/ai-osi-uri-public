@@ -50,8 +50,9 @@ DoD: TestFlight / Play Internal のビルド ID が processing 完了ステー�
 Web 版 `update-deploy` と同じ:
 
 1. `health_check` で `github.valid: true` / `firebase.valid: true`
-2. Keychain の secrets（`APPLE_TEAM_ID` / `APP_STORE_CONNECT_API_KEY_ID` / `ANDROID_KEYSTORE_PASSWORD` etc.）が読めるか確認
-3. 不足があれば登録コマンドを案内して halt
+2. `github_list_secrets` で配信のシークレット（`ASC_KEY_ID` / `ASC_ISSUER_ID` / `ASC_PRIVATE_KEY`、Android は `PLAY_SERVICE_ACCOUNT_JSON` とキーストア 4 点）が入っているか確認
+3. 足りなければ `mobile-secrets-sync` で入れる（配信の鍵は `mobile_keys_to_github`。手元の Keychain は使わない）
+4. 配信のワークフローが「手動だけ」（`workflow_dispatch` しか無い）古い形なら、push で動かないので本人に伝え、雛形の形（`mobile-app-scaffold` の「配信の仕組みの決まり」）に直すかを聞く。直すまでは修正を push したあと `github_run_workflow` で動かす
 
 ---
 
@@ -140,8 +141,8 @@ mcp__AI_OSI_URI_Deploy__github_push:
 ### Step 4-2: CI 監視 + 自動修正ループ
 
 `deploy-mobile-app` の Phase 6-7 と同じロジックを再利用。iOS/Android どちらか（or 両方）の
-workflow を監視し、失敗したら `deploy-mobile-app/references/ci-failure-patterns.md` と
-照合して auto-fix push。最大 3 回。
+workflow を `github_workflow_runs` で監視し、失敗したら `deploy-mobile-app/references/ci-failure-patterns.md` と
+照合して auto-fix push。最大 3 回。「鍵待ち」と出たら直すのではなく鍵を入れる（`mobile-secrets-sync`）。
 
 ### Step 4-3: TestFlight / Play Internal Track 到達確認
 
@@ -215,7 +216,7 @@ evidence を全て `mobile-update-progress.md` に貼ってから完了報告。
 
 | Phase | 失敗 | 対応 |
 |---|---|---|
-| 0 | Keychain 不足 | 登録コマンド案内、halt |
+| 0 | 配信の鍵が GitHub に無い | `mobile-secrets-sync`（`mobile_keys_to_github`）で入れる |
 | 1 | repo 特定できない | ユーザーに repo URL を直接聞く |
 | 2 | clone が dirty | `--force` しない、確認 |
 | 3 | 該当箇所が複数 | 全箇所を提示し選んでもらう |

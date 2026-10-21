@@ -1,15 +1,20 @@
-# iOS Release — auto-build + upload to TestFlight via fastlane on every push to main.
-# All the gotchas hard-won during the initial osi-mobile-deploy build are baked in.
+# iOS Release — main に iOS の変更を push すると、署名して TestFlight に上げる（手でも動かせる）。
 #
-# Required GitHub Secrets (populated by mobile-secrets-sync + mobile-firebase-setup):
-#   APPLE_TEAM_ID
-#   APP_STORE_CONNECT_API_KEY_ID
-#   APP_STORE_CONNECT_API_KEY_ISSUER_ID
-#   APP_STORE_CONNECT_API_KEY_B64          # base64 of the .p8 file
-#   IOS_DIST_CERT_P12_B64                  # base64 of Apple Distribution .p12
-#   IOS_DIST_CERT_PASSWORD                 # password for the .p12
-#   IOS_KEYCHAIN_PASSWORD                  # temp-keychain password created here
-#   GOOGLE_SERVICE_INFO_PLIST_DEV_B64      # base64 of GoogleService-Info-Dev.plist
+# 決まり（osi-mobile-deploy 0.9.0〜）:
+#   * 最初から push で動く。後から「手動だけ」に変えない（配信を人のボタン待ちにしない）
+#   * 鍵がまだ無いときは失敗にせず「鍵待ち」と出して終わる（鍵を後から入れる進め方でも、push のたびに赤が並ばない）
+#   * 鍵は App Store Connect の 3 点だけ。署名は Xcode の自動署名（Apple のクラウド署名）に任せる。証明書（.p12）は要らない
+#   * xcodebuild の出力を tail で絞るので、pipefail を必ず付ける（付けないと失敗が「成功」に見える）
+#
+# GitHub Secrets（名前は固定。コネクタの mobile_keys_to_github が「ツール設定」の会社の鍵から入れる）:
+#   ASC_KEY_ID          App Store Connect API キーの ID（10 文字）
+#   ASC_ISSUER_ID       Issuer ID（UUID）
+#   ASC_PRIVATE_KEY     .p8 の中身そのまま（-----BEGIN PRIVATE KEY----- から）
+#   GOOGLE_SERVICE_INFO_PLIST_DEV_B64   任意。Firebase を使うときだけ（mobile-firebase-setup が入れる）
+# GitHub Variables（任意）:
+#   BUILD_NUMBER_OFFSET  ビルド番号の下駄。既に TestFlight に大きい番号があるリポに後から入れたときだけ
+#
+# 鍵を入れたあと最初の 1 回は、コネクタの mobile_keys_to_github（start_release: true）か github_run_workflow で動かす。
 
 name: iOS Release (auto → TestFlight)
 
@@ -18,7 +23,6 @@ on:
     branches: [main]
     paths:
       - "apps/ios/**"
-      - "fastlane/**"
       - ".github/workflows/ios-release-auto.yml"
   workflow_dispatch:
     inputs:
@@ -35,142 +39,115 @@ concurrency:
 
 jobs:
   release:
-    name: fastlane ios ios_beta_auto
-    runs-on: macos-14
-    timeout-minutes: 90
+    name: Archive → TestFlight
+    runs-on: macos-15
+    timeout-minutes: 60
     env:
-      # Xcode 26 (iOS 26 SDK) is required. macos-14 image ships it; if missing,
-      # bump the runner label to macos-15.
-      XCODE_VERSION: "26.0"
-      LANG: en_US.UTF-8
-      LC_ALL: en_US.UTF-8
-      APPLE_TEAM_ID:                       ${{ secrets.APPLE_TEAM_ID }}
-      APP_STORE_CONNECT_API_KEY_ID:        ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
-      APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
-      APP_STORE_CONNECT_API_KEY_B64:       ${{ secrets.APP_STORE_CONNECT_API_KEY_B64 }}
-      IOS_DIST_CERT_P12_B64:               ${{ secrets.IOS_DIST_CERT_P12_B64 }}
-      IOS_DIST_CERT_PASSWORD:              ${{ secrets.IOS_DIST_CERT_PASSWORD }}
-      IOS_KEYCHAIN_PASSWORD:               ${{ secrets.IOS_KEYCHAIN_PASSWORD }}
-      GOOGLE_SERVICE_INFO_PLIST_DEV_B64:   ${{ secrets.GOOGLE_SERVICE_INFO_PLIST_DEV_B64 }}
-      FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: "120"
+      SCHEME: MyApp
+      PROJECT: MyApp.xcodeproj
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      # ── flavor → Configuration (bash 3.2 compatible case, not ${VAR^}) ────
+      # ── 鍵がそろっているか。無ければ「鍵待ち」で終わる（失敗にしない）─────────
+      - name: Check keys
+        id: keys
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
+        run: |
+          lack=""
+          for n in ASC_KEY_ID ASC_ISSUER_ID ASC_PRIVATE_KEY; do [ -n "${!n}" ] || lack="$lack $n"; done
+          if [ -n "$lack" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=鍵待ち::App Store Connect の鍵（${lack# }）がまだ GitHub にありません。TestFlight には上げずに終わります。コネクタの mobile_keys_to_github で入れてから、もう一度動かしてください"
+            echo "### 鍵待ち：TestFlight には上げていません（足りない鍵:${lack}）" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+          mkdir -p "$RUNNER_TEMP/keys"
+          printf '%s\n' "$ASC_PRIVATE_KEY" > "$RUNNER_TEMP/keys/AuthKey_${ASC_KEY_ID}.p8"
+          chmod 600 "$RUNNER_TEMP/keys/AuthKey_${ASC_KEY_ID}.p8"
+
+      # ── flavor → Configuration（bash 3.2 互換の case）──────────────────────
       - name: Resolve flavor
         id: flavor
+        if: steps.keys.outputs.ready == 'true'
         run: |
           FLAVOR="${{ github.event.inputs.flavor || 'dev' }}"
           case "$FLAVOR" in
-            dev)  FLAVOR_CAP="Dev"  ;;
-            stg)  FLAVOR_CAP="Stg"  ;;
-            prod) FLAVOR_CAP="Prod" ;;
+            dev)  CONF="Release-Dev"  ;;
+            stg)  CONF="Release-Stg"  ;;
+            prod) CONF="Release-Prod" ;;
             *)    echo "unknown flavor: $FLAVOR" >&2; exit 1 ;;
           esac
-          echo "flavor=$FLAVOR"           >> "$GITHUB_OUTPUT"
-          echo "flavor_cap=$FLAVOR_CAP"   >> "$GITHUB_OUTPUT"
-          echo "configuration=Release-$FLAVOR_CAP" >> "$GITHUB_OUTPUT"
-
-      - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_${XCODE_VERSION}.app
-
-      - name: Setup Ruby (bundler cache)
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: "3.2"
-          bundler-cache: true
-
-      - name: Install xcodegen
-        run: brew install xcodegen
-
-      # ── restore App Store Connect .p8 with the EXACT altool naming ───────
-      - name: Restore App Store Connect .p8 (AuthKey_<ID>.p8 naming required)
-        run: |
-          mkdir -p "$RUNNER_TEMP/private_keys"
-          echo "$APP_STORE_CONNECT_API_KEY_B64" | base64 --decode \
-            > "$RUNNER_TEMP/private_keys/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8"
-          chmod 600 "$RUNNER_TEMP/private_keys/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8"
-          echo "APP_STORE_CONNECT_API_KEY_PATH=$RUNNER_TEMP/private_keys/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8" >> "$GITHUB_ENV"
-          # Also symlink into ~/private_keys so plain altool invocations find it
-          mkdir -p "$HOME/private_keys"
-          ln -sf "$RUNNER_TEMP/private_keys/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8" \
-                 "$HOME/private_keys/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8"
-
-      # ── restore Distribution certificate into a temp keychain ─────────────
-      - name: Import Distribution certificate
-        run: |
-          KEYCHAIN_PATH="$RUNNER_TEMP/build.keychain"
-          security create-keychain -p "$IOS_KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security set-keychain-settings -lut 7200 "$KEYCHAIN_PATH"
-          security unlock-keychain -p "$IOS_KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-
-          CERT_PATH="$RUNNER_TEMP/dist_cert.p12"
-          echo "$IOS_DIST_CERT_P12_B64" | base64 --decode > "$CERT_PATH"
-          security import "$CERT_PATH" -k "$KEYCHAIN_PATH" \
-            -P "$IOS_DIST_CERT_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
-          security set-key-partition-list -S apple-tool:,apple: \
-            -s -k "$IOS_KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-
-          # Make the new keychain the default so xcodebuild can find the identity
-          security list-keychains -d user -s "$KEYCHAIN_PATH" login.keychain
+          echo "flavor=$FLAVOR" >> "$GITHUB_OUTPUT"
+          echo "configuration=$CONF" >> "$GITHUB_OUTPUT"
 
       - name: Restore GoogleService-Info.plist (dev)
-        if: env.GOOGLE_SERVICE_INFO_PLIST_DEV_B64 != ''
+        if: steps.keys.outputs.ready == 'true'
+        env:
+          GOOGLE_SERVICE_INFO_PLIST_DEV_B64: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST_DEV_B64 }}
         run: |
-          mkdir -p apps/ios/MyApp/Resources
-          echo "$GOOGLE_SERVICE_INFO_PLIST_DEV_B64" | base64 --decode \
-            > apps/ios/MyApp/Resources/GoogleService-Info-Dev.plist
-          # Copy to the generic name that AppDelegate looks for
-          cp apps/ios/MyApp/Resources/GoogleService-Info-Dev.plist \
-             apps/ios/MyApp/Resources/GoogleService-Info.plist
+          [ -n "$GOOGLE_SERVICE_INFO_PLIST_DEV_B64" ] || { echo "Firebase の設定なし（使わないアプリなら問題なし）"; exit 0; }
+          echo "$GOOGLE_SERVICE_INFO_PLIST_DEV_B64" | base64 --decode > apps/ios/MyApp/Resources/GoogleService-Info.plist
 
+      # ── stale な .xcodeproj を使わない（xcodegen-project-regen 参照）────────
       - name: xcodegen generate
-        working-directory: apps/ios
-        run: xcodegen generate
-
-      - name: Resolve Swift Packages
+        if: steps.keys.outputs.ready == 'true'
         working-directory: apps/ios
         run: |
-          xcodebuild -resolvePackageDependencies \
-            -project MyApp.xcodeproj -scheme MyApp
+          brew install xcodegen
+          xcodegen generate
 
-      - name: Fastlane ios ios_beta_auto
+      - name: Archive (signed by Apple cloud signing)
+        if: steps.keys.outputs.ready == 'true'
+        working-directory: apps/ios
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
         run: |
-          bundle exec fastlane ios ios_beta_auto \
-            flavor:"${{ steps.flavor.outputs.flavor }}" \
-            notes:"CI build ${GITHUB_SHA:0:7}"
+          set -o pipefail
+          BUILD_NUMBER=$(( ${{ github.run_number }} + ${{ vars.BUILD_NUMBER_OFFSET || 0 }} ))
+          echo "build number: $BUILD_NUMBER"
+          xcodebuild -project "$PROJECT" -scheme "$SCHEME" -configuration "${{ steps.flavor.outputs.configuration }}" \
+            -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            CURRENT_PROJECT_VERSION="$BUILD_NUMBER" CODE_SIGN_STYLE=Automatic \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/keys/AuthKey_${ASC_KEY_ID}.p8" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            archive | tail -80
 
-      # ── post-build hardening: ensure Assets.car + legacy AppIcon PNGs ─────
-      - name: Materialize legacy AppIcon file names (iOS 26 validation guard)
+      - name: Upload to TestFlight
+        if: steps.keys.outputs.ready == 'true'
+        working-directory: apps/ios
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          set -o pipefail
+          TEAM_ID=$(xcodebuild -project "$PROJECT" -scheme "$SCHEME" -showBuildSettings 2>/dev/null | awk -F' = ' '/ DEVELOPMENT_TEAM = /{print $2; exit}')
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>teamID</key><string>${TEAM_ID}</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>manageAppVersionAndBuildNumber</key><false/>
+          </dict></plist>
+          PLIST
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" -exportPath "$RUNNER_TEMP/export" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/keys/AuthKey_${ASC_KEY_ID}.p8" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" | tail -40
+          echo "### TestFlight に上げました（${{ steps.flavor.outputs.flavor }} / build $(( ${{ github.run_number }} + ${{ vars.BUILD_NUMBER_OFFSET || 0 }} ))）。Apple の処理に 10〜30 分かかります" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Clean up key
         if: always()
-        run: |
-          set -euo pipefail
-          IPA="$(ls apps/ios/build/ios/ipa/*.ipa 2>/dev/null | head -1 || true)"
-          [ -z "$IPA" ] && { echo "no ipa (build failed?)"; exit 0; }
-          TMP=$(mktemp -d)
-          ditto -x -k "$IPA" "$TMP"
-          APP=$(ls -d "$TMP"/Payload/*.app | head -1)
-          # If Assets.car is missing, recompile from the source catalog
-          if [ ! -f "$APP/Assets.car" ]; then
-            echo "→ Assets.car missing; recompiling via actool"
-            xcrun actool --compile "$APP" --platform iphoneos \
-              --minimum-deployment-target 17.0 --app-icon AppIcon \
-              --output-partial-info-plist "$TMP/AssetsInfo.plist" \
-              apps/ios/MyApp/Resources/Assets.xcassets
-          fi
-          # Legacy PNGs for older validators
-          SRC=apps/ios/MyApp/Resources/Assets.xcassets/AppIcon.appiconset
-          [ -f "$SRC/AppIcon-120.png" ] && cp -f "$SRC/AppIcon-120.png" "$APP/AppIcon60x60@2x.png"
-          [ -f "$SRC/AppIcon-180.png" ] && cp -f "$SRC/AppIcon-180.png" "$APP/AppIcon60x60@3x.png"
-          # Re-pack with ditto so SwiftSupport symlinks survive (ITMS-90426 guard)
-          rm -f "$IPA"
-          ( cd "$TMP" && ditto -c -k --sequesterRsrc --keepParent Payload "$IPA" )
-          echo "✓ Repacked $IPA"
-
-      - name: Cleanup keychain
-        if: always()
-        run: |
-          security delete-keychain "$RUNNER_TEMP/build.keychain" 2>/dev/null || true
+        run: rm -rf "$RUNNER_TEMP/keys"

@@ -1,12 +1,17 @@
-# Android Release — auto-build AAB + upload to Play Internal Track on every push to main.
+# Android Release — main に Android の変更を push すると、AAB を作って Google Play の内部テストに上げる（手でも動かせる）。
 #
-# Required GitHub Secrets:
-#   ANDROID_KEYSTORE_B64                  # base64 of release.keystore
-#   ANDROID_KEYSTORE_PASSWORD
-#   ANDROID_KEY_ALIAS
-#   ANDROID_KEY_PASSWORD
-#   GOOGLE_PLAY_SERVICE_ACCOUNT_JSON      # raw JSON string (multi-line)
-#   GOOGLE_SERVICES_JSON_DEV_B64          # base64 of Firebase google-services.json (dev)
+# 決まり（osi-mobile-deploy 0.9.0〜）:
+#   * 最初から push で動く。後から「手動だけ」に変えない
+#   * 鍵がまだ無いときは失敗にせず「鍵待ち」と出して終わる
+#
+# GitHub Secrets:
+#   ANDROID_KEYSTORE_B64 / ANDROID_KEYSTORE_PASSWORD / ANDROID_KEY_ALIAS / ANDROID_KEY_PASSWORD
+#                                         # mobile_generate_keystore で作って入れる（失うと更新できないので Drive にも控える）
+#   PLAY_SERVICE_ACCOUNT_JSON             # Play のサービスアカウント JSON そのまま。コネクタの mobile_keys_to_github が会社の鍵から入れる
+#   GOOGLE_SERVICES_JSON_DEV_B64          # 任意。Firebase を使うときだけ
+#
+# 鍵を入れたあと最初の 1 回は、mobile_keys_to_github（start_release: true）か github_run_workflow で動かす。
+# Play は最初の 1 本だけ Play Console から手で上げる決まり（API では新しいアプリに上げられない）。
 
 name: Android Release (auto → Play Internal Track)
 
@@ -41,8 +46,29 @@ jobs:
         with:
           fetch-depth: 0
 
+      # ── 鍵がそろっているか。無ければ「鍵待ち」で終わる（失敗にしない）─────────
+      - name: Check keys
+        id: keys
+        env:
+          ANDROID_KEYSTORE_B64:      ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS:         ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD:      ${{ secrets.ANDROID_KEY_PASSWORD }}
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          lack=""
+          for n in ANDROID_KEYSTORE_B64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD PLAY_SERVICE_ACCOUNT_JSON; do [ -n "${!n}" ] || lack="$lack $n"; done
+          if [ -n "$lack" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=鍵待ち::Google Play に上げる鍵（${lack# }）がまだ GitHub にありません。Play には上げずに終わります"
+            echo "### 鍵待ち：Google Play には上げていません（足りない鍵:${lack}）" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+
       - name: Resolve flavor
         id: flavor
+        if: steps.keys.outputs.ready == 'true'
         run: |
           FLAVOR="${{ github.event.inputs.flavor || 'dev' }}"
           case "$FLAVOR" in
@@ -52,18 +78,21 @@ jobs:
           echo "flavor=$FLAVOR" >> "$GITHUB_OUTPUT"
 
       - name: Setup JDK 17
+        if: steps.keys.outputs.ready == 'true'
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
       - name: Setup Ruby (bundler cache)
+        if: steps.keys.outputs.ready == 'true'
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.2"
           bundler-cache: true
 
       - name: Restore release keystore
+        if: steps.keys.outputs.ready == 'true'
         env:
           ANDROID_KEYSTORE_B64:      ${{ secrets.ANDROID_KEYSTORE_B64 }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -87,8 +116,9 @@ jobs:
       - name: Restore google-services.json (dev flavor)
         env:
           GOOGLE_SERVICES_JSON_DEV_B64: ${{ secrets.GOOGLE_SERVICES_JSON_DEV_B64 }}
-        if: env.GOOGLE_SERVICES_JSON_DEV_B64 != ''
+        if: steps.keys.outputs.ready == 'true'
         run: |
+          [ -n "$GOOGLE_SERVICES_JSON_DEV_B64" ] || { echo "Firebase の設定なし（使わないアプリなら問題なし）"; exit 0; }
           mkdir -p apps/android/app/src/dev
           echo "$GOOGLE_SERVICES_JSON_DEV_B64" | base64 --decode \
             > apps/android/app/src/dev/google-services.json
@@ -96,19 +126,22 @@ jobs:
           cp apps/android/app/src/dev/google-services.json apps/android/app/google-services.json
 
       - name: Restore Play SA JSON
+        if: steps.keys.outputs.ready == 'true'
         env:
-          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
         run: |
-          echo "$GOOGLE_PLAY_SERVICE_ACCOUNT_JSON" > "$RUNNER_TEMP/play-sa.json"
+          printf '%s' "$PLAY_SERVICE_ACCOUNT_JSON" > "$RUNNER_TEMP/play-sa.json"
           echo "GOOGLE_PLAY_JSON_KEY_PATH=$RUNNER_TEMP/play-sa.json" >> "$GITHUB_ENV"
 
       - name: Gradle bundleRelease
+        if: steps.keys.outputs.ready == 'true'
         working-directory: apps/android
         run: |
           chmod +x ./gradlew
           ./gradlew bundle${{ steps.flavor.outputs.flavor }}Release --no-daemon
 
       - name: Fastlane android android_beta_auto
+        if: steps.keys.outputs.ready == 'true'
         run: |
           bundle exec fastlane android android_beta_auto \
             flavor:"${{ steps.flavor.outputs.flavor }}"

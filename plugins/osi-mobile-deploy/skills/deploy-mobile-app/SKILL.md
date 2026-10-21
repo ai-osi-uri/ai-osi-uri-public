@@ -99,35 +99,15 @@ Firebase プロビジョニング・Secrets 投入・CI 監視・TestFlight / Pl
 1. `health_check` を呼び、以下がすべて OK であることを確認:
    - `github.valid: true`
    - `firebase.valid: true`（Google 認証 or Service Account）
-   - iOS 配信をするなら App Store Connect API Key（Keychain の `APP_STORE_CONNECT_API_KEY_ID` 等）
-   - Android 配信をするなら Google Play Service Account JSON
-2. Keychain の secrets を `security find-generic-password -s <name> -a "$USER" -w` で読めるか確認:
-
-    ```
-    iOS 用 (7 個):
-      APPLE_TEAM_ID
-      APP_STORE_CONNECT_API_KEY_ID
-      APP_STORE_CONNECT_API_KEY_ISSUER_ID
-      APP_STORE_CONNECT_API_KEY_B64
-      IOS_DIST_CERT_P12_B64
-      IOS_DIST_CERT_PASSWORD
-      IOS_KEYCHAIN_PASSWORD
-
-    Android 用 (5 個):
-      ANDROID_KEYSTORE_B64
-      ANDROID_KEYSTORE_PASSWORD
-      ANDROID_KEY_ALIAS
-      ANDROID_KEY_PASSWORD
-      GOOGLE_PLAY_SERVICE_ACCOUNT_JSON
-    ```
-
-3. 不足があればユーザーに登録コマンドを案内して停止:
-
-    ```
-    security add-generic-password -U -s "APPLE_TEAM_ID" -a "$USER" -w "24X327Z9SJ"
-    ```
-
-    ループしない・見切り発車しない。登録完了を待ってから Phase 4（ASC pre-flight）へ。
+   - iOS 配信をするなら App Store Connect の鍵 3 点（`mobile_health_check` の `apple.ok: true`）
+   - Android 配信をするなら Google Play のサービスアカウント（`mobile_health_check` の `google`）
+2. 配信の鍵は**ポータルの「ツール設定」に会社の鍵として預けたもの**を使う（手元の Keychain は使わない）。
+   iOS は App Store Connect の 3 点（Key ID・Issuer ID・.p8）だけ。証明書（.p12）・Team ID の別登録は要らない
+   （署名は Apple のクラウド署名。Team ID は project.yml の `DEVELOPMENT_TEAM` に書く）。
+   Android は Play のサービスアカウント JSON と、Phase 5 で作るアップロード用キーストア。
+3. **鍵が足りなくても止めない。** 雛形の配信ワークフローは鍵が無いと「鍵待ち」で緑のまま終わるので、
+   アプリづくり（Phase 1〜4）は先に進め、足りない鍵だけ本人に「ツール設定で預けてください」と 1 回伝える。
+   鍵がそろったら Phase 5 で入れて、そのまま 1 回目の配信を流す。
 
 4. **iOS を配信する場合、flavor ごとの ASC 事前登録を確認**（見落とすと CI 37 秒で死ぬ）:
 
@@ -136,10 +116,11 @@ Firebase プロビジョニング・Secrets 投入・CI 監視・TestFlight / Pl
 
    確認は `references/create-asc-app-record.rb` を叩く:
 
+   まず `ios_get_status`（bundle_id）で App 記録があるかを見る（`app_id` が返れば記録あり）。無い flavor だけ下のスクリプトで作る
+   （手元の Mac で、ASC の 3 点を環境変数に入れて回す。鍵の値は会話に出さない）:
+
    ```bash
-   export ASC_KEY_ID="$(security find-generic-password -s APP_STORE_CONNECT_API_KEY_ID -a $USER -w)"
-   export ASC_ISSUER_ID="$(security find-generic-password -s APP_STORE_CONNECT_API_KEY_ISSUER_ID -a $USER -w)"
-   export ASC_P8_B64="$(security find-generic-password -s APP_STORE_CONNECT_API_KEY_B64 -a $USER -w)"
+   # ASC_KEY_ID / ASC_ISSUER_ID / ASC_P8_B64（.p8 を base64 にしたもの）を環境変数に入れておく
    for FLAVOR in dev stg prod; do
      export TARGET_BUNDLE_ID="{{company.reverse_domain}}.{app_lower}.$FLAVOR"
      export TARGET_BUNDLE_NAME="{APP_NAME} $(echo $FLAVOR | tr a-z A-Z)"
@@ -264,23 +245,26 @@ mobile-icon-generator:
 
 ---
 
-## Phase 5: mobile-secrets-sync を呼ぶ
+## Phase 5: 鍵を GitHub に入れて、1 回目の配信を流す（mobile-secrets-sync）
 
-Keychain から secrets を読み、GitHub リポに投入する。
+配信の鍵は、コネクタの `mobile_keys_to_github` が「ツール設定」の会社の鍵から GitHub のシークレットに入れる
+（値は会話に出ない）。**鍵がそろっていれば `start_release: true` を付け、入れたその場で配信のワークフローを 1 回動かす**
+（動かす前に「◯◯ のリポに鍵を入れて TestFlight に出します」と本人に見せて OK をもらう）。
 
 ```
-mobile-secrets-sync:
-  repo_owner: {repo_owner}
+mobile_keys_to_github:
   repo_name: {repo_name}
-  targets: {ios|android|both}
+  targets: [ios, android]     # 配信する先だけ
+  start_release: true         # 鍵がそろった配信先のワークフローを動かす
 ```
 
-戻り値: `secrets_set: [...]`, `secrets_skipped: [...]`, `warnings: [...]`。
+戻り値: `set`（入れたシークレット名）・`missing`（足りない鍵）・`releases`（配信先ごとの run_id と URL）。
+Android のアップロード用キーストアと Firebase の設定は `mobile-secrets-sync` の手順で入れる。
 
 **注意**:
-- MCP に `github_secrets_set` は無い。REST API 経由（`PUT /repos/{owner}/{repo}/actions/secrets/{name}`）
-  で libsodium sealed box 暗号化して投入する。詳細は `mobile-secrets-sync/SKILL.md`。
-- 直接 API が難しい場合は Chrome MCP でブラウザ経由 fallback（詳細は同スキル参照）。
+- 鍵が足りない配信先は動かさない（動かしても「鍵待ち」で終わるだけ）。足りない鍵を本人に伝え、預けてもらったら呼び直す。
+- 配信の CI は**後から設定を変えない前提**で雛形に入っている（push で自動・手でも動かせる・鍵待ちは緑）。
+  AI が後から CI の動き方（`on:`）を書き換えようとすると安全チェックで止まるので、手で動かしたいときは `github_run_workflow` を使う。
 
 ---
 
@@ -292,14 +276,13 @@ Phase 2〜5 で push されたコミットが CI を走らせる。iOS ワーク
 
 ### 監視手順（各ターゲットで）
 
-1. `github_fetch` で `repos/{owner}/{repo}/actions/runs?per_page=5` を取得
-2. 対応する run（`head_sha == initial_commit_sha` かつ workflow_name が対象）を特定
-3. 30 秒ごとにポーリング → `status=completed` かつ `conclusion=success` で ✅
-4. `conclusion=failure` なら次の Step へ
+1. Phase 5 の `releases` に run_id があればそれを、無ければ `github_workflow_runs`（workflow: `ios-release-auto.yml` など）で直近の実行を取る
+2. `github_workflow_runs`（run_id）を 1〜2 分おきに見る → `summary` が「成功」で ✅（「鍵待ち」と出たら鍵が届いていない＝Phase 5 に戻る）
+3. 「失敗（ステップ名）」なら次の Step へ。ログは返る `url` で見られる
 
 ### 自動修正ループ（最大 3 回）
 
-1. `github_fetch` で失敗した job の logs を取得
+1. 失敗した job のログを取る（手元の Deploy 拡張の `github_fetch`、無ければ `github_workflow_runs` の `url` を本人に開いてもらう）
 2. `references/ci-failure-patterns.md` と照合（正規表現マッチ）
 3. マッチしたら該当ファイルを Edit ツールで修正
 4. `github_push` で再 push
@@ -374,7 +357,7 @@ mobile-app-smoke-test:
 
 | Phase | 失敗 | 対応 |
 |---|---|---|
-| 0 | Keychain に secret がない | 登録コマンドを案内、中断 |
+| 0 | 配信の鍵が「ツール設定」に無い | 足りない鍵を伝えて先に進める（配信は鍵待ちで止まるだけ）。そろったら Phase 5 |
 | 0 | `firebase.valid: false` | Google 認証 or Service Account 設定を案内、中断 |
 | 1 | APP_NAME が読み取れない | 「アプリ名は何にしますか？（英数字、例: Foo）」で 1 問だけ聞く |
 | 1 | 「Flutter で作って」と要望された | 既定がネイティブである旨と、既存 Flutter アプリからの移行かを確認。新規で Flutter を選ぶ強い事情が無ければネイティブで進める。強い事情があるなら本プラグインの対象外として halt |

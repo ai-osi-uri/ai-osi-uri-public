@@ -49,8 +49,8 @@ security find-generic-password -s ANDROID_KEYSTORE_B64 -a "$USER" -w \
 export ANDROID_KEYSTORE_PATH=/tmp/release.keystore
 
 # Service Account JSON を復元
-security find-generic-password -s GOOGLE_PLAY_SERVICE_ACCOUNT_JSON -a "$USER" -w \
-  > /tmp/play-sa.json
+security find-generic-password -s PLAY_SERVICE_ACCOUNT_JSON -a "$USER" -w \
+  > /tmp/play-sa.json   # 手元に控えた Play のサービスアカウント JSON（CI ではシークレット PLAY_SERVICE_ACCOUNT_JSON）
 export GOOGLE_PLAY_JSON_KEY_PATH=/tmp/play-sa.json
 
 # fastlane 実行
@@ -61,7 +61,13 @@ bundle exec fastlane android android_beta_auto flavor:"${FLAVOR:-dev}"
 ### モード B: GitHub Actions で走らせる（既定）
 
 `.github/workflows/android-release-auto.yml` は push で自動起動する。何もせずに
-`git push origin main`。CI 監視は `deploy-mobile-app` / `mobile-update-deploy` が行う。
+`git push origin main`。CI 監視は `deploy-mobile-app` / `mobile-update-deploy` が行う（`github_workflow_runs`）。
+
+- 必要なシークレット: `PLAY_SERVICE_ACCOUNT_JSON`（コネクタの `mobile_keys_to_github` がツール設定の会社の鍵から入れる）と、
+  キーストア 4 点（`ANDROID_KEYSTORE_B64` / `ANDROID_KEYSTORE_PASSWORD` / `ANDROID_KEY_ALIAS` / `ANDROID_KEY_PASSWORD`）。
+  足りないときは失敗せず「鍵待ち」で緑のまま終わる。
+- 鍵を入れたあと最初の 1 回は `github_run_workflow`（workflow: `android-release-auto.yml`）で動かす（本人の OK のうえで）。
+- Play は最初の 1 本だけ Play Console から手で上げる決まり（API では新しいアプリに上げられない）。
 
 ## fastlane lane の中身（`fastlane/Fastfile` の `android_beta_auto`）
 

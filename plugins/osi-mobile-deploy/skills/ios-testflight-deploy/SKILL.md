@@ -1,11 +1,11 @@
 ---
 name: ios-testflight-deploy
 description: |
-  fastlane + altool で iOS ビルドを TestFlight にアップロードする。
-  署名・アイコン・SwiftSupport まわりの落とし穴回避は references に理由付きで持つ。
-  `deploy-mobile-app` / `mobile-update-deploy` から呼ばれる。単体では「TestFlight
-  に上げて」「iOS を再配信して」で発動。TestFlight に上がった後のビルド昇格・App Store
-  申請・Xcode バージョン運用は `ios-appstore-release` の担当。
+  iOS ビルドを TestFlight に上げる。GitHub Actions（macOS）で xcodebuild が archive して、
+  Apple のクラウド署名で TestFlight にアップロードする。鍵は App Store Connect の 3 点だけ
+  （証明書 .p12 は要らない）。`deploy-mobile-app` / `mobile-update-deploy` から呼ばれる。
+  単体では「TestFlight に上げて」「iOS を再配信して」「鍵を入れて TestFlight に出して」で発動。
+  TestFlight に上がった後のビルド昇格・App Store 申請・Xcode バージョン運用は `ios-appstore-release` の担当。
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb
@@ -13,220 +13,134 @@ requires_connectors:
 label: iPhoneアプリをTestFlightへ
 ---
 
-# ios-testflight-deploy — iOS TestFlight 配信の詳細ノウハウ
+# ios-testflight-deploy — iOS を TestFlight に上げる
 
 > **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` `{{members.*}}` は、連結フォルダ直下の `osi-profile.md`（雛形: `config/osi-profile.example.md`）の値に置き換えて解釈する。無ければ会社名・案件フォルダ・台帳の有無・使うコネクタを質問して先に作る。値をここに直書きしない。
 
-Golden Template には既に「動く形」で焼き込み済み。本スキルは:
+配信は **リポの CI（`.github/workflows/ios-release-auto.yml`）が行う**。Claude がやるのは、
+鍵を入れる・CI を動かす・成否と TestFlight への到達を確かめる・落ちたら直す、の 4 つ。
+手元の Mac・Xcode・GitHub の画面は要らない（全部 URL のコネクタの道具でできる）。
 
-1. 実行の入り口（fastlane lane を叩く）
-2. ノウハウの根拠と「なぜこう書くか」の説明（references/ 配下）
+## 決まり（0.9.0〜。理由つき）
 
-の 2 つを担う。**同じ罠で二度時間を溶かさない**ためのナレッジ層。
+| 決まり | 理由 |
+|---|---|
+| **鍵は App Store Connect の 3 点だけ**（`ASC_KEY_ID` / `ASC_ISSUER_ID` / `ASC_PRIVATE_KEY`）。署名は Xcode の自動署名（Apple のクラウド署名）に任せる | 証明書（.p12）は会社の鍵として預かっていない。3 点ならツール設定から `mobile_keys_to_github` でそのまま入る。名前を変えると CI が読めない |
+| **配信のワークフローは最初から push で動き、手でも動かせる**（`on: push` + `workflow_dispatch`） | 「手動だけ」にすると、最後の一押しが人のボタン待ちになる。AI が後から CI の動き方（`on:`）を書き換えるのは安全チェックで止まるので、作る時点で正しい形にしておく |
+| **鍵が無いときは失敗にせず「鍵待ち」で終わる** | 鍵を後から入れる進め方でも、push のたびに赤（失敗）が並ばない。鍵を入れたら 1 回動かせば届く |
+| **xcodebuild の出力を tail で絞る行には `set -o pipefail`** | 付けないと xcodebuild が失敗しても tail の成功で「成功」と出る（落ちたのに気づけない） |
+| **ビルド番号は `github.run_number`（＋ Variables の `BUILD_NUMBER_OFFSET`）** | 同じ番号は TestFlight に二度上げられない。実行のたびに必ず増える番号を使う。後から入れたリポで既に大きい番号があるときだけ下駄を履かせる |
+| **`xcodegen generate` を archive の前に必ず走らせる** | stale な .xcodeproj で「Missing package product」が束で出る（`xcodegen-project-regen`） |
+| **macOS 15 の runner** | 古い runner は新しい iOS SDK が無く、App Store Connect がアップロードを断る |
 
-> **v0.2.0 追記**: SampleApp SwiftUI 移植で実運用中の `.github/workflows/ios-release-auto.yml`
-> の完全版を `references/ios-release-auto.yml.example` に同梱。必須 GitHub Secrets（7個）と
-> flavor ごとの plist secret 名も冒頭にコメントで明記。Golden Template から生成される
-> workflow はこれと 1:1 で対応する。追加獲得したノウハウ:
->
-> - `macos-15` runner + Xcode 26.x 選択（Xcode 16 は iOS 26 SDK が無く ASC が 409 を返す）
-> - Preflight で必須 secrets を検査し早期 fail
-> - `xcodegen generate` は fastlane に入る**前**の CI step で必ず走らせる（stale .xcodeproj
->   による Missing package product を潰す — `xcodegen-project-regen` skill 参照）
-> - flavor サフィックス mapping は bash 3.2 互換の `case` 文で書く
-> - AppIcon の legacy 命名（`AppIcon60x60@2x.png` / `AppIcon60x60@3x.png`）を Payload 直下に
->   `cp` する step が必要（iOS 26 の altool validation 対策）
-> - Distribution 証明書は P12 (`IOS_DIST_CERT_P12_B64`) を CI の一時 keychain に import →
->   `security set-key-partition-list -S apple-tool:,apple:` で codesign から見えるようにする
-> - fastlane match は使わず auto-signing 一本化（`xcargs: -allowProvisioningUpdates ...`）
+ワークフローの完全版は `references/ios-release-auto.yml.example`（`mobile-app-scaffold` の雛形と同じもの）。
 
 ## 入力契約
 
 | 項目 | 必須 | 説明 |
 |---|---|---|
-| `work_dir` | ✅ | モバイルリポの絶対パス |
-| `flavor` | 任意 | `dev` / `stg` / `prod`（既定: `dev`） |
-| `notes` | 任意 | TestFlight の what-to-test メモ |
+| `repo_name` | ✅ | モバイルリポ（会社の org） |
+| `flavor` | 任意 | `dev` / `stg` / `prod`（既定: `dev`。push で動くときは dev） |
+| `bundle_id` | 任意 | 到達確認用（既定: project.yml の flavor の Bundle ID） |
 
-## 実行モード
+## 手順
 
-### モード A: ローカル Mac で fastlane を直叩き
+### 1. 事前確認
+
+```
+mobile_health_check            → apple.ok: true（ツール設定の App Store Connect の鍵が生きている）
+ios_get_status(bundle_id)      → app_id が返る＝App Store Connect に App 記録がある
+github_workflow_runs(repo)     → workflows に ios-release-auto.yml（または testflight.yml）がある
+```
+
+- **App 記録が無い flavor は必ず落ちる**（Bundle ID と App 記録の両方が要る）。作り方は
+  `deploy-mobile-app/references/asc-app-record-setup.md`。App 記録の作成は Admin 権限が要るので、無ければ人に頼んで止まる。
+- ワークフローが無い・`workflow_dispatch` が無い古い手作りのものなら、雛形の `ios-release-auto.yml` に置き換える。
+  これは CI の動き方の変更なので、何をどう変えるかを本人に見せて OK をもらってから入れる。
+
+### 2. 鍵を入れて、1 回目を流す
+
+```
+mobile_keys_to_github({ repo_name, targets: ["ios"], start_release: true })
+```
+
+動かす前に「◯◯ のリポに鍵を入れて TestFlight に出します」と本人に見せて OK をもらう。
+鍵が既に入っていて、もう一度上げたいだけなら:
+
+```
+github_run_workflow({ repo_name, workflow: "ios-release-auto.yml", inputs: { flavor: "dev" } })
+```
+
+コードを直して main に push した場合は、push で自動的に動く（何も呼ばなくてよい）。
+
+### 3. 成否を見る
+
+```
+github_workflow_runs({ repo_name, run_id })   → summary: 実行中 / 成功 / 失敗（ステップ名）
+```
+
+1〜2 分おきに見る。20〜40 分かかる。
+
+- 「鍵待ち」と出た → 鍵が届いていない。手順 2 に戻る
+- 「失敗（Archive …）」 → 下の表で原因を当てて直し、push（push で再実行される）
+- 「成功」 → 手順 4 へ
+
+### 4. TestFlight に届いたかを確かめる
+
+```
+ios_get_status({ bundle_id })   → builds の先頭が今回のビルド番号で processingState が VALID
+```
+
+Apple の処理に 10〜30 分かかる。**CI が成功しただけで「TestFlight に上がりました」と言わない。**
+`ios_get_status` で今回のビルドが見えてから伝える。
+
+## よくある失敗
+
+| 症状（ログ） | 原因と対処 |
+|---|---|
+| `No Accounts` / `No signing certificate "iOS Distribution" found` | クラウド署名に鍵が渡っていない。`-authenticationKeyPath/ID/IssuerID` が archive と export の両方にあるか。キーの役割が App Manager 以上か |
+| `Could not find App with App Identifier` / `No profiles for '…' were found` | App Store Connect に Bundle ID か App 記録が無い（手順 1） |
+| `The bundle version must be higher than the previously uploaded version` | 既に大きいビルド番号がある。リポの Variables に `BUILD_NUMBER_OFFSET` を置く |
+| `Missing package product` が束で出る | `xcodegen generate` が抜けている／古い .xcodeproj がコミットされている（`xcodegen-project-regen`） |
+| `SDK version … is required` | runner が古い。`macos-15` にする |
+| `Missing required icon file` / `Invalid Info.plist value CFBundleIconName` | AppIcon（1024 の 1 枚）と Info.plist の `CFBundleIconName: AppIcon` を確かめる |
+| `Invalid … ITSAppUsesNonExemptEncryption` で TestFlight に出ない | Info.plist に `ITSAppUsesNonExemptEncryption: false`（暗号の届け出が要らないアプリ） |
+| `AuthKey_XXX.p8 not found` | .p8 のファイル名は `AuthKey_<KEY_ID>.p8` でなければならない |
+| GitHub 上は成功なのに TestFlight に無い | `pipefail` が無く、失敗が隠れている。ワークフローを雛形に合わせる |
+
+fastlane と altool で上げていた頃（〜0.8.x）の罠は `references/altool-quirks.md` に残してある（手元の Mac で上げるとき用）。
+
+## 手元の Mac で上げる（予備）
+
+CI が使えないときだけ。リポの `fastlane/Fastfile` の `ios_beta_auto` は、CI と同じ 3 点を環境変数
+（`ASC_KEY_ID` / `ASC_ISSUER_ID` / `ASC_PRIVATE_KEY`）で読む。鍵の値は会話に出さない。
 
 ```bash
-cd "$WORK_DIR"
-
-# Keychain から secrets を env に展開
-export APPLE_TEAM_ID="$(security find-generic-password -s APPLE_TEAM_ID -a "$USER" -w)"
-export APP_STORE_CONNECT_API_KEY_ID="$(security find-generic-password -s APP_STORE_CONNECT_API_KEY_ID -a "$USER" -w)"
-export APP_STORE_CONNECT_API_KEY_ISSUER_ID="$(security find-generic-password -s APP_STORE_CONNECT_API_KEY_ISSUER_ID -a "$USER" -w)"
-
-# .p8 を AuthKey_<ID>.p8 という命名で置く（altool の必須命名）
-mkdir -p ~/private_keys
-security find-generic-password -s APP_STORE_CONNECT_API_KEY_B64 -a "$USER" -w \
-  | base64 --decode > ~/private_keys/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8
-export APP_STORE_CONNECT_API_KEY_PATH=~/private_keys/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8
-
-# fastlane 実行
-bundle install --quiet
-bundle exec fastlane ios ios_beta_auto flavor:"${FLAVOR:-dev}" notes:"${NOTES:-}"
+cd "$WORK_DIR" && bundle install --quiet && bundle exec fastlane ios ios_beta_auto flavor:dev
 ```
-
-このモードは Mac local で完結。CI が調子悪い時のリカバリ用途にも使う。
-
-### ❗️ Pre-flight: flavor ごとの ASC App 記録確認（必須）
-
-flavor を新規に配信する場合、**CI を回す前に** Apple Developer Portal の Bundle ID と
-App Store Connect の App 記録の両方が存在することを確認する。片方でも欠けると
-fastlane `get_provisioning_profile` / `pilot` が 「Could not find App with App Identifier」
-で 37 秒で失敗する（SampleApp 2026-08-05 の prod 初回配信で実際に踏んだ）。
-
-確認・自動化は `deploy-mobile-app/references/create-asc-app-record.rb` のヘルパーを使う。
-Bundle ID は API で作れるが、App 記録の作成は Admin role 必須なのでキーの role が
-不足なら Web UI で人が作る。詳細と背景は
-`deploy-mobile-app/references/asc-app-record-setup.md`。
-
----
-
-### モード B: GitHub Actions で走らせる（既定）
-
-`.github/workflows/ios-release-auto.yml` は push で自動起動する構成。何もせずに
-`git push origin main` するだけ。CI 監視は `deploy-mobile-app` / `mobile-update-deploy`
-が行う。完全な workflow は `references/ios-release-auto.yml.example` を参照。
-
-## 必須 GitHub Secrets
-
-`references/ios-release-auto.yml.example` の冒頭コメントにも記載。
-
-**iOS auto-signing に必要（7 個）**:
-
-| Secret 名 | 中身 |
-|---|---|
-| `APPLE_TEAM_ID` | Apple Developer Team ID (10桁) |
-| `APP_STORE_CONNECT_API_KEY_ID` | .p8 のファイル名に入る Key ID |
-| `APP_STORE_CONNECT_API_KEY_ISSUER_ID` | App Store Connect の Issuer UUID |
-| `APP_STORE_CONNECT_API_KEY_B64` | .p8 を base64 化した文字列 |
-| `IOS_DIST_CERT_P12_B64` | Distribution 証明書 .p12 を base64 |
-| `IOS_DIST_CERT_PASSWORD` | .p12 のパスワード |
-| `IOS_KEYCHAIN_PASSWORD` | CI 上の一時 keychain 用パスワード（任意で強め） |
-
-**flavor ごとの Firebase plist（3 個）**:
-
-- `GOOGLE_SERVICE_INFO_PLIST_DEV_B64`
-- `GOOGLE_SERVICE_INFO_PLIST_STG_B64`
-- `GOOGLE_SERVICE_INFO_PLIST_PROD_B64`
-
-## fastlane lane の中身（`fastlane/Fastfile` の `ios_beta_auto`）
-
-Golden Template に焼き込み済み。要点:
-
-```ruby
-lane :ios_beta_auto do |options|
-  flavor = options[:flavor] || "dev"
-  configuration = { "dev" => "Release-Dev", "stg" => "Release-Stg", "prod" => "Release-Prod" }.fetch(flavor)
-  app_id        = APP_ID_BY_FLAVOR.fetch(flavor)
-  api_key       = load_app_store_connect_api_key!
-
-  # 1. xcodegen で .xcodeproj を再生成（ソース追加漏れ + stale project の防止）
-  Dir.chdir("apps/ios") { sh "xcodegen generate" }
-
-  # 2. build number を Apple 側の最大値 + 1 に
-  latest = latest_testflight_build_number(app_identifier: app_id, api_key: api_key, initial_build_number: 0)
-  increment_build_number(xcodeproj: "apps/ios/MyApp.xcodeproj", build_number: (latest.to_i + 1).to_s)
-
-  # 3. archive + export（Automatic Signing）
-  gym(
-    project: "apps/ios/MyApp.xcodeproj",
-    scheme:  "MyApp",
-    configuration: configuration,
-    clean:   true,
-    export_method: "app-store",
-    output_directory: "build/ios/ipa",
-    output_name: "MyApp-#{flavor}.ipa",
-    xcargs: "-allowProvisioningUpdates DEVELOPMENT_TEAM=#{ENV.fetch('APPLE_TEAM_ID')}",
-  )
-
-  # 4. Assets.car が Payload に入っているかを検証。無ければ actool で自前コンパイル
-  ensure_assets_car_in_payload!(ipa: "build/ios/ipa/MyApp-#{flavor}.ipa")
-
-  # 5. pilot で TestFlight upload。polling はスキップ（時間の無駄）
-  pilot(
-    api_key: api_key,
-    app_identifier: app_id,
-    ipa: "build/ios/ipa/MyApp-#{flavor}.ipa",
-    skip_waiting_for_build_processing: true,
-    changelog: options[:notes],
-    distribute_external: false,
-  )
-end
-```
-
-## `ensure_assets_car_in_payload!` の中身
-
-```ruby
-def ensure_assets_car_in_payload!(ipa:)
-  Dir.mktmpdir do |tmp|
-    sh "unzip -q '#{ipa}' -d '#{tmp}'"
-    app_dir = Dir["#{tmp}/Payload/*.app"].first
-    unless File.exist?("#{app_dir}/Assets.car")
-      UI.important "Assets.car missing — recompiling"
-      partial = "#{tmp}/AssetsInfo.plist"
-      sh "xcrun actool --compile '#{app_dir}' --platform iphoneos " \
-         "--minimum-deployment-target 16.0 --app-icon AppIcon " \
-         "--output-partial-info-plist '#{partial}' " \
-         "apps/ios/MyApp/Resources/Assets.xcassets"
-    end
-    # 旧命名の AppIcon60x60@2x.png / @3x.png も Payload 直下にコピー（iOS 26 の validation 対策）
-    ["120", "180"].each do |px|
-      src = "apps/ios/MyApp/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon-#{px}.png"
-      dst = "#{app_dir}/AppIcon60x60#{px == '120' ? '@2x' : '@3x'}.png"
-      FileUtils.cp(src, dst) if File.exist?(src) && !File.exist?(dst)
-    end
-    # 再 zip（ditto を使わないと SwiftSupport が壊れる → ITMS-90426）
-    FileUtils.rm(ipa)
-    sh "cd '#{tmp}' && zip -qry '#{ipa}' Payload SwiftSupport 2>/dev/null || " \
-       "cd '#{tmp}' && zip -qry '#{ipa}' Payload"
-  end
-end
-```
-
-より安全なのは `ditto -c -k --sequesterRsrc --keepParent`。`references/altool-quirks.md` 参照。
 
 ## 戻り値
 
 ```json
 {
+  "run_id": 123456,
+  "run_url": "https://github.com/.../actions/runs/123456",
+  "conclusion": "success",
   "build_number": "42",
-  "upload_status": "uploaded",
-  "processing": true,
-  "app_store_connect_url": "https://appstoreconnect.apple.com/apps/.../testflight/ios"
+  "testflight": "VALID"
 }
 ```
 
-## エラーハンドリング
-
-`references/altool-quirks.md` に典型症状と対処を全部並べている。頻出は以下:
-
-| 症状 | 対処 |
-|---|---|
-| `ITMS-90426 SwiftSupport missing` | ditto で再 zip（unzip → zip すると死ぬ） |
-| `Missing required icon file` | actool で Assets.car を自前生成、legacy PNG も併置 |
-| `AuthKey_XXX.p8 not found` | ファイル名を `AuthKey_${KEY_ID}.p8` にする |
-| `Cannot find provisioning profile` | `xcargs: "-allowProvisioningUpdates"` を追加、または Developer Portal で App ID を事前登録 |
-| `Build number already used` | fastlane の `latest_testflight_build_number` で自動 increment（既に組み込み済み） |
-| `Missing package product 'FirebaseCore'` × 14 | `xcodegen generate` が抜けている（`xcodegen-project-regen` 参照） |
-| `SDK version 26.x is required but 16.x was found` | macos-14 → macos-15 に切替 + Xcode_26.app 選択 |
-
 ## 注意事項
 
-- **pilot の polling をスキップする**。processing 完了まで 10〜30 分待つのは無駄。upload だけしてすぐ抜ける。processing 完了確認は `ios_get_status` で別途行う。
-- **App Store review 提出は本スキルの範疇外**。`ios_submit_review` MCP で明示的に指示された時だけ。
-- **flavor 3 種類（dev/stg/prod）を最初から用意**。BundleID を分けることで Firebase / TestFlight を並行運用できる。v1 は dev のみ実運用、stg/prod は Golden Template に entry として残しつつ運用開始は案件が本番化したタイミング。
-- **CI で走らせる時の provisioning は Automatic**（`match` を使わない）。証明書は Distribution 1 枚を Keychain / GitHub Secrets 経由で流し込む。`match` を後で入れたくなった時は明示的に切り替える。
-- **P12 一時 keychain**: `security create-keychain` → `security import` → `security set-key-partition-list -S apple-tool:,apple:` の 3 手順を workflow で必ず踏む。partition-list を忘れると codesign が対話 prompt を出して CI が hang する。
+- **App Store の審査提出はこのスキルの範囲外**。`ios-appstore-release`（`ios_submit_review`）で、はっきり頼まれたときだけ。
+- flavor は dev / stg / prod を雛形に用意している。Bundle ID が flavor ごとに違うので、配信する flavor ごとに App 記録が要る。最初は dev だけ運用する。
+- 鍵の値（.p8 の中身など）は会話・ログ・コミットに出さない。ワークフローは最後に鍵のファイルを消す。
 
 ## 関連スキル
 
+- `mobile-secrets-sync` — 鍵を入れて 1 回目を流す
 - `xcodegen-project-regen` — CI 内 `xcodegen generate` の理由と手当て
-- `ios-sim-auth-backdoor` — Simulator QA 用の Custom Token 導線
-- `deploy-mobile-app` — 新規リポ作成 → 本 skill を Phase 6-7 で呼ぶ
-- `mobile-update-deploy` — 既存リポの局所修正 → 本 skill が CI で回る
+- `deploy-mobile-app` — 新規リポ作成から配信まで
+- `mobile-update-deploy` — 既存リポを直して再配信
+- `ios-appstore-release` — TestFlight の後（昇格・申請）

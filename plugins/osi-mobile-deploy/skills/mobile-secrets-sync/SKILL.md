@@ -1,10 +1,11 @@
 ---
 name: mobile-secrets-sync
 description: |
-  モバイル配信に必要な GitHub Actions Secrets（証明書 / ASC キー / keystore / Play SA
-  / Firebase config 等）を一括投入する。keystore が未生成なら作成して Drive
-  に退避する。`deploy-mobile-app` の Phase 5 から呼ばれる。単体では「モバイルの
-  Secrets を入れて」で発動。
+  モバイル配信に必要な GitHub Actions Secrets（App Store Connect の鍵 3 点 / Play SA
+  / keystore / Firebase config 等）を入れ、鍵がそろったらそのまま 1 回目の配信を流す。
+  配信の鍵はツール設定の会社の鍵から mobile_keys_to_github で入れる。keystore が未生成なら
+  作成して Drive に退避する。`deploy-mobile-app` の Phase 5 から呼ばれる。単体では
+  「モバイルの Secrets を入れて」「配信の鍵を GitHub に入れて」「鍵を入れて TestFlight に出して」で発動。
 requires_connectors:
   - server: AI_OSI_URI_Deploy
     provision: mcpb
@@ -20,44 +21,50 @@ label: スマホ配信の鍵を入れる
 
 > **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` `{{members.*}}` は、連結フォルダ直下の `osi-profile.md`（雛形: `config/osi-profile.example.md`）の値に置き換えて解釈する。無ければ会社名・案件フォルダ・台帳の有無・使うコネクタを質問して先に作る。値をここに直書きしない。
 
-**手動 curl / bash / libsodium install はもう不要**。v0.2.0 から MCP ツール
-`github_set_secrets_batch` + `mobile_generate_keystore` に完全委譲する。
+**配信の鍵（App Store Connect・Google Play）は、ポータルの「ツール設定」に預けた会社の鍵から、コネクタの
+`mobile_keys_to_github` が GitHub のシークレットに入れる**（値はサーバーの中で暗号化して送るので、会話にも画面にも出ない）。
+手元の Keychain から読んで入れるやり方（〜0.8.x）はやめた。Keychain を使うのは、Android のアップロード用キーストアを控えるときだけ。
+
+## 決まり（0.9.0〜）
+
+- **シークレットの名前は固定**。雛形のワークフロー（`ios-release-auto.yml` / `android-release-auto.yml`）はこの名前で読む。
+  名前を変えない・別名で二重に入れない。
+- **iOS は 3 点だけ**（`ASC_KEY_ID` / `ASC_ISSUER_ID` / `ASC_PRIVATE_KEY`）。署名は Apple のクラウド署名なので、
+  証明書（.p12）・そのパスワード・一時 Keychain のパスワード・Team ID のシークレットは要らない（Team ID は project.yml）。
+- **鍵を入れたら、そのまま 1 回目の配信を流す**（`start_release: true`）。人に GitHub の画面でボタンを押してもらわない。
+  動かす前に「◯◯ のリポに鍵を入れて TestFlight（Google Play の内部テスト）に出します」と本人に見せて OK をもらう。
+- **鍵が足りなくても止めない**。足りない配信先は動かさず、足りない鍵の名前を本人に伝える。雛形の CI は鍵が無いと「鍵待ち」で緑のまま終わる。
 
 ## 入力契約
 
 | 項目 | 必須 | 説明 |
 |---|---|---|
-| `repo_owner` | ✅ | GitHub owner |
-| `repo_name` | ✅ | GitHub repo name |
-| `targets` | 任意 | `ios` / `android` / `both`（既定: `both`） |
+| `repo_name` | ✅ | GitHub repo name（会社の org。自分の鍵のときだけ `repo_owner`） |
+| `targets` | 任意 | `ios` / `android`（既定: 両方） |
+| `start_release` | 任意 | 入れたあと配信のワークフローを 1 回動かす（既定: 本人の OK があれば true） |
 | `include_firebase` | 任意 | GoogleService-Info.plist / google-services.json も投入（既定: true） |
-| `generate_keystore_if_missing` | 任意 | Keychain に Android keystore 無い場合に自動生成（既定: true） |
+| `generate_keystore_if_missing` | 任意 | Android のアップロード用キーストアが無ければ作る（既定: true） |
 | `keystore_backup_dir` | 任意 | keystore バックアップ先 Drive パス（既定: `{{paths.shared}}/mobile-release/keystores/`） |
-| `dry_run` | 任意 | true なら「何を投入するか」だけ表示して PUT はしない |
 
-## 投入する Secrets（12〜13個）
+## 入れるシークレット
 
-### iOS 7個
+### iOS 3 個（`mobile_keys_to_github` が入れる）
 
-| Secret 名 | Keychain source |
+| Secret 名 | 中身（ツール設定の鍵） |
 |---|---|
-| `APPLE_TEAM_ID` | `security find-generic-password -s APPLE_TEAM_ID` |
-| `APP_STORE_CONNECT_API_KEY_ID` | 同上 (10文字英数) |
-| `APP_STORE_CONNECT_API_KEY_ISSUER_ID` | 同上 (UUID) |
-| `APP_STORE_CONNECT_API_KEY_B64` | 同上 (.p8 の base64) |
-| `IOS_DIST_CERT_P12_B64` | 同上 (Distribution 証明書 .p12 の base64) |
-| `IOS_DIST_CERT_PASSWORD` | 同上 |
-| `IOS_KEYCHAIN_PASSWORD` | 同上（CI 上で作る一時 Keychain のパスワード） |
+| `ASC_KEY_ID` | App Store Connect API キーの ID（10 文字） |
+| `ASC_ISSUER_ID` | Issuer ID（UUID） |
+| `ASC_PRIVATE_KEY` | .p8 の中身そのまま（base64 にしない） |
 
-### Android 5個
+### Android 5 個
 
 | Secret 名 | 由来 |
 |---|---|
-| `ANDROID_KEYSTORE_B64` | Keychain（既存）or `mobile_generate_keystore` の戻り値 `keystore_b64` |
+| `PLAY_SERVICE_ACCOUNT_JSON` | `mobile_keys_to_github` が入れる（ツール設定の Play のサービスアカウント JSON そのまま） |
+| `ANDROID_KEYSTORE_B64` | Step 3（既存 or `mobile_generate_keystore` の `keystore_b64`） |
 | `ANDROID_KEYSTORE_PASSWORD` | 同上 `keystore_password` |
 | `ANDROID_KEY_ALIAS` | 同上 `alias`（既定 `upload`） |
 | `ANDROID_KEY_PASSWORD` | 同上 `key_password` |
-| `GOOGLE_PLAY_JSON_KEY_B64` | Keychain の `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` を base64 化 |
 
 ### Firebase 2〜4個（`include_firebase: true` のみ）
 
@@ -72,79 +79,36 @@ label: スマホ配信の鍵を入れる
 | `FIREBASE_ANDROID_APP_ID`            | `firebase apps:list --json` or Firebase Console | Android Crashlytics / クラッシュレポート送信で使う |
 | `GCP_SA_KEY_JSON`                    | GCP Console → IAM → Service Accounts → Keys → Create JSON | Firebase Functions を CI で `firebase deploy --only functions` するなら必須（Firebase Admin + Cloud Run Admin + Cloud Functions Admin） |
 
-## 実行フロー（全自動）
+## 実行フロー
 
 ### Step 1: 前提チェック
 
 ```
-1. github_list_secrets({repo_owner, repo_name}) を叩いて既存 Secret を確認
-   → 全部揃っていて再投入不要ならスキップ判定
-2. mobile_health_check({check_apple: true, check_google: true}) で
-   拡張側の ASC / Play 認証が生きていることを確認
-3. targets が android/both なら keytool が sandbox にあるか
-   （mobile_generate_keystore の内部で自動確認・不足なら fail）
+1. github_list_secrets({repo_owner, repo_name}) で既存のシークレット名を見る
+2. mobile_health_check で、ツール設定の App Store Connect / Play の鍵が生きているかを見る
+   （apple.ok / google が false なら、足りない鍵を本人に伝える。止めずに Step 3 以降は進める）
+3. リポに配信のワークフロー（ios-release-auto.yml / android-release-auto.yml）があるか
+   （github_workflow_runs の workflows で見られる。無ければ mobile-app-scaffold の雛形から置く）
 ```
 
-### Step 2: 値の収集
-
-Keychain から bash で読み出し。**この部分だけは MCP ツールでは代替できない**（Keychain
-アクセスは macOS ネイティブ）。以下のスクリプトを組み立てて実行:
-
-```bash
-#!/bin/bash
-set -e
-declare -A SECRETS
-
-read_keychain() {
-  local svc="$1"
-  security find-generic-password -s "$svc" -a "$USER" -w 2>/dev/null || echo ""
-}
-
-# --- iOS ---
-if [[ "$TARGETS" == "ios" || "$TARGETS" == "both" ]]; then
-  SECRETS[APPLE_TEAM_ID]="$(read_keychain APPLE_TEAM_ID)"
-  SECRETS[APP_STORE_CONNECT_API_KEY_ID]="$(read_keychain APP_STORE_CONNECT_API_KEY_ID)"
-  SECRETS[APP_STORE_CONNECT_API_KEY_ISSUER_ID]="$(read_keychain APP_STORE_CONNECT_API_KEY_ISSUER_ID)"
-  SECRETS[APP_STORE_CONNECT_API_KEY_B64]="$(read_keychain APP_STORE_CONNECT_API_KEY_B64)"
-  SECRETS[IOS_DIST_CERT_P12_B64]="$(read_keychain IOS_DIST_CERT_P12_B64)"
-  SECRETS[IOS_DIST_CERT_PASSWORD]="$(read_keychain IOS_DIST_CERT_PASSWORD)"
-  SECRETS[IOS_KEYCHAIN_PASSWORD]="$(read_keychain IOS_KEYCHAIN_PASSWORD)"
-fi
-
-# --- Android ---
-if [[ "$TARGETS" == "android" || "$TARGETS" == "both" ]]; then
-  SECRETS[GOOGLE_PLAY_JSON_KEY_B64]="$(read_keychain GOOGLE_PLAY_SERVICE_ACCOUNT_JSON | base64)"
-  # keystore の値は次の Step で（既存 or 生成）
-fi
-
-# 出力: name=value を1行ずつ（NULL区切りが理想だがまず素朴に）
-for k in "${!SECRETS[@]}"; do
-  # 値に改行が入る可能性のある .p8 base64 等は事前に tr -d '\n' で1行化
-  v="${SECRETS[$k]}"
-  echo "${k}=${v}"
-done > /tmp/secrets-collected.env
-```
-
-**halt & ask**: iOS 側で1つでも空なら以下を提示して停止:
+### Step 2: 配信の鍵を入れて、1 回目を流す
 
 ```
-以下の iOS secrets が Keychain にありません。ターミナルで登録してください:
-
-  security add-generic-password -U -s "APPLE_TEAM_ID" -a "$USER" -w "24X327Z9SJ"
-  security add-generic-password -U -s "APP_STORE_CONNECT_API_KEY_ID" -a "$USER" -w "..."
-  security add-generic-password -U -s "APP_STORE_CONNECT_API_KEY_ISSUER_ID" -a "$USER" -w "UUID"
-  security add-generic-password -U -s "APP_STORE_CONNECT_API_KEY_B64" -a "$USER" -w "$(base64 -i AuthKey_XXXXXXXXXX.p8)"
-  security add-generic-password -U -s "IOS_DIST_CERT_P12_B64" -a "$USER" -w "$(base64 -i dist.p12)"
-  security add-generic-password -U -s "IOS_DIST_CERT_PASSWORD" -a "$USER" -w "PASSWORD"
-  security add-generic-password -U -s "IOS_KEYCHAIN_PASSWORD" -a "$USER" -w "$(openssl rand -base64 24)"
-
-登録後に「登録した」と返してください。
+mobile_keys_to_github({
+  repo_name: "<repo_name>",
+  targets: ["ios", "android"],   // 配信する先だけ
+  start_release: true            // Android は Step 3 のキーストアを入れてから true にする
+})
 ```
+
+戻り値の `set`（入れた名前）・`missing`（足りない鍵）・`releases`（配信先ごとの run_id・URL）を本人に短く伝える。
+Android は キーストア（Step 3）が入るまで配信しても鍵待ちになるので、iOS だけ先に `start_release` してよい。
 
 ### Step 3: Android keystore（既存 or 新規生成）
 
 ```
-既存確認:
+既存確認（まず github_list_secrets に ANDROID_KEYSTORE_B64 があれば、作り直さずそのまま使う）:
+  read_keychain() { security find-generic-password -s "$1" -a "$USER" -w 2>/dev/null || echo ""; }
   ANDROID_KEYSTORE_B64="$(read_keychain ANDROID_KEYSTORE_B64)"
 
   if [ -z "$ANDROID_KEYSTORE_B64" ] && [ "$generate_keystore_if_missing" = "true" ]; then
@@ -176,27 +140,17 @@ done > /tmp/secrets-collected.env
   fi
 ```
 
-### Step 4: `github_set_secrets_batch` で一括 PUT
+### Step 4: キーストアと Firebase を `github_set_secrets_batch` で入れる
 
 ```
-Claude が MCP ツールを呼ぶ:
-
 github_set_secrets_batch({
   repo_owner: "<repo_owner>",
   repo_name: "<repo_name>",
   secrets: {
-    APPLE_TEAM_ID: "...",
-    APP_STORE_CONNECT_API_KEY_ID: "...",
-    APP_STORE_CONNECT_API_KEY_ISSUER_ID: "...",
-    APP_STORE_CONNECT_API_KEY_B64: "...",
-    IOS_DIST_CERT_P12_B64: "...",
-    IOS_DIST_CERT_PASSWORD: "...",
-    IOS_KEYCHAIN_PASSWORD: "...",
     ANDROID_KEYSTORE_B64: "...",
     ANDROID_KEYSTORE_PASSWORD: "...",
     ANDROID_KEY_ALIAS: "upload",
     ANDROID_KEY_PASSWORD: "...",
-    GOOGLE_PLAY_JSON_KEY_B64: "...",
     GOOGLE_SERVICE_INFO_PLIST_DEV_B64:  "...",   // include_firebase:true のみ
     GOOGLE_SERVICE_INFO_PLIST_PROD_B64: "...",   // prod を配信するなら必須
     GOOGLE_SERVICES_JSON_DEV_B64:       "...",
@@ -207,12 +161,14 @@ github_set_secrets_batch({
 })
 ```
 
+入れ終わったら Android も `github_run_workflow`（workflow: `android-release-auto.yml`）で 1 回動かす（本人の OK のうえで）。
+
 戻り値の `results` を人間可読に整形して報告:
 
 ```
-✅ 投入完了 (13/13)
-  - APPLE_TEAM_ID: updated
-  - APP_STORE_CONNECT_API_KEY_ID: created
+✅ 投入完了 (6/6)
+  - ANDROID_KEYSTORE_B64: created
+  - GOOGLE_SERVICES_JSON_DEV_B64: updated
   ...
 ```
 
@@ -235,7 +191,8 @@ github_list_secrets({repo_owner, repo_name}) を再度叩いて、
   "failed": 0,
   "generated_keystore": true,
   "keystore_backup_path": "{{paths.shared}}/mobile-release/keystores/{repo_name}-release.jks",
-  "method": "github_set_secrets_batch (MCP v1.17.3+)"
+  "releases": { "ios": { "run_id": 123, "url": "https://github.com/..." } },
+  "method": "mobile_keys_to_github + github_set_secrets_batch"
 }
 ```
 
@@ -243,9 +200,10 @@ github_list_secrets({repo_owner, repo_name}) を再度叩いて、
 
 | 症状 | 対応 |
 |---|---|
-| Keychain に iOS secret 無し | 登録コマンド提示、halt |
+| ツール設定に配信の鍵が無い（`missing`） | 足りない鍵の名前を伝えて「ツール設定」で預けてもらう。止めずに他の手順は進め、預けたら呼び直す |
+| `releases` が「workflow_dispatch がありません」 | 古い手作りのワークフロー。雛形の `ios-release-auto.yml` に置き換える（CI の動き方の変更なので本人の OK をもらってから） |
 | keytool 無し | mobile_generate_keystore が fail 返却 → JDK 案内、halt |
-| github_set_secrets_batch で 403 | GITHUB_PAT の scope 不足（`repo`+`workflow`）、案内、halt |
+| github_set_secrets_batch・github_run_workflow で 403 | GitHub の鍵の権限不足（`repo`+`workflow`）、案内、halt |
 | Drive バックアップ失敗 | Claude の Drive tool 状態確認、非致命的（Secret は既に投入済み） |
 | 一部 Secret のみ失敗 | 失敗した Secret 名を提示、再実行を案内 |
 
@@ -253,8 +211,7 @@ github_list_secrets({repo_owner, repo_name}) を再度叩いて、
 
 - **既存の同名 Secret は上書き**（`github_set_secrets_batch` の semantics）。同名を守りたいなら
   事前に `github_list_secrets` で確認。
-- **サイズ制限**: GitHub Actions Secret は 64KB まで。.p12 base64（〜5KB）や keystore base64
-  （〜3.7KB）は余裕。
+- **サイズ制限**: GitHub Actions Secret は 64KB まで。keystore base64（〜3.7KB）は余裕。
 - **keystore は絶対に失わない**: 失うとアプリ更新不可（新規 keystore で署名した AAB は
   Play が「別アプリ」扱いする）。Drive バックアップ + 1Password の 2重化必須。
 - **Play App Signing を使う場合**、アップロード鍵は差し替え可能だが「初回アップロード鍵の
