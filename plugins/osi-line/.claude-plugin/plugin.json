@@ -1,8 +1,8 @@
 {
   "name": "osi-line",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "requires_connectors": [],
-  "description": "自分の LINE（個人アカウント）を Claude から使うプラグイン。ツールポータルで QR（またはメール）でログインして Claude に「LINE のセットアップをして」と送るとつながり（line-setup・拡張が無ければ Claude が入れる・ヘルスチェックも）、未読や返事待ちのトークをまとめ（line-inbox）、返信は下書きを見せて本人の OK のあとで 1 通ずつ送り（line-reply・送るのは拡張の「読むだけ」を外したときだけ）、友だち・トーク・画像やファイル・設定・連携の解除などの基本操作（line-basics）を扱う。道具は AI OSI URI LINE 拡張（非公式・サブ端末としてログインするので PC 版 LINE と同時に使える・既定は読むだけ）。",
+  "description": "自分の LINE（個人アカウント）を Claude から使うプラグイン。Claude に「LINE のセットアップをして」と送ると、チャットに QR と PIN を出してそのままつながり（line-setup・拡張が無ければ Claude が入れる・ヘルスチェックも）、未読や返事待ちのトークをまとめ（line-inbox）、返信は下書きを見せて本人の OK のあとで 1 通ずつ送り（line-reply）、友だち・トーク・画像やファイル・設定・連携の解除などの基本操作（line-basics）を扱う。道具は AI OSI URI LINE 拡張（非公式・サブ端末としてログインするので PC 版 LINE と同時に使える・既定で送れる・設定で「読むだけ」にもできる）。",
   "author": {
     "name": "AI OSI URI",
     "email": "yuhenagisa@ai-osi-uri.com"
