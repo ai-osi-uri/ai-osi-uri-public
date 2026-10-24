@@ -32,6 +32,7 @@ label: GCP・BigQueryの操作
 | `gcp_health_check` | 認証疎通・SA・既定プロジェクト確認 | 読み取りのみ |
 | `gcp_api` | 任意の Google REST API を直接呼ぶ汎用ツール（Cloud Run / Service Usage / IAM / Resource Manager 等） | DELETE・`:delete`/`:stop`/`:disable` は `confirm:true` 必須 |
 | `bq_query` | BigQuery クエリ（集計・数字一致の検証） | 既定 read-only。DML/DDL は `allow_write:true` |
+| `gcp_secret_put`（URL のコネクタのみ） | ツール設定に預けた AI の鍵（anthropic / openai / typesafe）を、値を会話に出さずに Secret Manager へ入れる。`accessor` に Cloud Run の実行アカウントを渡すと読む権限も付ける | 値は返さない。AI の鍵以外は入れられない |
 
 MCP 名は `mcp__AI_OSI_URI_Deploy__gcp_health_check` / `gcp_api` / `bq_query`。
 
@@ -61,6 +62,14 @@ gcp_api(method="POST",
   url="https://serviceusage.googleapis.com/v1/projects/{project}/services/run.googleapis.com:enable")
 ```
 （BigQuery=bigquery.googleapis.com、Cloud Run=run.googleapis.com、Vertex=aiplatform.googleapis.com 等）
+
+**Cloud Run のアプリに AI の鍵を渡す（Secret Manager）**
+```
+gcp_secret_put(secret_id="my-app-ANTHROPIC_API_KEY", from_key="anthropic", project="<project>",
+  accessor="my-app@<project>.iam.gserviceaccount.com")
+```
+→ Cloud Run 側は環境変数 `ANTHROPIC_API_KEY` をこのシークレットの `latest` から読む設定にする。鍵の値を本人に貼ってもらわない。
+（Vercel なら `vercel_set_env` の `from_extension` が同じ役目）
 
 **Cloud Run サービス一覧 / 取得（Run Admin v2）**
 ```
