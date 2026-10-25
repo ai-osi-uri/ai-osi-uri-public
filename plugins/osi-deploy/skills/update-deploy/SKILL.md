@@ -223,6 +223,9 @@ Edit ツールで局所修正。原則：
 - 1 ファイル 1 関数の最小変更にとどめる
 - AI 系の修正なら同時に `maxDuration` も見直す（Vercel default 10s → 60s）
 - 変更が複数ファイルにまたがるなら `update-progress.md` に diff サマリを書き出す
+- **ローディング表示が欠けていたら、頼まれていなくても同じ更新で足す。** 画面遷移の進み具合バー（layout に `NavigationProgress`）、
+  本文の「読み込み中…」（`app/loading.tsx`）、ボタンの処理中表示の3つ。ひな型は create-app の
+  `references/screen-structure.md`「ローディング表示の入れ方」。足したことは完了報告に1行書く
 
 ### Step 3-4: ローカル sanity check（任意）
 

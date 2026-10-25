@@ -52,6 +52,7 @@ label: アプリ・サイトを新しく作る
 5. **責務分離**: 本スキルは判定・順序制御・引き渡しに専念。実ビルドは atomic に委譲
 6. **既存資産活用**: 各パスの atomic スキルを組み合わせる
 7. **画面はオブジェクト基準・横幅いっぱい**: ナビ（サイドバー）に並べるのはオブジェクトの一覧だけ。「〜する」はそのオブジェクトの画面の中のボタン。「使い方・設定」はフッター。本文は画面の横幅いっぱいに使い、`max-width` で中央に寄せない → [references/screen-structure.md](references/screen-structure.md)
+8. **待ちは必ず見せる（必須・試作でも省かない）**: 画面遷移の進み具合バー（layout に `NavigationProgress`）、本文の「読み込み中…」（`app/loading.tsx`）、ボタンの処理中表示（`useFormStatus` で押せなくして文言を変える）の3つを必ずそろえる。押したのに何も起きない時間を作らない → [references/screen-structure.md](references/screen-structure.md) の「ローディング表示の入れ方」
 
 ---
 

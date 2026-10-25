@@ -1,14 +1,16 @@
-# 画面構成の原則 — ナビはオブジェクト、動詞は画面の中、横幅は画面いっぱい
+# 画面構成の原則 — ナビはオブジェクト、動詞は画面の中、横幅は画面いっぱい、待ちは必ず見せる
 
 > create-app Phase 1-C から必ず読む。業務アプリの画面を組むときの、構造の決め方。
 > 配色・余白・部品の見た目はここでは扱わない（デザインシステムの担当）。
 
-## 原則（2行）
+## 原則（3行）
 
 **1. ナビゲーション（サイドバー・上部メニュー）に並べるのは「オブジェクトの一覧」だけ。
 「〜する」（動詞）は、そのオブジェクトの画面の中のボタンに置く。**
 
 **2. 本文は画面の横幅いっぱいに使う。中央に寄せて左右を余らせない。**
+
+**3. 画面遷移とボタンの処理には、必ずローディング表示を付ける。押したのに何も起きない時間を作らない。**
 
 ## なぜか
 
@@ -31,6 +33,17 @@ Salesforce・Notion・Linear など、業務アプリの定番はみなこの作
 サイドバーがある時点で左は埋まっているので、本文まで幅を絞る理由がない。
 `max-width` で中央に寄せる作りは、記事や LP のような「読む」ページの型であって、
 「見る・入れる」業務アプリには向かない。
+
+### 3. 待ちは必ず見せる
+
+業務アプリの画面は、たいていサーバーでデータを読んでから表示される（Next.js の App Router なら全ページが動的）。
+AIの処理を待つボタンは数秒〜数十秒かかる。その間に画面が何も変わらないと、
+
+- 押せていないと思って何度も押す（二重登録・AIの二重課金）
+- 「固まった」「遅い」と感じて、デモの場で印象が落ちる
+- 実際は動いているのに、不具合として報告が来る
+
+表示を付けるコストは数十行で、付け忘れたときの損のほうがずっと大きい。**デモ・試作でも省かない。**
 
 ## 置き場の決め方
 
@@ -64,6 +77,86 @@ Salesforce・Notion・Linear など、業務アプリの定番はみなこの作
 5. 1件の画面は「状態（どこまで進んだか）→ 中身 → 1件への操作」の順。操作は人が決める所だけに絞る
 6. 本文の横幅は画面いっぱい。1280px 以上の画面で左右が余っていたら、`max-width` を探して外す
 
+## ローディング表示の入れ方（全アプリ必須）
+
+3つを必ずそろえる。どれか1つでは足りない（効く場面が違う）。
+
+| 部品 | 効く場面 | Next.js（App Router）での置き方 |
+|---|---|---|
+| 画面上端の進み具合バー | リンク・ナビを押した瞬間〜次の画面が出るまで。フォーム送信→ redirect も | `components/NavigationProgress.tsx`（下のひな型）を `app/layout.tsx` の `<body>` 直下に `<Suspense fallback={null}>` で包んで置く |
+| 本文の「読み込み中…」 | 次の画面のデータを読んでいる間、本文の場所に出す | `app/loading.tsx`（サイドバーは残り、本文だけ差し替わる）。重い画面は各フォルダにも置く |
+| ボタンの処理中表示 | AI処理・保存などのボタン。二重押しも防ぐ | `useFormStatus` の `pending` で `disabled` にし、文言を「作成中…」などに変える（`SubmitButton`） |
+
+**進み具合バーのひな型**（依存パッケージなし。リンク・フォーム送信・戻る/進むで始まり、URL が変わったら消える）:
+
+```tsx
+'use client';
+import { useEffect, useRef, useState } from 'react';
+import { usePathname, useSearchParams } from 'next/navigation';
+
+export default function NavigationProgress() {
+  const pathname = usePathname();
+  const search = useSearchParams();
+  const [active, setActive] = useState(false);
+  const [width, setWidth] = useState(0);
+  const timers = useRef<number[]>([]);
+  const clear = () => { timers.current.forEach((t) => window.clearTimeout(t)); timers.current = []; };
+  const start = () => {
+    clear(); setActive(true); setWidth(8);
+    [[150, 30], [600, 55], [1500, 70], [4000, 82], [10000, 90]].forEach(([ms, w]) =>
+      timers.current.push(window.setTimeout(() => setWidth(w), ms)));
+    timers.current.push(window.setTimeout(() => done(), 60000)); // AI待ちがあるので長め
+  };
+  const done = () => {
+    clear(); setWidth(100);
+    timers.current.push(window.setTimeout(() => { setActive(false); setWidth(0); }, 250));
+  };
+  useEffect(() => { done(); }, [pathname, search]); // URL が変わったら完了
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const a = (e.target as HTMLElement | null)?.closest('a');
+      if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
+      const href = a.getAttribute('href');
+      if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+      const url = new URL(a.href, window.location.href);
+      if (url.origin !== window.location.origin) return;
+      if (url.pathname === window.location.pathname && url.search === window.location.search) return;
+      start();
+    };
+    const onSubmit = (e: SubmitEvent) => { if (!e.defaultPrevented && (e.target as HTMLFormElement)?.target !== '_blank') start(); };
+    const onPop = () => start();
+    document.addEventListener('click', onClick, true);
+    document.addEventListener('submit', onSubmit, true);
+    window.addEventListener('popstate', onPop);
+    return () => {
+      document.removeEventListener('click', onClick, true);
+      document.removeEventListener('submit', onSubmit, true);
+      window.removeEventListener('popstate', onPop);
+      clear();
+    };
+  }, []);
+  return (
+    <div className={`nav-progress${active ? ' on' : ''}`} aria-hidden={!active} role="progressbar" aria-label="読み込み中">
+      <div className="nav-progress-bar" style={{ width: `${width}%` }} />
+    </div>
+  );
+}
+```
+
+```css
+.nav-progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:1000;pointer-events:none;opacity:0;transition:opacity .2s}
+.nav-progress.on{opacity:1}
+.nav-progress-bar{height:100%;background:#3B82F6;transition:width .3s ease}
+.page-loading{display:flex;align-items:center;gap:10px;padding:40px 4px}
+.spinner{width:20px;height:20px;border:3px solid #EEF2FF;border-top-color:currentColor;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+```
+
+- `useSearchParams` を使うので、layout では必ず `<Suspense fallback={null}>` で包む（包まないとビルドで止まる）。
+- 色はアプリの主色に合わせてよい。高さは 3px 程度で、本文を押し下げない（`position: fixed`）。
+- Next.js 以外（Vite の SPA など）でも同じ3つをそろえる。ルーターの遷移開始／終了のイベントに進み具合バーをつなぎ、データ読み込み中は本文に「読み込み中…」を出す。
+
 ## URL の切り方
 
 - 一覧: `/<objects>`（例 `/orders`）
@@ -80,6 +173,9 @@ Salesforce・Notion・Linear など、業務アプリの定番はみなこの作
 - [ ] 「使い方」「設定」はフッターに退いているか
 - [ ] `/` を開いたら主オブジェクトの一覧に着くか
 - [ ] 1440px 幅のスクリーンショットで、本文の右側に余白が残っていないか（`main` に `max-width` が無いか）
+- [ ] 画面上端の進み具合バーがあるか（layout に `NavigationProgress`）。ナビを押した瞬間に出るか
+- [ ] `app/loading.tsx` があり、本文に「読み込み中…」が出るか
+- [ ] AI処理・保存のボタンが、処理中に押せなくなり文言が変わるか
 
 ## 直すときの目安
 
@@ -93,3 +189,7 @@ Salesforce・Notion・Linear など、業務アプリの定番はみなこの作
 > サイドバーに横並びにして指摘を受けた。受注票だけを残し（状態を子項目に）、
 > 「注文を入れる」「取り込み」は受注票一覧の右上のボタン、「使い方」はフッターへ移した。
 > 同じアプリで本文に `max-width: 1280px` が付いていて右側が余っていたのも指摘を受け、外した。
+>
+> 実例（2026-10）：商談用の試作で、ボタンの処理中表示はあったが、画面遷移のローディング表示が無く、
+> 「入っていない」と指摘を受けた（それまでにも繰り返し指摘されていた）。進み具合バーと `app/loading.tsx` を足し、
+> この原則の3つ目として全アプリの必須にした。
