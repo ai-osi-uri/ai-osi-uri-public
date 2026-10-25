@@ -87,7 +87,7 @@ AIの処理を待つボタンは数秒〜数十秒かかる。その間に画面
 | 本文の「読み込み中…」 | 次の画面のデータを読んでいる間、本文の場所に出す | `app/loading.tsx`（サイドバーは残り、本文だけ差し替わる）。重い画面は各フォルダにも置く |
 | ボタンの処理中表示 | AI処理・保存などのボタン。二重押しも防ぐ | `useFormStatus` の `pending` で `disabled` にし、文言を「作成中…」などに変える（`SubmitButton`） |
 
-**進み具合バーのひな型**（依存パッケージなし。リンク・フォーム送信・戻る/進むで始まり、URL が変わったら消える）:
+**進み具合バーのひな型**（依存パッケージなし。リンク・フォーム送信・戻る/進むで始まり、次の画面の中身が出たら消える）:
 
 ```tsx
 'use client';
@@ -111,7 +111,16 @@ export default function NavigationProgress() {
     clear(); setWidth(100);
     timers.current.push(window.setTimeout(() => { setActive(false); setWidth(0); }, 250));
   };
-  useEffect(() => { done(); }, [pathname, search]); // URL が変わったら完了
+  // URL が変わり、本文の「読み込み中…」（app/loading.tsx の .page-loading）が消えたら完了。
+  // loading.tsx があると URL は押した直後に変わるので、URL だけで消すとバーが一瞬で終わってしまう
+  useEffect(() => {
+    if (!document.querySelector('.page-loading')) { done(); return; }
+    const mo = new MutationObserver(() => {
+      if (!document.querySelector('.page-loading')) { mo.disconnect(); done(); }
+    });
+    mo.observe(document.body, { childList: true, subtree: true });
+    return () => mo.disconnect();
+  }, [pathname, search]);
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
@@ -154,6 +163,8 @@ export default function NavigationProgress() {
 ```
 
 - `useSearchParams` を使うので、layout では必ず `<Suspense fallback={null}>` で包む（包まないとビルドで止まる）。
+- `app/loading.tsx` の外側の要素には必ず `className="page-loading"` を付ける（バーはこれが消えるのを待つ）。
+- 確かめ方：Playwright でネットワークを2秒遅らせてナビを押し、0.05秒後にバーが出ていて（`.nav-progress.on`）、本文に「読み込み中…」があり、中身が出たらバーが消えることを見る。
 - 色はアプリの主色に合わせてよい。高さは 3px 程度で、本文を押し下げない（`position: fixed`）。
 - Next.js 以外（Vite の SPA など）でも同じ3つをそろえる。ルーターの遷移開始／終了のイベントに進み具合バーをつなぎ、データ読み込み中は本文に「読み込み中…」を出す。
 
