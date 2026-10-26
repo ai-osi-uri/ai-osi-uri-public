@@ -150,3 +150,8 @@ railway_deployment_status { service_id }
 - プロジェクトのダッシュボード URL（`https://railway.com/project/<project_id>`）
 - 作ったサービスと DB の一覧、設定した環境変数の**名前**
 - 未完了があれば（DNS 反映待ち・GitHub App 未許可など）その旨と次の手順
+
+## Railway から別のホストへ移すとき
+
+Cloud Run へ移す場合は、移す前に `gcp-ops` の `references/cloud-run-long-running.md` を読む
+（保存先の環境変数とマウント先の突き合わせ、メモリの計測、Railway の請求画面のアプリ単位の費用を先に見る）。

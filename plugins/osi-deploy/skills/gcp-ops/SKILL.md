@@ -99,6 +99,10 @@ gcp_api(url="https://cloudresourcemanager.googleapis.com/v1/projects/{project}")
 
 > 迷ったら「GET で一覧/取得 → 中身を見て → POST/PATCH で作成/更新」。削除は最後、必ず confirm:true。
 
+**常時動く・重い処理をするアプリ（録画・動画加工・定期処理）を Cloud Run に載せる／他のホストから移すとき**は、
+先に `references/cloud-run-long-running.md` を読む（メモリ超過で落ち続ける、マウント先に動画が書けない、
+32MiB を超える応答が返らない、移した後に保存先がずれる、大きさの取りすぎで費用が倍になる、の防ぎ方）。
+
 ---
 
 ## bq_query の使い方
