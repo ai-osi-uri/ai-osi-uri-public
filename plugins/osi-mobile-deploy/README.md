@@ -19,6 +19,12 @@
 
 ## Changelog
 
+### v0.10.0 — 配信用のキーは Admin、Xcode は一番新しいもの（2026-10）
+
+- App Store Connect の API キーは「管理者（Admin）」で作る。App Manager だとクラウド署名の書き出しで `Cloud signing permission error` になる（役割は後から変えられないので作り直す）
+- 雛形の iOS 配信は `macos-26` の runner で、入っている中で一番新しい Xcode（ベータ以外）を選んでからビルドする。古い SDK だと App Store Connect が `SDK version issue` で受け付けない
+- `ios-testflight-deploy` の決まり・よくある失敗、`deploy-mobile-app` の失敗パターン・App 記録の説明をこれに合わせて直した
+
 ### v0.9.0 — 配信を人のボタン待ちにしない（2026-10）
 
 鍵を GitHub に入れる道具はあったのに配信を動かす道具が無く、手作りの「手動だけ」のワークフローで最後の一押しが人の手になった実例を教訓にする。

@@ -40,7 +40,7 @@ concurrency:
 jobs:
   release:
     name: Archive → TestFlight
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 60
     env:
       SCHEME: MyApp
@@ -48,6 +48,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      # ── Xcode 26 以降を選ぶ（App Store Connect は最新の必須 SDK で作ったものしか受け付けない）──
+      - name: Select Xcode
+        run: |
+          X=$(ls -d /Applications/Xcode_[0-9]*.app 2>/dev/null | grep -vi beta | sort -V | tail -1)
+          [ -n "$X" ] || X=/Applications/Xcode.app
+          sudo xcode-select -s "$X/Contents/Developer"
+          xcodebuild -version
 
       # ── 鍵がそろっているか。無ければ「鍵待ち」で終わる（失敗にしない）─────────
       - name: Check keys

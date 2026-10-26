@@ -21,7 +21,7 @@ label: iPhoneアプリをTestFlightへ
 鍵を入れる・CI を動かす・成否と TestFlight への到達を確かめる・落ちたら直す、の 4 つ。
 手元の Mac・Xcode・GitHub の画面は要らない（全部 URL のコネクタの道具でできる）。
 
-## 決まり（0.9.0〜。理由つき）
+## 決まり（0.10.0〜。理由つき）
 
 | 決まり | 理由 |
 |---|---|
@@ -31,7 +31,8 @@ label: iPhoneアプリをTestFlightへ
 | **xcodebuild の出力を tail で絞る行には `set -o pipefail`** | 付けないと xcodebuild が失敗しても tail の成功で「成功」と出る（落ちたのに気づけない） |
 | **ビルド番号は `github.run_number`（＋ Variables の `BUILD_NUMBER_OFFSET`）** | 同じ番号は TestFlight に二度上げられない。実行のたびに必ず増える番号を使う。後から入れたリポで既に大きい番号があるときだけ下駄を履かせる |
 | **`xcodegen generate` を archive の前に必ず走らせる** | stale な .xcodeproj で「Missing package product」が束で出る（`xcodegen-project-regen`） |
-| **macOS 15 の runner** | 古い runner は新しい iOS SDK が無く、App Store Connect がアップロードを断る |
+| **App Store Connect の API キーは「管理者（Admin）」で作る** | クラウド署名（配布用の証明書を Apple に任せる）は Admin のキーでしか動かない。App Manager のキーだと archive までは通り、書き出しで `Cloud signing permission error` → `No profiles for … were found` になる。キーの役割は作成後に変えられないので、作り直してツール設定に入れ替える |
+| **最新の macOS runner（`macos-26`）＋ 入っている中で一番新しい Xcode を選ぶ** | App Store Connect は毎年、最新の SDK で作ったものしか受け付けなくなる（例: iOS 26 SDK＝Xcode 26 以降）。古い runner の既定の Xcode だと、書き出しの検査で `SDK version issue` で断られる。runner の版を上げても既定の Xcode が古いことがあるので、ワークフローで一番新しい Xcode を `xcode-select` で選ぶ |
 
 ワークフローの完全版は `references/ios-release-auto.yml.example`（`mobile-app-scaffold` の雛形と同じもの）。
 
@@ -98,11 +99,12 @@ Apple の処理に 10〜30 分かかる。**CI が成功しただけで「TestFl
 
 | 症状（ログ） | 原因と対処 |
 |---|---|
-| `No Accounts` / `No signing certificate "iOS Distribution" found` | クラウド署名に鍵が渡っていない。`-authenticationKeyPath/ID/IssuerID` が archive と export の両方にあるか。キーの役割が App Manager 以上か |
-| `Could not find App with App Identifier` / `No profiles for '…' were found` | App Store Connect に Bundle ID か App 記録が無い（手順 1） |
+| `No Accounts` / `No signing certificate "iOS Distribution" found` | クラウド署名に鍵が渡っていない。`-authenticationKeyPath/ID/IssuerID` が書き出し（export）にあるか |
+| `Cloud signing permission error`（続けて `No profiles for '…' were found`） | キーの役割が足りない。App Store Connect の「ユーザとアクセス → 統合 → チームキー」で、アクセスが「管理者」のキーを新しく作り（役割は後から変えられない）、ツール設定の App Store Connect に入れ替えて `mobile_keys_to_github` で入れ直す。今のキーの役割は同じ画面の「アクセス」列で分かる |
+| `Could not find App with App Identifier` / `No profiles for '…' were found`（`Cloud signing permission error` が無いとき） | App Store Connect に Bundle ID か App 記録が無い（手順 1） |
 | `The bundle version must be higher than the previously uploaded version` | 既に大きいビルド番号がある。リポの Variables に `BUILD_NUMBER_OFFSET` を置く |
 | `Missing package product` が束で出る | `xcodegen generate` が抜けている／古い .xcodeproj がコミットされている（`xcodegen-project-regen`） |
-| `SDK version … is required` | runner が古い。`macos-15` にする |
+| `SDK version issue. This app was built with the iOS XX SDK` / `SDK version … is required` | Xcode が古い。runner を最新（`macos-26` 以降）にし、「Select Xcode」の手順で一番新しい Xcode を選ぶ（雛形どおり）。ログの `xcodebuild -version` で選ばれた版を確かめる |
 | `Missing required icon file` / `Invalid Info.plist value CFBundleIconName` | AppIcon（1024 の 1 枚）と Info.plist の `CFBundleIconName: AppIcon` を確かめる |
 | `Invalid … ITSAppUsesNonExemptEncryption` で TestFlight に出ない | Info.plist に `ITSAppUsesNonExemptEncryption: false`（暗号の届け出が要らないアプリ） |
 | `AuthKey_XXX.p8 not found` | .p8 のファイル名は `AuthKey_<KEY_ID>.p8` でなければならない |

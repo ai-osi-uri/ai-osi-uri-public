@@ -115,18 +115,24 @@ auto-fix push で回復する。**新しく踏んだ罠は必ずここに追記�
 - **修正**: 本 Golden Template は **Automatic Signing 前提**（`match` を使わない）。`project.yml` で `CODE_SIGN_STYLE: Automatic` を明示。それでもダメなら Apple Developer Portal で App ID を事前登録しておく。
 - **再発防止**: Golden Template の `project.yml` に `CODE_SIGN_STYLE: Automatic` + `DEVELOPMENT_TEAM: $(APPLE_TEAM_ID)` を焼き込む。
 
-### 9. `Xcode 15 not found` / iOS 26 SDK 不足
+### 9. 必須 SDK 不足（Xcode が古い）
 
-- **症状**: `xcodebuild archive` が「iOS 26.0 SDK not available」で失敗。
-- **原因**: workflow で `sudo xcode-select -s /Applications/Xcode_15.4.app` を選んでいる。Xcode 26 は macos-14 image に含まれる。
-- **修正**: workflow の "Select Xcode" step を `XCODE_VERSION: "26.0"` に上げる:
+- **症状**: 書き出しの検査で `SDK version issue. This app was built with the iOS 18.x SDK. All iOS and iPadOS apps must be built with the iOS 26 SDK or later`、または archive で「iOS 26.0 SDK not available」。
+- **原因**: runner の既定の Xcode が、App Store Connect が求める SDK より古い（Apple は毎年、最新 SDK 必須の期限を設ける）。
+- **修正**: runner を最新（`macos-26` 以降）にし、入っている中で一番新しい Xcode を選ぶ:
 
     ```yaml
-    - name: Select Xcode
-      run: sudo xcode-select -s /Applications/Xcode_${XCODE_VERSION}.app
+    runs-on: macos-26
+    steps:
+      - name: Select Xcode
+        run: |
+          X=$(ls -d /Applications/Xcode_[0-9]*.app 2>/dev/null | grep -vi beta | sort -V | tail -1)
+          [ -n "$X" ] || X=/Applications/Xcode.app
+          sudo xcode-select -s "$X/Contents/Developer"
+          xcodebuild -version
     ```
 
-- **再発防止**: Golden Template は最初から `XCODE_VERSION: "26.0"` で焼き込む。
+- **再発防止**: Golden Template（`ios-release-auto.yml`）は最初からこの形。版を数字で固定しない（固定すると翌年の必須 SDK でまた落ちる）。App Store 審査で特定の版に揃えたいときは `ios-appstore-release` の N-1 運用に従う。
 
 ### 10. `CFBundleIconName` が無い → validation 失敗
 
