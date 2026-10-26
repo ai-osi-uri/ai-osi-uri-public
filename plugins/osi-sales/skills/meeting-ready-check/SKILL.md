@@ -14,6 +14,8 @@ requires_connectors:
     provision: user-install
   - server: drive-fs
     provision: user-install
+# スキルの一覧（つないだときに Claude に渡す）に出す短い用途
+label: 商談の準備を前日までに確定
 ---
 
 # meeting-ready-check — 商談準備の確定チェック
