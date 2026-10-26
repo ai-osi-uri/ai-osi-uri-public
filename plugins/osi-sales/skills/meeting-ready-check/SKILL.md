@@ -12,7 +12,7 @@ description: |
 requires_connectors:
   - server: google-calendar
     provision: user-install
-  - server: google-drive
+  - server: drive-fs
     provision: user-install
 ---
 
