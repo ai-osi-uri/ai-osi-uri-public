@@ -30,5 +30,6 @@ Cloud Run（常時 1 台・CPU 常時割り当て）で動かすときに、実�
 ## gcp_api で Cloud Run を直すときの小技
 
 - PATCH は `updateMask=template` で **template を丸ごと** 送る（環境変数・シークレット・ボリュームを落とさない）。直前の template を GET して保存し、そこから変える。
+- `updateMask` を付けずにサービス全体を送ると、送らなかった `invokerIamDisabled` が外れて 403 になる。最上位の項目は `updateMask` でその項目だけを送る（`cloud-run-move-checklist.md` の #2）。
 - 応答が大きすぎるときは `fields=name,done` で絞る（`template.containers.image` のような深い指定は 400 になることがある）。
 - 一時的な環境変数（再実行の指示など）は、終わったらすぐ外した template で入れ直す。

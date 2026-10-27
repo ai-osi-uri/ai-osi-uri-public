@@ -83,7 +83,7 @@ gcp_api(method="POST",
   query={ "serviceId": "my-api" },
   body={ "template": { "containers": [ { "image": "asia-northeast1-docker.pkg.dev/{project}/repo/my-api:latest" } ] } })
 ```
-（更新は同 URL の services/my-api に PATCH。公開にするなら IAM の run.invoker を allUsers に付与）
+（更新は同 URL の services/my-api に PATCH。最上位の項目は `updateMask` でその項目だけを送る。外から誰でも開けるようにするには `invokerIamDisabled: true`（gcloud なら `--no-invoker-iam-check`）。会社の決まりで `allUsers` への `run.invoker` 付与はできない）
 
 **BigQuery データセット作成**
 ```
@@ -98,6 +98,8 @@ gcp_api(url="https://cloudresourcemanager.googleapis.com/v1/projects/{project}")
 ```
 
 > 迷ったら「GET で一覧/取得 → 中身を見て → POST/PATCH で作成/更新」。削除は最後、必ず confirm:true。
+
+**アプリを Cloud Run に移す・新しく載せるとき**は、先に `references/cloud-run-move-checklist.md` を読む（環境変数の抜け、設定の丸ごと書き換えで 403、`/healthz` が Google 側で 404、前のホストの自動反映が残る、などの防ぎ方と、反映のたびに設定のずれを確かめる型）。
 
 **常時動く・重い処理をするアプリ（録画・動画加工・定期処理）を Cloud Run に載せる／他のホストから移すとき**は、
 先に `references/cloud-run-long-running.md` を読む（メモリ超過で落ち続ける、マウント先に動画が書けない、
