@@ -139,7 +139,7 @@ App 記録作成後に再実行すると:
 A: Bundle ID 登録は API で全自動化可能。App 記録作成だけ Admin role 必須で、通常の
 API キー（App Manager role）では弾かれる。なお、CI のクラウド署名（配布用の証明書を
 Apple に任せる方式）も Admin role のキーが要る（App Manager だと書き出しで
-`Cloud signing permission error`）。そのため配信用のキーは Admin で作ってツール設定に置く。
+`Cloud signing permission error`）。そのため配信用のキーは Admin で作って鍵設定に置く。
 App 記録は人が画面で作る想定（1 flavor で 1 回きり）。
 
 **Q: dev / stg / prod 全部 App 記録要る？**  

@@ -31,7 +31,7 @@ label: 契約書の下書き
 
 # osi-finance-contract-draft（契約書作成・雛形管理）
 
-> **台帳の置き場（手元の xlsx ／ Web）を先に確かめる。** URL のコネクタの `ledger_status` が `backend: web` を返したら、本文の `sheets_*`・`ledger_maintain` を `ledger_*` に読み替える（対応表と注意は `osi-finance-setup/references/ledger-backend.md`。Web の書く道具は既定で dry_run なので、書くときは `dry_run:false`）。Web なら台帳の仕事に手元の Finance 拡張は要らない。`mfi_*` は置き場に関係なく URL のコネクタでも使える。メール（`mail_*`）・電子署名（`ds_*`・`cs_*`）は Finance の外の共通の道具で、つなぐのはポータルの「ツール設定」（ファイルは会社の書類の置き場の相対パスで指す。`files_put` で上げる）。
+> **台帳の置き場（手元の xlsx ／ Web）を先に確かめる。** URL のコネクタの `ledger_status` が `backend: web` を返したら、本文の `sheets_*`・`ledger_maintain` を `ledger_*` に読み替える（対応表と注意は `osi-finance-setup/references/ledger-backend.md`。Web の書く道具は既定で dry_run なので、書くときは `dry_run:false`）。Web なら台帳の仕事に手元の Finance 拡張は要らない。`mfi_*` は置き場に関係なく URL のコネクタでも使える。メール（`mail_*`）・電子署名（`ds_*`・`cs_*`）は Finance の外の共通の道具で、つなぐのはポータルの「鍵設定」（ファイルは会社の書類の置き場の相対パスで指す。`files_put` で上げる）。
 
 
 > **台帳の読み書き（拡張が無いとき）**：拡張（AI OSI URI Finance）の `sheets_*` があればそれを使う。**拡張の道具が無ければ同梱の `assets/scripts/ledger_io.py <経理フォルダ>` を使う**（`read` / `append` / `update` / `update-status` / `next-id`。タブ名＋列名で指定し、引数・戻りは拡張にそろえてある。書く前に `_backup/` へ控える）。

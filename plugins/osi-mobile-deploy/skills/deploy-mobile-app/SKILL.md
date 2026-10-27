@@ -101,12 +101,12 @@ Firebase プロビジョニング・Secrets 投入・CI 監視・TestFlight / Pl
    - `firebase.valid: true`（Google 認証 or Service Account）
    - iOS 配信をするなら App Store Connect の鍵 3 点（`mobile_health_check` の `apple.ok: true`）
    - Android 配信をするなら Google Play のサービスアカウント（`mobile_health_check` の `google`）
-2. 配信の鍵は**ポータルの「ツール設定」に会社の鍵として預けたもの**を使う（手元の Keychain は使わない）。
+2. 配信の鍵は**ポータルの「鍵設定」に会社の鍵として預けたもの**を使う（手元の Keychain は使わない）。
    iOS は App Store Connect の 3 点（Key ID・Issuer ID・.p8）だけ。証明書（.p12）・Team ID の別登録は要らない
    （署名は Apple のクラウド署名。Team ID は project.yml の `DEVELOPMENT_TEAM` に書く）。
    Android は Play のサービスアカウント JSON と、Phase 5 で作るアップロード用キーストア。
 3. **鍵が足りなくても止めない。** 雛形の配信ワークフローは鍵が無いと「鍵待ち」で緑のまま終わるので、
-   アプリづくり（Phase 1〜4）は先に進め、足りない鍵だけ本人に「ツール設定で預けてください」と 1 回伝える。
+   アプリづくり（Phase 1〜4）は先に進め、足りない鍵だけ本人に「鍵設定で預けてください」と 1 回伝える。
    鍵がそろったら Phase 5 で入れて、そのまま 1 回目の配信を流す。
 
 4. **iOS を配信する場合、flavor ごとの ASC 事前登録を確認**（見落とすと CI 37 秒で死ぬ）:
@@ -247,7 +247,7 @@ mobile-icon-generator:
 
 ## Phase 5: 鍵を GitHub に入れて、1 回目の配信を流す（mobile-secrets-sync）
 
-配信の鍵は、コネクタの `mobile_keys_to_github` が「ツール設定」の会社の鍵から GitHub のシークレットに入れる
+配信の鍵は、コネクタの `mobile_keys_to_github` が「鍵設定」の会社の鍵から GitHub のシークレットに入れる
 （値は会話に出ない）。**鍵がそろっていれば `start_release: true` を付け、入れたその場で配信のワークフローを 1 回動かす**
 （動かす前に「◯◯ のリポに鍵を入れて TestFlight に出します」と本人に見せて OK をもらう）。
 
@@ -357,7 +357,7 @@ mobile-app-smoke-test:
 
 | Phase | 失敗 | 対応 |
 |---|---|---|
-| 0 | 配信の鍵が「ツール設定」に無い | 足りない鍵を伝えて先に進める（配信は鍵待ちで止まるだけ）。そろったら Phase 5 |
+| 0 | 配信の鍵が「鍵設定」に無い | 足りない鍵を伝えて先に進める（配信は鍵待ちで止まるだけ）。そろったら Phase 5 |
 | 0 | `firebase.valid: false` | Google 認証 or Service Account 設定を案内、中断 |
 | 1 | APP_NAME が読み取れない | 「アプリ名は何にしますか？（英数字、例: Foo）」で 1 問だけ聞く |
 | 1 | 「Flutter で作って」と要望された | 既定がネイティブである旨と、既存 Flutter アプリからの移行かを確認。新規で Flutter を選ぶ強い事情が無ければネイティブで進める。強い事情があるなら本プラグインの対象外として halt |

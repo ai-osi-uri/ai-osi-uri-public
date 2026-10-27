@@ -26,7 +26,7 @@ label: 受け取った請求書の起票
 
 # osi-finance-payment-intake（受領請求書 → 支払予定 起票）
 
-> **台帳の置き場（手元の xlsx ／ Web）を先に確かめる。** URL のコネクタの `ledger_status` が `backend: web` を返したら、本文の `sheets_*`・`ledger_maintain` を `ledger_*` に読み替える（対応表と注意は `osi-finance-setup/references/ledger-backend.md`。Web の書く道具は既定で dry_run なので、書くときは `dry_run:false`）。Web なら台帳の仕事に手元の Finance 拡張は要らない。`mfi_*` は置き場に関係なく URL のコネクタでも使える。メール（`mail_*`）・電子署名（`ds_*`・`cs_*`）は Finance の外の共通の道具で、つなぐのはポータルの「ツール設定」（ファイルは会社の書類の置き場の相対パスで指す。`files_put` で上げる）。
+> **台帳の置き場（手元の xlsx ／ Web）を先に確かめる。** URL のコネクタの `ledger_status` が `backend: web` を返したら、本文の `sheets_*`・`ledger_maintain` を `ledger_*` に読み替える（対応表と注意は `osi-finance-setup/references/ledger-backend.md`。Web の書く道具は既定で dry_run なので、書くときは `dry_run:false`）。Web なら台帳の仕事に手元の Finance 拡張は要らない。`mfi_*` は置き場に関係なく URL のコネクタでも使える。メール（`mail_*`）・電子署名（`ds_*`・`cs_*`）は Finance の外の共通の道具で、つなぐのはポータルの「鍵設定」（ファイルは会社の書類の置き場の相対パスで指す。`files_put` で上げる）。
 
 
 > **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` `{{members.*}}` は、連結フォルダ直下の `osi-profile.md`（雛形: osi-core の `plugins/osi-core/skills/getting-started/assets/osi-profile.example.md`）の値に置き換えて解釈する。無ければ会社名・案件フォルダ・台帳の有無・使うコネクタを質問して先に作る。値をここに直書きしない。
@@ -64,7 +64,7 @@ label: 受け取った請求書の起票
 ## 前提コネクタ
 
 - Google Drive / 台帳（受領請求書の格納・支払管理台帳）。
-- URL のコネクタの `mail_list_attachments` / `mail_save_attachments`（Gmail／Outlook 両対応。つなぐのはポータルの「ツール設定」）で請求書PDF添付を取得。予備として Superhuman Mail の `get_attachment`。
+- URL のコネクタの `mail_list_attachments` / `mail_save_attachments`（Gmail／Outlook 両対応。つなぐのはポータルの「鍵設定」）で請求書PDF添付を取得。予備として Superhuman Mail の `get_attachment`。
 - MF会計（任意）：`getTradePartners` を支払先マッチングの補助に使う（正本は台帳）。
 
 ## 手順
@@ -183,6 +183,6 @@ $L append --tab 月次支払管理 --dedupe-by 請求書番号 支払先ID --row
 
 詳細は **[`docs/エラー処理ガイド.md`](../../docs/エラー処理ガイド.md)** を正本とする。本スキルで詰まりやすい点：
 
-- **メール添付（受領請求書PDF）が取得できない**：純正のメールコネクタでは不可。URL のコネクタの `mail_save_attachments` を使う（未接続なら `mail_status` が返すツール設定の URL を本人に渡す）。それも使えない環境だけ Superhuman の `get_attachment`、それも無ければ **Drive手置き**（受領請求書フォルダ）を案内して止める。
+- **メール添付（受領請求書PDF）が取得できない**：純正のメールコネクタでは不可。URL のコネクタの `mail_save_attachments` を使う（未接続なら `mail_status` が返す鍵設定の URL を本人に渡す）。それも使えない環境だけ Superhuman の `get_attachment`、それも無ければ **Drive手置き**（受領請求書フォルダ）を案内して止める。
 - **大容量の請求書PDF**は Drive の**ローカル同期フォルダにコピー**して格納（直アップロードは不安定）。
 - 読めない値は**推測せず「要確認」**。新規・不明な支払先はその場で確認。**送金しない**。台帳へ書くタイミングは `WRITE_CONFIRMATION` に従う。

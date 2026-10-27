@@ -12,11 +12,11 @@
 2. そのアプリの認証は「認証コードの付与」・クライアントシークレットを保管できる「はい」。リダイレクト URI に
    `https://www.ai-osi-uri.info/keys/oauth/docusign/callback` を足して保存する（既存の URI は残してよい）。
 3. 「秘密鍵の追加」で Secret Key を作る（一度だけ表示される）。
-4. ポータルの「ツール設定」→「会社の鍵」に、Integration Key・Secret Key・環境（`prod` か `demo`）を預ける。
+4. ポータルの「鍵設定」→「会社の鍵」に、Integration Key・Secret Key・環境（`prod` か `demo`）を預ける。
 
 ## 2. 各自1回：DocuSign とつなぐ
 
-ポータルの「ツール設定」→「DocuSign」（`/keys/service/docusign`）で「DocuSign とつなぐ」を押し、
+ポータルの「鍵設定」→「DocuSign」（`/keys/service/docusign`）で「DocuSign とつなぐ」を押し、
 DocuSign の画面で許可する。チャットで `ds_status` が `connected: true` になれば完了です。
 送信者は**許可を押した本人**になります。
 
@@ -31,7 +31,7 @@ Claude の設定 →［コネクタ］から公式の DocuSign を接続する�
 
 ### 別のアカウントでつなぎ直したい
 
-ポータルの「ツール設定」→「DocuSign」で接続を外し、もう一度「DocuSign とつなぐ」を押す。
+ポータルの「鍵設定」→「DocuSign」で接続を外し、もう一度「DocuSign とつなぐ」を押す。
 
 ### 送信者は誰になるか
 
@@ -43,7 +43,7 @@ Claude の設定 →［コネクタ］から公式の DocuSign を接続する�
 ## 変更の経緯
 
 > **2026-10-16: 既定の経路を URL のコネクタの `ds_*` にしました。**手元の Finance 拡張の `ds_*` は外しました。
-> 連携アプリは会社の鍵（ツール設定）として1回だけ預け、各自は「DocuSign とつなぐ」を押すだけです。
+> 連携アプリは会社の鍵（鍵設定）として1回だけ預け、各自は「DocuSign とつなぐ」を押すだけです。
 > 本番アカウントで新しく Integration Key を作れない点は変わらないので、既に本番にあるアプリを使うか Go-Live を通します。
 
 > **2026-08-20: 既定の経路を「公式 DocuSign コネクタ＋人がアップロード」に戻しました。**

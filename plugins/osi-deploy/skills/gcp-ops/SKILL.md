@@ -32,7 +32,7 @@ label: GCP・BigQueryの操作
 | `gcp_health_check` | 認証疎通・SA・既定プロジェクト確認 | 読み取りのみ |
 | `gcp_api` | 任意の Google REST API を直接呼ぶ汎用ツール（Cloud Run / Service Usage / IAM / Resource Manager 等） | DELETE・`:delete`/`:stop`/`:disable` は `confirm:true` 必須 |
 | `bq_query` | BigQuery クエリ（集計・数字一致の検証） | 既定 read-only。DML/DDL は `allow_write:true` |
-| `gcp_secret_put`（URL のコネクタのみ） | ツール設定に預けた AI の鍵（anthropic / openai / typesafe）を、値を会話に出さずに Secret Manager へ入れる。`accessor` に Cloud Run の実行アカウントを渡すと読む権限も付ける | 値は返さない。AI の鍵以外は入れられない |
+| `gcp_secret_put`（URL のコネクタのみ） | 鍵設定に預けた AI の鍵（anthropic / openai / typesafe）を、値を会話に出さずに Secret Manager へ入れる。`accessor` に Cloud Run の実行アカウントを渡すと読む権限も付ける | 値は返さない。AI の鍵以外は入れられない |
 
 MCP 名は `mcp__AI_OSI_URI_Deploy__gcp_health_check` / `gcp_api` / `bq_query`。
 

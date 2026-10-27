@@ -3,7 +3,7 @@ name: mobile-secrets-sync
 description: |
   モバイル配信に必要な GitHub Actions Secrets（App Store Connect の鍵 3 点 / Play SA
   / keystore / Firebase config 等）を入れ、鍵がそろったらそのまま 1 回目の配信を流す。
-  配信の鍵はツール設定の会社の鍵から mobile_keys_to_github で入れる。keystore が未生成なら
+  配信の鍵は鍵設定の会社の鍵から mobile_keys_to_github で入れる。keystore が未生成なら
   作成して Drive に退避する。`deploy-mobile-app` の Phase 5 から呼ばれる。単体では
   「モバイルの Secrets を入れて」「配信の鍵を GitHub に入れて」「鍵を入れて TestFlight に出して」で発動。
 requires_connectors:
@@ -21,7 +21,7 @@ label: スマホ配信の鍵を入れる
 
 > **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` `{{members.*}}` は、連結フォルダ直下の `osi-profile.md`（雛形: `config/osi-profile.example.md`）の値に置き換えて解釈する。無ければ会社名・案件フォルダ・台帳の有無・使うコネクタを質問して先に作る。値をここに直書きしない。
 
-**配信の鍵（App Store Connect・Google Play）は、ポータルの「ツール設定」に預けた会社の鍵から、コネクタの
+**配信の鍵（App Store Connect・Google Play）は、ポータルの「鍵設定」に預けた会社の鍵から、コネクタの
 `mobile_keys_to_github` が GitHub のシークレットに入れる**（値はサーバーの中で暗号化して送るので、会話にも画面にも出ない）。
 手元の Keychain から読んで入れるやり方（〜0.8.x）はやめた。Keychain を使うのは、Android のアップロード用キーストアを控えるときだけ。
 
@@ -50,7 +50,7 @@ label: スマホ配信の鍵を入れる
 
 ### iOS 3 個（`mobile_keys_to_github` が入れる）
 
-| Secret 名 | 中身（ツール設定の鍵） |
+| Secret 名 | 中身（鍵設定の鍵） |
 |---|---|
 | `ASC_KEY_ID` | App Store Connect API キーの ID（10 文字） |
 | `ASC_ISSUER_ID` | Issuer ID（UUID） |
@@ -60,7 +60,7 @@ label: スマホ配信の鍵を入れる
 
 | Secret 名 | 由来 |
 |---|---|
-| `PLAY_SERVICE_ACCOUNT_JSON` | `mobile_keys_to_github` が入れる（ツール設定の Play のサービスアカウント JSON そのまま） |
+| `PLAY_SERVICE_ACCOUNT_JSON` | `mobile_keys_to_github` が入れる（鍵設定の Play のサービスアカウント JSON そのまま） |
 | `ANDROID_KEYSTORE_B64` | Step 3（既存 or `mobile_generate_keystore` の `keystore_b64`） |
 | `ANDROID_KEYSTORE_PASSWORD` | 同上 `keystore_password` |
 | `ANDROID_KEY_ALIAS` | 同上 `alias`（既定 `upload`） |
@@ -85,7 +85,7 @@ label: スマホ配信の鍵を入れる
 
 ```
 1. github_list_secrets({repo_owner, repo_name}) で既存のシークレット名を見る
-2. mobile_health_check で、ツール設定の App Store Connect / Play の鍵が生きているかを見る
+2. mobile_health_check で、鍵設定の App Store Connect / Play の鍵が生きているかを見る
    （apple.ok / google が false なら、足りない鍵を本人に伝える。止めずに Step 3 以降は進める）
 3. リポに配信のワークフロー（ios-release-auto.yml / android-release-auto.yml）があるか
    （github_workflow_runs の workflows で見られる。無ければ mobile-app-scaffold の雛形から置く）
@@ -200,7 +200,7 @@ github_list_secrets({repo_owner, repo_name}) を再度叩いて、
 
 | 症状 | 対応 |
 |---|---|
-| ツール設定に配信の鍵が無い（`missing`） | 足りない鍵の名前を伝えて「ツール設定」で預けてもらう。止めずに他の手順は進め、預けたら呼び直す |
+| 鍵設定に配信の鍵が無い（`missing`） | 足りない鍵の名前を伝えて「鍵設定」で預けてもらう。止めずに他の手順は進め、預けたら呼び直す |
 | `releases` が「workflow_dispatch がありません」 | 古い手作りのワークフロー。雛形の `ios-release-auto.yml` に置き換える（CI の動き方の変更なので本人の OK をもらってから） |
 | keytool 無し | mobile_generate_keystore が fail 返却 → JDK 案内、halt |
 | github_set_secrets_batch・github_run_workflow で 403 | GitHub の鍵の権限不足（`repo`+`workflow`）、案内、halt |

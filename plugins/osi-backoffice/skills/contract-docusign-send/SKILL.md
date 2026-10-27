@@ -14,7 +14,7 @@ description: >
   osi-finance の osi-finance-contract-intake。本スキルは「手元の契約書をチェックして送る」ことに特化する。
 requires_connectors:
   # 既定の経路（2026-10-16〜）。URL でつなぐコネクタ（リモート MCP）の ds_*・files_*。
-  # 連携アプリの鍵は会社の鍵（ポータルの「ツール設定」）、各自は「DocuSign とつなぐ」を1回押す
+  # 連携アプリの鍵は会社の鍵（ポータルの「鍵設定」）、各自は「DocuSign とつなぐ」を1回押す
   - server: AI_OSI_URI_Remote_MCP
     provision: user-connect
   # つないでいない人のための予備。公式 DocuSign コネクタ（人が書類をドラッグする）
@@ -86,11 +86,11 @@ label: 契約書を確認しDocuSignで送る
   >   できません。開発者アカウントで作成し Go-Live を経て移行」と明記**されている
 
 - **URL のコネクタ（リモート MCP）の `ds_*`＝既定（2026-10-16〜）**：DocuSign のつながりは Finance のものではなく、
-  ポータルの「ツール設定」→「DocuSign」（`/keys/service/docusign`）で本人が「DocuSign とつなぐ」を1回押す共通の道具。
+  ポータルの「鍵設定」→「DocuSign」（`/keys/service/docusign`）で本人が「DocuSign とつなぐ」を1回押す共通の道具。
   連携アプリの鍵（Integration Key・Secret Key・本番/試し）は会社の鍵として1回だけ預けてあれば、社員は鍵を作らない。
   送る書類は会社の書類の置き場の相対パスで指す（手元の契約書は先に `files_put` で上げる）。締結済みは `ds_save_documents` で置き場に戻る。
   まず `ds_status` を見る。`connected:false` なら返ってくる `connect_url` を本人に渡し、それまでは下の公式コネクタの経路で進める。
-  クラウドサインで送る組織は同じ形の `cs_*`（ツール設定 →「クラウドサイン」でクライアント ID を預ける）。
+  クラウドサインで送る組織は同じ形の `cs_*`（鍵設定 →「クラウドサイン」でクライアント ID を預ける）。
   手元の Finance 拡張の `ds_*` は 1.47.0 で外した（使わない）。
 
 - **AWS / S3 / Supabase：使わない。** 契約書のための置き場所を新設しない（2026-08-17 の判断を維持）。

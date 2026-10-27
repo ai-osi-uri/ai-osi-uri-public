@@ -33,7 +33,7 @@
 - **雛形 `android-release-auto.yml`** — Play の鍵の名前を `PLAY_SERVICE_ACCOUNT_JSON` に（コネクタが入れる名前とそろえた）。鍵待ちスキップを追加
 - **配信の仕組みの決まりを明文化**（`mobile-app-scaffold`）— push で動く＋手でも動かせる／鍵待ちは緑／pipefail／鍵の名前固定。手で書くときも守る
 - **`ios-testflight-deploy` v0.4.0** — fastlane + altool + P12 の手順を、鍵 3 点 + xcodebuild + クラウド署名に書き直し。鍵を入れて流す・成否を見る・届いたかを見る、をコネクタの道具（`mobile_keys_to_github` / `github_run_workflow` / `github_workflow_runs` / `ios_get_status`）で通す
-- **`mobile-secrets-sync` / `deploy-mobile-app` / `mobile-update-deploy`** — 配信の鍵は手元の Keychain ではなくツール設定の会社の鍵から入れる。鍵がそろったら `start_release: true` で 1 回目を流す。鍵が足りなくても止めない
+- **`mobile-secrets-sync` / `deploy-mobile-app` / `mobile-update-deploy`** — 配信の鍵は手元の Keychain ではなく鍵設定の会社の鍵から入れる。鍵がそろったら `start_release: true` で 1 回目を流す。鍵が足りなくても止めない
 - 前提: remote-mcp 0.51.0（`github_run_workflow` / `github_workflow_runs` / `mobile_keys_to_github` の `start_release`）
 
 ### v0.6.0 — ASC App 記録の Phase 0 事前登録（2026-08）
@@ -121,7 +121,7 @@ osi-mobile-deploy が前提とする AI OSI URI Deploy 拡張は、モバイル�
 ## 前提
 
 - Claude デスクトップに `AI OSI URI Deploy` MCP 拡張 v1.18.5+ が導入済み
-- 配信の鍵はポータルの「ツール設定」に会社の鍵として預ける（手元の Keychain は使わない）:
+- 配信の鍵はポータルの「鍵設定」に会社の鍵として預ける（手元の Keychain は使わない）:
   - iOS: App Store Connect の 3 点（Key ID・Issuer ID・.p8）。証明書（.p12）は要らない（Apple のクラウド署名）
   - Android: Play のサービスアカウント JSON。アップロード用キーストアは `mobile_generate_keystore` で作り Drive に控える
   - GitHub への投入は URL のコネクタの `mobile_keys_to_github`（シークレット名は `ASC_KEY_ID` / `ASC_ISSUER_ID` / `ASC_PRIVATE_KEY` / `PLAY_SERVICE_ACCOUNT_JSON`）

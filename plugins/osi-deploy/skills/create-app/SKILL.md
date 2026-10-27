@@ -67,10 +67,10 @@ label: アプリ・サイトを新しく作る
 |---|---|---|
 | ローカル（.mcpb） | 拡張設定の「GitHub Organization」（`health_check` の `github.repo_target`） | `auto:<ユーザー名>`。組織に入っていなければ個人アカウント、入っていれば聞く |
 | リモート・お試し | 自社の org に固定（名前に会社の接頭辞が付く）。個人アカウントには作れない | — |
-| リモート・自分の鍵 | ツール設定の「GitHub の作る先」（`github.org`）。組織名か自分のユーザー名 | 組織に入っていなければ個人アカウント、入っていれば聞く |
+| リモート・自分の鍵 | 鍵設定の「GitHub の作る先」（`github.org`）。組織名か自分のユーザー名 | 組織に入っていなければ個人アカウント、入っていれば聞く |
 
 - 作ったら、返事の `owner_type`（`user`＝個人／`org`＝組織）と `repo` を本人に一言で伝える（例：「個人アカウント taro に customer-karte を作りました」）。`auto_target: true` は作る先が空で個人に決めた印
-- 道具が `needs_target`（組織に入っている）で止まったら、`orgs` の名前を見せて「どの組織に作るか／個人アカウントにするか」を聞き、ツール設定（https://www.ai-osi-uri.info/keys#app）の「GitHub の作る先」に入れてもらってから作り直す
+- 道具が `needs_target`（組織に入っている）で止まったら、`orgs` の名前を見せて「どの組織に作るか／個人アカウントにするか」を聞き、鍵設定（https://www.ai-osi-uri.info/keys#app）の「GitHub の作る先」に入れてもらってから作り直す
 - 会社のアプリなら組織に置くほうを勧める（担当が変わっても引き継げる）。個人で良いと言われたらそのまま進める
 - 作ったあとは、返事の `repo` と `html_url` の持ち主が作る先と同じかを必ず見る。違えば中身を入れずに止めて報告する
 - 403 / 404 が返ったら、トークンにその作る先へ作る権限が無い（組織なら組織の承認・Administration の書き込み、個人なら repo 権限）。別の場所に作り直さない
@@ -141,7 +141,7 @@ Phase N:   完了レポート
 | 本文の手順・道具 | リモートではこうする |
 |---|---|
 | 「必要 mcpb >= 1.23.0」の版チェック | `tools : Deploy` の道具数が **33 以上**なら続行。少なければ「コネクタを切断→接続し直して」と案内して中断 |
-| `github.repo_target` / `owner_override` | お試しでは読まない・渡さない。自分の鍵ではツール設定の「GitHub の組織名」の組織に作る（空なら作らずに止まる）。お試しの作成先は自社の org に固定され、リポ名には会社の接頭辞（`health_check` の `projects : … 名前空間 <slug>-*`）が自動で付く |
+| `github.repo_target` / `owner_override` | お試しでは読まない・渡さない。自分の鍵では鍵設定の「GitHub の組織名」の組織に作る（空なら作らずに止まる）。お試しの作成先は自社の org に固定され、リポ名には会社の接頭辞（`health_check` の `projects : … 名前空間 <slug>-*`）が自動で付く |
 | `gh-create-repo-and-push`（`github_create_repo_and_push`） | `github_create_repo`（`name` = アプリの slug、`project_name` = 表示名）→ `github_put_files`（`files: [{path, content}]` を **1 コミット**で。`node_modules` / `.next` / `.env*` は含めない。合計 200 ファイルや 5 MB を超えそうなら数回に分けて push する） |
 | `github_push`（再 push） | 変更したファイルだけを `github_put_files`（同じブランチ・上書き） |
 | `vercel-connect-and-deploy`（`vercel_create_project_and_deploy`） | `vercel_create_project`（`repo_name`, `env_vars`, 必要なら `framework`）→ `vercel_get_deployment_status` で READY を待つ。clone / push は要らない |
@@ -171,7 +171,7 @@ Phase N:   完了レポート
    - Web-Railway: `railway.valid: true`（+ `railway_health_check` で作成先ワークスペースを確認）
    - Stripe: `stripe.test` / `stripe.live`
    - Supabase: `supabase.valid: true`
-   - AI 機能: `anthropic.valid: true`（URL のコネクタでは、ツール設定に Anthropic・OpenAI・TypeSafe の鍵があるか。アプリへは `vercel_set_env` の `from_extension` で値を見せずに入れる）
+   - AI 機能: `anthropic.valid: true`（URL のコネクタでは、鍵設定に Anthropic・OpenAI・TypeSafe の鍵があるか。アプリへは `vercel_set_env` の `from_extension` で値を見せずに入れる）
 3. **`github.repo_target` を読み、リポジトリを作る組織を確定する**（[作成先の決定ルール](#作成先の決定ルール組織だけ)）。
    `none` は GitHub が未接続。`auto:<名前>` は作る先が空（組織に入っていなければ個人アカウントに作る）
 4. 不足 → `setup-deploy-environment` を案内して中断。**発行そのものが必要なら `credential-handoff` に渡す**

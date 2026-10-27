@@ -28,7 +28,7 @@ label: 契約から請求予定を作る
 
 # osi-finance-contract-intake（契約取込 → 請求スケジュール展開）
 
-> **台帳の置き場（手元の xlsx ／ Web）を先に確かめる。** URL のコネクタの `ledger_status` が `backend: web` を返したら、本文の `sheets_*`・`ledger_maintain` を `ledger_*` に読み替える（対応表と注意は `osi-finance-setup/references/ledger-backend.md`。Web の書く道具は既定で dry_run なので、書くときは `dry_run:false`）。Web なら台帳の仕事に手元の Finance 拡張は要らない。`mfi_*` は置き場に関係なく URL のコネクタでも使える。メール（`mail_*`）・電子署名（`ds_*`・`cs_*`）は Finance の外の共通の道具で、つなぐのはポータルの「ツール設定」（ファイルは会社の書類の置き場の相対パスで指す。`files_put` で上げる）。
+> **台帳の置き場（手元の xlsx ／ Web）を先に確かめる。** URL のコネクタの `ledger_status` が `backend: web` を返したら、本文の `sheets_*`・`ledger_maintain` を `ledger_*` に読み替える（対応表と注意は `osi-finance-setup/references/ledger-backend.md`。Web の書く道具は既定で dry_run なので、書くときは `dry_run:false`）。Web なら台帳の仕事に手元の Finance 拡張は要らない。`mfi_*` は置き場に関係なく URL のコネクタでも使える。メール（`mail_*`）・電子署名（`ds_*`・`cs_*`）は Finance の外の共通の道具で、つなぐのはポータルの「鍵設定」（ファイルは会社の書類の置き場の相対パスで指す。`files_put` で上げる）。
 
 
 > **組織固有値はプロファイルから読む。** 本文の `{{paths.*}}` `{{ledgers.*}}` `{{company.*}}` `{{members.*}}` は、連結フォルダ直下の `osi-profile.md`（雛形: osi-core の `plugins/osi-core/skills/getting-started/assets/osi-profile.example.md`）の値に置き換えて解釈する。無ければ会社名・案件フォルダ・台帳の有無・使うコネクタを質問して先に作る。値をここに直書きしない。
@@ -178,6 +178,6 @@ label: 契約から請求予定を作る
 詳細は **[`docs/エラー処理ガイド.md`](../../docs/エラー処理ガイド.md)** を正本とする。本スキルで詰まりやすい点：
 
 - **大容量の契約PDF**は Drive 直アップロードが不安定。Google Drive の**ローカル同期フォルダにコピー**して格納する（配置後に開けるか確認）。
-- **メール添付が取得できない**場合：純正のメールコネクタでは添付を取り出せない。URL のコネクタの `mail_save_attachments` を使う（未接続なら返ってくるツール設定の URL を本人に渡す）。それも使えない環境だけ **Superhuman**、それも無ければ契約PDFを**Drive手置き**してもらう。
+- **メール添付が取得できない**場合：純正のメールコネクタでは添付を取り出せない。URL のコネクタの `mail_save_attachments` を使う（未接続なら返ってくる鍵設定の URL を本人に渡す）。それも使えない環境だけ **Superhuman**、それも無ければ契約PDFを**Drive手置き**してもらう。
 - 金額・期間が読めない／`osi-finance-settings.md` 未整備のときは、**推測せず「要確認」**として残す（`WRITE_CONFIRMATION=事前確認` なら止めて人に確認、`事後確認` なら備考欄に残して書き込みは続行）。
 - **台帳xlsxへの書き込みが「Excelで開かれています」で失敗する**場合：多くは同フォルダに残る `~$台帳名.xlsx` という残骸ロックファイルが原因（Excelの異常終了などで消えずに残る）。bashサンドボックスからは権限上削除できないことがあるため、その場合はユーザーに「実際にExcelで開いていないか」確認のうえ Finder での削除を依頼し、削除後に書き込みをリトライする。

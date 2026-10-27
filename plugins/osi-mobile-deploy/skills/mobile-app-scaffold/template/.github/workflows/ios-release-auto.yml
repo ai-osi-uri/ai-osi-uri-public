@@ -6,7 +6,7 @@
 #   * 鍵は App Store Connect の 3 点だけ。署名は Xcode の自動署名（Apple のクラウド署名）に任せる。証明書（.p12）は要らない
 #   * xcodebuild の出力を tail で絞るので、pipefail を必ず付ける（付けないと失敗が「成功」に見える）
 #
-# GitHub Secrets（名前は固定。コネクタの mobile_keys_to_github が「ツール設定」の会社の鍵から入れる）:
+# GitHub Secrets（名前は固定。コネクタの mobile_keys_to_github が「鍵設定」の会社の鍵から入れる）:
 #   ASC_KEY_ID          App Store Connect API キーの ID（10 文字）
 #   ASC_ISSUER_ID       Issuer ID（UUID）
 #   ASC_PRIVATE_KEY     .p8 の中身そのまま（-----BEGIN PRIVATE KEY----- から）

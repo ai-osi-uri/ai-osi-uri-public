@@ -39,10 +39,10 @@
 ## メール・電子署名・書類の置き場（共通の道具）
 
 メールと電子署名は Finance の道具ではなく、URL のコネクタの**共通の道具**（どの仕事からも使う）。
-台帳の置き場（local / web）に関係なく使える。**つなぐのはポータルの「ツール設定」**（https://www.ai-osi-uri.info/keys/use/mail ・ /keys/use/esign）。
+台帳の置き場（local / web）に関係なく使える。**つなぐのはポータルの「鍵設定」**（https://www.ai-osi-uri.info/keys/use/mail ・ /keys/use/esign）。
 Finance のスキルは「使う側」として、請求書の送付・受け取った請求書の保存・契約書の送付にこれらを使う。
 
-| 使い道（Finance の仕事） | 共通の道具 | つなぐ場所（ツール設定） |
+| 使い道（Finance の仕事） | 共通の道具 | つなぐ場所（鍵設定） |
 |---|---|---|
 | 請求書 PDF・契約書を置く・一覧・見せる | `files_put`・`files_list`・`files_url`（会社の書類の置き場） | 置き場は会計のサイトの「書類」でも見られる |
 | 請求書を添付して送る・受け取った請求書をしまう | `mail_status`・`mail_connect`・`mail_create_draft`・`mail_send_draft`・`mail_list_attachments`・`mail_save_attachments` | `/keys/service/gmail`・`/keys/service/outlook`（人ごと） |
@@ -55,7 +55,7 @@ Finance のスキルは「使う側」として、請求書の送付・受け取
   - `cs_send_document` は `expect_emails`、`mail_send_draft` は `expect_to`・`expect_attachments` が実物と一致しないと送らない。
 - 締結済みの保存先は既定で `03.契約書/締結済/`、受け取った添付は `04.受領書類/YYYY-MM/`。保存した `path` を台帳の「〜ファイル」列に書く。
 - つながりは人ごと（本人の鍵とトークン。本人に無いアプリの鍵は会社に預けた鍵を使う）。
-- まだつないでいないときは、道具がツール設定の URL を返す。その URL を本人に渡し、鍵の値は会話に貼ってもらわない。
+- まだつないでいないときは、道具が鍵設定の URL を返す。その URL を本人に渡し、鍵の値は会話に貼ってもらわない。
 
 ## 事故の型
 

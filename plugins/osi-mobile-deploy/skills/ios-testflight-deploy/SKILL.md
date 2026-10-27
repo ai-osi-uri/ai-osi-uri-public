@@ -25,13 +25,13 @@ label: iPhoneアプリをTestFlightへ
 
 | 決まり | 理由 |
 |---|---|
-| **鍵は App Store Connect の 3 点だけ**（`ASC_KEY_ID` / `ASC_ISSUER_ID` / `ASC_PRIVATE_KEY`）。署名は Xcode の自動署名（Apple のクラウド署名）に任せる | 証明書（.p12）は会社の鍵として預かっていない。3 点ならツール設定から `mobile_keys_to_github` でそのまま入る。名前を変えると CI が読めない |
+| **鍵は App Store Connect の 3 点だけ**（`ASC_KEY_ID` / `ASC_ISSUER_ID` / `ASC_PRIVATE_KEY`）。署名は Xcode の自動署名（Apple のクラウド署名）に任せる | 証明書（.p12）は会社の鍵として預かっていない。3 点なら鍵設定から `mobile_keys_to_github` でそのまま入る。名前を変えると CI が読めない |
 | **配信のワークフローは最初から push で動き、手でも動かせる**（`on: push` + `workflow_dispatch`） | 「手動だけ」にすると、最後の一押しが人のボタン待ちになる。AI が後から CI の動き方（`on:`）を書き換えるのは安全チェックで止まるので、作る時点で正しい形にしておく |
 | **鍵が無いときは失敗にせず「鍵待ち」で終わる** | 鍵を後から入れる進め方でも、push のたびに赤（失敗）が並ばない。鍵を入れたら 1 回動かせば届く |
 | **xcodebuild の出力を tail で絞る行には `set -o pipefail`** | 付けないと xcodebuild が失敗しても tail の成功で「成功」と出る（落ちたのに気づけない） |
 | **ビルド番号は `github.run_number`（＋ Variables の `BUILD_NUMBER_OFFSET`）** | 同じ番号は TestFlight に二度上げられない。実行のたびに必ず増える番号を使う。後から入れたリポで既に大きい番号があるときだけ下駄を履かせる |
 | **`xcodegen generate` を archive の前に必ず走らせる** | stale な .xcodeproj で「Missing package product」が束で出る（`xcodegen-project-regen`） |
-| **App Store Connect の API キーは「管理者（Admin）」で作る** | クラウド署名（配布用の証明書を Apple に任せる）は Admin のキーでしか動かない。App Manager のキーだと archive までは通り、書き出しで `Cloud signing permission error` → `No profiles for … were found` になる。キーの役割は作成後に変えられないので、作り直してツール設定に入れ替える |
+| **App Store Connect の API キーは「管理者（Admin）」で作る** | クラウド署名（配布用の証明書を Apple に任せる）は Admin のキーでしか動かない。App Manager のキーだと archive までは通り、書き出しで `Cloud signing permission error` → `No profiles for … were found` になる。キーの役割は作成後に変えられないので、作り直して鍵設定に入れ替える |
 | **最新の macOS runner（`macos-26`）＋ 入っている中で一番新しい Xcode を選ぶ** | App Store Connect は毎年、最新の SDK で作ったものしか受け付けなくなる（例: iOS 26 SDK＝Xcode 26 以降）。古い runner の既定の Xcode だと、書き出しの検査で `SDK version issue` で断られる。runner の版を上げても既定の Xcode が古いことがあるので、ワークフローで一番新しい Xcode を `xcode-select` で選ぶ |
 
 ワークフローの完全版は `references/ios-release-auto.yml.example`（`mobile-app-scaffold` の雛形と同じもの）。
@@ -49,7 +49,7 @@ label: iPhoneアプリをTestFlightへ
 ### 1. 事前確認
 
 ```
-mobile_health_check            → apple.ok: true（ツール設定の App Store Connect の鍵が生きている）
+mobile_health_check            → apple.ok: true（鍵設定の App Store Connect の鍵が生きている）
 ios_get_status(bundle_id)      → app_id が返る＝App Store Connect に App 記録がある
 github_workflow_runs(repo)     → workflows に ios-release-auto.yml（または testflight.yml）がある
 ```
@@ -100,7 +100,7 @@ Apple の処理に 10〜30 分かかる。**CI が成功しただけで「TestFl
 | 症状（ログ） | 原因と対処 |
 |---|---|
 | `No Accounts` / `No signing certificate "iOS Distribution" found` | クラウド署名に鍵が渡っていない。`-authenticationKeyPath/ID/IssuerID` が書き出し（export）にあるか |
-| `Cloud signing permission error`（続けて `No profiles for '…' were found`） | キーの役割が足りない。App Store Connect の「ユーザとアクセス → 統合 → チームキー」で、アクセスが「管理者」のキーを新しく作り（役割は後から変えられない）、ツール設定の App Store Connect に入れ替えて `mobile_keys_to_github` で入れ直す。今のキーの役割は同じ画面の「アクセス」列で分かる |
+| `Cloud signing permission error`（続けて `No profiles for '…' were found`） | キーの役割が足りない。App Store Connect の「ユーザとアクセス → 統合 → チームキー」で、アクセスが「管理者」のキーを新しく作り（役割は後から変えられない）、鍵設定の App Store Connect に入れ替えて `mobile_keys_to_github` で入れ直す。今のキーの役割は同じ画面の「アクセス」列で分かる |
 | `Could not find App with App Identifier` / `No profiles for '…' were found`（`Cloud signing permission error` が無いとき） | App Store Connect に Bundle ID か App 記録が無い（手順 1） |
 | `The bundle version must be higher than the previously uploaded version` | 既に大きいビルド番号がある。リポの Variables に `BUILD_NUMBER_OFFSET` を置く |
 | `Missing package product` が束で出る | `xcodegen generate` が抜けている／古い .xcodeproj がコミットされている（`xcodegen-project-regen`） |

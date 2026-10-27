@@ -63,7 +63,7 @@ bundle exec fastlane android android_beta_auto flavor:"${FLAVOR:-dev}"
 `.github/workflows/android-release-auto.yml` は push で自動起動する。何もせずに
 `git push origin main`。CI 監視は `deploy-mobile-app` / `mobile-update-deploy` が行う（`github_workflow_runs`）。
 
-- 必要なシークレット: `PLAY_SERVICE_ACCOUNT_JSON`（コネクタの `mobile_keys_to_github` がツール設定の会社の鍵から入れる）と、
+- 必要なシークレット: `PLAY_SERVICE_ACCOUNT_JSON`（コネクタの `mobile_keys_to_github` が鍵設定の会社の鍵から入れる）と、
   キーストア 4 点（`ANDROID_KEYSTORE_B64` / `ANDROID_KEYSTORE_PASSWORD` / `ANDROID_KEY_ALIAS` / `ANDROID_KEY_PASSWORD`）。
   足りないときは失敗せず「鍵待ち」で緑のまま終わる。
 - 鍵を入れたあと最初の 1 回は `github_run_workflow`（workflow: `android-release-auto.yml`）で動かす（本人の OK のうえで）。
