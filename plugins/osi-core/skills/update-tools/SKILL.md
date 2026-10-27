@@ -67,7 +67,7 @@ label: 道具・決まりを最新に
 1. つながっている拡張の版を、それぞれの `health_check`（Ops は `ops_status`、LINE は `login_status`）で見る。
 2. `local_tools_status` に `installed`（例 `{"ai-osi-uri-finance":"1.46.3"}`）を渡し、`needs_update` が付いたものだけ進める。
 3. 1つずつ `get_download_link(product)` を呼び、**返ってきたダウンロードのリンクを必ず本人に見せる**
-   （見せ方の形は local-setup の `references/install-extension.md` の 2。押せるリンク・ファイル名・版・5分で切れること・3つの手順）。
+   （見せ方の形は local-setup の `references/install-extension.md` の 2。押せるリンク・ファイル名・版・30分で切れること・3つの手順）。
    Claude が自動で落として開ける場面でも、リンクは見せる。
 4. 本人が「インストール」を押したら、新しい会話で `health_check` を呼んで版が上がったかを確かめる。
 
