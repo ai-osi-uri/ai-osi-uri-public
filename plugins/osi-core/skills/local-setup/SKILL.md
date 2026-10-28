@@ -54,7 +54,7 @@ Claude の手が届かない操作だけ。それ以外（何が要るかを確�
 
 ## 3. 整える
 
-足りないものだけ、手順書の順に進める。複数足りないときは computer → plugin → 拡張・Obsidian → mac/android → chrome の順。
+足りないものだけ、手順書の順に進める。複数足りないときは computer → chrome → plugin → 拡張・Obsidian → mac/android の順（chrome を先にするのは、拡張のダウンロードや鍵の発行画面で、いつものログインのまま Claude が進められるようにするため。2026-10-28）。
 
 ## 4. 戻る
 
