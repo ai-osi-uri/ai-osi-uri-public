@@ -55,6 +55,7 @@ label: アプリ・サイトを新しく作る
 8. **待ちは必ず見せる（必須・試作でも省かない）**: 画面遷移の進み具合バー（layout に `NavigationProgress`）、本文の「読み込み中…」（`app/loading.tsx`）、ボタンの処理中表示（`useFormStatus` で押せなくして文言を変える）の3つを必ずそろえる。押したのに何も起きない時間を作らない → [references/screen-structure.md](references/screen-structure.md) の「ローディング表示の入れ方」
 9. **一覧は全件を読まない（必須）**: どの一覧にも、はじめから検索欄とページ送り（既定 50 件）を付け、絞り込みはサーバ（DB）で行う。一覧の API は 1 ページ分と全件数だけ返す。検索・ページは URL に残す → [references/screen-structure.md](references/screen-structure.md) の「一覧の組み方」
 10. **詳細は決める場所でタブに分ける**: 1件の画面は自分の URL を持つ（ドロワーにしない）。項目が増えたら「誰が・どこで決める設定か」でタブに分け、先頭の「概要」に「いまの値・決まっている場所・どこで変えるか」を並べる。1 つの設定を変えられる場所は 1 か所だけ → [references/screen-structure.md](references/screen-structure.md) の「1件の画面（詳細）の組み方」
+11. **作り終えたら、別のAIがレビューする（必須ゲート）**: 作ったAIとは切り離した別の Claude（サブエージェント。使えない環境では新しい会話）に、決まり（screen-structure.md の最新版）と現物（コードの場所・公開URL）だけを渡して点検させる。作った側の説明や自己評価は渡さない。通過するまで完了にしない → [references/independent-review.md](references/independent-review.md)
 
 ---
 
@@ -117,6 +118,7 @@ Phase 3: プラン承認
 
 ─── 共通後処理 ───
 
+Phase N-1.5: 別のAIによるレビュー → references/independent-review.md
 Phase N-1: Drive 記録 → references/drive-record.md
 Phase N-0.5: 使い方マニュアル → app-manual
 Phase N-0.3: 事例に載せる（お客さまのアプリのとき）→ 道具 add_case
@@ -446,6 +448,19 @@ scaffold → gh-create-repo-and-push → harness-init
 ---
 
 ## 共通後処理
+
+### Phase N-1.5: 別のAIによるレビュー（必須ゲート）
+
+> 詳細: [references/independent-review.md](references/independent-review.md)
+
+**自分の仕事を自分で採点しない。** 作り終えて公開URLで動いたら、Drive 記録より前に、作ったAIとは切り離した別の Claude に、画面の原則（screen-structure.md）に沿っているかを点検させる。決まりの正誤は作った時点で決まるので、定期の点検ではなく、この瞬間に見る。
+
+1. サブエージェントを呼ぶ（使えない環境では、本人に新しい会話を1つ立ててもらい、independent-review.md の「レビュー役への頼み方」を貼る）。渡すのは**決まり（最新版）・コードの場所・公開URL・見る画面**だけ。作った経緯や「入れました」という説明は渡さない
+2. レビュー役はコードを読み、画面を実際に動かして確かめ、項目ごとに 通過／外れ／要確認／未確認 で返す
+3. 外れは作った側が直し、外れだった項目だけを新しく呼んだレビュー役に見せ直す（3往復まで。通らなければ本人に判断を仰ぐ）
+4. 結果の表を `deploy-progress.md` に貼る
+
+**DoD**: レビューが「通過」になるまで、Drive 記録・マニュアル・完了レポートに進まない。画面の無いアプリ（API だけ・バッチだけ）のみ省略でき、その場合は完了レポートに「レビュー: 不要（理由）」と書く。
 
 ### Phase N-1: Drive 記録（必須ゲート）
 

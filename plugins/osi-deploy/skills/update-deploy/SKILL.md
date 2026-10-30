@@ -365,6 +365,25 @@ Git author <mail> must have access to the team <TEAM> on Vercel to create deploy
 
 ---
 
+## Phase 5.3: 別のAIによるレビュー（画面に触れた更新のとき・報告前のゲート）
+
+> 詳細: create-app の `references/independent-review.md`
+
+**直すときは、既存の画面を崩しやすい。** 画面に触れた更新なら、smoke test の後に、作業した会話とは切り離した別の Claude（サブエージェント。使えない環境では新しい会話）に、画面の原則（create-app の `references/screen-structure.md` の最新版）に沿っているかを点検させる。
+
+- 見る範囲は「変わった画面」と「共通の枠（layout・サイドバー・`app/loading.tsx`）」だけでよい
+- 渡すのは決まり・コードの場所・公開URL・見る画面だけ。直した経緯や「直しました」という説明は渡さない
+- 外れは作業した側が直し、外れだった項目だけを新しく呼んだレビュー役に見せ直す（3往復まで）
+- 画面に触れない更新（文言の微修正・内部の作り替え・環境変数だけ）は省いてよい
+
+結果の表を `update-progress.md` に貼り、完了報告に必ず1行入れる：
+
+```
+レビュー: 通過（別のAI・外れ n 件を直した）／ 不要（{理由}）
+```
+
+---
+
 ## Phase 5.5: マニュアルの追随（条件付き・報告前のゲート）
 
 > 実行: `app-manual` スキル
@@ -424,6 +443,7 @@ Git author <mail> must have access to the team <TEAM> on Vercel to create deploy
   - smoke test: ✓ ({checks_passed}/{total})
 
 マニュアル: {変更なし / v{n} に更新（{変わった点}）}
+レビュー: {通過（別のAI・外れ n 件を直した）/ 不要（理由）}
 
 ロールバック:
   git -C <dir> revert {sha} && github_push でもう一度
@@ -463,6 +483,7 @@ Git author <mail> must have access to the team <TEAM> on Vercel to create deploy
   対象を取り違えている可能性が高い（別アプリの Vercel プロジェクトを触ろうとしているサイン）。
 - **URL・画面構成・ボタン名を変えたのに、マニュアルを直さずに完了報告を出さない**（Phase 5.5）。
   「マニュアルは別途」と言い残して終えない。同じ作業の中で直す。
+- **画面に触れた更新で、別のAIのレビューを通さずに完了報告を出さない**（Phase 5.3）。同じ会話の中で自分で確かめたことは、レビューの代わりにならない。
 
 ---
 
