@@ -2,6 +2,7 @@
 
 > create-app Phase 1-C から必ず読む。業務アプリの画面を組むときの、構造の決め方。
 > 配色・余白・部品の見た目はここでは扱わない（デザインシステムの担当）。
+> 待ち・切り替え・知らせの**動き方**（秒数・曲線・量）は [motion-standard.md](motion-standard.md) で決める。こちらと一緒に必ず読む。
 
 ## 原則
 
@@ -10,7 +11,7 @@
 
 **2. 本文は画面の横幅いっぱいに使う。中央に寄せて左右を余らせない。**
 
-**3. 画面遷移とボタンの処理には、必ずローディング表示を付ける。押したのに何も起きない時間を作らない。**
+**3. 画面遷移とボタンの処理には、必ずローディング表示を付ける。押したのに何も起きない時間を作らない。動き方は motion-standard.md の番号と数値で作る。**
 
 **4. 一覧には、はじめから検索とページ送りを付け、絞り込みはサーバ（DB）で行う。全件を読んでから画面で絞らない。**
 
@@ -99,13 +100,13 @@ AIの処理を待つボタンは数秒〜数十秒かかる。その間に画面
 
 ## ローディング表示の入れ方（全アプリ必須）
 
-3つを必ずそろえる。どれか1つでは足りない（効く場面が違う）。
+3つを必ずそろえる。どれか1つでは足りない（効く場面が違う）。それぞれの動き方（スケルトンの光の速さ、ボタンが縮む秒数など）は [motion-standard.md](motion-standard.md) の「待ち」の表に従う。
 
 | 部品 | 効く場面 | Next.js（App Router）での置き方 |
 |---|---|---|
 | 画面上端の進み具合バー | リンク・ナビを押した瞬間〜次の画面が出るまで。フォーム送信→ redirect も | `components/NavigationProgress.tsx`（下のひな型）を `app/layout.tsx` の `<body>` 直下に `<Suspense fallback={null}>` で包んで置く |
-| 本文の「読み込み中…」 | 次の画面のデータを読んでいる間、本文の場所に出す | `app/loading.tsx`（サイドバーは残り、本文だけ差し替わる）。重い画面は各フォルダにも置く |
-| ボタンの処理中表示 | AI処理・保存などのボタン。二重押しも防ぐ | `useFormStatus` の `pending` で `disabled` にし、文言を「作成中…」などに変える（`SubmitButton`） |
+| 本文の「読み込み中…」 | 次の画面のデータを読んでいる間、本文の場所に出す | `app/loading.tsx`（サイドバーは残り、本文だけ差し替わる）。重い画面は各フォルダにも置く。一覧の画面は中身と同じ形のスケルトン（motion-standard #069）にする |
+| ボタンの処理中表示 | AI処理・保存などのボタン。二重押しも防ぐ | `useFormStatus` の `pending` で `disabled` にし、文言を「作成中…」などに変える（`SubmitButton`）。主ボタンは motion-standard #160 の動き |
 
 **進み具合バーのひな型**（依存パッケージなし。リンク・フォーム送信・戻る/進むで始まり、次の画面の中身が出たら消える）:
 
@@ -178,7 +179,7 @@ export default function NavigationProgress() {
 .nav-progress.on{opacity:1}
 .nav-progress-bar{height:100%;background:#3B82F6;transition:width .3s ease}
 .page-loading{display:flex;align-items:center;gap:10px;padding:40px 4px}
-.spinner{width:20px;height:20px;border:3px solid #EEF2FF;border-top-color:currentColor;border-radius:50%;animation:spin .8s linear infinite}
+.spinner{width:20px;height:20px;border:3px solid #EEF2FF;border-top-color:currentColor;border-radius:50%;animation:spin .77s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 ```
 
@@ -252,6 +253,7 @@ export default function NavigationProgress() {
 - [ ] 画面上端の進み具合バーがあるか（layout に `NavigationProgress`）。ナビを押した瞬間に出るか
 - [ ] `app/loading.tsx` があり、本文に「読み込み中…」が出るか
 - [ ] AI処理・保存のボタンが、処理中に押せなくなり文言が変わるか
+- [ ] 動き（スケルトン・ボタン・トースト・タブ・モーダル）が motion-standard.md の番号と数値どおりか（同ファイルのチェックも通す）
 - [ ] どの一覧にも検索欄とページ送りがあるか。一覧の API が `q`・`page` を受け取り、1 ページ分と全件数だけ返しているか（全件を返していないか）
 - [ ] 検索・ページが URL に残り、詳細から戻ると同じ検索・ページに戻るか
 - [ ] 1件の画面がドロワーではなく自分の URL を持ち、項目が多ければタブ（先頭は概要）に分かれているか

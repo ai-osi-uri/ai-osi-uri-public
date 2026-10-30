@@ -105,7 +105,7 @@
 | plugins/osi-deploy/skills/create-app/references/drive-record.md | 21 | Notion | Notion のリード一覧に案件が登録されていれば、対応する Drive 案件フォルダが存在する。 |
 | plugins/osi-deploy/skills/create-app/references/drive-record.md | 66 | Notion | \| 案件 \| （Notion リード ID / 案件名 / なし） \| |
 | plugins/osi-deploy/skills/create-app/references/aws-app-gotchas.md | 54 | 共有ドライブ | 初回 apply 前に **`tf-state-backend` スキル**を呼ぶ（state基盤の作成＋backend.tf差し込み）。既存のローカルstateアプリは同スキルの migrate-existing（`aws_terrafo |
-| plugins/osi-deploy/skills/create-app/references/screen-structure.md | 31 | Notion | Salesforce・Notion・Linear など、業務アプリの定番はみなこの作りになっている。 |
+| plugins/osi-deploy/skills/create-app/references/screen-structure.md | 32 | Notion | Salesforce・Notion・Linear など、業務アプリの定番はみなこの作りになっている。 |
 | plugins/osi-deploy/skills/update-deploy/SKILL.md | 76 | GITHUB_ORG | \| `repo_owner` \| `ai-osi-uri` または個人 username \| 既定は GITHUB_ORG / GITHUB_USERNAME \| |
 | plugins/osi-deploy/skills/credential-handoff/SKILL.md | 107 | 共有ドライブ | \| Google Cloud サービスアカウント \| 鍵を作っただけでは Drive のファイルを読めない \| 対象ファイル／共有ドライブをサービスアカウントのメールに閲覧共有し、Drive API を有効化する \| |
 | plugins/osi-backoffice/skills/contract-docusign-send/SKILL.md | 98 | 共有ドライブ | - **Drive（マウント済み共有ドライブ）**：格納先は `references/storage-and-naming.md` の定義に従う。**このスキルにパスを直書きしない**（組織ごとに違い、移行でも動く）。 |
