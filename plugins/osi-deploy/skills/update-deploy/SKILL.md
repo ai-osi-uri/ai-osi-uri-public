@@ -226,6 +226,8 @@ Edit ツールで局所修正。原則：
 - **ローディング表示が欠けていたら、頼まれていなくても同じ更新で足す。** 画面遷移の進み具合バー（layout に `NavigationProgress`）、
   本文の「読み込み中…」（`app/loading.tsx`）、ボタンの処理中表示の3つ。ひな型は create-app の
   `references/screen-structure.md`「ローディング表示の入れ方」。足したことは完了報告に1行書く
+- **表・一覧のスクロールする箱が画面の高さからはみ出していたら（下端や横スクロールのつまみが画面の外）、頼まれていなくても同じ更新で収める。**
+  やり方は create-app の `references/screen-structure.md`「スクロールする場所の高さ」。直したことは完了報告に1行書く
 
 ### Step 3-4: ローカル sanity check（任意）
 

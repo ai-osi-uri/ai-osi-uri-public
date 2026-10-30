@@ -55,7 +55,8 @@ label: アプリ・サイトを新しく作る
 8. **待ちは必ず見せる（必須・試作でも省かない）**: 画面遷移の進み具合バー（layout に `NavigationProgress`）、本文の「読み込み中…」（`app/loading.tsx`）、ボタンの処理中表示（`useFormStatus` で押せなくして文言を変える）の3つを必ずそろえる。押したのに何も起きない時間を作らない → [references/screen-structure.md](references/screen-structure.md) の「ローディング表示の入れ方」
 9. **一覧は全件を読まない（必須）**: どの一覧にも、はじめから検索欄とページ送り（既定 50 件）を付け、絞り込みはサーバ（DB）で行う。一覧の API は 1 ページ分と全件数だけ返す。検索・ページは URL に残す → [references/screen-structure.md](references/screen-structure.md) の「一覧の組み方」
 10. **詳細は決める場所でタブに分ける**: 1件の画面は自分の URL を持つ（ドロワーにしない）。項目が増えたら「誰が・どこで決める設定か」でタブに分け、先頭の「概要」に「いまの値・決まっている場所・どこで変えるか」を並べる。1 つの設定を変えられる場所は 1 か所だけ → [references/screen-structure.md](references/screen-structure.md) の「1件の画面（詳細）の組み方」
-11. **作り終えたら、別のAI 2人がレビューする（必須ゲート）**: 作ったAIとは切り離した別の Claude（サブエージェント。使えない環境では新しい会話）と、ChatGPT（道具 `chatgpt_review`）に、決まり（screen-structure.md の最新版）と現物（コード・公開URL・画面で確かめた事実）だけを渡して点検させる。作った側の説明や自己評価は渡さない。2人の結果は多数決でなく根拠で合わせ、通過するまで完了にしない → [references/independent-review.md](references/independent-review.md)
+11. **スクロールする場所は画面の高さに収める（必須）**: 表・一覧の中だけがスクロールする箱は、下端と横スクロールのつまみが必ず画面内に見える高さにする。外枠を「上の固定部分＋残り（`flex: 1; min-height: 0; overflow: auto`）」で組み、`calc(100vh - ◯px)` の決め打ちはしない。見出しの行と左端の列は貼りつける → [references/screen-structure.md](references/screen-structure.md) の「スクロールする場所の高さ」
+12. **作り終えたら、別のAI 2人がレビューする（必須ゲート）**: 作ったAIとは切り離した別の Claude（サブエージェント。使えない環境では新しい会話）と、ChatGPT（道具 `chatgpt_review`）に、決まり（screen-structure.md の最新版）と現物（コード・公開URL・画面で確かめた事実）だけを渡して点検させる。作った側の説明や自己評価は渡さない。2人の結果は多数決でなく根拠で合わせ、通過するまで完了にしない → [references/independent-review.md](references/independent-review.md)
 
 ---
 
