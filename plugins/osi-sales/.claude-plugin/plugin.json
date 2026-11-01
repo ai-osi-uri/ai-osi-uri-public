@@ -1,6 +1,6 @@
 {
   "name": "osi-sales",
-  "version": "0.15.8",
+  "version": "0.15.9",
   "requires_connectors": [
     "Google Drive"
   ],
