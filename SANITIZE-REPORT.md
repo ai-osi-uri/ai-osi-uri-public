@@ -54,27 +54,27 @@
 | plugins/osi-sales/skills/meeting-minutes/SKILL.md | 4 | Plaud | 商談議事録を文字起こし（会社の議事録DB＝秘書の置き場、または Plaud）から自動生成し、Drive の `03_制作・成果物/` に docx として格納したうえで、議事録から営業状況（ステータス・確度・次アクション・期日・金額・窓口・ |
 | plugins/osi-sales/skills/meeting-minutes/SKILL.md | 34 | Plaud | AS-IS では、Plaud で録音した文字起こしを主担当が手で読み込み、 |
 | plugins/osi-sales/skills/meeting-minutes/SKILL.md | 46 | Plaud | Plaud MCP から文字起こしを直接取得して全自動化する（貼り付けも従来どおり可）。営業状況は AI が判断して |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 94 | Plaud | \| 会社の議事録DB（`secretary.project_ref` が無い／`supabase_execute_sql` が無い） \| Step 2-A を飛ばし、Plaud MCP（Step 2-B）から取る \| |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 95 | Plaud | \| Plaud（`connectors.plaud: false` またはツールが無い） \| 議事録DBがあればそこから取る（Step 2-A）。無ければ文字起こしは貼り付け・ファイル（txt/docx）で受ける（Step 2-C） \| |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 112 | Plaud | - 議事録DB・Plaud MCP から取得した（または貼り付けられた）文字起こしを読み、 |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 124 | Plaud | 2. 文字起こしを取得（会社の議事録DB（秘書の置き場）→ Plaud MCP の順に直接取得が基本／貼り付け・Gmail転送・Drive はフォールバック） |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 175 | Plaud | （Plaud の自動転送メール・Gemini のメモ・議事録パートナーの文字起こし）。Plaud につながっていなくても、 |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 183 | Plaud | - 0 件 → 2-B へ（録音が終わってから届くまで数分かかる。Plaud 側にはすぐある） |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 184 | Plaud | 2. **本文を取る**：`id` で `body` を取る（話者ラベル付きの全文。Plaud の文字起こしと同じもの）。 |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 189 | Plaud | ### 2-B: Plaud MCP で直接取得（秘書が無い会社ではプライマリ） |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 191 | Plaud | Plaud MCP コネクタ（ツール名に `plaud` を含む `list_files` / `get_file` / |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 202 | Plaud | 3. `get_note`（Plaud の AI 要約）は **参考情報に留める**。サマリ・次アクションの構造化は |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 203 | Plaud | Step 3 で Claude 自身が全文から行う（Plaud 要約の転記で済ませない）。 |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 207 | Plaud | ### 2-C: フォールバック（議事録DB・Plaud のどちらにも無い／道具が無い場合） |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 210 | Plaud | 1. **チャットへの貼り付け**：従来どおり Plaud アプリからのコピペを受け付ける |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 211 | Plaud | 2. **Gmail 転送メール**：Plaud から Gmail に自動転送されている場合、Gmail 検索 |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 215 | Plaud | どれも無ければ `AskUserQuestion` で「Plaud の文字起こしを貼り付けてください |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 476 | Plaud | - **議事録DBに該当が無い（届くまでの時間差・秘書に流れていない録音）** → 2-B の Plaud MCP へ。両方に無ければ 2-C |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 478 | Plaud | - **Plaud MCP が 401 / 未認証** → `login` ツールでサインインを促して再試行。直らなければ 2-C へフォールバック |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 479 | Plaud | - **Plaud に該当録音が無い** → 条件を緩めて再検索 → 無ければ貼り付け / Gmail / Drive へフォールバック |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 490 | Plaud | - `references/transcript-parsing.md` — 【共通・正本】文字起こしの取得（議事録DB / Plaud MCP / フォールバック）・特徴対処・話者推定（session-review / shodan-pr |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 502 | Plaud | - 「今日の○○社の録音を議事録にして」（← 議事録DB／Plaud MCP で直接取得） |
-| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 504 | Plaud | - 「Plaud の文字起こしを議事録にして」 |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 95 | Plaud | \| 会社の議事録DB（`secretary.project_ref` が無い／`supabase_execute_sql` が無い） \| Step 2-A を飛ばし、Plaud MCP（Step 2-B）から取る \| |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 96 | Plaud | \| Plaud（`connectors.plaud: false` またはツールが無い） \| 議事録DBがあればそこから取る（Step 2-A）。無ければ文字起こしは貼り付け・ファイル（txt/docx）で受ける（Step 2-C） \| |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 113 | Plaud | - 議事録DB・Plaud MCP から取得した（または貼り付けられた）文字起こしを読み、 |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 125 | Plaud | 2. 文字起こしを取得（会社の議事録DB（秘書の置き場）→ Plaud MCP の順に直接取得が基本／貼り付け・Gmail転送・Drive はフォールバック） |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 176 | Plaud | （Plaud の自動転送メール・Gemini のメモ・議事録パートナーの文字起こし）。Plaud につながっていなくても、 |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 184 | Plaud | - 0 件 → 2-B へ（録音が終わってから届くまで数分かかる。Plaud 側にはすぐある） |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 185 | Plaud | 2. **本文を取る**：`id` で `body` を取る（話者ラベル付きの全文。Plaud の文字起こしと同じもの）。 |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 190 | Plaud | ### 2-B: Plaud MCP で直接取得（秘書が無い会社ではプライマリ） |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 192 | Plaud | Plaud MCP コネクタ（ツール名に `plaud` を含む `list_files` / `get_file` / |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 203 | Plaud | 3. `get_note`（Plaud の AI 要約）は **参考情報に留める**。サマリ・次アクションの構造化は |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 204 | Plaud | Step 3 で Claude 自身が全文から行う（Plaud 要約の転記で済ませない）。 |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 208 | Plaud | ### 2-C: フォールバック（議事録DB・Plaud のどちらにも無い／道具が無い場合） |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 211 | Plaud | 1. **チャットへの貼り付け**：従来どおり Plaud アプリからのコピペを受け付ける |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 212 | Plaud | 2. **Gmail 転送メール**：Plaud から Gmail に自動転送されている場合、Gmail 検索 |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 216 | Plaud | どれも無ければ `AskUserQuestion` で「Plaud の文字起こしを貼り付けてください |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 477 | Plaud | - **議事録DBに該当が無い（届くまでの時間差・秘書に流れていない録音）** → 2-B の Plaud MCP へ。両方に無ければ 2-C |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 479 | Plaud | - **Plaud MCP が 401 / 未認証** → `login` ツールでサインインを促して再試行。直らなければ 2-C へフォールバック |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 480 | Plaud | - **Plaud に該当録音が無い** → 条件を緩めて再検索 → 無ければ貼り付け / Gmail / Drive へフォールバック |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 491 | Plaud | - `references/transcript-parsing.md` — 【共通・正本】文字起こしの取得（議事録DB / Plaud MCP / フォールバック）・特徴対処・話者推定（session-review / shodan-pr |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 503 | Plaud | - 「今日の○○社の録音を議事録にして」（← 議事録DB／Plaud MCP で直接取得） |
+| plugins/osi-sales/skills/meeting-minutes/SKILL.md | 505 | Plaud | - 「Plaud の文字起こしを議事録にして」 |
 | plugins/osi-sales/skills/meeting-minutes/references/transcript-parsing.md | 15 | Plaud | 秘書の置き場には、会社に届いた議事録が **全員分** たまっている（Plaud の自動転送メール・ |
 | plugins/osi-sales/skills/meeting-minutes/references/transcript-parsing.md | 16 | Plaud | Gemini のメモ・議事録パートナーの文字起こし）。Plaud につながっていなくても、 |
 | plugins/osi-sales/skills/meeting-minutes/references/transcript-parsing.md | 29 | Plaud | \| `kind` \| `plaud`（Plaud の転送メール）/ `gemini`（Gemini のメモ）/ `partner`（議事録パートナー） \| |
