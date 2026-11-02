@@ -93,7 +93,7 @@
 
 | プラグイン | スキル | 必要なコネクタ | 公開 | 何をする |
 |---|---|---|---|---|
-| osi-backoffice | `contract-docusign-send` | docusign, ai-osi-uri-finance | ○ | バックオフィス向け「契約書を内容チェックして DocuSign で署名依頼を送る」スキル |
+| osi-backoffice | `contract-send` | ai-osi-uri（esign_*） | ○ | バックオフィス向け「契約書を内容チェックして AI電子契約で署名依頼を送る」スキル |
 | osi-backoffice | `meishi-generator` | cowork, AI_OSI_URI_Deploy | 内部 | 名刺（表面）のラクスル入稿用PDFを自動生成するスキル |
 | osi-creative | `ai-video-production` | ai-osi-uri-creative | ○ | AI動画を作るオーケストレータ（ディスパッチャ）スキル |
 | osi-creative | `live-ugc-reel-edit` | ai-osi-uri-creative | 内部 | インフルエンサー等の「実写UGCクリップ（商品を飲む・使う・作る縦型素材）」を、参照リールの構成と“文字の遊び”に寄せて編集し、動く日本語テ… |

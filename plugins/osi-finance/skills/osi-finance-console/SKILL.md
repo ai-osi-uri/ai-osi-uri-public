@@ -7,9 +7,9 @@ description: >-
   「コンソールが開かない」「ブックマークが繋がらない」「コンソールのボタンの使い方」
   など、コンソールの起動導線とトラブルに関わるリクエストで発動する。
   ※ 請求書の発行は osi-finance-invoice、支払起票は osi-finance-payment-intake、
-  突合は osi-finance-mf-sync / ar-sync、契約の DocuSign 送付は contract-docusign-send の担当。
+  突合は osi-finance-mf-sync / ar-sync、契約の電子署名の送付（AI電子契約）は contract-send の担当。
   本スキルは「コンソールへの入口」に特化し、実処理そのものは各担当スキルに委ねる。
-connector_prose_ok:  # DocuSign 送付は contract-docusign-send の担当。本スキルは呼ばない
+connector_prose_ok:  # 電子署名の送付は contract-send の担当。本スキルは呼ばない
   - docusign
 # 手元が要る準備（get_skill が「手元の準備」の節を出す。導入手順は osi-core:local-setup）
 local_setup: [finance]
@@ -66,7 +66,7 @@ Gmail も、コンソールからは触れない。だから外部連携のボ�
 
 | プロンプトの主旨 | 渡す先 |
 | --- | --- |
-| 契約を DocuSign で送る | `osi-backoffice:contract-docusign-send` |
+| 契約を電子契約（AI電子契約）で送る | `osi-backoffice:contract-send` |
 | 台帳と MF を突合する | `osi-finance-mf-sync`（AP）／ `osi-finance-ar-sync`（AR） |
 | 請求書を発行する | `osi-finance-invoice`（単票モード） |
 | 仕訳を作る | `osi-finance-journal` |

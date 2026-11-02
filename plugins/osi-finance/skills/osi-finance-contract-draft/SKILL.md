@@ -12,7 +12,7 @@ description: >
   「NDAではない業務委託契約のドラフトが欲しい」「発注契約の契約書を作成」など、契約書の生成・
   雛形の登録/一覧に関わるリクエストで発動する（OSI Finance コンソールの「新規契約」「雛形を新規作成」
   「雛形として登録」ボタンが生成するプロンプトはこの形式）。
-  ※ NDA 単体の新規作成は nda-creation、手元の契約書のチェック→DocuSign送付は contract-docusign-send、
+  ※ NDA 単体の新規作成は nda-creation、手元の契約書のチェック→AI電子契約での送付は contract-send、
   受領契約の取込→スケジュール展開は osi-finance-contract-intake の役割。本スキルは
   「雛形ベースの契約書生成と雛形の育成」に特化する。
 requires_connectors:
@@ -21,7 +21,7 @@ requires_connectors:
   - server: drive-fs
     provision: fs
 
-connector_prose_ok:  # DocuSign 送付は contract-docusign-send の担当。本スキルは呼ばない
+connector_prose_ok:  # 電子署名の送付は contract-send の担当。本スキルは呼ばない
   - docusign
 # 手元が要る準備（get_skill が「手元の準備」の節を出す。導入手順は osi-core:local-setup）
 local_setup: [finance]
@@ -76,7 +76,7 @@ label: 契約書の下書き
    詳細は `docs/運用ルール.md` §5-4。
 5. **雛形マスタの使用回数を +1**（`sheets_update_values`。あわせて同行の**更新者・更新日時**を記録）。
 6. **報告**: 生成した契約書の要点（当事者・金額・期間・特記の反映箇所）と保存先・契約IDを提示し、
-   「レビュー後、送付は DocuSign（esign ON時）またはメールで。締結の記録はコンソールのボタンか
+   「レビュー後、送付は AI電子契約（contract-send、または画面 https://sign.ai-osi-uri.info）で。締結の記録はコンソールのボタンか
    『AR-C-xxx を締結済みにして』で」と案内する。
 
 ## モード②: 雛形登録（AI生成）

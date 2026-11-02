@@ -3,8 +3,8 @@ name: osi-finance-contract-intake
 description: >
   OSI Finance の請求業務の起点。Gmail（＋手動投入）から契約書PDFを収集して Drive の
   契約書フォルダ（設定の `請求管理ルート/契約書`、例: `{{paths.contracts}}/`）に格納し、請求管理台帳の「契約マスタ」に起票したうえで、契約期間
-  （開始〜終了）の各月に「月次請求スケジュール」の請求予定行を自動展開する。DocuSignは「自社が
-  送った契約」のメタ補完にのみ使う任意の補助。金額・期間は契約PDFの読み取りを中心に取得する。
+  （開始〜終了）の各月に「月次請求スケジュール」の請求予定行を自動展開する。AI電子契約（自社の電子契約・esign_*）は「自社が
+  送った契約」のメタ・PDFの補完に使う（DocuSign は移行前に送った契約だけ）。金額・期間は契約PDFの読み取りを中心に取得する。
   台帳へ反映するタイミングは設定の `WRITE_CONFIRMATION`（事前確認=人が確認してから反映／
   事後確認=先に反映してから報告）に従う。「契約を取り込んで」「新しい契約を請求スケジュールに反映」「○○社の契約を台帳に」
   「契約書フォルダを整理して請求予定を作って」「契約起点で請求準備」など、契約→請求／支払スケジュール化に
@@ -15,7 +15,7 @@ requires_connectors:
     provision: user-install
   - server: ai-osi-uri-finance   # 手元の台帳（sheets_*）。台帳を Web に置く会社は使わない
     provision: user-install
-  - server: AI_OSI_URI_Remote_MCP   # DocuSign・メール・書類の置き場（ds_*・mail_*・files_*）。手元の Finance 拡張の ds_*・mail_* は 1.47.0 で外した
+  - server: AI_OSI_URI_Remote_MCP   # AI電子契約・メール・書類の置き場（esign_*・mail_*・files_*。移行前の DocuSign は ds_*）。手元の Finance 拡張の ds_*・mail_* は 1.47.0 で外した
     provision: user-connect
 
 connector_prose_ok:  # DocuSign は URL のコネクタの ds_* 経由。公式の docusign コネクタ自体は要らない
@@ -49,8 +49,8 @@ label: 契約から請求予定を作る
 ## 前提コネクタ
 
 - メール：検索は純正のメールコネクタ（Gmail／Microsoft 365）、**添付の取り出しは URL のコネクタの `mail_save_attachments`**（会社の書類の置き場の `04.受領書類/` に保存。手元の台帳フォルダに置くときは `files_url` で取ってくる。つなぎ方は osi-finance-setup の `references/ledger-backend.md`「共通の道具」）、Google Drive / 台帳（設定の `請求管理ルート`、例: `{{paths.finance}}`）。
-- DocuSign（任意・補助）：`getEnvelopes` / `listEnvelopeDocuments` で自社送付契約のメタ・PDFを補完。
-  Navigator API（構造化金額・期間）はプラン外なので使わない。
+- AI電子契約（自社送付の正）：`esign_list`（`status: completed`）/ `esign_get` で相手・金額・契約日・締結日・締結 PDF の置き場（`company_path`、`03.契約書/締結済/`）を取る。PDF そのものは `esign_download` か置き場から。
+- DocuSign（2026-11-02 に AI電子契約へ移行）：移行前に送った契約だけ `ds_get_envelope` / `ds_save_documents` で補完する。
 
 ## 手順
 
@@ -58,7 +58,7 @@ label: 契約から請求予定を作る
 次のようなクエリで新規契約を探す（受信・送信の両方）。期間は前回取込以降に絞る。
 
 - `契約書 OR 業務委託 OR 覚書 OR 締結 OR 署名完了 OR 完了しました has:attachment`
-- DocuSign/クラウドサイン等の完了通知（`from:docusign OR from:cloudsign` など）。
+- 先方の電子契約（DocuSign・クラウドサイン等）の完了通知（`from:docusign OR from:cloudsign` など）。自社の AI電子契約の締結のお知らせ（件名「【締結】」）は Gmail ではなく `esign_list` で拾う。
 - 添付があり、本文が契約締結・署名完了を示すものを対象にする。
 
 ### 2. 契約PDFの格納（契約書フォルダ）
@@ -69,7 +69,7 @@ label: 契約から請求予定を作る
 > 実値は設定（`osi-finance-settings`）から解決する。構造は
 > `osi-finance-setup/references/ledger-structure.md` を参照。
 - **重複防止**：同名/同一契約が既にあればスキップ。Gmailで来ない契約は手動投入を促す。
-- 補助：自社送付分は DocuSign から取引先名・締結日・PDFを補完できる。
+- 補助：自社送付分は AI電子契約（`esign_get`）から取引先名・締結日・PDFを補完できる。
 - **契約マスタの `契約書ファイル` 列には、台帳フォルダからのフォルダ込み相対パスを書く**
   （例 `00.契約書/02.取引先別/018.サンプル/受注（AR）/….pdf`）。先頭の `00.契約書/` を落とさないこと。
   2026-08-31 の棚卸しで7件がこの欠落による参照切れだった。相手先名の異体字（旧字 `邉` と新字 `邊` など）も

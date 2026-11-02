@@ -35,7 +35,7 @@
 - 送付メタ：`_送付メタ_{契約名}_{YYYYMMDD}.md`
 
 ## 送付メタ テンプレート
-`_送付中/` に置く。**生の署名付きURLや一時資格情報は書かない**（S3キーと有効期限のみ）。
+`_送付中/` に置く（任意。AI電子契約の契約の画面と記録に同じことが残るので、台帳で追うなら省いてよい）。**一時的に開けるリンク（10 分のダウンロード URL など）は書かない**。
 
 ```markdown
 # 送付メタ：{契約名}
@@ -44,13 +44,13 @@
 - 区分：受注 / 発注
 - 契約種別：NDA / 業務委託 / レベニューシェア / その他
 - 送付日時：{YYYY-MM-DD HH:MM JST}
-- DocuSign envelope ID：{envelopeId}
-- ステータス：created（ドラフト）/ sent / completed / voided
+- AI電子契約の契約 ID：{id}（画面 https://sign.ai-osi-uri.info/{id}）
+- ステータス：draft（下書き）/ sent / partially_signed / completed / declined / canceled / expired
 - 署名者：
-  - 甲：{氏名}（{会社名} / {肩書}）<{email}> routingOrder=1
-  - 乙：{{company.representative}}（{{company.name}}）<{email}> routingOrder=2
+  - 甲：{氏名}（{会社名} / {肩書}）<{email}> 順番=1
+  - 乙：{{company.representative}}（{{company.name}}）<{email}> 順番=2
 - CC：{あれば}
-- S3キー：outbound/{YYYY-MM}/{相手先}_{契約名}_{YYYYMMDD}.pdf（バケット {{company.slug}}-contract-staging-…、1日で自動失効）
+- 書類の置き場の相対パス：03.契約書/送付前/{相手先}_{契約名}_{YYYYMMDD}.pdf（締結済みは 03.契約書/締結済/ に自動で置かれる）
 - チェック結果：問題なし {n} / 要確認 {n} / 要修正 {n}（主な論点：…）
 - 備考：
 ```

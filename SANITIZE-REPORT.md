@@ -2,7 +2,7 @@
 
 対象プラグイン: osi-creative, osi-sales, osi-docs, osi-deploy, osi-mobile-deploy, osi-knowledge, osi-finance, osi-core, osi-backoffice, osi-secretary, osi-marketing, osi-line
 
-以下の 109 箇所に要注意語が残っています。publish 前に人手で確認してください（自動削除は文書を壊すため行いません）。
+以下の 108 箇所に要注意語が残っています。publish 前に人手で確認してください（自動削除は文書を壊すため行いません）。
 
 | ファイル | 行 | 語 | 抜粋 |
 |---|---|---|---|
@@ -108,9 +108,8 @@
 | plugins/osi-deploy/skills/create-app/references/screen-structure.md | 34 | Notion | Salesforce・Notion・Linear など、業務アプリの定番はみなこの作りになっている。 |
 | plugins/osi-deploy/skills/update-deploy/SKILL.md | 76 | GITHUB_ORG | \| `repo_owner` \| `ai-osi-uri` または個人 username \| 既定は GITHUB_ORG / GITHUB_USERNAME \| |
 | plugins/osi-deploy/skills/credential-handoff/SKILL.md | 107 | 共有ドライブ | \| Google Cloud サービスアカウント \| 鍵を作っただけでは Drive のファイルを読めない \| 対象ファイル／共有ドライブをサービスアカウントのメールに閲覧共有し、Drive API を有効化する \| |
-| plugins/osi-backoffice/skills/contract-docusign-send/SKILL.md | 98 | 共有ドライブ | - **Drive（マウント済み共有ドライブ）**：格納先は `references/storage-and-naming.md` の定義に従う。**このスキルにパスを直書きしない**（組織ごとに違い、移行でも動く）。 |
-| plugins/osi-backoffice/skills/contract-docusign-send/_旧版_S3方式_20260817/docusign-and-s3.md | 30 | 共有ドライブ | - **file tools（Mac）**：outputs と共有ドライブのみ書ける。 |
-| plugins/osi-backoffice/skills/contract-docusign-send/references/storage-and-naming.md | 3 | 共有ドライブ | 契約の正本は Drive の**契約書フォルダ**（`{契約書ルート}`）。マウント済み共有ドライブに書くと Drive に同期される。 |
+| plugins/osi-backoffice/skills/contract-send/_旧版_S3方式_20260817/docusign-and-s3.md | 30 | 共有ドライブ | - **file tools（Mac）**：outputs と共有ドライブのみ書ける。 |
+| plugins/osi-backoffice/skills/contract-send/references/storage-and-naming.md | 3 | 共有ドライブ | 契約の正本は Drive の**契約書フォルダ**（`{契約書ルート}`）。マウント済み共有ドライブに書くと Drive に同期される。 |
 | plugins/osi-mobile-deploy/skills/deploy-mobile-app/SKILL.md | 156 | GITHUB_ORG | \| GITHUB_ORG \| `ai-osi-uri` / `personal` \| `create-app` の `USE_ORG` 判定に準拠 \| |
 | plugins/osi-creative/skills/ai-video-production/references/hook-insight.md | 57 | CAIO | この一言だと、B4（会社にひとりAIの意思決定者を置く＝CAIO）がそのまま答えになる。 |
 | plugins/osi-creative/skills/vp-corporate-card/SKILL.md | 8 | Plaud | connector_prose_ok:  # Plaud は「音声の入手経路の例」。このスキルが呼ぶわけではない |
