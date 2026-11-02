@@ -14,7 +14,7 @@ label: 事業計画を読む
 
 # 計画を読む
 
-> **台帳の置き場（手元の xlsx ／ Web）を先に確かめる。** URL のコネクタの `ledger_status` が `backend: web` を返したら、本文の `sheets_*`・`ledger_maintain` を `ledger_*` に読み替える（対応表と注意は `osi-finance-setup/references/ledger-backend.md`。Web の書く道具は既定で dry_run なので、書くときは `dry_run:false`）。Web なら台帳の仕事に手元の Finance 拡張は要らない。`mfi_*` は置き場に関係なく URL のコネクタでも使える。メール（`mail_*`）・電子署名（`ds_*`・`cs_*`）は Finance の外の共通の道具で、つなぐのはポータルの「鍵設定」（ファイルは会社の書類の置き場の相対パスで指す。`files_put` で上げる）。
+> **台帳のふだんの向き（手元の xlsx が正 ／ Web が正）を先に確かめる。** 会計のコネクタ（AI OSI URI Finance）の `ledger_status` が `backend: web`（Web が正）を返したら、本文の `sheets_*`・`ledger_maintain` を `ledger_*` に読み替える（対応表と注意は `osi-finance-setup/references/ledger-backend.md`。Web の書く道具は既定で dry_run なので、書くときは `dry_run:false`）。`backend: local`（手元が正）なら本文どおり手元の Finance 拡張で読み書きし、**台帳を書いたら、仕事の最後に必ず同期する**（`ledger_sync_start`〈trigger: skill〉→ 返った URL を手元の拡張の `ledger_sync_push` → `ledger_sync_plan` → 確認が要る行は本人に行ごとに聞く → `ledger_sync_apply`。手順は同じ ledger-backend.md の「同期」）。Web が正なら台帳の仕事に手元の Finance 拡張は要らない。`mfi_*` は置き場に関係なく URL のコネクタでも使える。メール（`mail_*`）・電子署名（`ds_*`・`cs_*`）は Finance の外の共通の道具で、つなぐのはポータルの「鍵設定」（ファイルは会社の書類の置き場の相対パスで指す。`files_put` で上げる）。
 
 
 > **台帳の読み書き（拡張が無いとき）**：拡張（AI OSI URI Finance）の `sheets_*` があればそれを使う。**拡張の道具が無ければ同梱の `assets/scripts/ledger_io.py <経理フォルダ>` を使う**（`read` / `append` / `update` / `update-status` / `next-id`。タブ名＋列名で指定し、引数・戻りは拡張にそろえてある。書く前に `_backup/` へ控える）。
