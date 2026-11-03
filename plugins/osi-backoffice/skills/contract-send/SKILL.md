@@ -119,6 +119,10 @@ label: 契約書を確認し電子契約で送る
    - `signers`：名前・メール・会社。順番に送るなら `order`。本文の決まった場所に欄を置くなら `fields`（1 人に何か所でも）：
      `type`＝`signature`（署名欄。割印・各ページの押印なら複数）／`date`（署名した日を自動で）／`name`・`company`（名前・会社を自動で）／`text`（署名のときに書いてもらう・必須。`label` に何を書く欄か）／`checkbox`（署名のときにチェック・任意）。
      場所は `doc`=何番目の書類〈0 始まり〉・`page`=ページ〈1 始まり〉・`x`・`y`=ページの左上を 0、右下を 1 とした割合で、欄の左上。署名欄を 1 つも置かなければ、締結の PDF の最後に足す「署名欄」のページにまとめて押す（本文に重ねない）。
+   - 確認コードを SMS で送るなら、署名する人に `phone`（携帯）を入れる（メールが届きにくい相手・本人確認を強めたいとき）。
+   - 送る前に社内の承認が要るなら `approver_email`（会社のメンバー）。承認まで送れないので、作ったあと `esign_request_approval` で頼む。承認者本人が Claude で判断するときは `esign_approve`（本人の判断を聞いてから）。
+   - 本人確認書類などを出してもらうなら `request_files`（`label`・`required`・`signer`）。相手は署名の画面で上げてから署名する。
+   - 同じ書類を大勢に個別に送るなら一括送信：`esign_bulk_create`（テンプレートから下書きをまとめて作る）→ 契約ごとの宛先を全件見せて OK → `esign_bulk_send`。
    - 同じ形の契約をよく送るなら、`esign_templates` でテンプレートを探し、`template_id` で作る（書類と欄はテンプレートのもの。`signers` は役の順に役の数だけ）。送った契約を次から使い回すなら `esign_save_template`。
    - `message`・`signing_order`・`expires_in_days`・`counterparty`・`amount`・`contract_date`（相手・金額・契約日は締結後に探す手がかり。電子帳簿保存法の検索の決まり）。
    - 議事録の ToDo から来た契約なら `meeting_id`・`todo_id` を渡す（締結すると、その ToDo が完了になる）。
