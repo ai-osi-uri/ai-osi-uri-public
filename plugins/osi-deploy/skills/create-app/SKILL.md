@@ -177,6 +177,7 @@ Phase N:   完了レポート
    - Stripe: `stripe.test` / `stripe.live`
    - Supabase: `supabase.valid: true`
    - AI 機能: `anthropic.valid: true`（URL のコネクタでは、鍵設定に Anthropic・OpenAI・TypeSafe の鍵があるか。アプリへは `vercel_set_env` の `from_extension` で値を見せずに入れる）
+   - SMS の本人確認（携帯で本人を確かめる）: 道具 `twilio_status` が返るか（会社の鍵の Twilio）。組み込み方は [references/sms-verify.md](references/sms-verify.md)
 3. **`github.repo_target` を読み、リポジトリを作る組織を確定する**（[作成先の決定ルール](#作成先の決定ルール組織だけ)）。
    `none` は GitHub が未接続。`auto:<名前>` は作る先が空（組織に入っていなければ個人アカウントに作る）
 4. 不足 → `setup-deploy-environment` を案内して中断。**発行そのものが必要なら `credential-handoff` に渡す**
