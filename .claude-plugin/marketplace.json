@@ -51,7 +51,7 @@
       "name": "osi-docs",
       "source": "./plugins/osi-docs",
       "description": "文書・契約・業務フロー・事業計画・構成図作成。財務モデル、企業分析、提案資料に加え、手描き配線図から物理・論理構成図とBOMを生成。 financial-model-3statement は config の開始年月から月次三表に「年月」行を出し、暦月の実績と並べられる。 明細（売上・原価・販管費の行）は業態別テンプレを持たず config の 明細 から生やす。合計と検算はコード側。",
-      "version": "0.13.6",
+      "version": "0.13.7",
       "category": "docs",
       "tags": [
         "docs",
@@ -170,7 +170,7 @@
       "name": "osi-backoffice",
       "source": "./plugins/osi-backoffice",
       "description": "バックオフィス業務自動化。契約書の内容チェック→AI電子契約で署名依頼（contract-send）と、名刺のラクスル入稿用PDF自動生成（meishi-generator：氏名・役職等を伝えるだけで原本.aiテンプレの可変部分を差し替えた入稿PDFを生成、CMYK・トンボ維持）。送付・発注は人が行う安全設計（自動送付・自動発注しない）。",
-      "version": "0.9.3",
+      "version": "0.9.4",
       "category": "backoffice",
       "tags": [
         "backoffice",
