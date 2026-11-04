@@ -5,7 +5,9 @@ description: >
   会話の中で導入手順を案内して使えるようにするスキル。get_skill が返す「手元の準備」の節から呼ばれ、
   要る準備の種類ごとに references の手順で本人と一緒に整え、整ったら元のスキルに戻る。
   「手元の準備をして」「パソコンとつないで」「導入手順を教えて」「このスキルを使えるようにして」
-  「フォルダをつなぎたい」「拡張を入れたい」「Mac で動かしたい」で発動する。
+  「フォルダをつなぎたい」「拡張を入れたい」「Mac で動かしたい」、
+  「議事録パートナーを入れたい」「Form Sender をダウンロードしたい」「App Builder を落としたい」のようにアプリを入れたい・落としたいと言われたときにも発動する
+  （ポータルへ行かせず、この会話でダウンロードのリンクを出す）。
 # スキルの一覧（つないだときに Claude に渡す）に出す短い用途
 label: 手元の準備(拡張など)
 ---
@@ -39,9 +41,11 @@ Claude の手が届かない操作だけ。それ以外（何が要るかを確�
 | ext-deploy | デスクトップ拡張「Deploy」（Git の push・取り込み、手元から Vercel に直接上げる・Terraform・署名鍵・Cloudflare Worker） | `references/extension.md` |
 | finance | 経理の台帳（デスクトップ拡張「Finance」＋台帳フォルダ） | `references/finance.md` |
 | obsidian | Obsidian のノートの置き場 | `references/obsidian.md` |
+| app | アプリ（議事録パートナー・Form Sender・SNS Sender・App Builder）を手元の PC に入れる（2026-11-04〜 リンクはこの会話で出す） | `references/install-app.md` |
 
 手順書は `get_skill`（name=`osi-core:local-setup`, file=`references/<名前>.md`）で読む。
 手元の拡張（Deploy・Finance・Creative・Core）を入れる・上げるのは、どれも `references/install-extension.md` の共通の手順（`local_tools_status` で版を比べ、Claude が落として開き、本人は「インストール」を1回押す）。
+アプリ（dmg / exe / zip）を入れるのは `references/install-app.md`（`get_download_link` に product と platform を渡す。先に本人の OS を確かめる。本人をポータルの「ツールインストール（DL）」へ行かせない）。
 手元にこのスキルが入っていれば、そのファイルを直接読んでもよい。
 
 ## 2. いま揃っているかを確かめる
@@ -66,3 +70,4 @@ Claude の手が届かない操作だけ。それ以外（何が要るかを確�
 - 準備の話を長く続けて、元の仕事を忘れる。準備は最小限、終わったらすぐ戻る。
 - 揃っているのに入れ直させる。必ず先に確かめる。
 - 「この環境ではできません」とだけ言って止める。手順を案内するか、チャットだけでできる範囲で進めるかのどちらかを必ず出す。
+- アプリを入れたいと言われて「ポータルからダウンロードしてください」と返す。リンクはこの会話で出せる（`references/install-app.md`）。
