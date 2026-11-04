@@ -7,7 +7,7 @@
   },
   "metadata": {
     "description": "公開プラグイン（外部配布用サブセット）。",
-    "version": "0.9.19"
+    "version": "0.9.20"
   },
   "plugins": [
     {
@@ -232,6 +232,20 @@
         "messaging",
         "reply",
         "unread"
+      ],
+      "strict": false
+    },
+    {
+      "name": "osi-note",
+      "source": "./plugins/osi-note",
+      "description": "note（note.com）を Claude から使う。拡張を入れてつなぐ（note-setup）、キーワードやクリエイターの記事を集めて読まれる型と空いている切り口をまとめる（note-research）、構成案から本文を書いて本人の OK のあとで下書きに保存する（note-draft・公開は本人が note の画面で）。道具は AI OSI URI note 拡張（非公式・OSS の note MCP を包んだもの・既定は読むだけ）。",
+      "version": "0.1.0",
+      "category": "marketing",
+      "tags": [
+        "note",
+        "blog",
+        "research",
+        "draft"
       ],
       "strict": false
     }

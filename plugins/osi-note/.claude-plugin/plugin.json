@@ -1,0 +1,13 @@
+{
+  "name": "osi-note",
+  "version": "0.1.0",
+  "requires_connectors": [],
+  "description": "note（note.com）を Claude から使うプラグイン。拡張を入れてつなぎ（note-setup）、キーワードやクリエイターの記事を集めて読まれる型と空いている切り口をまとめ（note-research）、構成案から本文を書いて本人の OK のあとで note の下書きに保存する（note-draft・公開は本人が note の画面で行う）。道具は AI OSI URI note 拡張（非公式・OSS の note MCP を包んだもの・既定は読むだけ）。",
+  "author": {
+    "name": "AI OSI URI",
+    "email": "yuhenagisa@ai-osi-uri.com"
+  },
+  "homepage": "https://github.com/ai-osi-uri/ai-osi-uri-plugins",
+  "license": "UNLICENSED",
+  "keywords": ["note", "note.com", "ブログ", "記事", "下書き"]
+}
