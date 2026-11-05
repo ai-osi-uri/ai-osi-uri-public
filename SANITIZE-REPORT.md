@@ -41,7 +41,7 @@
 | plugins/osi-sales/skills/proposal-package/SKILL.md | 108 | 共有ドライブ | - 台帳・案件フォルダ・共有ドライブ（下の表） |
 | plugins/osi-sales/skills/proposal-package/SKILL.md | 626 | Plaud | デモ後に Plaud 文字起こしが渡されたら： |
 | plugins/osi-sales/skills/new-lead-registration/scripts/ledger.py | 77 | 共有ドライブ | os.path.expanduser("~/Library/CloudStorage/GoogleDrive-*/共有ドライブ/*/osi-profile.md"), |
-| plugins/osi-sales/skills/meeting-ready-check/SKILL.md | 45 | Plaud | - 議事録はツールポータルを先に見る。それで終わらせず、録音（Plaud など）・メール・これまでに作った資料やアプリ |
+| plugins/osi-sales/skills/meeting-ready-check/SKILL.md | 50 | Plaud | - 議事録はツールポータルを先に見る。それで終わらせず、録音（Plaud など）・メール・これまでに作った資料やアプリ |
 | plugins/osi-sales/skills/shodan-prep/SKILL.md | 6 | Plaud | Plaud の文字起こしから「初回で握れた／失敗した項目」を抽出し、初回チェックリスト（references/ |
 | plugins/osi-sales/skills/shodan-prep/SKILL.md | 9 | Plaud | 「Plaud文字起こしから握れた/失敗を抽出して」など、商談の事前準備・初回チェックリストの作成や |
 | plugins/osi-sales/skills/shodan-prep/SKILL.md | 42 | Plaud | 商談 後 ──▶ EXTRACT モード：Plaud文字起こし → 握れた/失敗を採点 → チェックリストを育てる |

@@ -1,7 +1,7 @@
 {
   "name": "osi-core",
-  "version": "0.10.14",
-  "description": "横断オーケストレーション・品質層・入口。初回セットアップ（getting-started）で会社プロファイルと初期環境を整え、文字起こしや長文を適切な業務スキルへ振り分け、調査・提案・記事の主張を独立ファクトチェックする。",
+  "version": "0.11.1",
+  "description": "横断オーケストレーション・品質層・入口。どの仕事でも最初に読む「能動の決まり」（work-principles）を持ち、初回セットアップ（getting-started）で会社プロファイルと初期環境を整え、文字起こしや長文を適切な業務スキルへ振り分け、調査・提案・記事の主張を独立ファクトチェックする。",
   "author": {
     "name": "AI OSI URI",
     "email": "yuhenagisa@ai-osi-uri.com"
@@ -21,6 +21,7 @@
     "getting-started",
     "setup",
     "onboarding",
-    "profile"
+    "profile",
+    "principles"
   ]
 }
