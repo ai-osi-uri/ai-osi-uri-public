@@ -465,6 +465,19 @@ scaffold → gh-create-repo-and-push → harness-init
 
 **DoD**: 2人を合わせたレビューが「通過」になるまで、Drive 記録・マニュアル・完了レポートに進まない。画面の無いアプリ（API だけ・バッチだけ）のみ省略でき、その場合は完了レポートに「レビュー: 不要（理由）」と書く。
 
+### Phase N-1.2: ポータルの台帳に載せる（必須ゲート）
+
+> 詳細: [references/portal-ledger.md](references/portal-ledger.md)
+
+**お客さまが、自分のアプリの場所・管理者・費用をポータルで見られるところまでが納品。**
+
+1. `set_project_info` で公開 URL・管理画面の URL・管理者（誰が・どう入るか。パスワードは書かない）を書く
+2. 自動で載らないもの（Google Cloud・LINE・外部の SaaS）を案件台帳に載せる
+3. Google Cloud には `app=<名前>` のラベルを付ける
+4. AI などを使うアプリは、使った量をツールポータルの `/api/usage` に知らせる作りにする（Cloud Run は合言葉なし、それ以外はアプリごとの合言葉）
+
+**DoD**: ポータルのアプリ詳細で、見るところ・使っているものが埋まっている。
+
 ### Phase N-1: Drive 記録（必須ゲート）
 
 > 詳細: [references/drive-record.md](references/drive-record.md)
