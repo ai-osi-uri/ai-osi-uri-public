@@ -81,6 +81,28 @@ PC の拡張の道具は、返事を 60 秒しか待てない。`login_status` �
 - 「画像やファイルを Claude が読んだときは、『ダウンロード/LINE（Claude）』に保存されます。」
 - 始め方の例：「LINE の未読を見せて」「返事してない LINE ある？」「〇〇さんとの LINE を見せて」「〇〇さんへの返信を考えて」
 
+## パソコン無しで使う（URL のコネクタ・サーバーでつなぐ）
+スマホの Claude から使いたい・パソコンが閉じていても読みたい、と言われたとき、または拡張の道具が無い（`login_status` が呼べない）のに
+URL のコネクタの `personal_line_status` が見えるときはこちら。ログイン情報はパソコンではなく、URL のコネクタのサーバーで封をして持つ。
+1. `personal_line_status` を呼ぶ。`connected: true` ならつながっている（3 の確かめは `personal_line_list_chats` の `limit: 3`）。
+2. つながっていなければ、上の 1 の説明（非公式・規約・アカウント制限のおそれ）に「ログイン情報はコネクタのサーバーに暗号化して置きます」を添えて OK をもらい、
+   返ってきた `portal_url`（ツールポータルの LINE のページ）で QR かメール → PIN でログインしてもらう（チャットで QR は出せない）。
+   - 手元の拡張も使い続けるなら、ポータルの端末の種類は拡張と**別のもの**にする（拡張が Android なら iPad）。同じ種類だと片方がログアウトされる。
+3. ポータルで「ログインしました」と出たら（10 分以内に）`personal_line_connect` を呼ぶ。`line_login_handoff` → `login_from_portal` とは取り合いなので、サーバーでつなぐときは呼ばない。
+4. 外すときは `personal_line_disconnect`（本人の OK のあと）。
+
+| 手元の拡張 | URL のコネクタ |
+|---|---|
+| `login_status` | `personal_line_status` |
+| `login_from_portal` | `personal_line_connect` |
+| `logout_local` | `personal_line_disconnect` |
+| `list_chats` / `get_unread_digest` / `get_messages` / `get_media` | `personal_line_list_chats` / `personal_line_unread_digest` / `personal_line_get_messages` / `personal_line_get_media` |
+| `find_contact` / `list_contacts` | `personal_line_find_contact` / `personal_line_list_contacts` |
+| `draft_message` / `send_draft` | `personal_line_draft_message` / `personal_line_send_draft` |
+| `draft_group` / `create_group` / `leave_chat` | `personal_line_draft_group` / `personal_line_create_group` / `personal_line_leave_chat` |
+
+両方つながっているときは、手元の拡張を先に使う（ログイン情報が手元にだけあるほうを優先）。
+
 ## 困ったとき
 | 様子 | すること |
 |---|---|

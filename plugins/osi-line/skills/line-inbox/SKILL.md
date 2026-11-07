@@ -15,6 +15,8 @@ label: LINEの未読まとめ
 
 # line-inbox（未読と返事待ちをまとめる）
 
+> **拡張が無いとき（スマホの Claude・パソコンが閉じている）**：URL のコネクタの `personal_line_*` で同じことをする（道具の対応は line-setup の「パソコン無しで使う」）。決まり（既読を付けない・下書き → 本人の OK → 1 通）は同じ。
+
 道具は AI OSI URI LINE 拡張（`get_unread_digest` / `list_chats` / `get_messages` / `get_media`）。
 どの道具も既読を付けない。「LINE にログインしていません」と返ってきたら line-setup に切り替える。
 

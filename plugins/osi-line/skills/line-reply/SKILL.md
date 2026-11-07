@@ -15,6 +15,8 @@ label: LINEの返信を作る
 
 # line-reply（LINE の返信を作る・送る）
 
+> **拡張が無いとき（スマホの Claude・パソコンが閉じている）**：URL のコネクタの `personal_line_*` で同じことをする（道具の対応は line-setup の「パソコン無しで使う」）。決まり（既読を付けない・下書き → 本人の OK → 1 通）は同じ。
+
 道具は AI OSI URI LINE 拡張（`find_contact` / `list_chats` / `get_messages` / `draft_message`、送るときだけ `send_draft`）。
 
 ## まず確かめること：送れる設定か
