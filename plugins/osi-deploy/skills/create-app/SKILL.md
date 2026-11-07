@@ -57,6 +57,7 @@ label: アプリ・サイトを新しく作る
 10. **詳細は決める場所でタブに分ける**: 1件の画面は自分の URL を持つ（ドロワーにしない）。項目が増えたら「誰が・どこで決める設定か」でタブに分け、先頭の「概要」に「いまの値・決まっている場所・どこで変えるか」を並べる。1 つの設定を変えられる場所は 1 か所だけ → [references/screen-structure.md](references/screen-structure.md) の「1件の画面（詳細）の組み方」
 11. **スクロールする場所は画面の高さに収める（必須）**: 表・一覧の中だけがスクロールする箱は、下端と横スクロールのつまみが必ず画面内に見える高さにする。外枠を「上の固定部分＋残り（`flex: 1; min-height: 0; overflow: auto`）」で組み、`calc(100vh - ◯px)` の決め打ちはしない。見出しの行と左端の列は貼りつける → [references/screen-structure.md](references/screen-structure.md) の「スクロールする場所の高さ」
 12. **作り終えたら、別のAI 2人がレビューする（必須ゲート）**: 作ったAIとは切り離した別の Claude（サブエージェント。使えない環境では新しい会話）と、ChatGPT（道具 `chatgpt_review`）に、決まり（screen-structure.md の最新版）と現物（コード・公開URL・画面で確かめた事実）だけを渡して点検させる。作った側の説明や自己評価は渡さない。2人の結果は多数決でなく根拠で合わせ、通過するまで完了にしない → [references/independent-review.md](references/independent-review.md)
+13. **重いファイルはアプリのサーバーを通さない（必須）**: 動画・画像・録音・PDF などの中身は、保存場所（Cloud Storage・S3・R2・Supabase Storage）から期限つきURL（署名付きURL）でブラウザへ直接渡す。アプリは「見てよいか」を確かめてURLを出す（または案内する）だけにする。一覧の表紙（サムネイル）はファイルを作った時点で一緒に作り、一覧の動画は再生を押すまで読まない（画面に近づいたものから順に読む）。サーバーが1台・同時に受けられる数に上限がある構成ほど必須 → [references/screen-structure.md](references/screen-structure.md) の「重いファイルの渡し方」
 
 ---
 
