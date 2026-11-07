@@ -28,6 +28,7 @@ label: 公開中のアプリを直す
 > 入っていなければ、先に入れる（get_skill の頭の「手元の準備」→ `local_tools_status` → 本人が「インストール」を1回押す）。
 > 入れられない・断られたとき（ブラウザ版の Claude など）や小さなアプリだけ、URL でつなぐコネクタの `github_upload_url` → `github_push_folder` ／ `github_download_folder` を予備に使う
 > （毎回フォルダ全体を zip で送るので 1 回 200MB まで）。手順は references/git-via-url-connector.md。
+> **ほかの会社から共有されたアプリは例外**：手元の拡張は本人の鍵で動くので届かない。最初から URL のコネクタの道具で読む・直す（Phase 1 の Step 1-0）。
 
 `create-app`（旧 deploy-app） が「新規作成」を担うのに対し、本スキルは「既にある GitHub リポ＋
 Vercel/AWS のデプロイを、ローカル修正→push→自動再デプロイ→検証」まで貫通する。
@@ -35,6 +36,7 @@ Vercel/AWS のデプロイを、ローカル修正→push→自動再デプロ�
 ## いつ発動するか
 
 - 「○○アプリを直して」「○○のバグ修正」
+- 「（アプリの URL）このアプリを改修したい。ここをこう直したい」（URL だけで頼まれても。Phase 1 の Step 1-0 で特定する）
 - 「ai-catalog-navigator のアウトプット切れてる」「max_tokens 上げて」
 - 「○○のコピー直して再デプロイ」「文言修正して反映」
 - Vercel/AWS にすでに公開済みのリポを編集したい全シナリオ
@@ -62,6 +64,8 @@ DoD: smoke test の合格 evidence なしに「直りました」と報告しな
    - `update.status: "update_available"` → 止めずに `update.notice` を一言案内
    - `update.status: "unreachable"` → 何も言わずに続行
 2. 不足していれば `setup-deploy-environment` を案内して中断。
+   **ただし、先に Phase 1 の Step 1-0（`list_projects`）を見る。** 直すアプリが共有されたアプリ（`share` 付き）なら、
+   持ち主の鍵で動くので、本人の鍵・手元の拡張が無くても中断しない。
 3. AWS パスの修正なら `AWS_PROFILE` または `mcp__awslabs_aws-api-mcp-server__call_aws`
    が利用可能かを確認。
 
@@ -69,7 +73,37 @@ DoD: smoke test の合格 evidence なしに「直りました」と報告しな
 
 ## Phase 1: 対象リポ特定
 
-入力（自由文）から以下を確定する。読み取れない要素のみ AskUserQuestion で 1 問だけ聞く。
+### Step 1-0: まずアプリ一覧で探す（URL・アプリ名だけの頼みでも、最初に必ず）
+
+お客さまは「（アプリの URL）のこのアプリを、ここをこう直したい」とだけ頼む。案件台帳・リポジトリ名・Vercel を
+知っている前提で聞き返さない。**Vercel や GitHub を名前で探し回る前に、URL のコネクタの `list_projects` を呼ぶ。**
+自分の会社のアプリと、**ほかの会社から共有されたアプリ（`share` 付き）**がここに出る。共有されたアプリは
+`list_projects` を通さないと見つからない（自分の会社の鍵・お試しの共用アカウントで探しても、持ち主のアカウントには無い）。
+
+1. 渡された URL・アプリ名を、一覧の各アプリと照らす。合う順に：
+   - `public_url` のホスト名と一致する
+   - ホスト名の先頭（`https://<name>.vercel.app` や `https://<name>-xxxxxxxxx-<team>.vercel.app` の `<name>`）が、
+     `slug`・`resources` の Vercel プロジェクト名・GitHub リポジトリ名（`/` の後ろ）と一致する
+     （台帳の `public_url` はデプロイごとの長い URL、お客さまが使うのは短い URL、ということがよくある）
+   - アプリ名（日本語の `name`）に、頼まれた言葉が入っている
+2. 1 本に決まったら、そのアプリの `resources` から `repo_owner`／`repo_name`（`github_repo`）と Vercel プロジェクト（`vercel_project`）を取る。
+   以降の表の推測は使わない。
+3. 候補が複数なら、アプリ名で 1 問だけ聞く。
+4. **見つからなければ、探し回らずに止まる。** 本人に「このアプリは、あなたのアプリ一覧に出てきません。
+   持ち主の会社から共有されていない可能性があります。持ち主（このアプリを作った会社の担当者）に、あなたの会社への共有を頼んでください」と伝える。
+   `vercel_list_projects` や GitHub の検索を自分の鍵で続けても、共有されていないアプリは見つからない。
+
+**共有されたアプリ（一覧で `share` が付いている）のとき**
+- 道具は持ち主の会社の鍵で動く。本人や本人の会社の鍵は要らない（`health_check` で GitHub・Vercel の鍵が無くても止めない）。
+- 手元の Deploy 拡張の道具（本人の鍵で動く）は使わない。**URL のコネクタの道具で進める**：
+  読む `github_get_file`／`github_download_folder`、直す `github_put_files`（数ファイル）か
+  `github_upload_url` → `github_push_folder`（多いとき。references/git-via-url-connector.md）、
+  見張る `vercel_get_project`・`vercel_get_deployment_status`・`vercel_get_build_logs`。
+  Phase 2 のローカル clone・`gh`・`github_push` は通らないので飛ばす。
+- `share.role` が `view`（見るだけ）なら、読む・様子を見るまで。直す前に「持ち主に『直せる』で共有してもらってください」と伝える。
+- 環境変数・鍵・Git 連携（`vercel_connect_git`）・停止・移管は持ち主だけ。要るときは、何が要るかを書いて持ち主への依頼文を作る。
+
+入力（自由文）と Step 1-0 の結果から以下を確定する。読み取れない要素のみ AskUserQuestion で 1 問だけ聞く。
 
 | 項目 | 抽出例 | 推測ヒント |
 |---|---|---|
@@ -460,6 +494,7 @@ Git author <mail> must have access to the team <TEAM> on Vercel to create deploy
 | Phase | 失敗 | 対応 |
 |---|---|---|
 | 0 | 拡張未導入 | `setup-deploy-environment` 案内、中断 |
+| 1 | URL のアプリが `list_projects` に無い | 探し回らず止まる。共有されていない可能性を伝え、持ち主に会社への共有を頼んでもらう（Step 1-0） |
 | 1 | repo 特定できない | ユーザーに repo URL を直接聞く |
 | 2 | clone 不可（PAT 不足/権限なし） | `gh auth status` を案内、または Org 権限付与依頼 |
 | 2 | local clone が dirty | ユーザー確認、`--force` は絶対にしない |
@@ -477,6 +512,8 @@ Git author <mail> must have access to the team <TEAM> on Vercel to create deploy
 
 ## やってはいけないこと
 
+- **`list_projects` を見ずに、URL から Vercel・GitHub を自分の鍵で探しに行かない。** 共有されたアプリは持ち主のアカウントにあり、
+  自分の鍵（お試しの共用アカウントを含む）では見つからない。見つからないまま「ソースコードを教えてください」と本人に頼まない。
 - 既存リポを **新規 push（force-push）** で上書きしない。`github_push` は通常 push のみに使う。
 - ユーザー確認なしに **複数ファイル一気に書き換え** ない（特に文言・価格系）
 - 「コミットされた」「READY になった」だけで「直りました」と顧客に伝えない。**Phase 5 の evidence が揃って初めて完了**。

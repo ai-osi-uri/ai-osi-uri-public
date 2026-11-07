@@ -2,6 +2,27 @@
   "name": "update-deploy",
   "evals": [
     {
+      "id": "url-only-shared-app",
+      "prompt": "https://sample-app.vercel.app このアプリを改修したいです。一覧画面の段落が見にくいので、見やすくしたいです。どう直すのがいいと思いますか？",
+      "expected_skill": "update-deploy",
+      "expected_actions": [
+        "Phase 1 Step 1-0: list_projects を最初に呼ぶ（vercel_list_projects や GitHub の検索より前）",
+        "URL のホスト名の先頭 sample-app を、slug・Vercel プロジェクト名・リポジトリ名と照合して 1 本に決める",
+        "share 付き（共有されたアプリ）なら、本人の鍵が無くても止めず、URL のコネクタの github_get_file でソースを読む",
+        "ソースを読んだうえで改善案を出す（本人にソースコードを求めない）"
+      ]
+    },
+    {
+      "id": "url-not-in-ledger-stops",
+      "prompt": "https://other-app.example.com を直したい。ボタンの色を変えて",
+      "expected_skill": "update-deploy",
+      "expected_actions": [
+        "list_projects に該当が無い",
+        "vercel_list_projects や GitHub を探し回らずに止まる",
+        "共有されていない可能性を伝え、持ち主に会社への共有を頼むよう案内する（ソースコードを求めない）"
+      ]
+    },
+    {
       "id": "ai-output-truncated",
       "prompt": "example-app.vercel.app のAIリサーチ提案、アウトプット途中で切れてるから直して",
       "expected_skill": "update-deploy",
