@@ -21,7 +21,7 @@ storyline-gate → deck-composition → ★pptx-custom（ここ）
   考える            構成する            刷る
 ```
 
-**構成は受け取る。** 新規デッキを作るときは、まず deck-composition が出した `slide-plan.md`（スライド順・各 Action title・1メッセージ・載せる証拠）を入力にする。`slide-plan.md` が無いまま「どのスライドを何枚、どの順で」を本スキルで決め始めない——それは deck-composition の仕事。本スキルは各スライドを綺麗に刷り、構成の良し悪しは判断しない。
+**構成は受け取る。** 新規デッキを作るときは、まず deck-composition が出した `slide-plan.md`（スライド順・各タイトル・メッセージ・載せる証拠）を入力にする。`slide-plan.md` が無いまま「どのスライドを何枚、どの順で」を本スキルで決め始めない——それは deck-composition の仕事。本スキルは各スライドを綺麗に刷り、構成の良し悪しは判断しない。
 
 > 既存 pptx の整形・体裁直しなど、構成が既に存在する作業では deck-composition を経由しなくてよい（入力＝既存の .pptx）。
 
@@ -94,7 +94,7 @@ unzip -o -q presentation.pptx -d unpacked/     # 代替
 
 ## Creating from Scratch
 
-新規作成は **slide-plan.md（deck-composition の出力）を入力にする**。各スライドの Action title・1メッセージ・載せる証拠は plan に書かれている。本スキルはそれを下記のレイアウト機構で刷る。実装の詳細は基盤 `pptx` スキルの `pptxgenjs.md` / `python-pptx.md`（同梱していない）と本スキルの [exec-deck-code.md](exec-deck-code.md)。
+新規作成は **slide-plan.md（deck-composition の出力）を入力にする**。各スライドのタイトル・メッセージ・載せる証拠は plan に書かれている。本スキルはそれを下記のレイアウト機構で刷る。**本文スライドは、上にタイトル（短い見出し）、その下にメッセージ（言い切りの1文・太字）を別の行として刷る。1つのテキストに「見出し：主張」とつなげて刷らない**（deck-composition 原則3）。実装の詳細は基盤 `pptx` スキルの `pptxgenjs.md` / `python-pptx.md`（同梱していない）と本スキルの [exec-deck-code.md](exec-deck-code.md)。
 
 > 章扉・目次・パンくず等のナビ部品が必要かは slide-plan.md に記載がある。実装ヘルパーは [exec-deck-code.md](exec-deck-code.md)（`addSectionHeader` / `addPartDivider` / `addTOC`）を使う。
 
