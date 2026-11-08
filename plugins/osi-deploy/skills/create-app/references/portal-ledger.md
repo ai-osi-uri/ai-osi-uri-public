@@ -21,9 +21,14 @@
 ## 2. 使っているものを台帳に載せる
 
 GitHub・Vercel・Supabase は公開の道具が自動で載せる。それ以外（Google Cloud の Cloud Run・Secret Manager・Scheduler、LINE 公式アカウント、外部の SaaS）は、
-自動で載らないので、案件台帳（project_resources）に kind を付けて載せる：
-`gcp_cloud_run` / `gcp_secret` / `gcp_scheduler` / `gcp_project` / `line_channel` / `saas`。
-月額が決まっているもの（SaaS の月額など）は meta の `monthly_jpy` に入れる。Cloud Run は meta に `cpu`・`memory_gib`・`min_instances` を入れる（請求データが届くまでの見込みに使う）。
+自動で載らないので、道具 `add_project_resource` で 1 つずつ載せる（`kind` を付ける）：
+`gcp_cloud_run` / `gcp_secret` / `gcp_scheduler` / `gcp_project` / `line_channel` / `saas` / `other`（Cloud Storage のバケットなど）。
+
+- Cloud Run：`external_id` はサービス名、`url` は公開 URL、`gcp_project`・`region`・`service_account`（実行サービスアカウント）を入れる。
+  `cpu`・`memory_gib`・`min_instances` も入れる（請求データが届くまでの見込みに使う）。値は `gcp_api` でサービスを読んで写す（推測で書かない）
+- Secret Manager：`external_id` は「<アプリ名>-*」のようにまとめて 1 行でよい
+- 月額が決まっているもの（SaaS の月額など）は `monthly_jpy` に入れる
+- 載せたら `list_projects` でそのアプリの resources に出ているかを確かめる
 
 ## 3. Google Cloud には印（ラベル）を付ける
 

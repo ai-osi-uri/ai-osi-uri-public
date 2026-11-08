@@ -473,7 +473,7 @@ scaffold → gh-create-repo-and-push → harness-init
 **お客さまが、自分のアプリの場所・管理者・費用をポータルで見られるところまでが納品。**
 
 1. `set_project_info` で公開 URL・管理画面の URL・管理者（誰が・どう入るか。パスワードは書かない）を書く
-2. 自動で載らないもの（Google Cloud・LINE・外部の SaaS）を案件台帳に載せる
+2. 自動で載らないもの（Google Cloud・LINE・外部の SaaS）を `add_project_resource` で案件台帳に載せる
 3. Google Cloud には `app=<名前>` のラベルを付ける
 4. AI などを使うアプリは、使った量をツールポータルの `/api/usage` に知らせる作りにする（Cloud Run は合言葉なし、それ以外はアプリごとの合言葉）
 
