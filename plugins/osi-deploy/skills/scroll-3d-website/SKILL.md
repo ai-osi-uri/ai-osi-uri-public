@@ -3,16 +3,15 @@ name: scroll-3d-website
 description: |
   Build premium 3D scroll-animated websites end to end — Next.js setup, canvas
   frame-sequence engine, scroll math, smooth scroll, neumorphic design system,
-  performance hardening, and deploy. Also builds "one-take" cinematic homepages:
-  AI-generated live-action clips chained start-frame→end-frame into one seamless
-  film that scrubs with scroll, with text pinned in place (no fades, no seams).
-  Triggers on "3D website", "scroll animation", "frame sequence", "sticky canvas",
-  "hero animation that plays on scroll", "premium landing page with scroll effects",
-  「シネマティックなホームページ」「スクロールで動画が進むサイト」「ワンカットでつながる映像のHP」,
-  or sites in the vein of Igloo / Lusion / Active Theory. The word "3D" is not required.
+  performance hardening, and deploy. Triggers on "3D website", "scroll animation",
+  "frame sequence", "sticky canvas", "hero animation that plays on scroll", "premium
+  landing page with scroll effects", or sites in the vein of Igloo / Lusion / Active
+  Theory. The word "3D" is not required. For 「シネマティックなホームページ」「スクロールで
+  動画が進むサイト」「ワンカットでつながる映像のHP」 built from AI video, use the
+  osi-creative `cinematic-hp` skill instead.
 
 # スキルの一覧（つないだときに Claude に渡す）に出す短い用途
-label: 3Dスクロール・シネマティックのサイト
+label: 3Dスクロールのサイト
 ---
 
 # Build Premium 3D Scroll-Animated Websites
@@ -35,34 +34,12 @@ Keep this model front-of-mind. If the user says "I want a 3D hero that animates 
 
 For anything else — frame sequence wins every time. It's faster on mobile, never janks, and you can art-direct the animation in a real 3D tool.
 
-## 実写ワンカット型（AIで作った映像）— 3D の連番が無いときの第一選択
+## シネマティックHP（AIで作った一続きの映像）はこのスキルではない
 
-「シネマティックなHP」「会社の事業を映像で見せたい」と頼まれ、3D ツールの連番が無いときはこの型で作る。
-粒子や図形のような抽象表現から入らない。人が歩く・働く・暮らす実写の場面で見せる。
-手順・コード・確認方法は **references/08-one-take-cinematic.md**。
-同じ型の決まりと実測（会社概要・沿革・お問い合わせまで映像の中で進める、具体の場面で見せて抽象は締めだけ、関係ない看板・ロゴの混入）は osi-creative の **`cinematic-hp`** にもある。シネマティックを作るときは両方を読む（一覧に見えなければ `get_skill` で `cinematic-hp`）。
-
-最初から守ること（相手に何度も直された点）：
-
-1. **映像は 1 本だけ、継ぎ目なし**
-   - 背景に固定した映像を 1 本だけ置く。区画ごとに別の映像・写真を置かない。
-   - 場面と場面の境目（2 つの場面が上下に並んで見える状態）を出さない。
-2. **フェードを使わない**
-   - 場面は、カメラが移動してつながる映像で切り替える。
-   - 映像の作り方：`image_to_video` に、今の場面を `image_url`、次の場面を `end_image_url` として渡し、つなぎの映像を作る。
-   - 文字・段落・オープニングも、透明度で出し入れしない。マスクでせり上げる・抜く、幕を開くといった動きにする。
-3. **スクロールで進む** — 自動再生しない。スクロールした分だけ映像が進み、戻せば巻き戻る。
-4. **文字は止める** — 文字はページと一緒に流さず、画面のよい位置に止める。場面が変わったら、その場で入れ替える。
-5. **ページの中にスクロール枠を作らない** — 止める文字は、表やニュースも含め 1 画面に収める（スマホも）。
-
-作業の要点：
-- **静止画**：場面の静止画を作るたびに、1 枚ずつ目で確かめる（ロゴ・読める看板・時代感のずれを直す）。
-- **つなぎ映像**：作ったら必ずコマを並べて見る。途中で絵が透けて重なる（ディゾルブ）ものは使わない。
-  作り直しは `kling3-i2v` と `seedance25-i2v` を切り替えて試す。
-- **1 本にする**：`scripts/build_film.sh` でつなぎ、`scripts/align_film.py` で継ぎ目の寄りと色を、前の映像の最後の約 1 秒で合わせる。
-- **書き出し**：スクロールで動かす映像は `-g 4 -bf 0` で書き出す。
-- **確認**：`scripts/check_scroll_page.py` で、PC とスマホの両方を数字で確かめてから渡す。
-  見る点：文字が動かない／映像だけ進む／画面に収まる／スクロール枠なし／横はみ出しなし。
+「シネマティックなHP」「スクロールで映像が進むサイト」「会社の事業を映像で見せたい」と頼まれ、3D ツールの連番が無いときは、
+osi-creative の **`cinematic-hp`** を使う（一覧に見えなければ `get_skill` で `cinematic-hp` を読む）。
+決まり（一続きのカメラ・フェードなし・文字は止める・会社概要まで映像の中・中にスクロール枠なし）、2通りの作り方、
+継ぎ目合わせと確認の道具（`build_film.sh` / `align_film.py` / `check_scroll_page.py`）は、すべてあちらにある。
 
 ## The stack (pinned versions, battle-tested)
 
@@ -194,7 +171,7 @@ This is the part a lot of builders trip on. You can't do this from code alone; y
 4. Place in `public/frames/` (or `public/tunnel-frames/` for a second animation).
 5. Update `FRAME_COUNT` and path in the Hero component.
 
-If the user doesn't have frames yet, they have three options: (a) render their own in Blender, (b) commission an artist, (c) use a pre-built sequence from a stock site. Be direct about this — don't pretend the frames come from nowhere. If a live-action feel fits the brief, (d) build the one-take film with AI video instead — see **references/08-one-take-cinematic.md**.
+If the user doesn't have frames yet, they have three options: (a) render their own in Blender, (b) commission an artist, (c) use a pre-built sequence from a stock site. Be direct about this — don't pretend the frames come from nowhere. If a live-action feel fits the brief, (d) build the one-take film with AI video instead — use the `cinematic-hp` skill (osi-creative).
 
 ## Performance hardening checklist
 
@@ -241,10 +218,7 @@ Everything above is the top layer. Go deep when the task demands it:
 - `references/05-component-architecture.md` — File layout, reusable components, SSR rules
 - `references/06-performance-optimization.md` — RAF, direct DOM, preloading, hardware acceleration
 - `references/07-claude-code-guide.md` — Effective prompting, CLAUDE.md / AGENTS.md usage, skills
-- `references/08-one-take-cinematic.md` — 実写ワンカット型：場面の静止画 → 始め／終わりのコマ指定でつなぐ映像 → 継ぎ目合わせ → スクロールで動かす映像 → 文字を止めて入れ替える → 数字で確認
-- `scripts/build_film.sh` — 映像を 1 本につなぐ（重複する最後のコマを落とす）
-- `scripts/align_film.py` — 継ぎ目の寄り・位置・色を、前の映像の最後の約 1 秒で合わせる（クロスフェードではない）
-- `scripts/check_scroll_page.py` — 出来上がったページを PC とスマホで確認する（文字が止まっているか・映像が進むか・画面に収まるか・スクロール枠・横はみ出し・エラー）
+- シネマティックHP（AIで作った一続きの映像）… osi-creative の `cinematic-hp`（手順書・道具・実測はすべてあちら）
 
 Read the relevant reference file when the section you're working on touches its topic. Do not read all of them up-front — that wastes context. Pull them in on demand.
 
