@@ -67,4 +67,5 @@ label: シネマティックHP
 - `vp-seamless-journey` … 動画の連鎖生成と継ぎ目の検証（正本）
 - `vp-core` … プロンプトの承認ゲート・コマ検証
 - `scroll-3d-website`（osi-deploy）… Next.js で組む重めのスクロール演出サイト。こちらは素の HTML 1枚で軽く作る
+- `scroll-3d-website` の `references/08-one-take-cinematic.md` と `scripts/`（osi-deploy）… 同じワンカット型の別の手順書。文字を止めて入れ替える・マスクで出す（透明度で出し入れしない）、継ぎ目の寄りと色を合わせる `align_film.py`、PC とスマホを数字で確かめる `check_scroll_page.py` がある。作るときは両方を読む
 - `create-app`（osi-deploy）… 作成先の決定ルール・公開の道具

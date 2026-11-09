@@ -3,13 +3,16 @@ name: scroll-3d-website
 description: |
   Build premium 3D scroll-animated websites end to end — Next.js setup, canvas
   frame-sequence engine, scroll math, smooth scroll, neumorphic design system,
-  performance hardening, and deploy. Triggers on "3D website", "scroll animation",
-  "frame sequence", "sticky canvas", "hero animation that plays on scroll", "premium
-  landing page with scroll effects", or sites in the vein of Igloo / Lusion / Active
-  Theory. The word "3D" is not required.
+  performance hardening, and deploy. Also builds "one-take" cinematic homepages:
+  AI-generated live-action clips chained start-frame→end-frame into one seamless
+  film that scrubs with scroll, with text pinned in place (no fades, no seams).
+  Triggers on "3D website", "scroll animation", "frame sequence", "sticky canvas",
+  "hero animation that plays on scroll", "premium landing page with scroll effects",
+  「シネマティックなホームページ」「スクロールで動画が進むサイト」「ワンカットでつながる映像のHP」,
+  or sites in the vein of Igloo / Lusion / Active Theory. The word "3D" is not required.
 
 # スキルの一覧（つないだときに Claude に渡す）に出す短い用途
-label: 3Dスクロールのサイト
+label: 3Dスクロール・シネマティックのサイト
 ---
 
 # Build Premium 3D Scroll-Animated Websites
@@ -17,10 +20,6 @@ label: 3Dスクロールのサイト
 This skill captures the complete, proven pipeline for building the kind of premium scroll-animated site you see on high-end agency homepages — sticky canvas with frame-sequence playback as the user scrolls, buttery smooth scroll, neumorphic cards, staggered reveals, and careful performance hardening so it holds up on mobile Safari.
 
 You are the builder. The user brings the idea; you ship the whole site.
-
-> **「シネマティックなホームページ」「映画みたいなサイト」「スクロールで映像が進むHP」を頼まれたら、このスキルではなく
-> osi-creative の `cinematic-hp` を使う**（スキルの一覧に見えなければ `get_skill` で `cinematic-hp` を読む）。
-> 一続きのカメラ映像・会社概要まで映像の中で進む作りは、あちらに手順と決まりがある。
 
 ## Mental model
 
@@ -35,6 +34,35 @@ Keep this model front-of-mind. If the user says "I want a 3D hero that animates 
 - Scene has too many states to pre-render cleanly
 
 For anything else — frame sequence wins every time. It's faster on mobile, never janks, and you can art-direct the animation in a real 3D tool.
+
+## 実写ワンカット型（AIで作った映像）— 3D の連番が無いときの第一選択
+
+「シネマティックなHP」「会社の事業を映像で見せたい」と頼まれ、3D ツールの連番が無いときはこの型で作る。
+粒子や図形のような抽象表現から入らない。人が歩く・働く・暮らす実写の場面で見せる。
+手順・コード・確認方法は **references/08-one-take-cinematic.md**。
+同じ型の決まりと実測（会社概要・沿革・お問い合わせまで映像の中で進める、具体の場面で見せて抽象は締めだけ、関係ない看板・ロゴの混入）は osi-creative の **`cinematic-hp`** にもある。シネマティックを作るときは両方を読む（一覧に見えなければ `get_skill` で `cinematic-hp`）。
+
+最初から守ること（相手に何度も直された点）：
+
+1. **映像は 1 本だけ、継ぎ目なし**
+   - 背景に固定した映像を 1 本だけ置く。区画ごとに別の映像・写真を置かない。
+   - 場面と場面の境目（2 つの場面が上下に並んで見える状態）を出さない。
+2. **フェードを使わない**
+   - 場面は、カメラが移動してつながる映像で切り替える。
+   - 映像の作り方：`image_to_video` に、今の場面を `image_url`、次の場面を `end_image_url` として渡し、つなぎの映像を作る。
+   - 文字・段落・オープニングも、透明度で出し入れしない。マスクでせり上げる・抜く、幕を開くといった動きにする。
+3. **スクロールで進む** — 自動再生しない。スクロールした分だけ映像が進み、戻せば巻き戻る。
+4. **文字は止める** — 文字はページと一緒に流さず、画面のよい位置に止める。場面が変わったら、その場で入れ替える。
+5. **ページの中にスクロール枠を作らない** — 止める文字は、表やニュースも含め 1 画面に収める（スマホも）。
+
+作業の要点：
+- **静止画**：場面の静止画を作るたびに、1 枚ずつ目で確かめる（ロゴ・読める看板・時代感のずれを直す）。
+- **つなぎ映像**：作ったら必ずコマを並べて見る。途中で絵が透けて重なる（ディゾルブ）ものは使わない。
+  作り直しは `kling3-i2v` と `seedance25-i2v` を切り替えて試す。
+- **1 本にする**：`scripts/build_film.sh` でつなぎ、`scripts/align_film.py` で継ぎ目の寄りと色を、前の映像の最後の約 1 秒で合わせる。
+- **書き出し**：スクロールで動かす映像は `-g 4 -bf 0` で書き出す。
+- **確認**：`scripts/check_scroll_page.py` で、PC とスマホの両方を数字で確かめてから渡す。
+  見る点：文字が動かない／映像だけ進む／画面に収まる／スクロール枠なし／横はみ出しなし。
 
 ## The stack (pinned versions, battle-tested)
 
@@ -166,7 +194,7 @@ This is the part a lot of builders trip on. You can't do this from code alone; y
 4. Place in `public/frames/` (or `public/tunnel-frames/` for a second animation).
 5. Update `FRAME_COUNT` and path in the Hero component.
 
-If the user doesn't have frames yet, they have three options: (a) render their own in Blender, (b) commission an artist, (c) use a pre-built sequence from a stock site. Be direct about this — don't pretend the frames come from nowhere.
+If the user doesn't have frames yet, they have three options: (a) render their own in Blender, (b) commission an artist, (c) use a pre-built sequence from a stock site. Be direct about this — don't pretend the frames come from nowhere. If a live-action feel fits the brief, (d) build the one-take film with AI video instead — see **references/08-one-take-cinematic.md**.
 
 ## Performance hardening checklist
 
@@ -213,6 +241,10 @@ Everything above is the top layer. Go deep when the task demands it:
 - `references/05-component-architecture.md` — File layout, reusable components, SSR rules
 - `references/06-performance-optimization.md` — RAF, direct DOM, preloading, hardware acceleration
 - `references/07-claude-code-guide.md` — Effective prompting, CLAUDE.md / AGENTS.md usage, skills
+- `references/08-one-take-cinematic.md` — 実写ワンカット型：場面の静止画 → 始め／終わりのコマ指定でつなぐ映像 → 継ぎ目合わせ → スクロールで動かす映像 → 文字を止めて入れ替える → 数字で確認
+- `scripts/build_film.sh` — 映像を 1 本につなぐ（重複する最後のコマを落とす）
+- `scripts/align_film.py` — 継ぎ目の寄り・位置・色を、前の映像の最後の約 1 秒で合わせる（クロスフェードではない）
+- `scripts/check_scroll_page.py` — 出来上がったページを PC とスマホで確認する（文字が止まっているか・映像が進むか・画面に収まるか・スクロール枠・横はみ出し・エラー）
 
 Read the relevant reference file when the section you're working on touches its topic. Do not read all of them up-front — that wastes context. Pull them in on demand.
 
@@ -234,8 +266,9 @@ You've got this. Build something that makes people stop scrolling.
 - 新規アプリの企画〜公開までを一気通貫で回すなら、オーケストレータ `create-app` から本スキルを
   フロント構築フェーズとして呼ぶ。
 
-単一HTMLの軽量デモを素早く出したい場合は、Next.js を省いて 1 ファイルに収め、フレーム連番は
-AI 生成キービジュアルの擬似アニメ（canvas のスクロール連動 transform）で代替してよい。
+単一HTMLの軽量デモを素早く出したい場合は、Next.js を省いて 1 ファイルに収めてよい。
+映像は「実写ワンカット型」（references/08）を base64 で埋め込む（30 秒で 10MB 前後）。
+公開するときは mp4 を別ファイルにして置く。
 
 ### 実機で踏んだ落とし穴（必ず確認）
 - **`overflow-x: hidden` は `position: sticky` を壊す**。`html`/`body` に付けるとルートがスクロール
@@ -245,3 +278,11 @@ AI 生成キービジュアルの擬似アニメ（canvas のスクロール連�
   アニメに切り替えると破綻しない。
 - ローカル `file://` 直開きは origin 制限の警告が出る。確認は `python3 -m http.server` 経由か
   Vercel 等の公開URLで行う。
+- **場面ごとにフェードで切り替えると「つながっていない」と言われる**。場面転換は、カメラが移動してつながる映像で作る。
+  AI の映像は、遠い場面どうしを頼むと途中で 2 つの絵を重ねる（ディゾルブ）ことがある。
+  コマを並べて確かめ、重なっていたら作り直す。
+- **映像を `autoplay` で流すより、スクロールに合わせて動かす方が求められる**。
+  スクロールで動かす映像は、キーフレームを細かく（`-g 4 -bf 0`）しないとカクつく。
+- **文字をページと一緒に流すと読みにくい**。文字は固定した舞台に置いて止め、区画は空のスクロール区間にする。
+  区画の装飾クラスを舞台側に引き継がないと、見出しのデザインが外れる。
+- **生成した静止画には、実在ブランドのロゴや読める看板が入りやすい**。使う前に 1 枚ずつ見て、`edit_image` で消す。
