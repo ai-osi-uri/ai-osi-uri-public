@@ -18,6 +18,10 @@ This skill captures the complete, proven pipeline for building the kind of premi
 
 You are the builder. The user brings the idea; you ship the whole site.
 
+> **「シネマティックなホームページ」「映画みたいなサイト」「スクロールで映像が進むHP」を頼まれたら、このスキルではなく
+> osi-creative の `cinematic-hp` を使う**（スキルの一覧に見えなければ `get_skill` で `cinematic-hp` を読む）。
+> 一続きのカメラ映像・会社概要まで映像の中で進む作りは、あちらに手順と決まりがある。
+
 ## Mental model
 
 The "3D feel" on these sites is almost never runtime WebGL. It's a **pre-rendered image sequence** (100–120 frames exported from Blender / After Effects / Cinema 4D) that a `<canvas>` scrubs through based on scroll position. The viewport is pinned sticky while a tall parent section drives the scroll. That's the trick. Everything else is polish: Lenis for physics-based smooth scroll, Framer Motion for section reveals, CSS 3D transforms for small cubes/orbs, SVG path animations for circuit-style details, and a neumorphic design system that makes the whole thing feel premium.
