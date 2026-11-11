@@ -408,6 +408,7 @@ Git author <mail> must have access to the team <TEAM> on Vercel to create deploy
 **直すときは、既存の画面を崩しやすい。** 画面に触れた更新なら、smoke test の後に、作業した会話とは切り離した別の Claude（サブエージェント。使えない環境では新しい会話）に、画面の原則（create-app の `references/screen-structure.md` の最新版）に沿っているかを点検させる。
 
 - 見る範囲は「変わった画面」と「共通の枠（layout・サイドバー・`app/loading.tsx`）」だけでよい
+- **ログインのある API を足した・変えた更新は、画面に触れていなくてもこのゲートを通す。** 足した道・変えた道について、create-app の `references/access-control.md` のチェック A・B（他人の番号で取りにいく・役割の範囲の外に出る）を回す
 - 渡すのは決まり・コードの場所・公開URL・見る画面だけ。直した経緯や「直しました」という説明は渡さない
 - 1人目（Claude）の点検の材料（読んだファイル・画面で確かめた事実・スクリーンショット。判定は渡さない）で、2人目の ChatGPT（道具 `chatgpt_review`）にも判定させる。OpenAI の鍵が無く道具が出ないときは1人目だけで進め、報告に「ChatGPT: 鍵なし」と書く
 - 2人の結果は多数決でなく根拠で合わせる。外れは作業した側が直し、外れだった項目だけを見せ直す（3往復まで）
