@@ -121,12 +121,14 @@ jobs:
           echo "build number: $BUILD_NUMBER"
           xcodebuild -project "$PROJECT" -scheme "$SCHEME" -configuration "${{ steps.flavor.outputs.configuration }}" \
             -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/App.xcarchive" \
-            CURRENT_PROJECT_VERSION="$BUILD_NUMBER" CODE_SIGN_STYLE=Automatic \
-            -allowProvisioningUpdates \
-            -authenticationKeyPath "$RUNNER_TEMP/keys/AuthKey_${ASC_KEY_ID}.p8" \
-            -authenticationKeyID "$ASC_KEY_ID" \
-            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
-            archive | tail -80
+            CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            archive > "$RUNNER_TEMP/build.log" 2>&1 \
+            || { grep -E "error:|warning: .*(failed|missing)" "$RUNNER_TEMP/build.log" | head -60; tail -40 "$RUNNER_TEMP/build.log"; exit 1; }
+          tail -20 "$RUNNER_TEMP/build.log"
+          # 登録デバイスが0台のチームでは、Automatic の archive が開発用プロファイルを作れずに失敗する。
+          # ここでは署名せずに作り、次の書き出し（exportArchive）で配布用に署名する（Apple のクラウド署名）。
+          # 注意: 署名済みのバイナリ framework（FirebaseAnalytics など）を入れると、書き出しで Invalid Signature になる。
 
       - name: Upload to TestFlight
         if: steps.keys.outputs.ready == 'true'

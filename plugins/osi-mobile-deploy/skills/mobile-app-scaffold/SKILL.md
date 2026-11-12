@@ -206,8 +206,8 @@ apps/
     MyApp/
       App/
         MyAppApp.swift           # @main の SwiftUI App
+        ContentView.swift        # Hello World の SwiftUI View（sources に入る App/ の中に置く）
         AppDelegate.swift        # FirebaseApp.configure() を guard 付きで呼ぶ
-      ContentView.swift          # Hello World の SwiftUI View
       Config/
         Base.xcconfig
         Dev.xcconfig
@@ -224,7 +224,7 @@ apps/
       src/main/
         AndroidManifest.xml
         java/com/example/myapp/
-          MyApplication.kt       # Application.onCreate で FirebaseApp.initializeApp を guard
+          MyAppApplication.kt    # Application.onCreate で FirebaseApp.initializeApp を guard
           MainActivity.kt        # ComponentActivity + setContent {}
           ui/MainScreen.kt       # Hello World の @Composable
           ui/theme/{Color,Theme,Type}.kt
@@ -285,6 +285,18 @@ README.md
 - `Podfile` は入っていない（SPM のみで組む前提）。Firebase iOS SDK も SPM から入れる
 - iOS デプロイメントターゲットは **16.0** を既定（`apps/ios/project.yml`）。より広い互換性が必要な案件でも 16 未満には下げない
 - Android は **minSdk 26**（Android 8.0）を既定（`apps/android/app/build.gradle.kts`）。26 未満は adaptive icon / Compose の JVM 要件で古くなり過ぎるので下げない
+
+## 雛形から作った直後に止まりやすいところ（2026-11 の実例から）
+
+雛形は直してあるが、古い雛形から作ったリポや、手で書き足すときに同じことで止まる。
+
+- **アプリの部品（ソース）は、project.yml の sources に書いた場所の中に置く。** 外に置いたファイルはビルドに入らず「見つからない」で止まる。
+- **Info.plist は 1 か所だけで扱う。** resources にも入れると「Multiple commands produce」で止まり、xcodegen の `info:` を書くと中身が上書きされて、画面の向き・起動画面の設定が消え、書き出しで止まる。
+- **アイコンは本物の大きさの画像を置く。** 1×1 の仮画像だと、iOS は「AppIcon に使えるものが無い」、Android は AAPT2 で止まる。最初の配信の前に `mobile-icon-generator` を通す。
+- **名前の一括置換は、別の単語の一部を巻き込む。** 置換の元になる名前は、ほかの単語の頭にならない形にしておく（例：`MyApplication` の中の `MyApp` が置き換わって、壊れたクラス名になった）。
+- **iPhone の登録が 0 台のチームは、archive の時点で署名しない。** 開発用の署名を作れずに止まるので、署名せずに作り、書き出しで Apple のクラウド署名に任せる（雛形のワークフローはこの形）。
+  この形では、**署名済みのバイナリの部品（FirebaseAnalytics など）を入れると、書き出しで Invalid Signature になる。** ソースで入る部品（Crashlytics など）を選ぶか、入れる前に署名の扱いを決める。
+- **Firebase の設定ファイルが無いと、Android のビルドが止まる**（google-services プラグイン）。Firebase を使うなら、設定ファイルを GitHub に入れてからプラグインを有効にする。使わない版ではプラグインごと外す。
 
 ## 関連スキル
 

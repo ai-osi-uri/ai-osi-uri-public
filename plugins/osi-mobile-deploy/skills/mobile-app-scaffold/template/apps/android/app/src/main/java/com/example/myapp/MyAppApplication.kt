@@ -12,7 +12,7 @@ import com.google.firebase.FirebaseApp
  * lightweight preview build). Without this guard the app crashes at
  * `FirebaseInitProvider` before `onCreate` even runs.
  */
-class MyApplication : Application() {
+class MyAppApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         try {

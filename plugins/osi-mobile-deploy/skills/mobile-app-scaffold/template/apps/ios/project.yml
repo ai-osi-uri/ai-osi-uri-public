@@ -42,7 +42,7 @@ configs:
 packages:
   Firebase:
     url: https://github.com/firebase/firebase-ios-sdk
-    from: "11.0.0"
+    from: "12.0.0"
 
 targets:
   MyApp:
@@ -55,8 +55,9 @@ targets:
         buildPhase: resources
         excludes:
           - "**/*.sample"
-    info:
-      path: MyApp/Resources/Info.plist
+          # Info.plist は INFOPLIST_FILE で扱う。resources に入れると「Multiple commands produce Info.plist」で止まる。
+          # info: も書かない（xcodegen が中身を上書きし、画面の向き・起動画面の設定が消えて書き出しで止まる）
+          - "Info.plist"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.example.myapp
@@ -77,7 +78,6 @@ targets:
           PRODUCT_BUNDLE_IDENTIFIER: com.example.myapp
           APP_FLAVOR: prod
     dependencies:
-      - package: Firebase
-        product: FirebaseAnalytics
+      # FirebaseAnalytics は入れない（署名済みのバイナリ framework で、署名しない archive → クラウド署名の書き出しが Invalid Signature で止まる）
       - package: Firebase
         product: FirebaseCrashlytics

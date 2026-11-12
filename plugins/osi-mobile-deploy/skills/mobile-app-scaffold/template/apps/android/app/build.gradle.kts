@@ -1,3 +1,5 @@
+import java.util.Properties
+
 // Android app module for MyApp
 //
 // Stack policy (osi-mobile-deploy 既定):

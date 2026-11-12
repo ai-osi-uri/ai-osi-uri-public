@@ -166,6 +166,8 @@ github_list_secrets({repo_owner, repo_name}) を叩き、
 | Bundle ID / Package Name の重複追加 | `firebase_list_ios_apps` / `firebase_list_android_apps` で existing 確認 |
 | `firebase_add_ios_app` が「App is being created」で 409 | 30 秒待って再試行 |
 | GitHub Secrets 投入で 403 | PAT の scope に `repo` + `workflow` が必要。案内して停止 |
+| `firebase_*` が「Firebase Management API has not been used in project …」で 403 | 道具の鍵（サービスアカウント）が属するプロジェクトで Firebase Management API が無効。鍵に有効化の権限が無いことが多いので、本人のブラウザ（Claude in Chrome）でエラーにある URL を開いて「有効にする」を押す |
+| 新しく作った Firebase プロジェクトに道具が入れない（403） | Firebase プロジェクトを本人の画面で作ったときは、道具の鍵がまだメンバーではない。IAM で鍵（health_check の返事に出る SA）に「Firebase 管理者」を付ける。**権限を渡す操作は本人が押す**（Claude からは止められる）。値を入れた画面まで開いて渡す |
 | `github_set_secrets_batch` ツールが見つからない | 拡張が v1.17.3 未満。新しい .mcpb をインストール後 Claude 完全再起動 |
 
 ## 注意事項

@@ -26,7 +26,7 @@ plugin's initial build:
 - Fastlane `pilot` uses `skip_waiting_for_build_processing: true` — no
   10-minute wait in CI.
 - Android: `versionCode` auto-increments from Play internal max + 1;
-  `MyApplication.onCreate` guards `FirebaseApp.initializeApp` so a missing
+  `MyAppApplication.onCreate` guards `FirebaseApp.initializeApp` so a missing
   `google-services.json` doesn't crash the process.
 
 ## Layout
@@ -52,7 +52,7 @@ apps/
       build.gradle.kts     # Kotlin + Compose + dev/stg/prod flavors
       src/main/
         AndroidManifest.xml
-        java/com/example/myapp/{MyApplication.kt, MainActivity.kt, ui/MainScreen.kt}
+        java/com/example/myapp/{MyAppApplication.kt, MainActivity.kt, ui/MainScreen.kt}
         res/{mipmap-*/, values/, xml/, mipmap-anydpi-v26/}
       google-services.json.sample
 .github/workflows/
