@@ -129,7 +129,7 @@ Chrome をつなぐと発行画面まで代わりに進められることを、�
 | 呼び出し元 | いつ呼ぶか | 渡すやりたいこと |
 |---|---|---|
 | `create-app` | `[quota_exceeded:projects]` / `[quota_exceeded:resources]`（お試しの枠）を受けた／本人がお試しの枠を超えて作りたいと言った | `app`（決済があれば `pay` も） |
-| `create-app` | URL のコネクタで、自分の鍵（または会社の鍵）で動いていて、`uses` の `[app]` が `✕`（GitHub・Vercel・Supabase などが未登録） | `app`（決済があれば `pay` も） |
+| `create-app` | URL のコネクタで、作るアプリに要る `uses` の行が `✕`（`[app]`＝GitHub・Vercel・Supabase、`[cloudflare]`、`[railway]`、`[pay]` など） | ✕ の行の id（複数あれば全部） |
 | `create-app` | Stripe の道具が「Stripe の鍵が未登録」で止まった | `pay` |
 | `setup-deploy-environment` | `health_check` がテキストで返った（URL のコネクタの人がダウンロード版の手順に来た） | 呼び出し元のやりたいこと（無ければ `app`） |
 | `secretary-create` | URL のコネクタで、`uses` の `[secretary]` が `✕` | `secretary` |
