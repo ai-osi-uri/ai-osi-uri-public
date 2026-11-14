@@ -33,7 +33,11 @@ label: スマホ配信の鍵を入れる
   証明書（.p12）・そのパスワード・一時 Keychain のパスワード・Team ID のシークレットは要らない（Team ID は project.yml）。
 - **鍵を入れたら、そのまま 1 回目の配信を流す**（`start_release: true`）。人に GitHub の画面でボタンを押してもらわない。
   動かす前に「◯◯ のリポに鍵を入れて TestFlight（Google Play の内部テスト）に出します」と本人に見せて OK をもらう。
-- **鍵が足りなくても止めない**。足りない配信先は動かさず、足りない鍵の名前を本人に伝える。雛形の CI は鍵が無いと「鍵待ち」で緑のまま終わる。
+- **鍵が足りなくても止めない。でも、伝えるだけで終わらせない**（0.10.3〜）。足りない配信先は動かさず、足りない鍵の名前を本人に伝えて
+  「今いっしょに用意しますか？（発行画面まで私が進めます。押していただくのは『作成』と『貼って登録』だけです）」と 1 回聞く。
+  用意するなら `own-keys-setup`（osi-deploy。手元に無ければ get_skill で読む）に渡し、そろったら Step 2 から呼び直す。
+  断られたら、足りない鍵の名前と鍵設定の URL を残して、キーストア・Firebase など他の手順は進める。
+  雛形の CI は鍵が無いと「鍵待ち」で緑のまま終わる。
 
 ## 入力契約
 
@@ -86,7 +90,9 @@ label: スマホ配信の鍵を入れる
 ```
 1. github_list_secrets({repo_owner, repo_name}) で既存のシークレット名を見る
 2. mobile_health_check で、鍵設定の App Store Connect / Play の鍵が生きているかを見る
-   （apple.ok / google が false なら、足りない鍵を本人に伝える。止めずに Step 3 以降は進める）
+   （apple.ok / google が false なら、足りない鍵を本人に伝え、上の決まりどおり
+    「今いっしょに用意しますか」と聞く。用意するなら own-keys-setup に渡し、そろってから Step 2 へ。
+    断られても Step 3 以降は進める）
 3. リポに配信のワークフロー（ios-release-auto.yml / android-release-auto.yml）があるか
    （github_workflow_runs の workflows で見られる。無ければ mobile-app-scaffold の雛形から置く）
 ```
@@ -102,6 +108,7 @@ mobile_keys_to_github({
 ```
 
 戻り値の `set`（入れた名前）・`missing`（足りない鍵）・`releases`（配信先ごとの run_id・URL）を本人に短く伝える。
+`missing` があれば、Step 1 の 2 でまだ聞いていなければ同じ問いを出す（もう聞いて断られていれば聞き直さない）。
 Android は キーストア（Step 3）が入るまで配信しても鍵待ちになるので、iOS だけ先に `start_release` してよい。
 
 ### Step 3: Android keystore（既存 or 新規生成）
@@ -200,7 +207,7 @@ github_list_secrets({repo_owner, repo_name}) を再度叩いて、
 
 | 症状 | 対応 |
 |---|---|
-| 鍵設定に配信の鍵が無い（`missing`） | 足りない鍵の名前を伝えて「鍵設定」で預けてもらう。止めずに他の手順は進め、預けたら呼び直す |
+| 鍵設定に配信の鍵が無い（`missing`） | 足りない鍵の名前を伝え、今いっしょに用意するかを聞く。用意するなら `own-keys-setup` に渡し、そろったら呼び直す。断られたら他の手順は進める |
 | `releases` が「workflow_dispatch がありません」 | 古い手作りのワークフロー。雛形の `ios-release-auto.yml` に置き換える（CI の動き方の変更なので本人の OK をもらってから） |
 | keytool 無し | mobile_generate_keystore が fail 返却 → JDK 案内、halt |
 | github_set_secrets_batch・github_run_workflow で 403 | GitHub の鍵の権限不足（`repo`+`workflow`）、案内、halt |

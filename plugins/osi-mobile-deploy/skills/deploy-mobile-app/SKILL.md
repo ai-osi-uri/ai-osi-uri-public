@@ -105,8 +105,21 @@ Firebase プロビジョニング・Secrets 投入・CI 監視・TestFlight / Pl
    iOS は App Store Connect の 3 点（Key ID・Issuer ID・.p8）だけ。証明書（.p12）・Team ID の別登録は要らない
    （署名は Apple のクラウド署名。Team ID は project.yml の `DEVELOPMENT_TEAM` に書く）。
    Android は Play のサービスアカウント JSON と、Phase 5 で作るアップロード用キーストア。
-3. **鍵が足りなくても止めない。** 雛形の配信ワークフローは鍵が無いと「鍵待ち」で緑のまま終わるので、
-   アプリづくり（Phase 1〜4）は先に進め、足りない鍵だけ本人に「鍵設定で預けてください」と 1 回伝える。
+3. **鍵が足りなくてもアプリづくりは止めない。ただし、鍵の用意は本人と一緒にやる（伝えるだけで終わらせない）。**
+   足りない鍵（`mobile_health_check` の `apple.ok` / `google` が false、または URL のコネクタの `health_check` の `uses` で
+   iPhone／Android の配信の行が `✕`）があれば、配信する先の分だけ、本人に 1 問だけ聞く（AskUserQuestion）:
+
+   > 配信に要る鍵（〈足りない鍵の名前〉）がまだ鍵設定にありません。今いっしょに用意しますか？
+   > （発行画面まで私が進めます。押していただくのは「作成」と「貼って登録」だけです）
+
+   - **今用意する** → `own-keys-setup`（osi-deploy。手元に無ければ get_skill で読む）に渡す。やりたいこと＝iPhone／Android の配信（配信する先だけ）。
+     そろったら、ここに戻って続ける。
+   - **あとで** → アプリづくり（Phase 1〜4）を先に進め、Phase 5 の前にもう一度だけ同じ問いを出す。
+   - Apple Developer Program・Google Play Console の登録そのものがまだなら、そのことを先に伝える
+     （登録は本人が行い、法人は審査に日数がかかる）。登録が済んでから `own-keys-setup` に渡す。
+
+   「鍵設定で預けてください」と文章で伝えて終わるのは禁止（何をどこで発行するか分からない人がそこで止まる）。
+   雛形の配信ワークフローは鍵が無いと「鍵待ち」で緑のまま終わるので、鍵が後になってもアプリづくりは壊れない。
    鍵がそろったら Phase 5 で入れて、そのまま 1 回目の配信を流す。
 
 4. **iOS を配信する場合、flavor ごとの ASC 事前登録を確認**（見落とすと CI 37 秒で死ぬ）:
@@ -262,7 +275,9 @@ mobile_keys_to_github:
 Android のアップロード用キーストアと Firebase の設定は `mobile-secrets-sync` の手順で入れる。
 
 **注意**:
-- 鍵が足りない配信先は動かさない（動かしても「鍵待ち」で終わるだけ）。足りない鍵を本人に伝え、預けてもらったら呼び直す。
+- 鍵が足りない配信先は動かさない（動かしても「鍵待ち」で終わるだけ）。`missing` が返ったら、Phase 0 の 3 と同じ問いで
+  「今いっしょに用意しますか」と聞き、用意するなら `own-keys-setup` に渡す。そろったら呼び直す
+  （Phase 0 で「あとで」を選ばれていても、ここでもう一度だけ聞く。2 回断られたら、足りない鍵の名前と鍵設定の URL を残して止める）。
 - 配信の CI は**後から設定を変えない前提**で雛形に入っている（push で自動・手でも動かせる・鍵待ちは緑）。
   AI が後から CI の動き方（`on:`）を書き換えようとすると安全チェックで止まるので、手で動かしたいときは `github_run_workflow` を使う。
 
@@ -357,12 +372,13 @@ mobile-app-smoke-test:
 
 | Phase | 失敗 | 対応 |
 |---|---|---|
-| 0 | 配信の鍵が「鍵設定」に無い | 足りない鍵を伝えて先に進める（配信は鍵待ちで止まるだけ）。そろったら Phase 5 |
+| 0 | 配信の鍵が「鍵設定」に無い | 足りない鍵を伝え、今いっしょに用意するかを聞く。用意するなら `own-keys-setup` に渡す。あとでならアプリづくりを先に進め、Phase 5 の前にもう一度聞く |
 | 0 | `firebase.valid: false` | Google 認証 or Service Account 設定を案内、中断 |
 | 1 | APP_NAME が読み取れない | 「アプリ名は何にしますか？（英数字、例: Foo）」で 1 問だけ聞く |
 | 1 | 「Flutter で作って」と要望された | 既定がネイティブである旨と、既存 Flutter アプリからの移行かを確認。新規で Flutter を選ぶ強い事情が無ければネイティブで進める。強い事情があるなら本プラグインの対象外として halt |
 | 2 | 同名リポあり | 「既存のを更新しますか？（mobile-update-deploy へ）」で確認 |
 | 3 | Firebase プロジェクト作成失敗（quota 超過） | 既存プロジェクトを指定できるか確認 |
+| 5 | `mobile_keys_to_github` が `missing` を返した | Phase 0 の 3 と同じ問いを出し、用意するなら `own-keys-setup` に渡して、そろったら呼び直す |
 | 5 | Secrets 投入失敗（REST API 401） | GitHub PAT の scope 不足 → 案内 |
 | 6-7 | 自動修正ループが 3 回失敗 | 最後のログを提示して停止、ユーザー判断待ち |
 | 8 | Simulator/Emulator が起動しない | `xcrun simctl list` / `emulator -list-avds` で診断案内 |
@@ -379,6 +395,8 @@ mobile-app-smoke-test:
 - **Bundle ID の自動生成で `com.example.*` を使う**：App Store Connect には登録できない。必ず `com.{org}.{app}` 形式で。
 - **Firebase の URL scheme をユーザー確認なしに Info.plist へ追加**：空の `REVERSED_CLIENT_ID` を入れると起動時にクラッシュする。Google Sign-In を明示的に追加する時だけ入れる。
 - **CI 失敗時に log を読まずに再 push**：pattern マッチせずに闇雲に push すると無限ループする。3 回失敗したら止まる。
+- **足りない鍵を「鍵設定で預けてください」と伝えるだけで終わる**：ポータルの「できること」は「鍵が無いまま貼っても、Claude が要る鍵を 1 つずつ案内します」と約束している。
+  今いっしょに用意するかを聞き、用意するなら `own-keys-setup` に渡す。
 
 ---
 
@@ -390,6 +408,7 @@ mobile-app-smoke-test:
 - `mobile-secrets-sync` — Phase 5 で呼ぶ
 - `mobile-app-smoke-test` — Phase 8 で呼ぶ
 - `mobile-crash-triage` — smoke test が失敗した時に呼ぶ
+- `own-keys-setup`（osi-deploy）— 配信の鍵が足りないときに渡す（発行画面の作成直前まで Claude が進め、鍵設定に 1 つずつ登録して戻る）
 - `mobile-update-deploy` — 既存リポの局所修正（本スキルの範疇外）
 - `ios-testflight-deploy` — 実配信の詳細ノウハウ（fastlane / altool の癖）
 - `android-play-deploy` — 実配信の詳細ノウハウ（Gradle / bundletool / Play API）

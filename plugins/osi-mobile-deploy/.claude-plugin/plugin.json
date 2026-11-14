@@ -1,6 +1,6 @@
 {
   "name": "osi-mobile-deploy",
-  "version": "0.10.2",
+  "version": "0.10.3",
   "requires_connectors": [
     "AI OSI URI Deploy"
   ],
