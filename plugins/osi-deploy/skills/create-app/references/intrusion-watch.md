@@ -63,13 +63,34 @@ export async function reportIntrusion(kind: IntrusionKind, req?: { headers: Head
     // 届かなくても止めない
   }
 }
+
+/** 見つけたら止める：ログインを確かめる前に聞く。止められていれば残り秒数。ポータルに届かないときは止めない（0） */
+export async function intrusionBlockedFor(req: { headers: Headers }): Promise<number> {
+  if (!intrusionEnabled()) return 0;
+  const ip = clientIp(req.headers);
+  if (!ip) return 0;
+  try {
+    const res = await fetch(process.env.INTRUSION_URL!.replace(/\/events$/, '/check'), {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.INTRUSION_KEY}` },
+      body: JSON.stringify({ ip }),
+      signal: AbortSignal.timeout(1500),
+      cache: 'no-store',
+    });
+    if (!res.ok) return 0;
+    const j = (await res.json()) as { retry_after?: number };
+    return Math.max(0, Number(j.retry_after) || 0);
+  } catch {
+    return 0;
+  }
+}
 ```
 
 呼ぶ場所：
 
 | 場所 | 入れ方 |
 |---|---|
-| ログインの口（`/api/login` など） | 失敗を返す直前に `await reportIntrusion('login_failed', req)`、成功の直前に `await reportIntrusion('login_succeeded', req)` |
+| ログインの口（`/api/login` など） | **まず** `const wait = await intrusionBlockedFor(req)`。`wait > 0` なら、パスコードを確かめずに 429（`retry-after` に秒数）で断り、画面には「間違いが続いたため、この端末からのログインを止めています。約◯分後にもう一度」と出す。そのあと、失敗を返す直前に `await reportIntrusion('login_failed', req)`、成功の直前に `await reportIntrusion('login_succeeded', req)` |
 | 関所（`middleware.ts`） | ログインしていない API の呼び出しに 401 を返す所で `event.waitUntil(reportIntrusion('unauthorized', req))`（返事を待たせない。`middleware(req, event: NextFetchEvent)`） |
 | つながりの知らせ | `app/api/intrusion/ping/route.ts` で `reportIntrusion('ping')`。`vercel.json` の `crons` に毎日 1 回（例 `"10 21 * * *"`）。関所の「ログインなしで通す道」に足す。`CRON_SECRET` があれば `Authorization` を確かめる |
 | `/api/health` | `intrusion: intrusionEnabled()` を足す（つないだかを外から確かめられる） |
@@ -100,9 +121,15 @@ Vercel 以外（Cloud Run・AWS など）は、ポータルのアプリ詳細 �
 2. `ping` の口を 1 回呼ぶ（Cron を待たない） → ポータルのアプリ詳細 → セキュリティの「外からのアクセス」が「いまは大丈夫です」になる
 3. 間違ったパスコードで、続けてログインを失敗させる（同じ IP から 10 回、または合わせて 30 回）→ 検知が 1 件立つ
    （送信元の IP が毎回変わる環境では、同じ IP の決まりに当たらず「合わせて 30 回」で立つ。これは正しい動き）
-4. 立った検知を開いて「テストだった」と書いて「確認した」で閉じる。完了レポートに「不正アクセスの見張り：つないだ・検知を確かめた」と書く
+4. 続けて失敗させると、途中から 429（止めている）が返る。送信元の IP が毎回変わる環境では、合わせて 30 回を超えたあと、3 回失敗した IP から止まる
+5. 立った検知を開いて「テストだった」と書いて「確認した」で閉じる。完了レポートに「不正アクセスの見張り：つないだ・検知を確かめた」と書く
+
+## 見つけたら止める（決まり）
+
+- 止めるのは**その送り元（IP）だけ**。全体を止めると、攻撃する側がお店の人を締め出せてしまう。
+- 同じ IP から 15 分で 10 回失敗 → 最後の失敗から 15 分止める。場所を変えた総当たりの最中（直近 5 分に合わせて 30 回以上）は、3 回失敗した IP から止める。
+- ポータルに届かないときは止めない（ログインできなくなる方が困る）。これで access-control.md の原則 6（入口に回数の上限）を満たす。
 
 ## まだ入っていないもの（入れたら、ここを直す）
 
-- 見つけたら止める（同じ送り元の失敗が続いたら、しばらくログインを受け付けない）。それまでは access-control.md の原則 6 を、アプリの中で別に入れる
 - しきい値と届け先（LINE・メール・お客さまの監視の仕組み）を変える画面
