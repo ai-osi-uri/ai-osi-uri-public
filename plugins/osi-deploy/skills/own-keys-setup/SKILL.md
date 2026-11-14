@@ -10,6 +10,7 @@ description: |
   「2 本目のアプリを作りたい」「自社アカウントに切り替えたい」「鍵を入れたい」「鍵がそろっているか確かめて」「秘書を作りたいが鍵が無い」
   「決済を付けたい」「お試しの上限に当たった」「〇〇の鍵を登録して」「鍵を作り直して」「鍵が切れた（401 で止まる）」、鍵設定の「AI に頼む」の指示文（「鍵設定で「…」を使えるようにしたいです」）で発動する。`create-app` が `[quota_exceeded:projects]`・`[quota_exceeded:resources]`・`[quota_exceeded:media]`・`[quota_exceeded:generation]` を受けたとき、
   `secretary-create` が URL のコネクタで「自分の鍵のときだけ」と止められたときにも呼ばれる。
+  `deploy-mobile-app`・`mobile-secrets-sync`（スマホ配信の鍵）、`ai-video-production`（動画の鍵）が、足りない鍵を本人が「今用意する」と選んだときにも呼ばれる。
   ダウンロード版（AI OSI URI Deploy 拡張）の鍵は `setup-deploy-environment` の担当。
 # スキルの一覧（つないだときに Claude に渡す）に出す短い用途
 label: 鍵を預ける(鍵設定)
@@ -133,6 +134,8 @@ Chrome をつなぐと発行画面まで代わりに進められることを、�
 | `create-app` | Stripe の道具が「Stripe の鍵が未登録」で止まった | `pay` |
 | `setup-deploy-environment` | `health_check` がテキストで返った（URL のコネクタの人がダウンロード版の手順に来た） | 呼び出し元のやりたいこと（無ければ `app`） |
 | `secretary-create` | URL のコネクタで、`uses` の `[secretary]` が `✕` | `secretary` |
+| `deploy-mobile-app` / `mobile-secrets-sync` | 配信の鍵が足りない（`mobile_health_check` の `apple.ok` / `google` が false、`mobile_keys_to_github` が `missing`、`asc.*`・`play.*` が `NG`）と分かり、本人が「今用意する」を選んだ | `ios` / `android`（配信する先だけ。Firebase も要れば `firebase`） |
+| `ai-video-production` | `[creative]` が `✕`、`fal.key`・`elevenlabs.key` が `NG`、または `[quota_exceeded:generation]` で、本人が「今用意する」を選んだ | `creative` |
 | LINE の道具 | 「アプリの画面で、そのアプリの LINE 公式アカウントの鍵を預けると使えます」と出た | （下の「LINE はアプリごと」） |
 | 本人 | 「鍵を設定して」「〇〇を使えるようにして」／鍵設定の「AI に頼む」の指示文 | 言われたもの（無ければ `uses` の `✕` から選んでもらう） |
 
@@ -158,6 +161,7 @@ LINE 公式アカウントのチャネルアクセストークンは、1 つの�
 - 鍵がチャットに貼られ、そのまま使う → 使わない。作り直しを案内する
 - 鍵を入れただけで自分の鍵に切り替わったと思い込む → 切り替えは別のボタン。`keys :` で確かめる
 - 期限切れの鍵が「登録済み」に見えて、作る途中で 401 → `credentials:` の `NG` を見る。OK でも、道具を 1 回動かして確かめる
+- `uses` の行が `○` なのに、その行の鍵が `credentials:` で `NG`・`broken:` に出ている（期限切れの鍵を `○` と数えることがある） → `uses` だけで「そろっている」と言わない。`NG` の鍵は足りない扱いにして作り直す
 - テスト用のアカウント・別の会社でログインしたまま鍵を入れる → §1b で右上の会社名と左下のアカウントを先に見る
 - 会社の鍵を入れ直したのに、自分の鍵の古いものが残っていて止まる（メール・電子署名） → §1b でもう一方のタブも見る
 - 消すボタンを押して確認ダイアログで Chrome が止まる → 押す前に本人に伝え、確認の OK は本人に押してもらう
