@@ -101,6 +101,8 @@ URL のコネクタの `personal_line_status` が見えるときはこちら。�
 | `draft_message` / `send_draft` | `personal_line_draft_message` / `personal_line_send_draft` |
 | `draft_group` / `create_group` / `leave_chat` | `personal_line_draft_group` / `personal_line_create_group` / `personal_line_leave_chat` |
 
+オープンチャットは URL のコネクタの道具で扱える（リモート MCP 0.130.0〜）。`personal_line_list_chats` に参加中のオープンチャット（`kind` が「オープンチャット」・`chatId` は `m…`）も出て、`personal_line_get_messages` で読み、`personal_line_draft_message` → 本人の OK → `personal_line_send_draft` で送る。送ると参加者の全員に見えるので、下書きを見せるときに人数も伝える。オープンチャットの画像やファイルの中身・メンション・退室は LINE アプリで行う。手元の拡張の道具はオープンチャットを扱わない。
+
 両方つながっているときは、手元の拡張を先に使う（ログイン情報が手元にだけあるほうを優先）。
 
 ## 困ったとき
