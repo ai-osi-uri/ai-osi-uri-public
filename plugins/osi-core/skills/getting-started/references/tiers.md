@@ -4,29 +4,33 @@
 > 段の意味：**0** は Plugins からインストールするだけ／**1** は Claude の Connectors で純正コネクタ（Gmail・Drive・Slack・Calendar・MoneyForward 等）を繋ぐ／**2** は AI OSI URI Deploy・Finance・Creative などの自社 MCP を繋ぐ。既定は**マネージド**（ツールポータルにログインし、コネクタの URL を Cowork に貼るだけ。アカウント作成も鍵も要らない）。自分の鍵で動かす人だけ `.mcpb` を入れて鍵を設定する（ダウンロード経路）。
 > 「公開」列は外部版（`build_external.py`）に含まれるか。
 
-## 0 段目：入れた瞬間に動く（コネクタ不要） — 51 本
+## 0 段目：入れた瞬間に動く（コネクタ不要） — 55 本
 
 | プラグイン | スキル | 必要なコネクタ | 公開 | 何をする |
 |---|---|---|---|---|
 | osi-core | `getting-started` | — | ○ | スキルを入れた直後の初回セットアップを、会話 1 回で終わらせる入口スキル |
 | osi-core | `jev-judge` | — | ○ | 大量の文章に同じ判定（はい／いいえ・選択肢から1つ・段階で点数）をかける横断スキル |
+| osi-core | `local-setup` | — | ○ | チャットだけでは動かない仕事（手元のパソコン・Mac・Android・Obsidian・経理の台帳・デスクトップ拡張・Chrome が要るも… |
 | osi-core | `research-verifier` | — | ○ | 調査結果、営業リスト、提案書、事業計画、記事などに含まれる事実主張を、作成時の推論から独立して主張単位で再検証する横断品質ゲート |
 | osi-core | `secretary-report` | — | ○ | Claude でやった仕事の進み具合を、会社の秘書（LINE 秘書）に報告する横断スキル |
+| osi-core | `update-tools` | — | ○ | 道具（コネクタ）・手元のプラグイン・手元の拡張・Claude の設定に書いた「道具と働く決まり」を、会話の中でまとめて最新にするスキル |
+| osi-core | `work-principles` | — | ○ | どの仕事でも最初に読む、会社の「能動の決まり」（仕事の進め方の決まり） |
 | osi-deploy | `app-builder-container-export` | — | 内部 | 【コマンド専用・自動発火しない】任意スタックのフルスタックアプリ（フロント +自前バックエンド + DB）を、オンプレ App Builde… |
 | osi-deploy | `app-builder-export` | — | 内部 | 【コマンド専用・自動発火しない】アプリ仕様を、App Builder（ローカル版）が取り込める App Bundle（.appbuilder… |
+| osi-deploy | `app-builder-node-export` | — | 内部 | アプリを、オンプレの App Builder が Docker なしで動かせる「Node のアプリ」（.node-app.zip）として書き… |
 | osi-deploy | `app-manual` | — | ○ | 公開したアプリの「使い方マニュアル」を、実装（ルート・画面のラベル・サーバーアクション・メール文面・認証方式）から起こして pptx で作る… |
 | osi-deploy | `app-smoke-test` | — | ○ | デプロイ済みの URL を curl で叩いて HTTP レベルの動作確認をする |
 | osi-deploy | `aws-static-deploy` | — | ○ | GitHub に push 済みの静的サイト（HTML / Vite / Next.js export）を S3 + CloudFront … |
 | osi-deploy | `harness-init` | — | ○ | 生成するリポに「ハーネスエンジニアリング」の最小構成（AGENTS.md /CLAUDE.md・init.sh・claude-progres… |
 | osi-deploy | `nextjs-pdf-export` | — | 内部 | Next.js（App Router）+ Vercel サーバレスで **日本語フォント埋め込み済み PDF** を出すAPI ルートを構築… |
-| osi-deploy | `own-keys-setup` | — | ○ | お試し（マネージド）から「鍵設定」に移るときの案内役 |
+| osi-deploy | `own-keys-setup` | — | ○ | URL で繋いだコネクタ（リモート MCP）の「鍵設定」に鍵を預ける一連の作業の案内役 |
 | osi-deploy | `scroll-3d-website` | — | ○ | Build premium 3D scroll-animated websites end to end — Next.js setup, … |
 | osi-deploy | `setup-deploy-environment` | — | ○ | デプロイを使えるようにする初回セットアップ |
 | osi-deploy | `supabase-set-auth-url` | — | ○ | Supabase の Auth 設定（Site URL / Redirect URLs）を本番デプロイ後の URL に更新する |
 | osi-docs | `business-flow-asis-tobe` | — | ○ | 任意の業態・客先について、業務フローの AS-IS（現状）と TO-BE（将来像）を定義し、ステップごとのスイムレーン図を含む詳細なpptx… |
 | osi-docs | `business-plan-builder` | — | ○ | 新規事業・新会社・既存事業者の「事業計画一式」を作る唯一の窓口（オーケストレータ） |
 | osi-docs | `company-financial-report` | — | 内部 | 対象企業（主に上場企業）の「業績・財務分析レポート」を、Web一次情報の調査からWord(docx)納品まで一気通貫で作るスキル |
-| osi-docs | `deck-composition` | — | ○ | 承認済みの骨子（storyline.md）を、スライドの「構成」＝枚数・順序・各スライドの主張（Action title）・1スライド1メッ… |
+| osi-docs | `deck-composition` | — | ○ | 承認済みの骨子（storyline.md）を、スライドの「構成」＝枚数・順序・各スライドの主張（タイトル＝短い見出し／メッセージ＝言い切り）… |
 | osi-docs | `design-guide` | — | ○ | スライド・Word・Excel・アプリ画面を「誰が見ても伝わる形」で作るための、色を持たない共通の作り方 |
 | osi-docs | `doc-type-router` | — | ○ | 資料づくりの入口で「型」を選ぶルーター |
 | osi-docs | `financial-model-3statement` | — | ○ | 事業計画の「財務3表フル連動モデル（Excel）」を作る atomic スキル |
@@ -60,7 +64,7 @@
 | osi-sales | `proposal-estimate` | — | ○ | 見積もり・スケジュール入り**詳細提案書（pptx）を単発生成する atomic スキル** |
 | osi-sales | `proposal-self-review` | — | ○ | 顧客向けの提案書・デモ・アプリ・資料などの「成果物」をユーザーに見せる前に、必ず通す自己レビューのゲート |
 
-## 1 段目：Claude の純正コネクタを繋げば動く（OAuth でワンクリック） — 24 本
+## 1 段目：Claude の純正コネクタを繋げば動く（OAuth でワンクリック） — 25 本
 
 | プラグイン | スキル | 必要なコネクタ | 公開 | 何をする |
 |---|---|---|---|---|
@@ -82,23 +86,26 @@
 | osi-knowledge | `calendar-free-time` | google-calendar | ○ | Google Calendarから空き時間を取得し、コンパクトなフォーマットで表示するスキル |
 | osi-meta | `skill-lifecycle` | cowork | 内部 | スキルそのものを管理するライフサイクル・オーケストレータ |
 | osi-sales | `goal-setting-sheet` | web-fetch | ○ | 初回商談の議事録（文字起こし）から、AIコンシェルジュの「目標設定シート」を Word で作り、送付用の LINE 文面まで用意するスキル |
-| osi-sales | `meeting-minutes` | slack, box, plaud | ○ | 商談議事録を Plaud の文字起こしから自動生成し、Drive の `03_制作・成果物/` に docx として格納したうえで、営業管理… |
+| osi-sales | `meeting-minutes` | slack, box, plaud | ○ | 商談議事録を文字起こし（会社の議事録DB＝秘書の置き場、または Plaud）から自動生成し、Drive の `03_制作・成果物/` に d… |
+| osi-sales | `meeting-ready-check` | google-calendar, drive-fs | ○ | 自分が営業している商談・デリバリーの準備を、前日までに「確定」させるスキル |
 | osi-sales | `new-lead-registration` | slack | ○ | 新規リード（見込み案件）を営業管理表（`{{ledgers.sales}}` の `取引先管理` タブ）に1行追加し、`{{paths.pr… |
 | osi-sales | `pr-times-article` | slack | ○ | 協業実績・事例紹介をPR TIMES記事として作成するスキル |
 | osi-sales | `proposal-package` | slack, plaud | ○ | リードに対する提案準備を一気通貫で行う**唯一の窓口（オーケストレータ）スキル** |
 | osi-sales | `session-review` | plaud | ○ | 「AI伴走（Claude / AI 導入支援）セッション」の文字起こしから、振り返りレビューを構造化して生成するスキル |
 | osi-sales | `shodan-prep` | box, plaud, web-fetch | ○ | 商談を「準備」と「振り返り」の両面で支援するスキル |
 
-## 2 段目：自社 MCP（Deploy / Finance / Creative 等）を繋ぐ（既定はマネージド＝URL を貼るだけ） — 61 本
+## 2 段目：自社 MCP（Deploy / Finance / Creative 等）を繋ぐ（既定はマネージド＝URL を貼るだけ） — 70 本
 
 | プラグイン | スキル | 必要なコネクタ | 公開 | 何をする |
 |---|---|---|---|---|
-| osi-backoffice | `contract-send` | ai-osi-uri（esign_*） | ○ | バックオフィス向け「契約書を内容チェックして AI電子契約で署名依頼を送る」スキル |
+| osi-backoffice | `contract-send` | AI_OSI_URI_Remote_MCP | ○ | バックオフィス向け「契約書を内容チェックして、AI電子契約（自社の電子契約）で署名依頼を送る」スキル |
 | osi-backoffice | `meishi-generator` | cowork, AI_OSI_URI_Deploy | 内部 | 名刺（表面）のラクスル入稿用PDFを自動生成するスキル |
 | osi-creative | `ai-video-production` | ai-osi-uri-creative | ○ | AI動画を作るオーケストレータ（ディスパッチャ）スキル |
+| osi-creative | `cinematic-hp` | ai-osi-uri-creative | ○ | お店・会社のシネマティックなホームページ（スクロールすると一続きのカメラの映像が進み、料理の寄り→店内→厨房→メニュー→外観→予約まで、会社… |
 | osi-creative | `live-ugc-reel-edit` | ai-osi-uri-creative | 内部 | インフルエンサー等の「実写UGCクリップ（商品を飲む・使う・作る縦型素材）」を、参照リールの構成と“文字の遊び”に寄せて編集し、動く日本語テ… |
 | osi-creative | `music` | ai-osi-uri-creative | ○ | 動画のBGM・音楽を担う atomic スキル（narration と同格の能力アトミック） |
 | osi-creative | `narration` | ai-osi-uri-creative | ○ | AI音声ナレーション（日本語特化）を作る atomic スキル |
+| osi-creative | `vp-brand-film` | ai-osi-uri-creative | ○ | AI動画の「ブランドムービー」メソッド |
 | osi-creative | `vp-character-action` | ai-osi-uri-creative | ○ | AI動画の「キャラ一貫アクション」メソッド |
 | osi-creative | `vp-core` | ai-osi-uri-creative | ○ | AI動画制作の「共通インナー」atomicスキル |
 | osi-creative | `vp-corporate-card` | ai-osi-uri-creative | ○ | AI動画の「企業の動画名刺」メソッド |
@@ -130,26 +137,33 @@
 | osi-finance | `osi-finance-bank-recon` | AI_OSI_URI_Finance, drive-fs | ○ | OSI Finance の経理で、ネットバンキングの入出金明細CSVと台帳を突合し、入金（AR）・支払（AP）の実績を裏取りするスキル（BA… |
 | osi-finance | `osi-finance-connect` | claude-in-chrome, AI_OSI_URI_Finance, money-forward | ○ | AI OSI URI Finance 拡張（請求管理台帳の読み書き＋MoneyForwardクラウド請求書ポーリング）の **OAuth 接… |
 | osi-finance | `osi-finance-contract-draft` | AI_OSI_URI_Finance, drive-fs | ○ | OSI Finance の契約書作成・雛形管理スキル（コンソールの中核パートナー） |
-| osi-finance | `osi-finance-contract-intake` | gmail, ai-osi-uri-finance | ○ | OSI Finance の請求業務の起点 |
+| osi-finance | `osi-finance-contract-intake` | gmail, ai-osi-uri-finance, AI_OSI_URI_Remote_MCP | ○ | OSI Finance の請求業務の起点 |
 | osi-finance | `osi-finance-freee-sync` | AI_OSI_URI_Finance, drive-fs | ○ | OSI Finance の経理で、freee 会計からエクスポートした仕訳CSVと台帳（請求管理台帳・支払管理台帳）を突合し、売上(AR)・… |
 | osi-finance | `osi-finance-invoice` | AI_OSI_URI_Finance, gmail, claude-in-chrome, plaud | ○ | OSI Finance の月次請求書発行 |
 | osi-finance | `osi-finance-journal` | AI_OSI_URI_Finance | ○ | OSI Finance の内部仕訳帳（仕訳台帳）に、台帳からローカルで仕訳を生成・記帳するスキル（v4 の中核） |
-| osi-finance | `osi-finance-setup` | money-forward, gmail, superhuman, ai-osi-uri-finance | ○ | OSI Finance（請求AR・支払APの経理自動化）を新しい組織の Claude に初回セットアップするオーケストレータ・スキル |
+| osi-finance | `osi-finance-setup` | money-forward, gmail, superhuman, ai-osi-uri-finance, AI_OSI_URI_Remote_MCP | ○ | OSI Finance（請求AR・支払APの経理自動化）を新しい組織の Claude に初回セットアップするオーケストレータ・スキル |
 | osi-finance | `osi-finance-year-end-close` | money-forward, AI_OSI_URI_Finance | ○ | OSI Finance の「決算整理と決算書一式」を期末月に回すスキル |
+| osi-line | `line-basics` | AI_OSI_URI_LINE | ○ | 自分の LINE（個人アカウント）を Claude から扱う基本の操作 |
+| osi-line | `line-inbox` | AI_OSI_URI_LINE | ○ | 自分の LINE（個人アカウント）の未読と、返事をしていないトーク（相手の発言で止まっているトーク）を集めて、誰から何が来ていて、どれに返事… |
+| osi-line | `line-reply` | AI_OSI_URI_LINE | ○ | 自分の LINE（個人アカウント）の返信を作るスキル |
+| osi-line | `line-setup` | AI_OSI_URI_LINE | ○ | 自分の LINE（個人アカウント）を Claude から使えるようにするセットアップと、つながっているかの確かめ（ヘルスチェック） |
 | osi-mobile-deploy | `android-play-deploy` | AI_OSI_URI_Deploy | ○ | Android AAB を Google Play Internal Track にアップロードする |
 | osi-mobile-deploy | `apiv2-callable-iam-gotchas` | AI_OSI_URI_Deploy | ○ | Firebase Cloud Functions v2 の callable がクライアントから呼べないときの復旧 |
 | osi-mobile-deploy | `deploy-mobile-app` | AI_OSI_URI_Deploy, cowork, computer-use, ai-osi-uri-creative | ○ | ネイティブモバイルアプリ（iOS = SwiftUI / Android = Kotlin + Jetpack Compose）を新規に作っ… |
 | osi-mobile-deploy | `firestore-bulk-index-sync` | AI_OSI_URI_Deploy | ○ | `firebase deploy --only firestore:indexes` が index limit / 409 already… |
 | osi-mobile-deploy | `ios-appstore-release` | AI_OSI_URI_Deploy, slack | 内部 | TestFlight にビルドが上がった **後** の iOS リリース管理 |
 | osi-mobile-deploy | `ios-sim-auth-backdoor` | AI_OSI_URI_Deploy | 内部 | iOS Simulator で Firebase Auth のサインインを通す 2 本立て |
-| osi-mobile-deploy | `ios-testflight-deploy` | AI_OSI_URI_Deploy | ○ | fastlane + altool で iOS ビルドを TestFlight にアップロードする |
+| osi-mobile-deploy | `ios-testflight-deploy` | AI_OSI_URI_Deploy | ○ | iOS ビルドを TestFlight に上げる |
 | osi-mobile-deploy | `mobile-app-scaffold` | AI_OSI_URI_Deploy | ○ | Golden Template（SwiftUI + Jetpack Compose、Firebase / CI / fastlane 込み）… |
 | osi-mobile-deploy | `mobile-crash-triage` | AI_OSI_URI_Deploy | ○ | TestFlight / Play に配信済みのビルドがクラッシュしたとき、ログを取得・シンボリケートして原因候補と修正案を出す |
 | osi-mobile-deploy | `mobile-firebase-setup` | AI_OSI_URI_Deploy | ○ | モバイルアプリ用の Firebase プロジェクトを作成し、iOS / Android アプリを追加してconfig を GitHub Se… |
 | osi-mobile-deploy | `mobile-icon-generator` | nano-banana, ai-osi-uri-creative | ○ | 1枚の 1024x1024 画像から iOS AppIcon と Android mipmap の全サイズを一括生成する |
-| osi-mobile-deploy | `mobile-secrets-sync` | AI_OSI_URI_Deploy, cowork | ○ | モバイル配信に必要な GitHub Actions Secrets（証明書 / ASC キー / keystore / Play SA/ F… |
+| osi-mobile-deploy | `mobile-secrets-sync` | AI_OSI_URI_Deploy, cowork | ○ | モバイル配信に必要な GitHub Actions Secrets（App Store Connect の鍵 3 点 / Play SA/ … |
 | osi-mobile-deploy | `mobile-update-deploy` | AI_OSI_URI_Deploy, cowork, computer-use | ○ | 既存のネイティブモバイルアプリを修正して再配信する（修正 → push → CI 監視 →TestFlight / Play Interna… |
 | osi-mobile-deploy | `xcodegen-project-regen` | AI_OSI_URI_Deploy | ○ | xcodegen 管理の iOS プロジェクトで、pull 後に「Missing package product'FirebaseCore'… |
+| osi-note | `note-draft` | AI_OSI_URI_note | ○ | note（note.com）の記事を、構成案 → 本文（Markdown）→ 本人の確認 → note の「下書き」に保存、まで進める |
+| osi-note | `note-research` | AI_OSI_URI_note | ○ | note（note.com）の記事リサーチ |
+| osi-note | `note-setup` | AI_OSI_URI_note | ○ | note（note.com）を Claude から使えるようにするセットアップと、つながっているかの確かめ（ヘルスチェック） |
 | osi-sales | `discussion-prep` | obsidian | ○ | 「方向性ディスカッション（経営メンバーとの壁打ち）」に丸腰で臨まないための準備スキル |
 | osi-secretary | `secretary-care` | AI_OSI_URI_Deploy | ○ | できあがった AI 秘書の様子を見る・最新にするスキル |
 | osi-secretary | `secretary-create` | AI_OSI_URI_Deploy | ○ | 会社の AI 秘書（LINE で仕事を頼める秘書）を、使う人自身のアカウント（LINE 公式アカウント・Supabase・Vercel・Cl… |

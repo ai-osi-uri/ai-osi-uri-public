@@ -119,7 +119,7 @@ Phase 3: プラン承認
 
 [ローカル出力パス]
   Phase 4-L → references/local-output-path.md
-    local-project-output / app-builder-export / app-builder-container-export
+    local-project-output / app-builder-export / app-builder-node-export / app-builder-container-export
 
 ─── 共通後処理 ───
 
@@ -435,6 +435,7 @@ create-app が Phase 0-3 でアプリ定義を確定
 scaffold → gh-create-repo-and-push → harness-init
 → local-project-output（プロジェクト一式を出力）
   or app-builder-export（.appbuilder.json 台帳スペック → App Builder に取り込む）
+  or app-builder-node-export（.node-app.zip → App Builder に取り込む。Docker 不要の標準）
   or app-builder-container-export（単一イメージ .tar.gz → App Builder に取り込む＝生アプリ）
 ```
 
@@ -443,6 +444,7 @@ scaffold → gh-create-repo-and-push → harness-init
 |--------|------|
 | `local-project-output` | プロジェクトフォルダをそのまま出力（受け手が npm install / npm start） |
 | `app-builder-export` | 設定駆動の台帳スペック `.appbuilder.json` を書き出し、オンプレの App Builder に取り込む |
+| `app-builder-node-export` | Node だけで動くアプリを `.node-app.zip` にして書き出し、App Builder に Docker なしで取り込む（現場がチャットで直す標準の形） |
 | `app-builder-container-export` | 任意スタックの生アプリを単一イメージ `.tar.gz` にして書き出し、App Builder に取り込む（生アプリ） |
 
 ---
@@ -610,6 +612,7 @@ scaffold → gh-create-repo-and-push → harness-init
 **ローカル出力:**
 - `local-project-output` — プロジェクト出力（生ソース一式）
 - `app-builder-export` — 台帳スペック(.appbuilder.json)を App Builder に取り込む
+- `app-builder-node-export` — Node のアプリを .node-app.zip にして App Builder に取り込む（Docker 不要）
 - `app-builder-container-export` — 生アプリを単一イメージ tar にして App Builder に取り込む
 
 **運用:**

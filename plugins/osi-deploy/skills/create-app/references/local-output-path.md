@@ -13,6 +13,7 @@ Phase 3（技術選定）で以下のいずれかに該当する場合、Phase 4
 | ユーザーの発言 | 判定 |
 |--------------|------|
 | 「ローカルで動かしたい」「オフラインで使う」「インターネットなしで使いたい」 | Phase 4-L |
+| 「App Builder で動かしたい」「PCの中だけで使える版にしたい」「中身を外に出せない場所で、現場が直せるようにしたい」 | Phase 4-L（**app-builder-node-export**。Docker 不要の標準） |
 | 「社内サーバ／オンプレに置きたい」「Docker で渡したい」「自己完結で動かしたい」 | Phase 4-L（app-builder-container-export） |
 | 「App Builder で簡単な台帳を作って渡したい」「現場でチャット改修させたい」 | Phase 4-L（app-builder-export） |
 | 「プロジェクトフォルダをそのまま渡したい」「コードを触りたい」「とりあえずローカルで試したい」 | Phase 4-L（local-project-output） |
@@ -101,7 +102,8 @@ Phase 3（技術選定）で以下のいずれかに該当する場合、Phase 4
 |-----------------|---------|------|
 | 開発者（自分でコードを触る） | local-project-output | ソースが見える、改変・拡張できる |
 | App Builder を運用していて、**単純な台帳**を渡したい | app-builder-export | config 1 ファイルで渡せる・現場がチャット改修できる |
-| App Builder を運用していて、**任意スタックの生アプリ**を自己完結・オフラインで渡したい | app-builder-container-export | 単一イメージ tar・ネット不要・環境差異なし |
+| App Builder を運用していて、**複数機能・独自画面のアプリ**を渡し、現場に直させたい（標準） | app-builder-node-export | Docker 不要・同梱の Node で動く・直したものがそのまま効く・AI は App Builder の設定 |
+| App Builder を運用していて、**Node 以外の作り**（Python など）のアプリを渡したい | app-builder-container-export | 単一イメージ tar・Docker 必須 |
 | 社内 IT / インフラ（オンプレで運用） | app-builder-container-export | 再現性が高く、App Builder のカタログから起動/停止できる |
 
 ### 判断フロー
@@ -111,7 +113,8 @@ Phase 3（技術選定）で以下のいずれかに該当する場合、Phase 4
   ├─ Yes → local-project-output
   └─ No（App Builder に取り込んで動かす）
       ├─ 単一テーブルの台帳で十分? → app-builder-export（.appbuilder.json）
-      └─ 任意スタックの生アプリ（複数機能・独自UI・自前DB）? → app-builder-container-export（イメージ tar）
+      ├─ 複数機能・独自UI のアプリ（標準）→ app-builder-node-export（.node-app.zip・Docker 不要）
+      └─ Node 以外の作りでしか作れない? → app-builder-container-export（イメージ tar・Docker 必須）
 ```
 
 ---
