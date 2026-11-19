@@ -361,9 +361,29 @@ DB を問い合わせて気づき、次のデプロイで直った。止まる�
    同じメール・同じ接続元で失敗が続いたらしばらく止める。パスワードそのものは記録に残さない。管理画面の点検だけで済ませず、利用者のログインも同じ基準で作る。
 3. **失敗の言葉は、理由ごとに分ける**。どんな失敗も「パスワードが違います」にまとめない。とくに通信の失敗（Supabase の `AuthRetryableFetchError`・status 0・`Failed to fetch`）は
    「通信できませんでした」と出し、別の入り方（メールのリンクなど、サーバー経由の入口）を案内する。
-4. **ファイルの受け渡しも、外部のドメインを見せない作りを選ぶ**。署名付き URL（`*.supabase.co/storage/...`）へ転送・iframe 表示・直接アップロードすると、
-   同じネットワークでは見られない・上げられない。小さいファイルはサーバー経由で流す。大きいファイル（Vercel の関数の上限 4.5MB を超えるもの）は、
-   Supabase の独自ドメイン（アプリと同じ自社ドメインの下）を使う。社外の人が開く画面（署名・ダウンロード）ほど優先する。
+4. **ファイルの受け渡しも、外部のドメインを見せない**。署名付き URL（`*.supabase.co/storage/...`）へそのまま転送・iframe 表示・直接アップロードすると、
+   同じネットワークでは見られない・上げられない。社外の人が開く画面（署名・ダウンロード）ほど効く。
+   **アプリのドメインの決まったパスを、Supabase の署名付き URL へ転送する**（Next.js の `rewrites`。Vercel が中継するので、関数の 4.5MB の上限はかからない。
+   有料の独自ドメインも DNS の変更も要らない）。
+   - `next.config` に、署名付きの読み書きのパスだけを転送する決まりを置く：
+     ```js
+     async rewrites() {
+       const sb = (process.env.NEXT_PUBLIC_SUPABASE_URL || "").replace(/\/+$/, "");
+       if (!sb) return [];
+       return [
+         { source: "/sb-files/object/sign/:path*", destination: `${sb}/storage/v1/object/sign/:path*` },
+         { source: "/sb-files/object/upload/sign/:path*", destination: `${sb}/storage/v1/object/upload/sign/:path*` },
+       ];
+     }
+     ```
+     鍵の付かない通り道（`object/public`・`rest`・`auth`）は転送しない。
+   - 署名付き URL を画面・メール・転送に渡す前に、`https://<ref>.supabase.co/storage/v1/object/…` を `/sb-files/object/…` に書き換える関数を 1 つ用意し、全部そこを通す
+     （画面に埋め込むときは相対パス、メール・AI の道具に渡すときはアプリのドメインの絶対 URL）。版によって相対の `/object/…` が返ることもあるので、両方を受ける。
+   - アップロードは `supabase-js` の `uploadToSignedUrl` を使わず、`/sb-files/object/upload/sign/<bucket>/<path>?token=<鍵>` へ `fetch` で `PUT` する（`content-type` と `x-upsert` を付ける）。
+   - サイトを複数のドメインで出している（middleware でドメインごとに振り分けている）なら、転送のパスを middleware の `matcher` から外し、どのドメインからでも使えるようにする。
+   - iframe で書類を見せるときは、ページと同じドメインの相対パスにする（`X-Frame-Options: SAMEORIGIN` で別ドメインは映らない）。
+   - 確かめ方：偽の鍵で `/sb-files/object/sign/<bucket>/x?token=bad` を開き、Supabase の `InvalidJWT` が返れば転送できている。鍵の付かないパスは 404 になること。
+     4.5MB を超えるファイルを転送経由で上げて通ることも確かめる。
 5. **作り終えたら、外部サービスのドメインを止めた状態で一通り通す**。ブラウザの開発者ツールで `*.supabase.co` をブロックし（Network の Block request domain）、
    ログイン・パスワード変更・保存・ファイルを開く／上げる、を全部通して、止まる所が無いか・止まったときの言葉が正しいかを確かめる。
 
