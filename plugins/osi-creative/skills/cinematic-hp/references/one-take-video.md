@@ -20,6 +20,7 @@
 ### 1. 場面（キーフレーム）を決めて静止画を作る
 - 事業ごとに「その仕事をしている人が映る場面」を 1 枚ずつ決め、最後に「街に戻る」場面で輪にする
   （例：朝の街 → オフィスで画面を見る人 → 電話する人 → 住宅街 → 部屋の中の人 → 夜景の人たち → 朝の街）。
+- となり合う2枚は「窓・扉・空・湯気などを通って、カメラが実際に行ける」関係にする。同じ建物の中の別々の部屋を、通り道なしで並べない（前の絵のガラス越しに見える店内と、次の絵の店内が別物だと、モデルは2枚を重ねてごまかす）。同じ建物の中を進む場面は、絵を作らずに前の動画の最終コマから続ける。
 - 場所と場所の間を空撮でつなぐ場合は、間に置く「つなぎの静止画」（例：夕方の住宅街）も作る。
 - 生成：`generate_image`（16:9、2K）。プロンプトに「cinematic film still / 35mm film grain / 色味（例：navy and cyan grade）/ no text, no logos」を入れて、色調をそろえる。
 - 1 枚ずつ目で確かめて直す（`edit_image`）。直す対象：
@@ -36,7 +37,7 @@
   - 例：`Single unbroken physical camera move, absolutely no dissolve or cross-fade, no double exposure: the drone flies up toward the lit window, passes through it into the room ...`
   - 窓・ドア・ガラスを「くぐる」動きにすると、場所が変わっても自然につながる。
 - 全部を同時に投げ、終わったら `check_status` で回収する。1 本 2〜6 分かかる。
-- **必ずコマを並べて確かめる**：`ffmpeg -vf "select='not(mod(n\,15))',scale=320:-2,tile=4x3"`。
+- **必ずコマを並べて確かめる**：`ffmpeg -vf "select='not(mod(n\,3))',scale=320:-2,tile=8x5"`（1秒に8コマ。15コマおきだと、1秒足らずの重なりは一覧に1枚しか入らず見落とす）。あわせて `python3 scripts/find_dissolves.py clip.mp4 --sheet found.jpg`。
   途中で 2 つの絵が重なって透けるコマ（＝ディゾルブ）があれば使わない。プロンプトを強めるか、別のモデルで作り直す。
   `kling3-i2v` は遠い場面どうしだとディゾルブに逃げやすい。そのときは `seedance25-i2v` で作り直すと、カメラが移動してくれることが多い。
 

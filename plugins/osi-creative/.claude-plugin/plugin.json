@@ -1,6 +1,6 @@
 {
   "name": "osi-creative",
-  "version": "0.12.1",
+  "version": "0.12.2",
   "requires_connectors": [
     "AI OSI URI Creative"
   ],
