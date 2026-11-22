@@ -3,6 +3,10 @@
 > サーバ（クラウド）にデプロイせず、ローカル/オンプレで実行可能な形でアプリを出力するパス。
 > 出力先は次の 3 つ。**b) と c) は「オンプレの App Builder に取り込んで動かす」受け渡し形式**（App Builder が受け手）。
 > a) は App Builder を介さない生プロジェクト出力。
+>
+> **既定は app-builder-node-export（.node-app.zip）（2026-11-22）。** 「ローカルで」「PCの中だけで」「ネットにつながない」
+> 「手元で触れる環境を用意して」と言われたら、まずこれ。受け手に Node.js・GitHub・PowerShell（ターミナル）を触らせない
+> （そういう手順を案内した結果、現場で止まった）。a) は受け手が「コードを自分で触る開発者」と分かっているときだけ。
 
 ---
 
@@ -12,11 +16,11 @@ Phase 3（技術選定）で以下のいずれかに該当する場合、Phase 4
 
 | ユーザーの発言 | 判定 |
 |--------------|------|
-| 「ローカルで動かしたい」「オフラインで使う」「インターネットなしで使いたい」 | Phase 4-L |
+| 「ローカルで動かしたい」「オフラインで使う」「インターネットなしで使いたい」「作ったアプリを手元で動かしたい」 | Phase 4-L（**app-builder-node-export**。既定） |
 | 「App Builder で動かしたい」「PCの中だけで使える版にしたい」「中身を外に出せない場所で、現場が直せるようにしたい」 | Phase 4-L（**app-builder-node-export**。Docker 不要の標準） |
 | 「社内サーバ／オンプレに置きたい」「Docker で渡したい」「自己完結で動かしたい」 | Phase 4-L（app-builder-container-export） |
 | 「App Builder で簡単な台帳を作って渡したい」「現場でチャット改修させたい」 | Phase 4-L（app-builder-export） |
-| 「プロジェクトフォルダをそのまま渡したい」「コードを触りたい」「とりあえずローカルで試したい」 | Phase 4-L（local-project-output） |
+| 「プロジェクトフォルダをそのまま渡したい」「コードを自分で触りたい」（受け手が開発者のときだけ） | Phase 4-L（local-project-output） |
 | 「デプロイはしないで」 | Phase 4-L |
 
 ### Phase 4-L に該当しないケース
@@ -109,7 +113,7 @@ Phase 3（技術選定）で以下のいずれかに該当する場合、Phase 4
 ### 判断フロー
 
 ```
-受け取る側は生ソースを触りたい?
+受け取る側は、コードを自分で触る開発者だと言われている?（言われていなければ No）
   ├─ Yes → local-project-output
   └─ No（App Builder に取り込んで動かす）
       ├─ 単一テーブルの台帳で十分? → app-builder-export（.appbuilder.json）
@@ -135,6 +139,16 @@ Step 2-3: 必要なら gh-create-repo-and-push / harness-init（オンプレ受�
 ```
 Step 4: プロジェクトフォルダをそのまま出力する（README・.env.example・DBがあれば docker-compose.yml）
 Step 5: 出力先フォルダのパスをユーザーに報告する
+```
+
+#### app-builder-node-export の場合（既定・.node-app.zip）
+
+```
+Step 0: 受け手の 4 つの流れ（App Builder を入れる → 答える → zip を受け取る → 取り込んで起動）を本人に見せる。
+        App Builder が入っていなければ get_download_link（product app-builder）でリンクをこの会話で出す
+Step 4: app-builder-node-export atomic を呼ぶ（作ってあるアプリを移すときも同じ。リポは Claude の作業場所に取る）
+Step 5: 検証（単体起動・App Builder と同じ守りで起動・記録が残る）
+Step 6: zip を会話のファイルとして渡し、「📦 アプリを取り込む」→「起動」→「開く」を伝える
 ```
 
 #### app-builder-export の場合（台帳スペック）

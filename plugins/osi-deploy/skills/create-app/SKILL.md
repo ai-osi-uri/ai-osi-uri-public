@@ -7,7 +7,8 @@ description: |
   「アプリ作って」「LP 立ち上げて」「○○屋向けの在庫管理アプリ作って」
   「予約サイトを作って」「会員制のサブスク SaaS 作って」「業務系のシステム作って」
   「デスクトップアプリを作って」「Electron で作って」「PC にインストールできるアプリ」
-  「ローカルで動くアプリ」で発動する。**モバイルアプリ（iOS / Android）は
+  「ローカルで動くアプリ」「PCの中だけで動くアプリ」で発動する（PC の中で動かすものは
+  Phase 4-L で `app-builder-node-export` に渡すのが標準）。**モバイルアプリ（iOS / Android）は
   `deploy-mobile-app`（osi-mobile-deploy）が直接受ける**ので「iPhone アプリ作って」
   「Android アプリを作って」では発動しない。Web
   前提で進めた結果モバイルと判明したときだけ Phase 4-M で委譲する。既存アプリの修正は
@@ -280,9 +281,10 @@ Phase 3 のプランに**【画面構成】**として書き、承認を取る�
 
 | トリガー | ターゲット | パス |
 |----------|-----------|------|
-| 「Electronで」「デスクトップアプリ」「PCにインストール」「オフラインで使いたい」 | **Desktop** | Phase 4-D |
+| 「Electronで」「デスクトップアプリ」「PCにインストールするソフトとして配りたい」 | **Desktop** | Phase 4-D |
 | 「iPhoneアプリ」「Androidアプリ」「モバイルアプリ」「ネイティブアプリ」 | **Mobile** | Phase 4-M |
-| 「ローカルで動かしたい」「コンテナで配布」「Docker で渡したい」「スタンドアロン」 | **ローカル出力** | Phase 4-L |
+| 「ローカルで動かしたい」「PCの中だけで」「インターネットにつながない環境で」「オフラインで使いたい」「ネットに出さない」「作ったアプリを手元で動かしたい」「App Builder で」 | **ローカル出力**（既定は `app-builder-node-export`） | Phase 4-L |
+| 「コンテナで配布」「Docker で渡したい」「スタンドアロン」 | **ローカル出力** | Phase 4-L |
 | LP / SaaS / 予約 / EC / 管理画面 / 指定なし | **Web**（既定） | Step 2-2 へ |
 
 ### Step 2-2: Web インフラ判定（Web パスのみ）
@@ -430,6 +432,11 @@ create-app が Phase 0-3 でアプリ定義を確定
 > 詳細: [references/local-output-path.md](references/local-output-path.md)
 
 サーバにデプロイせず、ローカル実行可能な形式で出力する。
+
+> **既定は `app-builder-node-export`（2026-11-22）。** 受け手に渡すのは `.node-app.zip` 1 つで、受け手は App Builder の
+> 「📦 アプリを取り込む」→「起動」だけ。受け手に Node.js・GitHub・PowerShell（ターミナル）を触らせる手順は出さない。
+> `local-project-output` は「コードを自分で触る開発者」と分かっているときだけ。Phase 0 の Deploy 拡張・鍵の確認と
+> GitHub への push は、この道では要らない（作業は Claude の作業場所で済む）。
 
 ```
 scaffold → gh-create-repo-and-push → harness-init
