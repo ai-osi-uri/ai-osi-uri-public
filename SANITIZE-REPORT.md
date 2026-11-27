@@ -102,8 +102,8 @@
 | plugins/osi-deploy/skills/setup-deploy-environment/SKILL.md | 24 | 共有ドライブ | > 旧版は `.deploy-credentials/.env` にトークンを書き込んでいたが、平文・共有ドライブ同期・ |
 | plugins/osi-deploy/skills/setup-deploy-environment/SKILL.md | 30 | 共有ドライブ | （社内手順：共有ドライブ「環境構築キット」参照） |
 | plugins/osi-deploy/skills/update-deploy/SKILL.md | 110 | GITHUB_ORG | \| `repo_owner` \| `ai-osi-uri` または個人 username \| 既定は GITHUB_ORG / GITHUB_USERNAME \| |
-| plugins/osi-core/skills/getting-started/SKILL.md | 79 | Plaud | 3. 見えているツール名から、繋がっているコネクタを列挙する（AI OSI URI（マネージドのカスタムコネクタ。`health_check` / `whoami` / `list_projects` / `usage_status` と  |
-| plugins/osi-core/skills/getting-started/SKILL.md | 133 | Plaud | \| MoneyForward / DocuSign / Plaud / Obsidian \| 軽い読み取り 1 回 \| 同上 \| |
+| plugins/osi-core/skills/getting-started/SKILL.md | 83 | Plaud | 3. 見えているツール名から、繋がっているコネクタを列挙する（AI OSI URI（マネージドのカスタムコネクタ。`health_check` / `whoami` / `list_projects` / `usage_status` と  |
+| plugins/osi-core/skills/getting-started/SKILL.md | 137 | Plaud | \| MoneyForward / DocuSign / Plaud / Obsidian \| 軽い読み取り 1 回 \| 同上 \| |
 | plugins/osi-core/skills/getting-started/references/tiers.md | 90 | Plaud | \| osi-sales \| `meeting-minutes` \| slack, box, plaud \| ○ \| 商談議事録を文字起こし（会社の議事録DB＝秘書の置き場、または Plaud）から自動生成し、Drive の `03_制作・成 |
 | plugins/osi-core/skills/transcript-router/SKILL.md | 36 | Plaud | - **テキストが貼られていなくても**、「今日の○○の録音を」「さっきの Plaud を」のように |
 | plugins/osi-core/skills/transcript-router/SKILL.md | 37 | Plaud | Plaud 録音を指す一言が来ている（→ 下の「Plaud MCP からの取得」で先に本文を確保してから判定） |
