@@ -6,9 +6,9 @@
 | ふだんの向き | 正本 | Claude が書く道具 | 人が見る画面 |
 |---|---|---|---|
 | 手元が正（local・既定） | 経理フォルダの xlsx | 手元の Finance 拡張の `sheets_*`・`ledger_maintain` | 手元のコンソール／会計のサイト（同期した写し） |
-| Web が正（web） | 会計のサイトの中の台帳 | 会計のコネクタの `ledger_*` | 会計のサイトの「台帳」画面 |
+| Web が正（web） | 会計のサイトの中の台帳 | URL のコネクタの `ledger_*` | 会計のサイトの「台帳」画面 |
 
-会計の道具は、会計専用のコネクタ「AI OSI URI Finance」（`https://mcp.ai-osi-uri.info/mcp/finance`）にある。共通の AI OSI URI のコネクタにも 2026-11-16 までは同じ道具が残る。
+会計の道具（`ledger_*`・`mfi_*`・`sync_ledger` など）は、共通の URL のコネクタ（URL の末尾が `/mcp`）にある。コネクタを別に足す必要はない（会社の中では、会計を見られる人にだけ見える）。前に会計専用のコネクタ「AI OSI URI Finance」（`/mcp/finance`）をつないだ人は、そちらでも同じ道具が使える。
 
 表と列は、どちらの置き場でも同じ（正本は `assets/schema/data-layout.yaml`）。スキル本文の手順・判断は置き場に関係なくそのまま使い、
 **道具の名前だけを読み替える。**
